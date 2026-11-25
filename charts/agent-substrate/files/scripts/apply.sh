@@ -71,6 +71,9 @@ create_secret "$PODCERT_NS" postgres-ca-pool kubernetes.io/tls pool tls.crt tls.
 if [ -n "${PG_READ_WRITE_SECRET:-}" ]; then
   create_secret "$NS" "$PG_READ_WRITE_SECRET" kubernetes.io/basic-auth username password
 fi
+if [ -n "${PG_JUICEFS_SECRET:-}" ]; then
+  create_secret "$NS" "$PG_JUICEFS_SECRET" kubernetes.io/basic-auth username password
+fi
 
 # actor-id-ca-certs publishes just the root of actor-id-ca-pool, which the
 # egress gateway verifies actor client certificates against. Kept in sync.

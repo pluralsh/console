@@ -499,3 +499,19 @@ func TestAccountAnthropicBaseURL(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "https://anthropic-gateway.example", providerConfig.NetworkConfig.BaseURL)
 }
+
+// Bifrost reads the provider list once at startup, so AI being disabled must not fail it and crash Nexus.
+func TestGetConfiguredProviders_AIDisabled(t *testing.T) {
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{Enabled: false}},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providers, err := acct.GetConfiguredProviders()
+	require.NoError(t, err)
+	require.Empty(t, providers)
+
+	_, err = acct.GetKeysForProvider(context.Background(), schemas.OpenAI)
+	require.ErrorContains(t, err, "AI is disabled")
+}

@@ -96,6 +96,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
             scmCreds {
               username
               token
+              expiresAt
               proxy {
                 enabled
                 url
@@ -113,6 +114,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       assert found["id"] == run.id
       assert found["scmCreds"]["username"] == "apikey"
       assert found["scmCreds"]["token"] == conn.token
+      refute found["scmCreds"]["expiresAt"]
       assert found["scmCreds"]["proxy"] == %{
         "enabled" => true,
         "url" => "http://proxy.example.com:8080",

@@ -224,6 +224,10 @@ func (d *Daemon) probe(ctx context.Context, specs []*devboxv1.AgentProbeSpec, ep
 }
 
 func (d *Daemon) PrepareSuspend(ctx context.Context, req *devboxv1.PrepareSuspendRequest) (*devboxv1.PrepareSuspendResponse, error) {
+	if why := d.idle.Veto(req.GetReason()); why != "" {
+		d.log.Info("refusing automatic suspend", "reason", req.GetReason(), "why", why)
+		return nil, status.Error(codes.FailedPrecondition, why)
+	}
 	resp := &devboxv1.PrepareSuspendResponse{}
 	if req.GetReason() == devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT {
 		if req.GetSharedSnapshot() {

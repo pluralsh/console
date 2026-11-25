@@ -21,7 +21,8 @@ func (m *Manager) writeTranscriptLocked() {
 	for _, e := range m.unwritten {
 		batch = append(batch, e)
 	}
-	if err := m.opts.Transcript.Append(m.ctx, batch); err != nil {
+	// Stop's final flush runs after the manager's context is cancelled.
+	if err := m.opts.Transcript.Append(context.WithoutCancel(m.ctx), batch); err != nil {
 		m.log.Error("writing transcript", "entities", len(batch), "err", err)
 		return
 	}

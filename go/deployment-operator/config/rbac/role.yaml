@@ -150,3 +150,11 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - create
+  - delete
+  - get

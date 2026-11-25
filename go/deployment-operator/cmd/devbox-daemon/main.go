@@ -27,6 +27,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/agents"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/harness"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/trust"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 )
 
 // version is set with -ldflags "-X main.version=...".
@@ -154,6 +155,12 @@ func run(args []string) int {
 	o.finish(os.Stderr)
 	log := o.cfg.Log
 
+	guestCfg, err := guest.FromEnv()
+	if err != nil {
+		log.Error("startup failed", "err", err)
+		return 1
+	}
+	o.cfg.Guest = guestCfg
 	d, err := daemon.New(o.cfg)
 	if err != nil {
 		log.Error("startup failed", "err", err)

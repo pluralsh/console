@@ -97,11 +97,11 @@
   },
   "/getting-started/advanced-config/ingress-migration": {
     "relPath": "/getting-started/advanced-config/ingress-migration.md",
-    "lastmod": "2026-11-20T13:14:59.294Z"
+    "lastmod": "2026-11-25T07:06:28.342Z"
   },
   "/getting-started/advanced-config/private-ca": {
     "relPath": "/getting-started/advanced-config/private-ca.md",
-    "lastmod": "2026-10-30T03:01:56.000Z"
+    "lastmod": "2026-11-20T15:20:42.000Z"
   },
   "/api-reference": {
     "relPath": "/api-reference/index.md",
@@ -437,11 +437,11 @@
   },
   "/plural-features/continuous-deployment/service-templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-11-20T13:14:59.873Z"
+    "lastmod": "2026-11-25T07:06:28.864Z"
   },
   "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters": {
     "relPath": "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters.md",
-    "lastmod": "2026-11-20T13:14:59.902Z"
+    "lastmod": "2026-11-25T07:06:28.887Z"
   },
   "/plural-features/continuous-deployment/lua": {
     "relPath": "/plural-features/continuous-deployment/lua.md",
@@ -805,7 +805,7 @@
   },
   "/deployments/private-ca": {
     "relPath": "/getting-started/advanced-config/private-ca.md",
-    "lastmod": "2026-10-30T03:01:56.000Z"
+    "lastmod": "2026-11-20T15:20:42.000Z"
   },
   "/deployments/operator/architecture": {
     "relPath": "/plural-features/continuous-deployment/deployment-operator/index.md",
@@ -933,7 +933,7 @@
   },
   "/deployments/templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-11-20T13:15:00.695Z"
+    "lastmod": "2026-11-25T07:06:29.607Z"
   },
   "/deployments/multi-tenancy": {
     "relPath": "/plural-features/projects-and-multi-tenancy/index.md",

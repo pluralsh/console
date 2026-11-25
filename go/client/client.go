@@ -626,10 +626,11 @@ func (t *AgentAttachmentFragment) GetDownloadURL() *string {
 }
 
 type ScmCredentialFragment struct {
-	Token    string                       "json:\"token\" graphql:\"token\""
-	Username string                       "json:\"username\" graphql:\"username\""
-	ExaKey   *string                      "json:\"exaKey,omitempty\" graphql:\"exaKey\""
-	Proxy    *ScmCredentialFragment_Proxy "json:\"proxy,omitempty\" graphql:\"proxy\""
+	Token     string                       "json:\"token\" graphql:\"token\""
+	ExpiresAt *string                      "json:\"expiresAt,omitempty\" graphql:\"expiresAt\""
+	Username  string                       "json:\"username\" graphql:\"username\""
+	ExaKey    *string                      "json:\"exaKey,omitempty\" graphql:\"exaKey\""
+	Proxy     *ScmCredentialFragment_Proxy "json:\"proxy,omitempty\" graphql:\"proxy\""
 }
 
 func (t *ScmCredentialFragment) GetToken() string {
@@ -637,6 +638,12 @@ func (t *ScmCredentialFragment) GetToken() string {
 		t = &ScmCredentialFragment{}
 	}
 	return t.Token
+}
+func (t *ScmCredentialFragment) GetExpiresAt() *string {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.ExpiresAt
 }
 func (t *ScmCredentialFragment) GetUsername() string {
 	if t == nil {
@@ -56823,6 +56830,7 @@ fragment AgentRunCredentialsFragment on AgentRun {
 }
 fragment ScmCredentialFragment on ScmCreds {
 	token
+	expiresAt
 	username
 	exaKey
 	proxy {

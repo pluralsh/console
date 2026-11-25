@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/samber/lo"
@@ -20,6 +21,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
 
@@ -49,6 +51,10 @@ const (
 	gatewayPodIdentityMount  = "/run/podidentity.podcert.ate.dev"
 	gatewayServiceDNSMount   = "/run/servicedns.podcert.ate.dev"
 	gatewayServiceDNSCAMount = "/run/servicedns-ca.podcert.ate.dev"
+
+	// devboxJuiceFSService is the agent-substrate chart's JuiceFS CSI controller.
+	devboxJuiceFSService = "devbox-juicefs"
+	devboxJuiceFSPort    = 9820
 )
 
 func devboxGatewayLabels() map[string]string {
@@ -122,12 +128,25 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 		}
 	}
 
+	env, err := r.gatewayEnv(ctx)
+	if err != nil {
+		return err
+	}
+	if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, ns); err != nil {
+		return fmt.Errorf("ensuring spawned CA configmap for gateway: %w", err)
+	}
+	caChecksum, err := common.SpawnedCASourceChecksum()
+	if err != nil {
+		return fmt.Errorf("hashing spawned CA source for gateway: %w", err)
+	}
 	// The serving names are hashed too, so pods re-request their certificate if a Service is renamed.
+	// CA checksum rolls the gateway when the private CA bundle rotates (subPath mounts do not hot-reload).
 	checksum, err := utils.HashObject(struct {
 		Token        string
 		Env          []corev1.EnvVar
 		ServingNames []string
-	}{r.Config.DeployToken, r.gatewayEnv(), []string{r.gatewayHost(devboxGatewayName), r.gatewayHost(devboxEgressAuthzName)}})
+		CA           string
+	}{r.Config.DeployToken, env, []string{r.gatewayHost(devboxGatewayName), r.gatewayHost(devboxEgressAuthzName)}, caChecksum})
 	if err != nil {
 		return err
 	}
@@ -137,7 +156,7 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 		deployment.Labels = lo.Assign(deployment.Labels, devboxGatewayLabels())
 		deployment.Spec.Replicas = lo.ToPtr(r.Config.GatewayReplicas)
 		deployment.Spec.Selector = &metav1.LabelSelector{MatchLabels: devboxGatewaySelector()}
-		deployment.Spec.Template = r.gatewayPodTemplate(checksum)
+		deployment.Spec.Template = r.gatewayPodTemplate(checksum, env)
 		return r.ownGateway(runner, deployment)
 	}); err != nil {
 		return fmt.Errorf("reconciling gateway Deployment: %w", err)
@@ -190,8 +209,8 @@ func (r *DevboxRunnerReconciler) gatewayService(name string, ports []corev1.Serv
 	}
 }
 
-func (r *DevboxRunnerReconciler) gatewayEnv() []corev1.EnvVar {
-	return []corev1.EnvVar{
+func (r *DevboxRunnerReconciler) gatewayEnv(ctx context.Context) ([]corev1.EnvVar, error) {
+	env := []corev1.EnvVar{
 		{Name: "CONSOLE_URL", Value: r.Config.ConsoleURL},
 		{Name: "DEVBOX_KAS_URL", Value: r.Config.KasURL},
 		{Name: "CLUSTER_ID", Value: r.Config.ClusterID},
@@ -213,6 +232,17 @@ func (r *DevboxRunnerReconciler) gatewayEnv() []corev1.EnvVar {
 		{Name: "DEVBOX_GATEWAY_HOST", Value: r.gatewayHost(devboxGatewayName)},
 		{Name: "DEVBOX_EGRESS_AUTHZ_HOST", Value: r.gatewayHost(devboxEgressAuthzName)},
 	}
+	// Only set once the agent-substrate chart installs JuiceFS: with an address, deleting any snapshot first deletes
+	// its JuiceFS seed, and fails while the controller is unreachable.
+	juicefs := &corev1.Service{}
+	err := r.Get(ctx, client.ObjectKey{Name: devboxJuiceFSService, Namespace: r.Config.SubstrateNamespace}, juicefs)
+	switch {
+	case err == nil:
+		env = append(env, corev1.EnvVar{Name: "DEVBOX_JUICEFS_ADDRESS", Value: fmt.Sprintf("%s.%s.svc:%d", devboxJuiceFSService, r.Config.SubstrateNamespace, devboxJuiceFSPort)})
+	case !apierrors.IsNotFound(err):
+		return nil, fmt.Errorf("checking for the JuiceFS controller: %w", err)
+	}
+	return env, nil
 }
 
 // gatewayHost is the name atenet-egress dials a gateway Service at, and the DNS SAN the servicedns signer issues
@@ -221,8 +251,8 @@ func (r *DevboxRunnerReconciler) gatewayHost(service string) string {
 	return service + "." + r.Config.OperatorNamespace + ".svc"
 }
 
-func (r *DevboxRunnerReconciler) gatewayPodTemplate(checksum string) corev1.PodTemplateSpec {
-	env := append(r.gatewayEnv(),
+func (r *DevboxRunnerReconciler) gatewayPodTemplate(checksum string, env []corev1.EnvVar) corev1.PodTemplateSpec {
+	env = append(slices.Clone(env),
 		corev1.EnvVar{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
 		corev1.EnvVar{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
 		corev1.EnvVar{Name: "DEPLOY_TOKEN", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{
@@ -231,7 +261,7 @@ func (r *DevboxRunnerReconciler) gatewayPodTemplate(checksum string) corev1.PodT
 	)
 	live := &metav1.LabelSelector{MatchLabels: map[string]string{podcertCanaryingLabel: "live"}}
 
-	return corev1.PodTemplateSpec{
+	tpl := corev1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:      devboxGatewayLabels(),
 			Annotations: map[string]string{"devboxes.plural.sh/config-checksum": checksum},
@@ -296,6 +326,8 @@ func (r *DevboxRunnerReconciler) gatewayPodTemplate(checksum string) corev1.PodT
 			},
 		},
 	}
+	common.ApplySpawnedCAToPodSpec(&tpl.Spec)
+	return tpl
 }
 
 func (r *DevboxRunnerReconciler) gatewayNetworkPolicySpec() networkingv1.NetworkPolicySpec {

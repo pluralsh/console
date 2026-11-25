@@ -6,6 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors/actorstest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
@@ -99,6 +102,120 @@ func TestActorLifecycle(t *testing.T) {
 	}
 	if !slices.Contains(fake.CallsSnapshot(), "DeleteActorEgressPolicy rs-1/i-abc") {
 		t.Fatalf("egress policy not deleted with the actor: %v", fake.CallsSnapshot())
+	}
+}
+
+// running creates an actor and resumes it.
+func running(t *testing.T, c *actors.Client, ref actors.Ref) {
+	t.Helper()
+	if _, err := c.CreateActor(context.Background(), actors.Spec{Ref: ref, Template: "t"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Resume(context.Background(), ref); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestResumeConvergesFromWhatAnInterruptedOperationLeft(t *testing.T) {
+	ref := actors.Ref{Atespace: "rs-1", Name: "i-abc"}
+	for _, tc := range []struct {
+		name  string
+		state ateapi.ActorState
+		// the RPC that repairs it before the resume
+		repair string
+	}{
+		// a checkpoint cut off by its deadline: AssignWorker prerequisite not met (got: SUSPENDING)
+		{"suspend cut off midway", ateapi.ActorState_ACTOR_STATE_SUSPENDING, "SuspendActor"},
+		{"crashed", ateapi.ActorState_ACTOR_STATE_CRASHED, "RevertActor"},
+		// a resume that died after assigning a worker is re-entered, not waited on
+		{"resume died midway", ateapi.ActorState_ACTOR_STATE_RESUMING, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			c, fake := newClient(t)
+			running(t, c, ref)
+			fake.SetState(ref.Atespace, ref.Name, tc.state, "worker-1")
+			before := len(fake.CallsSnapshot())
+
+			if err := c.Resume(ctx, ref); err != nil {
+				t.Fatal(err)
+			}
+			if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+				t.Fatalf("state = %s", got)
+			}
+			calls := fake.CallsSnapshot()[before:]
+			if tc.repair != "" && !slices.Contains(calls, tc.repair+" rs-1/i-abc") {
+				t.Fatalf("calls = %v, want a %s", calls, tc.repair)
+			}
+		})
+	}
+}
+
+func TestResumeRetriesAnOperationInFlight(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	c, fake := newClient(t)
+	ref := actors.Ref{Atespace: "rs-1", Name: "i-abc"}
+	if _, err := c.CreateActor(ctx, actors.Spec{Ref: ref, Template: "t"}); err != nil {
+		t.Fatal(err)
+	}
+	fake.FailResume = status.Error(codes.Aborted, "another operation is in progress for this actor")
+	fake.FailResumeTimes = 2
+	if err := c.Resume(ctx, ref); err != nil {
+		t.Fatal(err)
+	}
+	if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("state = %s", got)
+	}
+}
+
+func TestResumeDoesNotRetryAHardFailure(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	c, fake := newClient(t)
+	ref := actors.Ref{Atespace: "rs-1", Name: "i-abc"}
+	running(t, c, ref)
+	fake.SetState(ref.Atespace, ref.Name, ateapi.ActorState_ACTOR_STATE_DELETING, "")
+	if err := c.Resume(ctx, ref); status.Code(err) != codes.FailedPrecondition {
+		t.Fatalf("resume of a deleting actor = %v", err)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("a hard failure should return at once")
+	}
+}
+
+func TestSuspendFinishesAnInterruptedSuspend(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	c, fake := newClient(t)
+	ref := actors.Ref{Atespace: "rs-1", Name: "i-abc"}
+	running(t, c, ref)
+	// cut off midway twice
+	fake.FailSuspend = status.Error(codes.Unavailable, "while calling atelet Checkpoint: connection refused")
+	fake.FailSuspendTimes = 2
+	if err := c.Suspend(ctx, ref, false); err != nil {
+		t.Fatal(err)
+	}
+	if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_SUSPENDED {
+		t.Fatalf("state = %s", got)
+	}
+
+	// a deadline is the caller's, not retried: the actor is left SUSPENDING for the next resume to finish
+	running(t, c, ref)
+	fake.FailSuspend = status.Error(codes.DeadlineExceeded, "while calling atelet Checkpoint: context deadline exceeded")
+	fake.FailSuspendTimes = 1
+	if err := c.Suspend(ctx, ref, false); status.Code(err) != codes.DeadlineExceeded {
+		t.Fatalf("suspend = %v", err)
+	}
+	if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_SUSPENDING {
+		t.Fatalf("state = %s", got)
+	}
+	if err := c.Resume(ctx, ref); err != nil {
+		t.Fatal(err)
+	}
+	if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("state = %s", got)
 	}
 }
 

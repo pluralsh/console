@@ -26,6 +26,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/gitutil"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/harness"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/proc"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/workspace"
 )
 
 const (
@@ -75,12 +76,12 @@ type Text struct {
 }
 
 func (p *Preparer) Prepare(ctx context.Context, req *devboxv1.PreparePullRequestRequest) (*devboxv1.PreparePullRequestResponse, error) {
-	co := p.find(ctx, req.GetRepository())
+	co := p.find(ctx, req.GetRepository(), req.GetThreadId())
 	if co == nil {
 		return nil, derr.New(codes.NotFound, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED,
 			fmt.Sprintf("no checkout %q in this devbox", req.GetRepository()), nil)
 	}
-	dir := co.GetPath()
+	dir, owner := co.GetPath(), co.GetWorktreeThreadId()
 	if !p.claim(dir) {
 		return nil, derr.New(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED,
 			"a pull request is already being prepared for "+co.GetName(), nil)
@@ -111,7 +112,7 @@ func (p *Preparer) Prepare(ctx context.Context, req *devboxv1.PreparePullRequest
 	if !cx.dirty && cx.commits == "" {
 		return nil, precondition(co.GetName() + " has no changes to open a pull request for")
 	}
-	threadID := co.GetWorktreeThreadId()
+	threadID := owner
 	if threadID == "" {
 		threadID = req.GetThreadId()
 	}
@@ -122,11 +123,19 @@ func (p *Preparer) Prepare(ctx context.Context, req *devboxv1.PreparePullRequest
 	text, writer := p.write(ctx, req, dir, cx)
 
 	branch := co.GetBranch()
-	if branch == "" || branch == base {
+	switch {
+	case branch == "" || branch == base:
 		branch = p.freeBranch(ctx, dir, slugBranch(text.Branch, text.Title))
 		if _, err := gitutil.RunEnv(ctx, dir, env, "checkout", "-b", branch); err != nil {
 			return nil, err
 		}
+	case owner != "" && branch == workspace.WorktreeBranch(owner):
+		// the worktree's placeholder branch gets a name that says what the pull request is
+		named := p.freeBranch(ctx, dir, slugBranch(text.Branch, text.Title))
+		if _, err := gitutil.RunEnv(ctx, dir, env, "branch", "-m", named); err != nil {
+			return nil, err
+		}
+		branch = named
 	}
 	committed := false
 	if cx.dirty {
@@ -157,19 +166,29 @@ func precondition(msg string) error {
 	return derr.New(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, msg, nil)
 }
 
-// find matches a checkout by path, else by name, preferring a main checkout over a worktree of the same name.
-func (p *Preparer) find(ctx context.Context, repository string) *devboxv1.Checkout {
+// find matches a checkout by path, else by name: the thread's own worktree of that name, then the main checkout,
+// never another thread's worktree.
+func (p *Preparer) find(ctx context.Context, repository, threadID string) *devboxv1.Checkout {
 	r := strings.TrimSuffix(strings.TrimSpace(repository), "/")
-	var byName *devboxv1.Checkout
+	var main, own *devboxv1.Checkout
 	for _, c := range p.opts.Checkouts(ctx) {
 		if c.GetPath() == r {
 			return c
 		}
-		if c.GetName() == r && (byName == nil || byName.GetWorktreeThreadId() != "") {
-			byName = c
+		if c.GetName() != r {
+			continue
+		}
+		switch c.GetWorktreeThreadId() {
+		case "":
+			main = c
+		case threadID:
+			own = c
 		}
 	}
-	return byName
+	if own != nil && threadID != "" {
+		return own
+	}
+	return main
 }
 
 func (p *Preparer) claim(dir string) bool {

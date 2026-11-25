@@ -495,11 +495,16 @@ defmodule Console.Devboxes do
   def resume_instance(id, %User{} = user) do
     with {:ok, inst} <- allow(get_instance!(id), user, :keep_awake),
          {:ok, inst} <- claim_resume(inst.id) do
-      case Control.resume_instance(inst) do
-        # the gateway keeps waking it and reports running when it's up
-        {:error, :starting} -> {:ok, inst}
-        res -> control_result(res, inst)
+      # the gateway keeps waking it past a :starting (or a call that timed out on the way) and reports running
+      # when it's up
+      res = case Control.resume_instance(inst) do
+        {:error, reason} when reason in [:starting, :timeout] -> :ok
+        res -> res
       end
+      # re-read: the gateway reports running before ResumeInstance returns, and answering with the suspended copy
+      # would overwrite that status in the client's cache
+      with {:ok, _} <- control_result(res, inst),
+        do: {:ok, Repo.get!(DevboxInstance, inst.id)}
     end
   end
 

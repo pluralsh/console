@@ -249,7 +249,7 @@ func (d *Detector) Evaluate() *devboxv1.IdleState {
 	case idle && !d.requested && !now.Before(d.idleSince.Add(p.GracePeriod)):
 		d.requested = true
 		req = &devboxv1.SuspendRequested{Reason: devboxv1.SuspendReason_SUSPEND_REASON_IDLE, IdleSince: timestamppb.New(d.idleSince)}
-	case !d.ceilingFired && p.MaxContinuousAwake > 0 && now.Sub(d.awakeSince) >= p.MaxContinuousAwake:
+	case !d.ceilingFired && p.MaxContinuousAwake > 0 && now.Sub(d.awakeSince) >= p.MaxContinuousAwake && !agentTurn(agent):
 		d.ceilingFired = true
 		req = &devboxv1.SuspendRequested{Reason: devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE}
 		if !d.idleSince.IsZero() {
@@ -266,6 +266,47 @@ func (d *Detector) Evaluate() *devboxv1.IdleState {
 		d.mu.Lock()
 	}
 	return proto.Clone(st).(*devboxv1.IdleState)
+}
+
+// Veto reports why the box shouldn't take an automatic suspend for reason now, or "" when it may: an idle
+// suspend needs the box still idle (a prompt may have arrived since it was requested), and nothing automatic
+// suspends a running agent turn, which would cut off the model's stream mid-turn. Other reasons aren't vetoed.
+func (d *Detector) Veto(reason devboxv1.SuspendReason) string {
+	switch reason {
+	case devboxv1.SuspendReason_SUSPEND_REASON_IDLE:
+		if st := d.Evaluate(); !st.GetIdle() {
+			return "busy: " + describe(st.GetBusyReasons())
+		}
+	case devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE:
+		if d.src.Agent == nil {
+			return ""
+		}
+		if agent := d.src.Agent(d.clock.Now()); agentTurn(agent) {
+			// The ceiling fires again once the turn ends.
+			d.mu.Lock()
+			d.ceilingFired = false
+			d.mu.Unlock()
+			return "agent running: " + describe(agent)
+		}
+	}
+	return ""
+}
+
+func agentTurn(reasons []*devboxv1.BusyReason) bool {
+	for _, r := range reasons {
+		if r.GetKind() == devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN {
+			return true
+		}
+	}
+	return false
+}
+
+func describe(reasons []*devboxv1.BusyReason) string {
+	out := make([]string, 0, len(reasons))
+	for _, r := range reasons {
+		out = append(out, strings.ToLower(strings.TrimPrefix(r.GetKind().String(), "BUSY_REASON_KIND_"))+" "+r.GetDetail())
+	}
+	return strings.Join(out, ", ")
 }
 
 // stateKey identifies a state for change detection: idle flag, idle_since and the busy reasons' kinds and

@@ -251,6 +251,7 @@ fragment AgentAttachmentFragment on Attachment {
 
 fragment ScmCredentialFragment on ScmCreds {
     token
+    expiresAt
     username
     exaKey
     proxy {

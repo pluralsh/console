@@ -9734,6 +9734,8 @@ type ScmCreds struct {
 	BaseURL  *string `json:"baseUrl,omitempty"`
 	Username string  `json:"username"`
 	Token    string  `json:"token"`
+	// when the token expires, for short-lived tokens like github app installation tokens
+	ExpiresAt *string `json:"expiresAt,omitempty"`
 	// the proxy to use for git and SCM API requests
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the exa key for the agent

@@ -19,6 +19,7 @@ import (
 	"unicode/utf8"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
@@ -45,6 +46,8 @@ type Checkouts interface {
 	Checkouts() []string
 	// ThreadWorktrees returns a thread's worktree paths.
 	ThreadWorktrees(threadID string) []string
+	// AllThreadWorktrees returns every thread's worktree paths, each mapped to its thread's id.
+	AllThreadWorktrees() map[string]string
 }
 
 // Service implements the filesystem RPCs.
@@ -172,6 +175,9 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 	if !st.IsDir() {
 		return nil, invalid(req.GetPath() + " is not a directory")
 	}
+	if q := req.GetQuery(); q != "" {
+		return s.search(ctx, root, q, req.GetIncludeHidden(), int(req.GetLimit())), nil
+	}
 	depth := int(req.GetDepth())
 	if depth <= 0 {
 		depth = 1
@@ -180,6 +186,20 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 	if limit <= 0 || limit > MaxListEntries {
 		limit = MaxListEntries
 	}
+	if req.GetBrief() && depth == 1 && s.ChangesCache != nil {
+		if entries, truncated, ok := s.ChangesCache.Children(root, req.GetIncludeHidden(), limit); ok {
+			return &devboxv1.ListFilesResponse{Entries: entries, Truncated: truncated}, nil
+		}
+	}
+	resp, err := s.listDisk(ctx, req, root, depth, limit)
+	if err != nil {
+		return nil, ioError(err, req.GetPath())
+	}
+	return resp, nil
+}
+
+// listDisk lists root by reading it, depth levels deep.
+func (s *Service) listDisk(ctx context.Context, req *devboxv1.ListFilesRequest, root string, depth, limit int) (*devboxv1.ListFilesResponse, error) {
 	resp := &devboxv1.ListFilesResponse{}
 	si := &statusIndex{ctx: ctx, cache: map[string]map[string]string{}}
 	var walk func(dir string, level int) error
@@ -199,21 +219,7 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 			names = append(names, de.Name())
 		}
 		if req.GetRespectGitignore() {
-			if repo := s.repoOf(dir); repo != "" {
-				rels := make([]string, 0, len(names))
-				for _, n := range names {
-					rel, _ := filepath.Rel(repo, filepath.Join(dir, n))
-					rels = append(rels, filepath.ToSlash(rel))
-				}
-				ignored := gitutil.IgnoredFilter(ctx, repo, rels)
-				kept := names[:0]
-				for i, n := range names {
-					if !ignored[rels[i]] {
-						kept = append(kept, n)
-					}
-				}
-				names = kept
-			}
+			names = s.notIgnored(ctx, dir, names)
 		}
 		sort.Strings(names)
 		for _, n := range names {
@@ -227,7 +233,11 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 				continue
 			}
 			e := entryOf(abs, info)
-			si.annotate(s, e)
+			if !req.GetBrief() {
+				si.annotate(s, e)
+			} else if repo := s.repoOf(abs); repo != "" {
+				e.Repository = filepath.Base(repo)
+			}
 			resp.Entries = append(resp.Entries, e)
 			if info.IsDir() && level < depth {
 				if err := walk(abs, level+1); err != nil && !errors.Is(err, fs.ErrPermission) {
@@ -241,9 +251,30 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 		return nil
 	}
 	if err := walk(root, 1); err != nil {
-		return nil, ioError(err, req.GetPath())
+		return nil, err
 	}
 	return resp, nil
+}
+
+// notIgnored drops the names in dir its checkout's gitignore matches.
+func (s *Service) notIgnored(ctx context.Context, dir string, names []string) []string {
+	repo := s.repoOf(dir)
+	if repo == "" {
+		return names
+	}
+	rels := make([]string, 0, len(names))
+	for _, n := range names {
+		rel, _ := filepath.Rel(repo, filepath.Join(dir, n))
+		rels = append(rels, filepath.ToSlash(rel))
+	}
+	ignored := gitutil.IgnoredFilter(ctx, repo, rels)
+	kept := names[:0]
+	for i, n := range names {
+		if !ignored[rels[i]] {
+			kept = append(kept, n)
+		}
+	}
+	return kept
 }
 
 // Stat implements StatFile.
@@ -429,14 +460,7 @@ func (s *Service) Write(ctx context.Context, req *devboxv1.WriteFileRequest) (*d
 
 // Changes implements GetChanges: one entry per checkout (or per thread worktree).
 func (s *Service) Changes(ctx context.Context, req *devboxv1.GetChangesRequest) (*devboxv1.GetChangesResponse, error) {
-	var repos []string
-	if s.Checkouts != nil {
-		if req.GetThreadId() != "" {
-			repos = s.Checkouts.ThreadWorktrees(req.GetThreadId())
-		} else {
-			repos = s.Checkouts.Checkouts()
-		}
-	}
+	repos, owners := s.changeScope(req.GetThreadId())
 	if len(req.GetRepositories()) > 0 {
 		want := map[string]bool{}
 		for _, r := range req.GetRepositories() {
@@ -480,14 +504,43 @@ func (s *Service) Changes(ctx context.Context, req *devboxv1.GetChangesRequest) 
 			if err != nil {
 				rc = &devboxv1.RepositoryChanges{Checkout: &devboxv1.Checkout{Path: repo, Name: filepath.Base(repo)}}
 			}
-			if req.GetThreadId() != "" {
-				rc.Checkout.WorktreeThreadId = req.GetThreadId()
+			if owner := owners[repo]; owner != "" {
+				rc.Checkout = proto.Clone(rc.Checkout).(*devboxv1.Checkout)
+				rc.Checkout.WorktreeThreadId = owner
 			}
 			results[i] = rc
 		}()
 	}
 	wg.Wait()
 	return &devboxv1.GetChangesResponse{Repositories: results}, nil
+}
+
+// changeScope is what GetChanges looks at, with the thread owning each worktree: a thread's own worktrees, or the
+// main checkouts for a thread working in them; without a thread, the main checkouts and every thread's worktrees.
+func (s *Service) changeScope(threadID string) ([]string, map[string]string) {
+	if s.Checkouts == nil {
+		return nil, nil
+	}
+	owners := map[string]string{}
+	if threadID != "" {
+		wts := s.Checkouts.ThreadWorktrees(threadID)
+		if len(wts) == 0 {
+			return s.Checkouts.Checkouts(), owners
+		}
+		for _, p := range wts {
+			owners[p] = threadID
+		}
+		return wts, owners
+	}
+	repos := s.Checkouts.Checkouts()
+	all := s.Checkouts.AllThreadWorktrees()
+	wts := make([]string, 0, len(all))
+	for p, id := range all {
+		wts = append(wts, p)
+		owners[p] = id
+	}
+	sort.Strings(wts)
+	return append(repos, wts...), owners
 }
 
 // changesConcurrency bounds the checkouts GetChanges inspects at once.

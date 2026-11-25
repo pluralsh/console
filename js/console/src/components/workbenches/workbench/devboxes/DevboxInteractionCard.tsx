@@ -240,7 +240,7 @@ function PermissionForm({
         return (
           <Button
             key={option.optionId}
-            small
+            xsmall
             secondary={reject || `${option.kind}`.endsWith('always')}
             destructive={reject && `${option.kind}`.endsWith('always')}
             disabled={loading}
@@ -251,7 +251,7 @@ function PermissionForm({
         )
       })}
       <Button
-        small
+        xsmall
         tertiary
         disabled={loading}
         onClick={() => onRespond({ cancelled: true })}
@@ -422,6 +422,7 @@ function ElicitationForm({
             >
               {choices ? (
                 <Select
+                  size="small"
                   label={`Pick ${label.toLowerCase()}`}
                   selectedKey={(values[key] as string) ?? null}
                   onSelectionChange={(k) => set(`${k}`)}
@@ -435,6 +436,7 @@ function ElicitationForm({
                 </Select>
               ) : (
                 <Input
+                  small
                   inputProps={{ 'aria-label': label }}
                   type={
                     prop.type === 'number' || prop.type === 'integer'
@@ -452,7 +454,7 @@ function ElicitationForm({
         })}
         <Flex gap="small">
           <Button
-            small
+            xsmall
             type="submit"
             loading={loading}
             disabled={touched && invalid}
@@ -487,7 +489,7 @@ function UrlElicitation({
       {url && <UrlSC>{url}</UrlSC>}
       <Flex gap="small">
         <Button
-          small
+          xsmall
           as="a"
           href={safe ? url : undefined}
           target="_blank"
@@ -498,7 +500,7 @@ function UrlElicitation({
           Open link
         </Button>
         <Button
-          small
+          xsmall
           secondary
           disabled={loading}
           onClick={() => onRespond({ action: DevboxElicitationAction.Accept })}
@@ -524,7 +526,7 @@ function ElicitationActions({
   return (
     <>
       <Button
-        small
+        xsmall
         secondary
         type="button"
         disabled={loading}
@@ -533,7 +535,7 @@ function ElicitationActions({
         Decline
       </Button>
       <Button
-        small
+        xsmall
         tertiary
         type="button"
         disabled={loading}

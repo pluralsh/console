@@ -185,6 +185,67 @@ func TestWorktrees(t *testing.T) {
 	}
 }
 
+// The golden boot's clones are refetched when an instance first boots: a clean checkout fast-forwards or switches
+// to the branch the instance asks for, and one with local changes is left alone.
+func TestPrecloneRefetchedOnFirstBoot(t *testing.T) {
+	src := t.TempDir()
+	api := gittest.Repo(t, filepath.Join(src, "acme", "api"), map[string]string{"main.go": "package main\n"})
+	web := gittest.Repo(t, filepath.Join(src, "acme", "web"), map[string]string{"index.html": "<html>\n"})
+	gittest.Git(t, web, "branch", "next")
+	cli := gittest.Repo(t, filepath.Join(src, "acme", "cli"), map[string]string{"cli.go": "package cli\n"})
+
+	golden, home := newWorkspace(t)
+	if err := golden.Preclone(context.Background(), []*devboxv1.RepositorySpec{{Url: api}, {Url: web}, {Url: cli}}); err != nil {
+		t.Fatal(err)
+	}
+	if golden.Hydrated() {
+		t.Fatal("a preclone hydrated the workspace; instances must still hydrate")
+	}
+	for _, dir := range []string{"api", "web", "cli"} {
+		if !strings.Contains(between(readFile(t, golden.ProjectMDPath()), BlockStart, BlockEnd), "~/"+dir) {
+			t.Errorf("Project.md doesn't list precloned ~/%s", dir)
+		}
+	}
+
+	// the remotes move on after the revision is built
+	gittest.Write(t, api, map[string]string{"new.go": "package main\n"})
+	gittest.Git(t, api, "add", "-A")
+	gittest.Git(t, api, "commit", "--quiet", "-m", "after golden")
+	gittest.Write(t, cli, map[string]string{"cli.go": "package cli // upstream\n"})
+	gittest.Git(t, cli, "commit", "--quiet", "-am", "upstream change")
+	// and the box has a local change in cli
+	gittest.Write(t, home, map[string]string{"cli/cli.go": "package cli // local\n"})
+
+	inst, err := New(Options{Home: home, StateDir: filepath.Join(home, ".plural"), Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := inst.Hydrate(context.Background(), []*devboxv1.RepositorySpec{{Url: web, Branch: "next"}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(home, "api", "new.go")); err != nil {
+		t.Errorf("precloned api wasn't fast-forwarded: %v", err)
+	}
+	if b := strings.TrimSpace(gittest.Git(t, filepath.Join(home, "web"), "rev-parse", "--abbrev-ref", "HEAD")); b != "next" {
+		t.Errorf("precloned web is on %q, want the requested next", b)
+	}
+	if got := readFile(t, filepath.Join(home, "cli", "cli.go")); got != "package cli // local\n" {
+		t.Errorf("a local change was overwritten: %q", got)
+	}
+	if !inst.Hydrated() {
+		t.Error("the instance's hydration wasn't recorded")
+	}
+}
+
+func readFile(t *testing.T, path string) string {
+	t.Helper()
+	b, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(b)
+}
+
 // A box restored from a snapshot can hydrate before its network is back: clones that couldn't reach the remote
 // aren't recorded as done, so the next boot retries them and clears the condition.
 func TestHydrationRetriesUnreachableClones(t *testing.T) {

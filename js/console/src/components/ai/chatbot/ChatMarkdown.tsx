@@ -11,6 +11,7 @@ import {
   DEVBOX_COMMAND_TAG,
   DEVBOX_FILE_ATTRIBUTES,
   DEVBOX_FILE_TAG,
+  DevboxMarkdownLink,
   devboxFileChipComponents,
 } from './DevboxFileChip'
 import {
@@ -76,6 +77,7 @@ export function ChatMarkdown({
           table: ChatTable,
           th: ChatTh,
           td: ChatTd,
+          a: DevboxMarkdownLink,
           ...components,
         }}
       />

@@ -146,6 +146,18 @@
       "ExtraHeaders": null
     },
     {
+      "Host": "*.blob.core.windows.net",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
       "Host": "bitbucket.org",
       "Port": 443,
       "Scheme": "https",

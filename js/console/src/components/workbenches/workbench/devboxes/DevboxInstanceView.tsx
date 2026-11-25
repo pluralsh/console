@@ -28,17 +28,14 @@ import { mergePendingInteractions } from './devboxInteractions'
 import { mergeNewThreads } from './devboxThreadsCache'
 import { DevboxChangesViewer } from './DevboxChangesViewer'
 import { DevboxFileViewer } from './DevboxFileViewer'
-import {
-  effectiveMaxDeferral,
-  getDevboxAwakeStatus,
-  isInstanceLive,
-} from './devboxIdle'
+import { effectiveMaxDeferral, isInstanceLive } from './devboxIdle'
 import { DevboxInstanceHeader } from './DevboxInstanceHeader'
 import { DevboxNewSession } from './DevboxNewSession'
 import { DEVBOX_HEADER_HEIGHT } from './DevboxSessionsSidebar'
 import { DevboxThreadPane } from './DevboxThreadPane'
 import { ImportThreadModal } from './DevboxThreadList'
 import { selectedThread } from './devboxThreads'
+import { useSubscriptionRecovery } from 'components/hooks/useSubscriptionRecovery'
 import { useDevboxPresence } from './useDevboxPresence'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
@@ -74,11 +71,11 @@ export function DevboxInstanceView({
     poll: true,
   })
 
-  const { error: statusError } = useDevboxInstanceStatusDeltaSubscription({
+  const statusDeltas = useDevboxInstanceStatusDeltaSubscription({
     variables: { id: instanceId },
     skip: !instanceId,
   })
-  useDevboxThreadDeltaSubscription({
+  const threadDeltas = useDevboxThreadDeltaSubscription({
     variables: { instanceId },
     skip: !instanceId,
     onData: ({ data: { data } }) => {
@@ -89,7 +86,7 @@ export function DevboxInstanceView({
 
   // approvals and questions the agent is blocked on arrive here, not as thread
   // deltas, as do the threads and subagents the agent starts itself
-  useDevboxInstanceIndexDeltaSubscription({
+  const indexDeltas = useDevboxInstanceIndexDeltaSubscription({
     variables: { instanceId },
     skip: !instanceId,
     onData: ({ client, data: { data } }) => {
@@ -106,6 +103,15 @@ export function DevboxInstanceView({
       )
     },
   })
+
+  // each delta subscription missed updates while it was down, so a recovery
+  // refetches the instance (the timeline store reloads its own sessions)
+  const recovery = { skip: !instanceId, onRecover: refetch }
+  const deltasDown = [
+    useSubscriptionRecovery(statusDeltas, recovery),
+    useSubscriptionRecovery(threadDeltas, recovery),
+    useSubscriptionRecovery(indexDeltas, recovery),
+  ].some(Boolean)
 
   const live = isInstanceLive(instance?.status)
   const { viewedFile, selectFile, change, selectChange, openFile } =
@@ -138,11 +144,6 @@ export function DevboxInstanceView({
     const timer = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
-  const awake = instance
-    ? getDevboxAwakeStatus(instance, { now, resuming })
-    : null
-
-  useSuspendingSoonToast(awake?.suspendingSoon ?? false, instance?.name)
 
   // surface live-only notices once
   const { dispatch: timelineDispatch } = timeline
@@ -212,9 +213,7 @@ export function DevboxInstanceView({
     workbenchData?.workbench?.configuration?.devbox?.maxDeferral
   )
   const disconnected =
-    !!statusError ||
-    !!timeline.subscriptionError ||
-    isClusterOfflineError(error)
+    deltasDown || timeline.subscriptionDown || isClusterOfflineError(error)
 
   return (
     <ViewSC>
@@ -267,6 +266,13 @@ export function DevboxInstanceView({
                     secondary
                     startIcon={<ReloadIcon />}
                     onClick={() => {
+                      for (const deltas of [
+                        statusDeltas,
+                        threadDeltas,
+                        indexDeltas,
+                      ])
+                        deltas.restart()
+                      timeline.restartSubscription()
                       refetch()
                       timeline.reload()
                     }}
@@ -344,30 +350,6 @@ function useStatusFallback(
     if (live && !wasLive.current) refetch()
     wasLive.current = live
   }, [live, refetch])
-}
-
-function useSuspendingSoonToast(
-  suspendingSoon: boolean,
-  name: Nullable<string>
-) {
-  const { popToast } = useSimpleToast()
-  const shown = useRef(false)
-  useEffect(() => {
-    if (!suspendingSoon) {
-      shown.current = false
-      return
-    }
-    if (shown.current) return
-    shown.current = true
-    const message = `${name || 'This instance'} is suspending soon. Keep it awake from the status menu.`
-    popToast({ content: message, severity: 'danger' })
-    if (
-      document.visibilityState === 'hidden' &&
-      typeof Notification !== 'undefined' &&
-      Notification.permission === 'granted'
-    )
-      new Notification('Devbox suspending soon', { body: message })
-  }, [name, popToast, suspendingSoon])
 }
 
 const ViewSC = styled.div({

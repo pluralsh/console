@@ -133,7 +133,8 @@ func inlineFile(b *devboxv1.ContentBlock, n int) (attachmentFile, bool, error) {
 
 // agentPrompt is the prompt sent to the agent for content as recorded: each staged image an agent accepts also
 // goes inline, ahead of its link, so the agent sees it while still knowing where the file is.
-func (m *Manager) agentPrompt(c *agentConn, content []*devboxv1.ContentBlock) []any {
+func (m *Manager) agentPrompt(c *agentConn, t *thread, content []*devboxv1.ContentBlock) []any {
+	content = m.worktreeContent(t, content)
 	blocks, _ := acp.ContentBlocksJSON(content)
 	if !c.caps.promptImage {
 		return blocks
@@ -154,7 +155,7 @@ func (m *Manager) inlineImage(link *devboxv1.ResourceLink, root string) acp.Obje
 		return nil
 	}
 	u, err := url.Parse(link.GetUri())
-	if err != nil || u.Scheme != "file" || !strings.HasPrefix(filepath.Clean(u.Path), root) {
+	if err != nil || u.Scheme != fileScheme || !strings.HasPrefix(filepath.Clean(u.Path), root) {
 		return nil
 	}
 	data, err := os.ReadFile(u.Path)
@@ -197,7 +198,9 @@ func mimeOf(declared, name string) string {
 	return "application/octet-stream"
 }
 
-func fileURI(path string) string { return (&url.URL{Scheme: "file", Path: path}).String() }
+const fileScheme = "file"
+
+func fileURI(path string) string { return (&url.URL{Scheme: fileScheme, Path: path}).String() }
 
 func invalidPrompt(msg string) error {
 	return derr.New(codes.InvalidArgument, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, msg, nil)

@@ -140,13 +140,15 @@ const ellipsis = {
 } as const
 
 const TitleSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.body2Bold,
+  ...theme.partials.text.caption,
   ...ellipsis,
+  fontWeight: 600,
   color: theme.colors.text,
 }))
 
 const TitleCodeSC = styled.code(({ theme }) => ({
-  ...theme.partials.text.code,
+  ...theme.partials.text.caption,
+  ...theme.partials.text.mono,
   ...ellipsis,
   color: theme.colors.text,
 }))

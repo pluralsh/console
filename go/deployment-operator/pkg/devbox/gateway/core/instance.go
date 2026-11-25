@@ -83,6 +83,8 @@ type Instance struct {
 	awakeSince  time.Time
 	fwd         *forwarder
 	suspending  bool
+	// probing is set while confirmUnresponsive checks a silent daemon.
+	probing bool
 	// waking is the resume in flight, shared by every caller that needs the instance running.
 	waking     *wakeOp
 	sharedSnap bool

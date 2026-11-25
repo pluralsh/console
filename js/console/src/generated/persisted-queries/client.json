@@ -1187,10 +1187,10 @@
          "name": "DevboxPullRequests",
          "body": "query DevboxPullRequests($devboxId: ID, $devboxInstanceId: ID, $devboxThreadId: ID, $first: Int = 50) {\n  pullRequests(\n    devboxId: $devboxId\n    devboxInstanceId: $devboxInstanceId\n    devboxThreadId: $devboxThreadId\n    first: $first\n  ) {\n    edges {\n      node {\n        ...DevboxPullRequest\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment DevboxPullRequest on PullRequest {\n  ...PullRequestBasic\n  source\n  metadata\n  devbox {\n    id\n    name\n    __typename\n  }\n  devboxInstance {\n    id\n    name\n    workbench {\n      id\n      __typename\n    }\n    __typename\n  }\n  devboxThread {\n    id\n    title\n    agentTitle\n    sessionId\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:b16863562c63a456829b2d8a657349e3f5188405f0d661fe73676b04cd38cc20": {
+      "sha256:6328fae30fe92155e494b4bc5cbb168ac83c6d25b3bf6fb04551ba2f754b8163": {
          "type": "query",
          "name": "DevboxFiles",
-         "body": "query DevboxFiles($instanceId: ID!, $path: String) {\n  devboxFiles(instanceId: $instanceId, path: $path) {\n    ...DevboxFileEntry\n    __typename\n  }\n}\n\nfragment DevboxFileEntry on DevboxFileEntry {\n  path\n  name\n  type\n  size\n  modifiedAt\n  symlinkTarget\n  repository\n  gitStatus\n  __typename\n}"
+         "body": "query DevboxFiles($instanceId: ID!, $path: String, $query: String, $brief: Boolean) {\n  devboxFiles(instanceId: $instanceId, path: $path, query: $query, brief: $brief) {\n    ...DevboxFileEntry\n    __typename\n  }\n}\n\nfragment DevboxFileEntry on DevboxFileEntry {\n  path\n  name\n  type\n  size\n  modifiedAt\n  symlinkTarget\n  repository\n  gitStatus\n  __typename\n}"
       },
       "sha256:ea51d23000d95c17226afaf25aa208bb53e5bca37eff8839493877c8ecb96b70": {
          "type": "query",

@@ -17,7 +17,7 @@ import { applyNodeToRefs } from '../utils/applyNodeToRefs'
 import Flex, { FlexProps } from './Flex'
 import { Spinner } from './Spinner'
 
-type ButtonSize = 'small' | 'medium' | 'large'
+type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large'
 type ButtonType =
   | 'primary'
   | 'secondary'
@@ -34,6 +34,7 @@ export type ButtonProps = {
   children?: ReactNode
   innerFlexProps?: FlexProps
   // flags- keeping this pattern instead of using "size" and "type" for backwards compatibility
+  xsmall?: boolean
   small?: boolean
   large?: boolean
   primary?: boolean
@@ -74,6 +75,7 @@ const Button = memo(
     loadingIndicator,
     disabled,
     children,
+    xsmall,
     small,
     large,
     primary: _primary,
@@ -98,7 +100,13 @@ const Button = memo(
       'auto'
     )
 
-    const buttonSize = large ? 'large' : small ? 'small' : 'medium'
+    const buttonSize = large
+      ? 'large'
+      : small
+        ? 'small'
+        : xsmall
+          ? 'xsmall'
+          : 'medium'
     const buttonType = secondary
       ? 'secondary'
       : tertiary
@@ -369,6 +377,12 @@ export const ButtonBaseSC = styled.button<{
       padding: `calc(${spacing.xxsmall} - 1px) calc(${spacing.medium} - 1px)`,
       minHeight: 32,
     }),
+    ...($size === 'xsmall' && {
+      ...partials.text.buttonSmall,
+      lineHeight: '1rem',
+      padding: `calc(${spacing.xxsmall} - 1px) calc(${spacing.small} - 1px)`,
+      minHeight: 24,
+    }),
   })
 )
 
@@ -378,7 +392,11 @@ const IconSC = styled.span<{
   $position: 'start' | 'end'
 }>(({ theme, $loading, $size, $position }) => {
   const marginSize =
-    $size === 'large' ? theme.spacing.medium : theme.spacing.small
+    $size === 'large'
+      ? theme.spacing.medium
+      : $size === 'xsmall'
+        ? theme.spacing.xsmall
+        : theme.spacing.small
   return {
     display: 'flex',
     alignItems: 'center',

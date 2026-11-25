@@ -147,6 +147,8 @@ defmodule Devbox.V1.ListFilesRequest do
   field :include_hidden, 4, type: :bool, json_name: "includeHidden"
   field :respect_gitignore, 5, type: :bool, json_name: "respectGitignore"
   field :limit, 6, type: :int32
+  field :query, 7, type: :string
+  field :brief, 8, type: :bool
 end
 
 defmodule Devbox.V1.ListFilesResponse do

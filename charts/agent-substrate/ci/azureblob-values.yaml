@@ -27,3 +27,10 @@ postgres:
     backup:
       enabled: true
       destinationPath: https://pluralate.blob.core.windows.net/pg-backups/ate-postgres
+
+# JuiceFS homes in the snapshot container through Entra workload identity.
+juicefs:
+  enabled: true
+  image:
+    tag: "0.0.0"
+  azureClientId: 00000000-0000-0000-0000-000000000004

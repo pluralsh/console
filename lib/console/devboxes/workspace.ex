@@ -49,12 +49,13 @@ defmodule Console.Devboxes.Workspace do
   defp terminal_id(_, opts), do: opts[:terminal_id]
 
   @doc """
-  One directory level of the workspace (`~` relative paths).
+  One directory level of the workspace (`~` relative paths), or with a `:query` the best fuzzy matches anywhere
+  beneath it.  `:brief` entries carry only path, name, type and repository, and are served from memory.
   """
-  @spec list_files(binary, binary | nil, User.t) :: {:ok, [map]} | error
-  def list_files(instance_id, path, %User{} = user) do
+  @spec list_files(binary, binary | nil, map, User.t) :: {:ok, [map]} | error
+  def list_files(instance_id, path, opts, %User{} = user) do
     with {:ok, inst} <- readable(instance_id, user),
-      do: Control.list_files(inst, path || "") |> Error.control_ok()
+      do: Control.list_files(inst, path || "", Map.take(opts, [:query, :brief])) |> Error.control_ok()
   end
 
   @doc """

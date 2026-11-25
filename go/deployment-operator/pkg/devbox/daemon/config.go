@@ -8,6 +8,7 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/harness"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/clock"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 )
 
 // Config holds every path and port the daemon uses. cmd/devbox-daemon fills it from flags and DEVBOX_* env.
@@ -52,6 +53,9 @@ type Config struct {
 	AgentOverrides map[devboxv1.AgentType]harness.Command
 	// InsecureNoAuth accepts calls without a request token even after Initialize delivered keys (local only).
 	InsecureNoAuth bool
+	// Guest is the runner's DEVBOX_RUNNER_CONFIG, whose repositories, mise config and bootstrap script the
+	// golden boot applies.
+	Guest *guest.Config
 
 	Version string
 	Clock   clock.Clock

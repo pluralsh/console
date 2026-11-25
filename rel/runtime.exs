@@ -290,7 +290,15 @@ config :console,
   nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
   workbench_default: get_env("CONSOLE_WORKBENCH_DEFAULT") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME"),
-  agent_helm_values: get_env("CONSOLE_AGENT_HELM_VALUES"),
+  agent_helm_values: (case get_env("CONSOLE_AGENT_HELM_VALUES_PATH") do
+    path when is_binary(path) and byte_size(path) > 0 ->
+      case File.read(path) do
+        {:ok, contents} -> contents
+        {:error, _} -> get_env("CONSOLE_AGENT_HELM_VALUES")
+      end
+    _ ->
+      get_env("CONSOLE_AGENT_HELM_VALUES")
+  end),
   qove_key: get_env("CONSOLE_QOVE_PUBLIC_KEY"),
   cloud_override: get_env("CONSOLE_CLOUD_OVERRIDE")
 

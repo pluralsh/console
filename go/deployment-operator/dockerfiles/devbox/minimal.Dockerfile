@@ -120,6 +120,10 @@ RUN npm install --global \
     npm cache clean --force && \
     rm -rf /root/.npm /tmp/*
 
+COPY deployment-operator/dockerfiles/devbox/patches/ /tmp/patches/
+RUN node /tmp/patches/codex-acp-unsandboxed.mjs "$(npm root --global)/@agentclientprotocol/codex-acp/dist/index.js" && \
+    rm -rf /tmp/patches
+
 # Pin node-based launchers to this Node, so a repository's mise-managed Node
 # (first on PATH) never runs the harnesses.
 RUN cd /usr/local/bin && \

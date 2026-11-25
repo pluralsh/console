@@ -3,7 +3,7 @@ defmodule Console.Deployments.Agents do
   use Nebulex.Caching
   require Logger
   import Console.Deployments.Policies
-  import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
+  import Console.Deployments.Pr.Git, only: [backfill_token: 1, backfill_token_with_expiry: 1, to_http: 2]
   import Console.Schema.AgentRun, only: [is_terminal: 1]
   alias Console.Deployments.Pr.Review
   alias Console.Services.Users
@@ -756,12 +756,13 @@ defmodule Console.Deployments.Agents do
   def scm_creds(%AgentRun{} = run, actor) do
     with {:ok, _} <- allow(run, actor, :creds),
          %ScmConnection{username: username, type: provider} = conn <- scm_connection(run),
-         {:ok, conn} <- backfill_token(conn) do
+         {:ok, conn, expires_at} <- backfill_token_with_expiry(conn) do
       ok(%{
         type: provider,
         base_url: conn.base_url,
         username: username || "apikey",
         token: conn.token,
+        expires_at: expires_at,
         proxy: conn.proxy
       })
     else

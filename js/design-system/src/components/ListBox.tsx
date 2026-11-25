@@ -14,6 +14,8 @@ import {
 import {
   type AriaListBoxOptions,
   mergeProps,
+  useFocusVisible,
+  useHover,
   useListBox,
   useOption,
 } from 'react-aria'
@@ -256,8 +258,8 @@ function ListBoxUnmanaged({
       <ScrollContainer
         ref={ref as RefObject<HTMLDivElement | null>}
         extendStyle={{
-          paddingTop: headerFixed ? 0 : theme.spacing.xxxsmall,
-          paddingBottom: footerFixed ? 0 : theme.spacing.xxxsmall,
+          paddingTop: headerFixed ? 0 : theme.spacing.xxsmall,
+          paddingBottom: footerFixed ? 0 : theme.spacing.xxsmall,
         }}
         {...listBoxProps}
       >
@@ -285,12 +287,16 @@ function Option({ item, state }: { item: any; state: ListState<object> }) {
     descriptionProps,
     isFocused,
   } = useOption({ key: item.key }, state, ref)
+  // the focused option follows the pointer, which :hover already fills, so
+  // only ring it while navigating by keyboard
+  const { isFocusVisible } = useFocusVisible()
+  const { hoverProps, isHovered } = useHover({})
 
   const { ref: itemRef, selected, disabled } = item?.rendered?.props ?? {}
-  const mergedProps = mergeProps(optionProps, {
+  const mergedProps = mergeProps(optionProps, hoverProps, {
     selected: isSelected || selected,
     disabled: isDisabled || disabled,
-    focused: isFocused,
+    focused: isFocused && isFocusVisible && !isHovered,
     labelProps,
     descriptionProps,
     selectionMode: state.selectionManager.selectionMode,

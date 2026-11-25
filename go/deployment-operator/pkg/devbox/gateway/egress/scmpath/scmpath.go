@@ -259,7 +259,23 @@ func parseGitHub(host, method string, segs []string) Result {
 	if len(segs) == 0 || githubReserved[segs[0]] {
 		return deny("not a repository path")
 	}
+	if releaseRead(method, segs) {
+		return Result{Safe: true}
+	}
 	return parseOwnerRepo(host, segs)
+}
+
+// releaseRead reports whether a request reads a repository's releases: segs is <owner>/<repo>/releases/..., from
+// the web path or after /repos on the API. Toolchain installers (mise, aqua, ubi, ruby-build) list and download
+// releases of arbitrary repositories, so release reads are allowed outside the repository allowlist; nothing else
+// about those repositories is.
+func releaseRead(method string, segs []string) bool {
+	if method != http.MethodGet && method != http.MethodHead || len(segs) < 3 || segs[2] != "releases" {
+		return false
+	}
+	owner, ok1 := plain(segs[0])
+	repo, ok2 := plain(segs[1])
+	return ok1 && ok2 && owner != "" && repo != ""
 }
 
 func parseGitHubAPI(webHost, method string, segs []string) Result {
@@ -270,6 +286,8 @@ func parseGitHubAPI(webHost, method string, segs []string) Result {
 	case segs[0] == "graphql":
 		return deny(graphQLReason)
 	case githubSafeAPI[segs[0]] && len(segs) == 1:
+		return Result{Safe: true}
+	case segs[0] == "repos" && releaseRead(method, segs[1:]):
 		return Result{Safe: true}
 	case segs[0] == "repos":
 		r := parseGitHubRepos(webHost, segs)

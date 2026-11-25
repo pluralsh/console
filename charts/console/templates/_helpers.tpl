@@ -158,3 +158,81 @@ custom pod labels so the Deployment and Service selectors cannot be changed.
 {{- $selectorLabels := include "embedding-server.selectorLabels" . | fromYaml -}}
 {{- toYaml (mergeOverwrite $labels $selectorLabels) -}}
 {{- end -}}
+
+{{/*
+Custom CA volumeMounts for console / KAS containers.
+*/}}
+{{- define "console.certs.volumeMounts" -}}
+{{- range $cert := .Values.certs }}
+- name: {{ $cert.name }}
+  mountPath: /etc/ssl/certs/{{ $cert.file }}
+  subPath: {{ $cert.file }}
+  readOnly: true
+{{- end }}
+{{- end -}}
+
+{{/*
+Custom CA volumes backed by chart-rendered ConfigMaps.
+*/}}
+{{- define "console.certs.volumes" -}}
+{{- range $cert := .Values.certs }}
+- name: {{ $cert.name }}
+  configMap:
+    name: {{ include "console.fullname" $ }}-{{ $cert.name }}
+    defaultMode: 0644
+{{- end }}
+{{- end -}}
+
+{{/*
+Checksum of chart-managed CA data so pods with subPath mounts restart on rotation.
+*/}}
+{{- define "console.certs.checksum" -}}
+{{- if .Values.certs -}}
+{{- .Values.certs | toYaml | sha256sum -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Agent helm values for bootstrap. Chart certs are merged into agentHelmValues so
+private-CA installs can still set custom agent values (e.g. vendored images).
+User-provided keys win over the CA defaults (deep merge).
+*/}}
+{{- define "console.agentHelmValues" -}}
+{{- if or .Values.console.config.agentHelmValues .Values.certs -}}
+{{- $ca := dict -}}
+{{- if .Values.certs -}}
+{{- $ca = dict "certs" .Values.certs "spawnedWorkloads" (dict "caBundle" (dict "enabled" true)) -}}
+{{- end -}}
+{{- $user := .Values.console.config.agentHelmValues | default dict -}}
+{{- mergeOverwrite (deepCopy $ca) $user | toYaml -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Mount large agent helm values from a Secret file instead of envFrom.
+Merged CA PEMs blow ARG_MAX when injected as CONSOLE_AGENT_HELM_VALUES.
+*/}}
+{{- define "console.agentHelmValues.volume" -}}
+{{- if include "console.agentHelmValues" . }}
+- name: agent-helm-values
+  secret:
+    secretName: console-agent-helm-values
+    defaultMode: 0644
+{{- end -}}
+{{- end -}}
+
+{{- define "console.agentHelmValues.volumeMount" -}}
+{{- if include "console.agentHelmValues" . }}
+- name: agent-helm-values
+  mountPath: /etc/console/agent-helm-values.yaml
+  subPath: values.yaml
+  readOnly: true
+{{- end -}}
+{{- end -}}
+
+{{- define "console.agentHelmValues.env" -}}
+{{- if include "console.agentHelmValues" . }}
+- name: CONSOLE_AGENT_HELM_VALUES_PATH
+  value: /etc/console/agent-helm-values.yaml
+{{- end -}}
+{{- end -}}

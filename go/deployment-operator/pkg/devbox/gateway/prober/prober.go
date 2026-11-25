@@ -384,7 +384,11 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 		creds.Invalidate(instanceID)
 	}()
 
-	if _, err := p.deps.Actors.CreateActor(ctx, actors.Spec{Ref: ref, Template: req.ActorTemplate, SourceTag: req.GoldenTag}); err != nil {
+	actorSpec := actors.Spec{Ref: ref, Template: req.ActorTemplate, SourceTag: req.GoldenTag}
+	if req.JuiceFSHome {
+		actorSpec.SourceTag, actorSpec.Preview = "", true
+	}
+	if _, err := p.deps.Actors.CreateActor(ctx, actorSpec); err != nil {
 		return nil, fmt.Errorf("creating probe actor %s: %w", ref, err)
 	}
 	if err := p.deps.Actors.ApplyEgressPolicy(ctx, ref, rules); err != nil {

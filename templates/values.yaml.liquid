@@ -1,3 +1,10 @@
+{% if configuration.privateCaPem %}
+certs:
+  - name: ca-bundle
+    file: ca-certificates.crt
+    data: |
+{{ configuration.privateCaPem | trim | indent: 6 }}
+{% endif %}
 
 ingress:
   console_dns: {{ configuration.consoleDns }}
@@ -13,6 +20,11 @@ ingress:
 {% if configuration.provider %}
 provider: {{ configuration.provider }}
 {% endif %}
+
+# Nexus, the AI proxy that devboxes and agent runtimes send model traffic through (/ext/ai), using the console's AI
+# settings
+aiProxy:
+  enabled: true
 
 secrets:
   jwt: {{ configuration.jwt }}

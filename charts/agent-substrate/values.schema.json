@@ -447,6 +447,20 @@
       "type": "object",
       "properties": { "image": { "type": "string", "minLength": 1 } }
     },
+    "assetStaging": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "image": { "type": "string", "minLength": 1 },
+        "bucketUrl": { "type": "string" },
+        "arches": { "type": "array", "items": { "type": "string", "enum": ["amd64", "arm64"] } },
+        "activeDeadlineSeconds": { "type": "integer" },
+        "workSize": { "type": "string" },
+        "resources": { "type": "object" },
+        "extraArgs": { "type": "array" },
+        "extraEnv": { "type": "array" }
+      }
+    },
     "cloudnative-pg": {
       "type": "object",
       "properties": { "enabled": { "type": "boolean" } }

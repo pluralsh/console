@@ -173,7 +173,7 @@ const HeaderSC = styled.button<{ $indent: boolean }>(({ theme, $indent }) => ({
   ...theme.partials.reset.button,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.small,
+  gap: theme.spacing.xxsmall,
   width: 'fit-content',
   maxWidth: '100%',
   minWidth: 0,

@@ -23,6 +23,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/fakeacp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/harness"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/proc"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/transcript"
 )
 
 const (
@@ -514,6 +515,28 @@ func TestSubagentPermissionBelongsToTheSubagent(t *testing.T) {
 	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
 }
 
+func TestTurnBlockedOnAnUnansweredPermissionStopsKeepingTheBoxAwake(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "subagent-permission")
+	eventually(t, "pending interaction", func() bool { return len(h.m.Interactions()) > 0 })
+	kinds := func(reasons []*devboxv1.BusyReason) []devboxv1.BusyReasonKind {
+		out := []devboxv1.BusyReasonKind{}
+		for _, r := range reasons {
+			out = append(out, r.GetKind())
+		}
+		return out
+	}
+
+	now := kinds(h.m.BusyReasons(time.Now()))
+	if !slices.Contains(now, devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN) || !slices.Contains(now, devboxv1.BusyReasonKind_BUSY_REASON_KIND_PENDING_INTERACTION) {
+		t.Fatalf("fresh permission: %v", now)
+	}
+	if later := h.m.BusyReasons(time.Now().Add(PendingInteractionBusy + time.Minute)); len(later) != 0 {
+		t.Fatalf("a turn blocked on an answer for %s still keeps the box awake: %v", PendingInteractionBusy, kinds(later))
+	}
+}
+
 // specLauncher adjusts the fake agent's launch.
 type specLauncher struct {
 	testLauncher
@@ -814,6 +837,72 @@ func TestQueuedPromptsSurviveARestart(t *testing.T) {
 	got := restorePrompt(persistPrompt(qp))
 	if !proto.Equal(got.proto(), qp.proto()) || got.messageID != qp.messageID {
 		t.Fatalf("restored %v, want %v", got.proto(), qp.proto())
+	}
+}
+
+// A restarted daemon (resume after suspend, or after a crash that left threads.json behind the transcript) keeps
+// placing new entities after the ones already in the transcript, so later turns don't interleave with earlier ones.
+func TestPositionsStayAfterTheTranscriptAcrossRestarts(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		crash bool
+	}{{"clean stop", false}, {"stale state", true}} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			home := filepath.Join(dir, "home")
+			if err := os.MkdirAll(home, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			tr := transcript.Memory()
+			shared := func(o *Options) { o.StateDir, o.Home, o.Transcript = filepath.Join(dir, "state"), home, tr }
+
+			h := newManagerWith(t, 2, devboxv1.BillingMode_BILLING_MODE_PROXY, shared)
+			s := h.create(t, "t1")
+			h.prompt(t, s, "p1", "first")
+			eventually(t, "first reply", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:first") })
+			eventually(t, "idle", func() bool { return h.idle("t1") })
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			h.m.Stop(ctx)
+
+			if tc.crash {
+				path := filepath.Join(dir, "state", "threads.json")
+				var st persistedState
+				raw, err := os.ReadFile(path)
+				if err != nil || json.Unmarshal(raw, &st) != nil {
+					t.Fatalf("reading state: %v", err)
+				}
+				st.Threads[0].Session.NextPosition = 1
+				raw, _ = json.Marshal(st)
+				if err := os.WriteFile(path, raw, 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			h = newManagerWith(t, 2, devboxv1.BillingMode_BILLING_MODE_PROXY, shared)
+			h.prompt(t, s, "p2", "second")
+			eventually(t, "second reply", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:second") })
+
+			entities := h.entities(s.GetSessionId())
+			byPosition := map[uint64]string{}
+			var firstTurn uint64
+			for key, e := range entities {
+				if prev, ok := byPosition[e.GetPosition()]; ok {
+					t.Fatalf("%s and %s share position %d", prev, key, e.GetPosition())
+				}
+				byPosition[e.GetPosition()] = key
+				var body strings.Builder
+				for _, c := range e.GetMessage().GetContent() {
+					body.WriteString(c.GetText().GetText())
+				}
+				if !strings.Contains(body.String(), "second") {
+					firstTurn = max(firstTurn, e.GetPosition())
+				}
+			}
+			if p := entities["ENTITY_TYPE_USER_MESSAGE/prompt-p2"].GetPosition(); p <= firstTurn {
+				t.Fatalf("the second prompt is at %d, inside the first turn (through %d): %v", p, firstTurn, byPosition)
+			}
+		})
 	}
 }
 

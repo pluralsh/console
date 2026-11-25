@@ -102,6 +102,13 @@ func (f *fakeSubstrate) EnsureAtespaceAccessPolicy(_ context.Context, atespace, 
 	return nil
 }
 
+func (f *fakeSubstrate) EnsureGlobalAccessPolicy(ctx context.Context, role string, members ...string) error {
+	return f.EnsureAtespaceAccessPolicy(ctx, globalPolicy, role, members...)
+}
+
+// globalPolicy keys the global access policy in fakeSubstrate.policies.
+const globalPolicy = ""
+
 func (f *fakeSubstrate) CreateActorTemplate(_ context.Context, t *ateapi.ActorTemplate, preview bool) (*ateapi.ActorTemplate, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
