@@ -19,6 +19,11 @@ spec:
     cpu: "4"
     memory: 8Gi
     disk: 50Gi
+  # Keeps /home/dev on a ZeroFS volume instead of in snapshots; needs zerofs.enabled in the agent-substrate chart.
+  # JuiceFS works the same way with juicefs.enabled. Remove the block to keep homes in snapshots.
+  home:
+    storage: ZeroFS
+    size: 20Gi
   workerPool:
     replicas: 2
     maxInstances: 20

@@ -313,8 +313,13 @@ supply your own with `zerofs.encryption.existingSecret`. Losing the password los
   the home can be staged on any other node. `updateStrategy` is `OnDelete`, because restarting the
   plugin ends every home on the node.
 
-Seeds and snapshots aren't supported yet: CreateVolume with a content source or `seed` parameter
-fails with `UNIMPLEMENTED`.
+A DevboxRunner uses it with `spec.home.storage: ZeroFS`. Each template revision gets a seeded
+StorageClass as with [JuiceFS](#juicefs-homes). The first home from it is the golden boot's. When
+Substrate deletes it, the controller copies its objects to `<zerofs.prefix>/seeds/<seed>/`, and every
+later home of the revision starts from a server-side copy of that prefix. Snapshots don't save the
+home, and starting from a snapshot fails with `UNSUPPORTED`. CreateVolume with a content source
+fails with `UNIMPLEMENTED`. Homes still count against `spec.resources.disk`, because each writer's
+cache sits on node disk.
 
 ## Values
 

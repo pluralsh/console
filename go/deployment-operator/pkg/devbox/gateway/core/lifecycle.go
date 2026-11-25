@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
@@ -50,9 +51,11 @@ func (g *Gateway) create(ctx context.Context, req *devboxv1.CreateInstanceReques
 	if runner.Atespace == "" {
 		return nil, status.Errorf(codes.FailedPrecondition, "%v: %s", ErrRunnerNotReady, runner.Name)
 	}
-	if src != nil && src.snapshot != nil && (runner.JuiceFSHome || runner.Revisions[src.snapshot.GetTemplateRevision()].JuiceFSHome) {
-		return nil, statusError(codes.Unimplemented, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED,
-			"devbox runner %s keeps homes on JuiceFS, and starting from a snapshot isn't supported for them yet", runner.Name)
+	if src != nil && src.snapshot != nil {
+		if home := externalHome(runner.HomeStorage, runner.Revisions[src.snapshot.GetTemplateRevision()].HomeStorage); home != "" {
+			return nil, statusError(codes.Unimplemented, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED,
+				"devbox runner %s keeps homes on %s, and starting from a snapshot isn't supported for them yet", runner.Name, home)
+		}
 	}
 	now := g.now()
 	rec := Record{
@@ -152,7 +155,7 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 	inst.mu.Unlock()
 
 	spec := actors.Spec{Ref: ref, Template: template, SourceTag: tag}
-	if runner.JuiceFSHome && src == nil {
+	if runner.HomeStorage.External() && src == nil {
 		// Substrate refuses an explicit tag for templates with external volumes; the default is the golden tag.
 		spec.SourceTag, spec.Preview = "", true
 	}
@@ -608,7 +611,7 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 	if err != nil {
 		return nil, err
 	}
-	if err := g.saveHomeSeed(ctx, ref, tagRef); err != nil {
+	if err := g.saveHomeSeed(ctx, inst, ref, tagRef); err != nil {
 		if derr := g.deps.Actors.DeleteTag(ctx, tagRef); derr != nil {
 			g.log.Error(derr, "deleting the tag of a failed snapshot", "instance", inst.ID, "tag", tagRef.String())
 		}
@@ -627,9 +630,16 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 }
 
 // saveHomeSeed copies a JuiceFS home, which isn't in the tag, into the snapshot's seed while the actor is still
-// suspended, so the copy matches the tag.
-func (g *Gateway) saveHomeSeed(ctx context.Context, ref, tag actors.Ref) error {
+// suspended, so the copy matches the tag. Seeds are JuiceFS seeds, so a ZeroFS home isn't saved.
+func (g *Gateway) saveHomeSeed(ctx context.Context, inst *Instance, ref, tag actors.Ref) error {
 	if g.deps.Seeds == nil {
+		return nil
+	}
+	storage, err := g.homeStorage(ctx, inst)
+	if err != nil {
+		return fmt.Errorf("finding the home storage of %s: %w", ref, err)
+	}
+	if storage == v1alpha1.DevboxHomeZeroFS {
 		return nil
 	}
 	a, err := g.deps.Actors.GetActor(ctx, ref)
@@ -644,6 +654,38 @@ func (g *Gateway) saveHomeSeed(ctx context.Context, ref, tag actors.Ref) error {
 		return fmt.Errorf("saving the home of %s: %w", ref, err)
 	}
 	return nil
+}
+
+// homeStorage is where the instance's revision keeps homes, reading the runner if the instance doesn't have it, as
+// after an adopt that couldn't. A revision no longer in the runner's status falls back to the runner's storage.
+func (g *Gateway) homeStorage(ctx context.Context, inst *Instance) (v1alpha1.DevboxHomeStorage, error) {
+	inst.mu.Lock()
+	runner, rec := inst.runner, inst.rec
+	inst.mu.Unlock()
+	if runner == nil {
+		r, err := g.deps.Runners.Get(ctx, rec.Runner)
+		if err != nil {
+			return "", err
+		}
+		inst.mu.Lock()
+		inst.runner = r
+		inst.mu.Unlock()
+		runner = r
+	}
+	if rev, ok := runner.Revisions[rec.TemplateRevision]; ok {
+		return rev.HomeStorage, nil
+	}
+	return runner.HomeStorage, nil
+}
+
+// externalHome is the first of storages that's an external volume, or "".
+func externalHome(storages ...v1alpha1.DevboxHomeStorage) v1alpha1.DevboxHomeStorage {
+	for _, s := range storages {
+		if s.External() {
+			return s
+		}
+	}
+	return ""
 }
 
 // homeVolume is the template volume mounted at /home/dev.

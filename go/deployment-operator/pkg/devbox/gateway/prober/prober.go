@@ -385,7 +385,7 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	}()
 
 	actorSpec := actors.Spec{Ref: ref, Template: req.ActorTemplate, SourceTag: req.GoldenTag}
-	if req.JuiceFSHome {
+	if req.ExternalHome {
 		actorSpec.SourceTag, actorSpec.Preview = "", true
 	}
 	if _, err := p.deps.Actors.CreateActor(ctx, actorSpec); err != nil {

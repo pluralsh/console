@@ -82,7 +82,8 @@ func devboxInstanceCapacity(runner *v1alpha1.DevboxRunner, class v1alpha1.Devbox
 	minCPU, minMemory, disk := cpuQ.MilliValue(), memoryQ.Value(), diskQ.Value()
 	if runner.Spec.HomeStorage() == v1alpha1.DevboxHomeJuiceFS {
 		// The home lives in object storage. Its node cache is bounded by JuiceFS, which stops caching before the
-		// disk fills, so it takes no budget.
+		// disk fills, so it takes no budget. A ZeroFS home's writer caches on the node's disk per home, up to the
+		// home's own data, so it keeps the home's budget.
 		disk = 0
 	}
 	out := devboxCapacity{CPU: minCPU, Memory: minMemory}

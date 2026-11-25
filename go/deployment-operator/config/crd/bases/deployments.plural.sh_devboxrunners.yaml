@@ -338,8 +338,9 @@ spec:
                     anyOf:
                     - type: integer
                     - type: string
-                    description: Size is the most a JuiceFS home may hold, enforced
-                      as a JuiceFS quota. Defaults to spec.resources.disk.
+                    description: |-
+                      Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.
+                      Defaults to spec.resources.disk.
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   storage:
@@ -350,10 +351,12 @@ spec:
                     enum:
                     - Snapshot
                     - JuiceFS
+                    - ZeroFS
                     type: string
                   storageClassName:
-                    description: StorageClassName is the JuiceFS StorageClass. Defaults
-                      to the agent-substrate chart's devbox-juicefs.
+                    description: |-
+                      StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's
+                      devbox-juicefs or devbox-zerofs.
                     type: string
                 type: object
               httpAllowlist:
@@ -1298,6 +1301,7 @@ spec:
                       enum:
                       - Snapshot
                       - JuiceFS
+                      - ZeroFS
                       type: string
                     image:
                       type: string
