@@ -331,6 +331,48 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
   end
 
+  describe "list_devbox_pull_requests/2" do
+    test "it lists the instance's pull requests however they were opened, and finds the devbox's by url" do
+      cluster = insert(:cluster)
+      devbox = insert(:devbox, cluster: cluster)
+      inst = insert(:devbox_instance, devbox: devbox)
+      older = insert(:devbox_instance, devbox: devbox)
+      thread = insert(:devbox_instance_session, instance: inst)
+      button = insert(:pull_request, devbox: devbox, devbox_instance: inst, devbox_instance_session: thread, source: :devbox,
+                                     url: "https://github.com/pluralsh/console/pull/12")
+      mcp = insert(:pull_request, devbox: devbox, devbox_instance: inst, source: :mcp, url: "https://github.com/pluralsh/console/pull/13")
+      from_older = insert(:pull_request, devbox: devbox, devbox_instance: older, url: "https://github.com/pluralsh/console/pull/9")
+      other = insert(:pull_request, devbox: build(:devbox, cluster: cluster), url: "https://github.com/pluralsh/console/pull/1")
+
+      %V1.ListDevboxPullRequestsResponse{pull_requests: prs} =
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id}, authed(cluster))
+
+      assert Enum.map(prs, & &1.url) |> Enum.sort() == Enum.sort([button.url, mcp.url])
+      record = Enum.find(prs, & &1.url == button.url)
+      assert record.number == 12
+      assert record.source == "devbox"
+      assert record.status == "open"
+      assert record.devbox_id == devbox.id
+      assert record.instance_id == inst.id
+      assert record.thread_id == thread.id
+
+      %V1.ListDevboxPullRequestsResponse{pull_requests: [%V1.DevboxPullRequestRecord{url: url}]} =
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id, url: from_older.url}, authed(cluster))
+      assert url == from_older.url
+
+      %V1.ListDevboxPullRequestsResponse{pull_requests: []} =
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id, url: other.url}, authed(cluster))
+    end
+
+    test "it rejects instances of other clusters" do
+      inst = insert(:devbox_instance)
+
+      assert_raise GRPC.RPCError, fn ->
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id}, authed(insert(:cluster)))
+      end
+    end
+  end
+
   describe "update_agent_credential/2" do
     test "the lease holder's refresh is applied" do
       cluster = insert(:cluster)

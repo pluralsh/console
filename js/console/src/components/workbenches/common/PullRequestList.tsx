@@ -1,25 +1,40 @@
 import { IconFrame, prettifyRepoUrl } from '@pluralsh/design-system'
 import { CaptionP } from 'components/utils/typography/Text'
 import { PrStatus, PullRequestBasicFragment } from 'generated/graphql'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { PrStatusIcon, WorkbenchPrStatusChip } from './WorkbenchJobPrIcon'
 
-// one row per pull request, open ones first; the title opens the pr, the caption defaults to its repo and age
+// one row per pull request, open ones first; the title opens the pr, the caption defaults to its repo and age.
+// the row whose url is `highlighted` is tinted and scrolled into view
 export function PullRequestList<T extends PullRequestBasicFragment>({
   pullRequests,
   caption = defaultCaption,
   titleTooltip,
+  highlighted,
 }: {
   pullRequests: T[]
   caption?: (pr: T) => ReactNode
   titleTooltip?: (pr: T) => Nullable<string>
+  highlighted?: Nullable<string>
 }) {
+  const highlightedRef = useRef<HTMLDivElement>(null)
+  const hasHighlighted = pullRequests.some((pr) => pr.url === highlighted)
+  useEffect(() => {
+    if (hasHighlighted)
+      highlightedRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [highlighted, hasHighlighted])
+
   return (
     <ListSC>
       {sortOpenFirst(pullRequests).map((pr) => (
-        <RowSC key={pr.id}>
+        <RowSC
+          key={pr.id}
+          ref={pr.url === highlighted ? highlightedRef : undefined}
+          $highlighted={pr.url === highlighted}
+          aria-current={pr.url === highlighted || undefined}
+        >
           <IconFrame
             type="tertiary"
             size="small"
@@ -72,12 +87,20 @@ const ListSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
 }))
 
-const RowSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  minWidth: 0,
-}))
+const RowSC = styled.div<{ $highlighted?: boolean }>(
+  ({ theme, $highlighted }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.small,
+    minWidth: 0,
+    ...($highlighted && {
+      margin: `0 -${theme.spacing.xsmall}px`,
+      padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+      borderRadius: theme.borderRadiuses.medium,
+      backgroundColor: theme.colors['fill-zero-selected'],
+    }),
+  })
+)
 
 const BodySC = styled.div({
   display: 'flex',

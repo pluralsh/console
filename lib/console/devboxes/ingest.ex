@@ -696,6 +696,29 @@ defmodule Console.Devboxes.Ingest do
   end
 
   @doc """
+  `Ingest.ListDevboxPullRequests`: the pull requests of an instance, or with a `url`, that pull request if it belongs
+  to the instance's devbox, however it was opened.
+  """
+  @spec list_devbox_pull_requests(binary, binary | nil, Cluster.t) :: {:ok, [PullRequest.t]} | error
+  def list_devbox_pull_requests(instance_id, url, %Cluster{} = cluster) do
+    with {:ok, _} <- owned(instance_id, cluster) do
+      inst = Devboxes.get_instance!(instance_id)
+      case blank(url) do
+        nil ->
+          PullRequest.for_devbox_instance(inst.id)
+          |> PullRequest.ordered(asc: :inserted_at)
+          |> Repo.all()
+        url ->
+          case Repo.get_by(PullRequest, url: url, devbox_id: inst.devbox_id) do
+            %PullRequest{} = pr -> [pr]
+            nil -> []
+          end
+      end
+      |> ok()
+    end
+  end
+
+  @doc """
   Opens a pull request for a devbox instance's branch through the repository's SCM connection, attributed to the
   instance and thread.  `extra` holds the record's `source` and any `metadata`.
   """
