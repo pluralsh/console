@@ -11,7 +11,8 @@
 # devbox-runtime-manifest import from this repository (for linux/amd64 and linux/arm64), the version of every other
 # module they link (not go.mod and go.sum, which change with dependencies the daemon doesn't use), the module's go
 # directive, the Dockerfile (which pins the Go toolchain, the Node image and the agents' versions), its
-# dockerignore, the bake file, this script and everything under runtime/ (the component spec and build script). Too narrow a hash
+# dockerignore, the bake file, this script, everything under runtime/ (the component spec and build script) and
+# patches/ (applied to the agents). Too narrow a hash
 # ships a stale daemon, so anything else that reaches the image must be added here.
 set -euo pipefail
 
@@ -31,7 +32,7 @@ files() {
   echo "${rel}/runtime-core.Dockerfile.dockerignore"
   echo "${rel}/docker-bake.hcl"
   echo "${rel}/runtime-src-hash.sh"
-  (cd "${go_dir}" && find "${rel}/runtime" -type f)
+  (cd "${go_dir}" && find "${rel}/runtime" "${rel}/patches" -type f)
 }
 
 # The modules linked into the binaries, as "path version" (with what replaces them, if anything). Modules of this

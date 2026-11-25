@@ -101,7 +101,9 @@ ENV NPM_CONFIG_UPDATE_NOTIFIER=false \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 COPY deployment-operator/dockerfiles/devbox/runtime/assemble.sh deployment-operator/dockerfiles/devbox/runtime/components.json /src/
+COPY deployment-operator/dockerfiles/devbox/patches/ /src/patches/
 RUN --mount=type=cache,target=/root/.npm,id=devbox-runtime-npm \
+    PATCHES=/src/patches \
     sh /src/assemble.sh /src/components.json /out/components /out/versions "${TARGETARCH}" \
       claude="${CLAUDE_VERSION}" claude-acp="${CLAUDE_ACP_VERSION}" \
       codex="${CODEX_VERSION}" codex-acp="${CODEX_ACP_VERSION}" \

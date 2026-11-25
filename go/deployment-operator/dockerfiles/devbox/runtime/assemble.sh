@@ -32,6 +32,8 @@ case "$4" in
 esac
 shift 4
 pins="$*"
+# The patches the devbox images apply to the agents (dockerfiles/devbox/patches).
+patches=${PATCHES:-$(cd "$(dirname "$0")/../patches" 2>/dev/null && pwd)}
 
 case "$(uname -m)" in
   x86_64) host_cpu=x64 ;;
@@ -95,9 +97,13 @@ prune() {
   rm -f "$1/package.json" "$1/package-lock.json"
 }
 
-# bundle <component> <entry>: bundles an ESM CLI and its dependencies into <out>/<component>/index.mjs.
+# bundle <component> <entry> [patch]: bundles an ESM CLI and its dependencies into <out>/<component>/index.mjs,
+# after running the patch (a script in $patches, given the entry file) on it.
 bundle() {
   component "$1"
+  if [ -n "${3:-}" ]; then
+    node "$patches/$3" "$work/$1/node_modules/$2"
+  fi
   mkdir -p "$out/$1"
   # From the component's directory, so the paths esbuild records are relative to it.
   (cd "$work/$1" && "$work/esbuild/node_modules/.bin/esbuild" "node_modules/$2" --bundle --platform=node --format=esm \
@@ -128,7 +134,9 @@ component opencode
 install -D -m 0755 "$work/opencode/node_modules/opencode-linux-$cpu/bin/opencode" "$out/opencode/bin/opencode"
 
 bundle claude-acp @agentclientprotocol/claude-agent-acp/dist/index.js
-bundle codex-acp @agentclientprotocol/codex-acp/dist/index.js
+# The devbox is the sandbox: Codex's own (no network, writes only under the workspace) breaks package downloads
+# through the egress proxy. The patch fails if the adapter's modes changed shape.
+bundle codex-acp @agentclientprotocol/codex-acp/dist/index.js codex-acp-unsandboxed.mjs
 bundle pi-acp pi-acp/dist/index.js
 
 tree gemini
