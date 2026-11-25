@@ -11,10 +11,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -42,6 +44,10 @@ type Server struct {
 	FailSuspend error
 	// FailSuspendTimes, when positive, limits FailSuspend to that many calls.
 	FailSuspendTimes int
+	// Previews records the actors created with the preview header.
+	Previews map[string]bool
+	// ExternalHomes makes GetActor report an external "home" volume, named like Substrate's, on every actor.
+	ExternalHomes bool
 
 	version int64
 }
@@ -140,16 +146,38 @@ func (s *Server) GetActor(_ context.Context, req *ateapi.GetActorRequest) (*atea
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "actor %s not found", key(req.GetActor()))
 	}
-	return proto.Clone(a).(*ateapi.Actor), nil
+	out := proto.Clone(a).(*ateapi.Actor)
+	if s.ExternalHomes {
+		if out.Status == nil {
+			out.Status = &ateapi.ActorStatus{}
+		}
+		out.Status.ExternalVolumes = &ateapi.ExternalVolumes{Volumes: []*ateapi.ExternalVolumeStatus{
+			{Name: "home", StorageVolumeId: "substrate-" + a.GetMetadata().GetUid() + "-home"},
+		}}
+	}
+	return out, nil
 }
 
-func (s *Server) CreateActor(_ context.Context, req *ateapi.CreateActorRequest) (*ateapi.Actor, error) {
+// Preview reports whether an actor was created with the preview header.
+func (s *Server) Preview(atespace, name string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.Previews[atespace+"/"+name]
+}
+
+func (s *Server) CreateActor(ctx context.Context, req *ateapi.CreateActorRequest) (*ateapi.Actor, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	ref := &ateapi.ObjectRef{Atespace: req.GetActor().GetMetadata().GetAtespace(), Name: req.GetActor().GetMetadata().GetName()}
 	s.record("CreateActor", ref)
 	if _, ok := s.Actors[key(ref)]; ok {
 		return nil, status.Error(codes.AlreadyExists, "actor exists")
+	}
+	if md, _ := metadata.FromIncomingContext(ctx); len(md.Get(substrate.PreviewHeader)) > 0 {
+		if s.Previews == nil {
+			s.Previews = map[string]bool{}
+		}
+		s.Previews[key(ref)] = true
 	}
 	a := proto.Clone(req.GetActor()).(*ateapi.Actor)
 	a.Metadata.Uid = fmt.Sprintf("uid-%d", s.nextVersion())

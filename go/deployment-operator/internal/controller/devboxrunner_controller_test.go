@@ -24,6 +24,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -41,6 +42,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -946,9 +948,62 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(policy.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())))
 	})
 
+	t.Run("a JuiceFS home gets a StorageClass per revision seeded by its golden boot", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "juicefs", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeJuiceFS), Size: lo.ToPtr(resource.MustParse("100Gi"))}
+		})
+		env.reconcile(t, "juicefs", 1)
+		_, _ = env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "juicefs"}})
+		runner := env.get(t, "juicefs")
+		g.Expect(condition(runner, v1alpha1.DevboxTemplateReadyConditionType).Message).To(ContainSubstring("StorageClass devbox-juicefs for JuiceFS homes doesn't exist"))
+		g.Expect(runner.Status.Revisions).To(BeEmpty())
+
+		g.Expect(env.client.Create(ctx, &storagev1.StorageClass{
+			ObjectMeta:  metav1.ObjectMeta{Name: v1alpha1.DevboxDefaultJuiceFSStorageClass},
+			Provisioner: juicefs.DriverName,
+			Parameters:  map[string]string{juicefs.ParamUID: "1000"},
+		})).To(Succeed())
+		runner = env.reconcile(t, "juicefs", 1)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1))
+		rev := runner.Status.Revisions[0]
+		g.Expect(rev.HomeStorage).To(HaveValue(Equal(v1alpha1.DevboxHomeJuiceFS)))
+		atespace := *runner.Status.Atespace
+
+		tmpl := env.substrate.template(atespace, rev.Name)
+		home, _ := lo.Find(tmpl.Volumes, func(v *ateapi.Volume) bool { return v.Name == devboxHomeVolume })
+		g.Expect(home.GetExternal().GetTemplate().GetCapacityBytes()).To(Equal(int64(100 << 30)))
+		className := home.GetExternal().GetTemplate().GetStorageClassName()
+		g.Expect(className).To(Equal("devbox-home." + atespace + "." + rev.Name))
+		g.Expect(env.substrate.previews[rev.Name]).To(BeTrue())
+
+		sc := &storagev1.StorageClass{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: className}, sc)).To(Succeed())
+		g.Expect(sc.Provisioner).To(Equal(juicefs.DriverName))
+		g.Expect(sc.Parameters).To(Equal(map[string]string{juicefs.ParamUID: "1000", juicefs.ParamSeed: atespace + "." + rev.Name}))
+		g.Expect(sc.GetOwnerReferences()).To(ContainElement(HaveField("UID", runner.UID)))
+
+		hash := rev.Hash
+		gatewayEnv := func() []corev1.EnvVar {
+			d := &appsv1.Deployment{}
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, d)).To(Succeed())
+			return d.Spec.Template.Spec.Containers[0].Env
+		}
+		g.Expect(gatewayEnv()).NotTo(ContainElement(HaveField("Name", "DEVBOX_JUICEFS_ADDRESS")), "no JuiceFS controller, no seeds")
+		g.Expect(env.client.Create(ctx, &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{Name: devboxJuiceFSService, Namespace: "ate-system"},
+			Spec:       corev1.ServiceSpec{Ports: []corev1.ServicePort{{Name: "grpc", Port: devboxJuiceFSPort}}},
+		})).To(Succeed())
+		runner = env.reconcile(t, "juicefs", 1)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1), "the per-revision class doesn't change the template hash")
+		g.Expect(runner.Status.Revisions[0].Hash).To(Equal(hash))
+		g.Expect(gatewayEnv()).To(ContainElement(corev1.EnvVar{Name: "DEVBOX_JUICEFS_ADDRESS", Value: "devbox-juicefs.ate-system.svc:9820"}))
+	})
+
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild"} {
+		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild", "juicefs"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())

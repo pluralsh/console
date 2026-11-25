@@ -477,7 +477,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 			SecurityContext: &ateapi.SecurityContext{Capabilities: &ateapi.Capabilities{Add: devboxCapabilities}},
 		}},
 		Volumes: []*ateapi.Volume{
-			{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}},
+			devboxHomeVolumeSource(runner),
 			{Name: devboxTrustVolume, SystemInfo: &ateapi.SystemInfoVolumeSource{DataSources: []*ateapi.SystemInfoDataSource{{
 				TrustBundle: &ateapi.TrustBundleDataSource{Names: []string{"egress-mitm.ate.dev"}, Path: "egress-mitm.pem"},
 			}}}},
@@ -505,6 +505,28 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 		return nil, "", err
 	}
 	return template, hash, nil
+}
+
+// devboxHomeVolumeSource is /home/dev: a durable dir carried in the instance's snapshots, or a JuiceFS volume
+// whose quota is the home's size. A JuiceFS home names the runner's StorageClass here, which keys the template
+// hash; ensureHomeStorageClass swaps in the revision's own class once the template is named.
+func devboxHomeVolumeSource(runner *v1alpha1.DevboxRunner) *ateapi.Volume {
+	if runner.Spec.HomeStorage() != v1alpha1.DevboxHomeJuiceFS {
+		return &ateapi.Volume{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}}
+	}
+	size := runner.Spec.HomeSize()
+	return &ateapi.Volume{Name: devboxHomeVolume, External: &ateapi.ExternalVolumeSource{Template: &ateapi.ExternalVolumeTemplate{
+		CapacityBytes:    size.Value(),
+		StorageClassName: runner.Spec.HomeStorageClass(),
+	}}}
+}
+
+// devboxTemplateNeedsPreview reports whether creating the template uses Substrate preview features.
+func devboxTemplateNeedsPreview(template *ateapi.ActorTemplate) bool {
+	if template.GoldenEgressPolicy != nil {
+		return true
+	}
+	return lo.ContainsBy(template.Volumes, func(v *ateapi.Volume) bool { return v.External != nil })
 }
 
 // devboxGoldenEgressPolicy lets the golden boot reach what the bootstrap script and mise need: the runner's
@@ -570,7 +592,11 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 		}
 		name := devboxTemplateName(runner, next)
 		template.Metadata.Name = name
-		if _, err := api.CreateActorTemplate(ctx, template, template.GoldenEgressPolicy != nil); err != nil {
+		if err := r.ensureHomeStorageClass(ctx, runner, template); err != nil {
+			utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxMisconfiguredReason, err.Error())
+			return err
+		}
+		if _, err := api.CreateActorTemplate(ctx, template, devboxTemplateNeedsPreview(template)); err != nil {
 			utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxFailedReason,
 				fmt.Sprintf("creating ActorTemplate %s: %s", name, err))
 			return err
@@ -586,14 +612,18 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 				}
 			}
 		}
-		runner.Status.Revisions = append([]v1alpha1.DevboxRevision{{
+		rev := v1alpha1.DevboxRevision{
 			Revision:  next,
 			Name:      name,
 			Hash:      hash,
 			Image:     image,
 			Phase:     v1alpha1.DevboxRevisionBuilding,
 			CreatedAt: lo.ToPtr(metav1.Now()),
-		}}, runner.Status.Revisions...)
+		}
+		if storage := runner.Spec.HomeStorage(); storage != v1alpha1.DevboxHomeSnapshot {
+			rev.HomeStorage = &storage
+		}
+		runner.Status.Revisions = append([]v1alpha1.DevboxRevision{rev}, runner.Status.Revisions...)
 	}
 
 	for i := range runner.Status.Revisions {
@@ -668,6 +698,7 @@ func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.
 			ActorTemplate: rev.Name,
 			Revision:      rev.Revision,
 			GoldenTag:     lo.FromPtr(rev.GoldenTag),
+			JuiceFSHome:   lo.FromPtr(rev.HomeStorage) == v1alpha1.DevboxHomeJuiceFS,
 			DevboxID:      lo.FromPtr(runner.Status.ID),
 		},
 		Agents: devboxGuestAgents(runner),
@@ -783,6 +814,11 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.
 		}
 		if err := api.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
 			return fmt.Errorf("deleting ActorTemplate %s: %w", rev.Name, err)
+		}
+		if rev.HomeStorage != nil && *rev.HomeStorage == v1alpha1.DevboxHomeJuiceFS {
+			if err := r.deleteHomeStorageClass(ctx, atespace, rev.Name); err != nil {
+				return err
+			}
 		}
 		if err := r.Probe.Cleanup(ctx, runner.Name, rev.Revision); err != nil {
 			return err

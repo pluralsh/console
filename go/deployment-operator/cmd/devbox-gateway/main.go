@@ -41,6 +41,8 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/prober"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/router"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/tunnel"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
 
@@ -66,6 +68,7 @@ type options struct {
 	serviceDNSDir  string
 	serviceDNSCA   string
 	routerAddress  string
+	juicefsAddress string
 	credProvider   string
 	extProc        string
 	mcpAddr        string
@@ -124,6 +127,7 @@ func register(fs *flag.FlagSet) *options {
 	fs.StringVar(&o.serviceDNSDir, "service-dns-dir", env("DEVBOX_SERVICE_DNS_DIR", "/run/servicedns.podcert.ate.dev"), "servicedns serving credential bundle (DEVBOX_SERVICE_DNS_DIR)")
 	fs.StringVar(&o.serviceDNSCA, "service-dns-ca-dir", env("DEVBOX_SERVICE_DNS_CA_DIR", "/run/servicedns-ca.podcert.ate.dev"), "servicedns trust bundle (DEVBOX_SERVICE_DNS_CA_DIR)")
 	fs.StringVar(&o.routerAddress, "router-address", env("DEVBOX_ROUTER_ADDRESS", router.DefaultAddress), "atenet-router address (DEVBOX_ROUTER_ADDRESS)")
+	fs.StringVar(&o.juicefsAddress, "juicefs-address", env("DEVBOX_JUICEFS_ADDRESS", ""), "JuiceFS CSI controller address, <service>.<namespace>.svc:<port>, for saving the homes of snapshots (DEVBOX_JUICEFS_ADDRESS; empty disables)")
 	fs.StringVar(&o.credProvider, "credential-provider-addr", env("DEVBOX_CREDENTIAL_PROVIDER_ADDR", egress.DefaultCredentialProviderAddr), "credential provider listen address (DEVBOX_CREDENTIAL_PROVIDER_ADDR)")
 	fs.StringVar(&o.extProc, "extproc-addr", env("DEVBOX_EXTPROC_ADDR", egress.DefaultAuthzAddr), "egress ext_proc listen address (DEVBOX_EXTPROC_ADDR)")
 	fs.StringVar(&o.mcpAddr, "mcp-addr", env("DEVBOX_MCP_ADDR", egress.DefaultMCPAddr), "devbox MCP and SandboxCredentials listen address (DEVBOX_MCP_ADDR)")
@@ -237,6 +241,24 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	}
 	defer rt.Close() // nolint: errcheck
 
+	var seeds core.Seeds
+	if o.juicefsAddress != "" {
+		host, _, err := net.SplitHostPort(o.juicefsAddress)
+		if err != nil {
+			return fmt.Errorf("parsing DEVBOX_JUICEFS_ADDRESS: %w", err)
+		}
+		tlsCfg, err := podcert.ClientTLS(filepath.Join(o.podIdentityDir, "credential-bundle.pem"), filepath.Join(o.serviceDNSCA, "trust-bundle.pem"), host)
+		if err != nil {
+			return fmt.Errorf("configuring the JuiceFS controller client: %w", err)
+		}
+		jfs, err := juicefs.Dial(o.juicefsAddress, tlsCfg)
+		if err != nil {
+			return err
+		}
+		defer jfs.Close() // nolint: errcheck
+		seeds = jfs
+	}
+
 	token := o.deployToken
 	kas, err := tunnel.Dial(tunnel.DialConfig{
 		URL:       o.kasURL,
@@ -293,6 +315,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		Router:  rt,
 		Records: &core.KubeRecords{Client: kube, Namespace: o.podNamespace},
 		Runners: &core.KubeRunners{Client: kube, Namespace: o.podNamespace},
+		Seeds:   seeds,
 		Log:     log.WithName("core"),
 	})
 	if err != nil {

@@ -29,6 +29,8 @@ type Runner struct {
 	Revision    int64
 	GoldenTag   string
 	ImageDigest string
+	// JuiceFSHome means the current revision keeps homes on JuiceFS.
+	JuiceFSHome bool
 	// Revisions maps every revision that still exists to its template and golden tag.
 	Revisions map[int64]RunnerRevision
 
@@ -43,8 +45,9 @@ type Runner struct {
 }
 
 type RunnerRevision struct {
-	Template  string
-	GoldenTag string
+	Template    string
+	GoldenTag   string
+	JuiceFSHome bool
 }
 
 // ErrRunnerNotReady means the runner has no ready revision to start instances from.
@@ -157,9 +160,11 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 		r.Revision = *st.TemplateRevision
 	}
 	for _, rev := range st.Revisions {
-		r.Revisions[rev.Revision] = RunnerRevision{Template: rev.Name, GoldenTag: deref(rev.GoldenTag)}
+		juiceFS := deref(rev.HomeStorage) == v1alpha1.DevboxHomeJuiceFS
+		r.Revisions[rev.Revision] = RunnerRevision{Template: rev.Name, GoldenTag: deref(rev.GoldenTag), JuiceFSHome: juiceFS}
 		if rev.Revision == r.Revision {
 			r.GoldenTag = deref(rev.GoldenTag)
+			r.JuiceFSHome = juiceFS
 			if r.Template == "" {
 				r.Template = rev.Name
 			}

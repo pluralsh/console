@@ -143,6 +143,10 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	Resources *DevboxResources `json:"resources,omitempty"`
 
+	// Home selects where instances keep /home/dev.
+	// +kubebuilder:validation:Optional
+	Home *DevboxHome `json:"home,omitempty"`
+
 	// WorkerPool sizes the Substrate WorkerPool backing this runner.
 	// +kubebuilder:validation:Optional
 	WorkerPool *DevboxWorkerPool `json:"workerPool,omitempty"`
@@ -302,6 +306,70 @@ type DevboxResources struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="20Gi"
 	Disk *resource.Quantity `json:"disk,omitempty"`
+}
+
+// DevboxHomeStorage is where an instance's /home/dev lives.
+// +kubebuilder:validation:Enum=Snapshot;JuiceFS
+type DevboxHomeStorage string
+
+const (
+	// DevboxHomeSnapshot keeps the home on the instance's node and carries it in every snapshot.
+	DevboxHomeSnapshot DevboxHomeStorage = "Snapshot"
+	// DevboxHomeJuiceFS keeps the home in the agent-substrate chart's JuiceFS filesystem (juicefs.enabled), mounted
+	// wherever the instance runs, so snapshots carry only memory and moving node doesn't copy the home.
+	DevboxHomeJuiceFS DevboxHomeStorage = "JuiceFS"
+
+	// DevboxDefaultJuiceFSStorageClass is the agent-substrate chart's juicefs.storageClassName default.
+	DevboxDefaultJuiceFSStorageClass = "devbox-juicefs"
+)
+
+// DevboxHome selects how instances store /home/dev.
+//
+// With JuiceFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and mise
+// installed is there from the start, and every snapshot also saves the home as a JuiceFS clone. Starting an
+// instance from a snapshot isn't supported yet: Substrate can't restore a tag of a template with external
+// volumes.
+type DevboxHome struct {
+	// Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
+	// home.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=Snapshot
+	Storage *DevboxHomeStorage `json:"storage,omitempty"`
+
+	// Size is the most a JuiceFS home may hold, enforced as a JuiceFS quota. Defaults to spec.resources.disk.
+	// +kubebuilder:validation:Optional
+	Size *resource.Quantity `json:"size,omitempty"`
+
+	// StorageClassName is the JuiceFS StorageClass. Defaults to the agent-substrate chart's devbox-juicefs.
+	// +kubebuilder:validation:Optional
+	StorageClassName *string `json:"storageClassName,omitempty"`
+}
+
+// HomeStorage is where instances keep /home/dev.
+func (s *DevboxRunnerSpec) HomeStorage() DevboxHomeStorage {
+	if s.Home == nil || s.Home.Storage == nil {
+		return DevboxHomeSnapshot
+	}
+	return *s.Home.Storage
+}
+
+// HomeSize is the most an instance's home may hold.
+func (s *DevboxRunnerSpec) HomeSize() resource.Quantity {
+	if s.Home != nil && s.Home.Size != nil {
+		return *s.Home.Size
+	}
+	if s.Resources != nil && s.Resources.Disk != nil {
+		return *s.Resources.Disk
+	}
+	return resource.MustParse("20Gi")
+}
+
+// HomeStorageClass is the StorageClass of a JuiceFS home.
+func (s *DevboxRunnerSpec) HomeStorageClass() string {
+	if s.Home != nil && s.Home.StorageClassName != nil && *s.Home.StorageClassName != "" {
+		return *s.Home.StorageClassName
+	}
+	return DevboxDefaultJuiceFSStorageClass
 }
 
 // DevboxWorkerPool is the Substrate WorkerPool the operator runs for the runner. Each worker is expected to have a
@@ -848,6 +916,9 @@ type DevboxRevision struct {
 	Phase DevboxRevisionPhase `json:"phase"`
 	// +kubebuilder:validation:Optional
 	GoldenTag *string `json:"goldenTag,omitempty"`
+	// HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot.
+	// +kubebuilder:validation:Optional
+	HomeStorage *DevboxHomeStorage `json:"homeStorage,omitempty"`
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 	// +kubebuilder:validation:Optional

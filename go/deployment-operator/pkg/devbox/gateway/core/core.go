@@ -41,6 +41,12 @@ type CredentialService interface {
 	InstanceCredential(ctx context.Context, instanceID string, sel *devboxv1.CredentialSelector) (*devboxv1.InstanceCredential, error)
 }
 
+// Seeds saves the JuiceFS homes of snapshotted instances (juicefs.Client).
+type Seeds interface {
+	SaveSeed(ctx context.Context, seedID, volumeID string) error
+	DeleteSeed(ctx context.Context, seedID string) error
+}
+
 // Config tunes the core. Zero values take the defaults below.
 type Config struct {
 	GatewayID        string
@@ -121,8 +127,10 @@ type Deps struct {
 	Egress Egress
 	// Credentials is optional; SandboxCredentials needs it.
 	Credentials CredentialService
-	Log         logr.Logger
-	Now         func() time.Time
+	// Seeds is optional; without it snapshots of JuiceFS homes keep no copy of the home.
+	Seeds Seeds
+	Log   logr.Logger
+	Now   func() time.Time
 }
 
 // Gateway is the core.
@@ -381,6 +389,12 @@ func ActorName(instanceID string) string {
 		n = strings.TrimRight(n[:63], "-")
 	}
 	return n
+}
+
+// SnapshotSeedID is the JuiceFS seed holding a snapshot's home. Seeds are global, so it carries the atespace, and
+// its "tag" segment keeps it apart from the operator's <atespace>.<template> golden seeds.
+func SnapshotSeedID(tag actors.Ref) string {
+	return tag.Atespace + ".tag." + tag.Name
 }
 
 // SnapshotTagName is the Substrate tag of a snapshot.

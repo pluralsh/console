@@ -33,3 +33,12 @@ postgres:
     backup:
       enabled: true
       destinationPath: gs://plural-ate-pg-backups/ate-postgres/
+
+# JuiceFS homes in the snapshot bucket through Workload Identity.
+juicefs:
+  enabled: true
+  image:
+    tag: "0.0.0"
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: devbox-juicefs@plural-dev.iam.gserviceaccount.com

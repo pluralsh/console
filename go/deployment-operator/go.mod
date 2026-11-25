@@ -35,6 +35,7 @@ require (
 	github.com/cert-manager/cert-manager v1.19.3
 	github.com/coder/acp-go-sdk v0.13.5
 	github.com/coder/websocket v1.8.14
+	github.com/container-storage-interface/spec v1.12.0
 	github.com/creack/pty v1.1.24
 	github.com/cyphar/filepath-securejoin v0.6.1
 	github.com/envoyproxy/go-control-plane/envoy v1.39.0

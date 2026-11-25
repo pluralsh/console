@@ -50,6 +50,10 @@ func (g *Gateway) create(ctx context.Context, req *devboxv1.CreateInstanceReques
 	if runner.Atespace == "" {
 		return nil, status.Errorf(codes.FailedPrecondition, "%v: %s", ErrRunnerNotReady, runner.Name)
 	}
+	if src != nil && src.snapshot != nil && (runner.JuiceFSHome || runner.Revisions[src.snapshot.GetTemplateRevision()].JuiceFSHome) {
+		return nil, statusError(codes.Unimplemented, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED,
+			"devbox runner %s keeps homes on JuiceFS, and starting from a snapshot isn't supported for them yet", runner.Name)
+	}
 	now := g.now()
 	rec := Record{
 		InstanceID:  req.GetInstanceId(),
@@ -74,8 +78,10 @@ func (g *Gateway) create(ctx context.Context, req *devboxv1.CreateInstanceReques
 		return nil, errRecord(err)
 	}
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_PROVISIONING})
+	// Read before provisioning starts, which can otherwise move the record past PROVISIONING before the reply.
+	resp := g.createResponse(inst)
 	g.goBackground(func(ctx context.Context) { g.provision(ctx, inst, src) })
-	return g.createResponse(inst), nil
+	return resp, nil
 }
 
 func (g *Gateway) createResponse(inst *Instance) *devboxv1.CreateInstanceResponse {
@@ -145,7 +151,12 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 	}
 	inst.mu.Unlock()
 
-	if _, err := g.deps.Actors.CreateActor(ctx, actors.Spec{Ref: ref, Template: template, SourceTag: tag}); err != nil {
+	spec := actors.Spec{Ref: ref, Template: template, SourceTag: tag}
+	if runner.JuiceFSHome && src == nil {
+		// Substrate refuses an explicit tag for templates with external volumes; the default is the golden tag.
+		spec.SourceTag, spec.Preview = "", true
+	}
+	if _, err := g.deps.Actors.CreateActor(ctx, spec); err != nil {
 		return fmt.Errorf("creating actor %s: %w", ref, err)
 	}
 	if retarget != "" {
@@ -597,6 +608,12 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 	if err != nil {
 		return nil, err
 	}
+	if err := g.saveHomeSeed(ctx, ref, tagRef); err != nil {
+		if derr := g.deps.Actors.DeleteTag(ctx, tagRef); derr != nil {
+			g.log.Error(derr, "deleting the tag of a failed snapshot", "instance", inst.ID, "tag", tagRef.String())
+		}
+		return nil, err
+	}
 	fidelity := devboxv1.SnapshotFidelity_SNAPSHOT_FIDELITY_FILESYSTEM
 	if actors.TagFidelity(tag) == ateapi.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY {
 		fidelity = devboxv1.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY
@@ -608,6 +625,29 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 		Fidelity:         fidelity,
 	}, nil
 }
+
+// saveHomeSeed copies a JuiceFS home, which isn't in the tag, into the snapshot's seed while the actor is still
+// suspended, so the copy matches the tag.
+func (g *Gateway) saveHomeSeed(ctx context.Context, ref, tag actors.Ref) error {
+	if g.deps.Seeds == nil {
+		return nil
+	}
+	a, err := g.deps.Actors.GetActor(ctx, ref)
+	if err != nil {
+		return fmt.Errorf("reading actor %s: %w", ref, err)
+	}
+	volume := actors.ExternalVolumeID(a, homeVolume)
+	if volume == "" {
+		return nil
+	}
+	if err := g.deps.Seeds.SaveSeed(ctx, SnapshotSeedID(tag), volume); err != nil {
+		return fmt.Errorf("saving the home of %s: %w", ref, err)
+	}
+	return nil
+}
+
+// homeVolume is the template volume mounted at /home/dev.
+const homeVolume = "home"
 
 // ---- cancel and complete (DBX-60) ----
 

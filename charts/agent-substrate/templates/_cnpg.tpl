@@ -104,6 +104,20 @@ azureCredentials:
 {{- if $c.keepOnUninstall -}}
 {{- $_ := set $annotations "helm.sh/resource-policy" "keep" -}}
 {{- end -}}
+{{- $roles := list (dict
+  "name" $pg.readWriteUser
+  "ensure" "present"
+  "login" true
+  "inherit" false
+  "inRoles" (list $pg.readWriteRole)
+  "passwordSecret" (dict "name" (include "substrate.cnpg.readWriteSecret" .))) -}}
+{{- if .Values.juicefs.enabled -}}
+{{- $roles = append $roles (dict
+  "name" .Values.juicefs.postgres.user
+  "ensure" "present"
+  "login" true
+  "passwordSecret" (dict "name" (include "substrate.juicefs.passwordSecret" .))) -}}
+{{- end -}}
 {{- $spec := dict
   "instances" (int $c.instances)
   "enableSuperuserAccess" false
@@ -111,13 +125,7 @@ azureCredentials:
     "database" $pg.database
     "owner" $pg.ownerUser
     "postInitApplicationSQL" (include "substrate.cnpg.setupSQL" . | fromYamlArray)))
-  "managed" (dict "roles" (list (dict
-    "name" $pg.readWriteUser
-    "ensure" "present"
-    "login" true
-    "inherit" false
-    "inRoles" (list $pg.readWriteRole)
-    "passwordSecret" (dict "name" (include "substrate.cnpg.readWriteSecret" .)))))
+  "managed" (dict "roles" $roles)
   "storage" (dict "size" $c.storage.size)
 -}}
 {{- with $c.imageName }}{{ $_ := set $spec "imageName" . }}{{ end -}}
@@ -149,6 +157,13 @@ azureCredentials:
   "kind" "ScheduledBackup"
   "metadata" (dict "name" $c.clusterName "namespace" $ns "labels" (include "substrate.labels" . | fromYaml))
   "spec" (dict "schedule" $c.backup.schedule "backupOwnerReference" "self" "cluster" (dict "name" $c.clusterName))) -}}
+{{- end -}}
+{{- if .Values.juicefs.enabled -}}
+{{- $out = append $out (dict
+  "apiVersion" "postgresql.cnpg.io/v1"
+  "kind" "Database"
+  "metadata" (dict "name" (printf "%s-%s" $c.clusterName .Values.juicefs.postgres.database) "namespace" $ns "labels" (include "substrate.labels" . | fromYaml) "annotations" $annotations)
+  "spec" (dict "name" .Values.juicefs.postgres.database "owner" .Values.juicefs.postgres.user "cluster" (dict "name" $c.clusterName) "ensure" "present" "databaseReclaimPolicy" "retain")) -}}
 {{- end -}}
 {{- toYaml $out -}}
 {{- end -}}

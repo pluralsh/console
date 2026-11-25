@@ -13,6 +13,14 @@
 {{- $deferred = append $deferred . -}}
 {{- end -}}
 {{- $crds = concat $crds (list "clusters.postgresql.cnpg.io" "scheduledbackups.postgresql.cnpg.io") -}}
+{{- if .Values.juicefs.enabled -}}
+{{- $crds = append $crds "databases.postgresql.cnpg.io" -}}
+{{- end -}}
+{{- end -}}
+{{- $csiDriverConfig := and .Values.juicefs.enabled (not (include "substrate.csiDriverConfigCRDServed" .)) -}}
+{{- if $csiDriverConfig -}}
+{{- $deferred = append $deferred (include "substrate.juicefs.csiDriverConfig" . | fromYaml) -}}
+{{- $crds = append $crds "csidriverconfigs.ate.dev" -}}
 {{- end -}}
 {{- if $deferred }}
 {{- $adopt := include "substrate.adoptionMetadata" . | fromYaml -}}
@@ -35,7 +43,7 @@ rules:
     resources: ["customresourcedefinitions"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["ate.dev"]
-    resources: ["sandboxconfigs"]
+    resources: ["sandboxconfigs", "csidriverconfigs"]
     verbs: ["get", "list", "create", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -63,7 +71,7 @@ metadata:
     {{- include "substrate.labels" . | nindent 4 }}
 rules:
   - apiGroups: ["postgresql.cnpg.io"]
-    resources: ["clusters", "scheduledbackups"]
+    resources: ["clusters", "scheduledbackups", "databases"]
     verbs: ["get", "list", "create", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

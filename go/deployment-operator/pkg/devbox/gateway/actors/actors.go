@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
@@ -135,12 +136,18 @@ type Spec struct {
 	Ref Ref
 	// Template is the ActorTemplate name, in Ref.Atespace.
 	Template string
-	// SourceTag seeds the actor's first resume from a tag (golden or snapshot), in Ref.Atespace.
+	// SourceTag seeds the actor's first resume from a tag (golden or snapshot), in Ref.Atespace. Empty takes the
+	// template's golden tag.
 	SourceTag string
+	// Preview opts the call into Substrate preview features, which templates with external volumes need.
+	Preview bool
 }
 
 // CreateActor creates a suspended actor, or returns the existing one.
 func (c *Client) CreateActor(ctx context.Context, spec Spec) (*ateapi.Actor, error) {
+	if spec.Preview {
+		ctx = metadata.AppendToOutgoingContext(ctx, substrate.PreviewHeader, "true")
+	}
 	actor := &ateapi.Actor{
 		Metadata:      &ateapi.ResourceMetadata{Atespace: spec.Ref.Atespace, Name: spec.Ref.Name},
 		ActorTemplate: &ateapi.ObjectRef{Atespace: spec.Ref.Atespace, Name: spec.Template},
@@ -480,6 +487,16 @@ func (c *Client) WaitTag(ctx context.Context, tag Ref) (*ateapi.Tag, error) {
 func (c *Client) DeleteTag(ctx context.Context, tag Ref) error {
 	_, err := c.control.DeleteTag(ctx, &ateapi.DeleteTagRequest{Tag: tag.object()})
 	return ignoreNotFound(err)
+}
+
+// ExternalVolumeID is the storage volume of an actor's external volume, empty until Substrate provisions it.
+func ExternalVolumeID(a *ateapi.Actor, volume string) string {
+	for _, v := range a.GetStatus().GetExternalVolumes().GetVolumes() {
+		if v.GetName() == volume {
+			return v.GetStorageVolumeId()
+		}
+	}
+	return ""
 }
 
 // TagFidelity reports whether a tag holds memory or only filesystem state.

@@ -83,4 +83,7 @@ ca_pool postgres-ca-pool ed25519
 if [ -n "${PG_READ_WRITE_SECRET:-}" ]; then
   password "$PG_READ_WRITE_SECRET" "$PG_READ_WRITE_USER"
 fi
+if [ -n "${PG_JUICEFS_SECRET:-}" ]; then
+  password "$PG_JUICEFS_SECRET" "$PG_JUICEFS_USER"
+fi
 echo "generated candidate key material in $WORK"

@@ -2,8 +2,11 @@ package core
 
 import (
 	"context"
+	"errors"
+	"maps"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -13,6 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -741,6 +745,110 @@ func TestSnapshotAndStartFromSnapshot(t *testing.T) {
 	h.daemon.mu.Unlock()
 	if !init.GetRestoredFromSnapshot() || init.GetRestoreFidelity() != devboxv1.SnapshotFidelity_SNAPSHOT_FIDELITY_FILESYSTEM {
 		t.Fatalf("Initialize = %v", init)
+	}
+}
+
+type fakeSeeds struct {
+	mu      sync.Mutex
+	saved   map[string]string
+	deleted []string
+	failErr error
+}
+
+func (f *fakeSeeds) SaveSeed(_ context.Context, seedID, volumeID string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.failErr != nil {
+		return f.failErr
+	}
+	if f.saved == nil {
+		f.saved = map[string]string{}
+	}
+	f.saved[seedID] = volumeID
+	return nil
+}
+
+func (f *fakeSeeds) DeleteSeed(_ context.Context, seedID string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.deleted = append(f.deleted, seedID)
+	return nil
+}
+
+func TestJuiceFSHomes(t *testing.T) {
+	h := newHarness(t, nil)
+	h.g.deps.Runners.(StaticRunners)[testRunner].JuiceFSHome = true
+	seeds := &fakeSeeds{}
+	h.g.deps.Seeds = seeds
+	h.ate.ExternalHomes = true
+	ctx := context.Background()
+
+	h.running("inst-1")
+	ref := actors.Ref{Atespace: testAtespace, Name: "dbx-inst-1"}
+	actor, err := h.g.deps.Actors.GetActor(ctx, ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if actor.GetSourceTag() != nil || !h.ate.Preview(ref.Atespace, ref.Name) {
+		t.Fatalf("the actor must take the template's golden tag with the preview header: source %v", actor.GetSourceTag())
+	}
+
+	snapshot := func(id string) *devboxv1.ReportSnapshotRequest {
+		t.Helper()
+		if _, err := h.g.SnapshotInstance(ctx, &devboxv1.SnapshotInstanceRequest{InstanceId: "inst-1", SnapshotId: id}); err != nil {
+			t.Fatal(err)
+		}
+		var report *devboxv1.ReportSnapshotRequest
+		h.eventually("snapshot "+id, func() bool {
+			h.ingest.mu.Lock()
+			defer h.ingest.mu.Unlock()
+			for _, r := range h.ingest.snapshots {
+				if r.GetSnapshotId() == id {
+					report = r
+				}
+			}
+			return report != nil
+		})
+		h.eventually("running again", func() bool { return h.g.get("inst-1").status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING })
+		return report
+	}
+	if r := snapshot("snap-1"); r.GetState() != devboxv1.SnapshotState_SNAPSHOT_STATE_SUCCEEDED {
+		t.Fatalf("snapshot report = %v", r)
+	}
+	seeds.mu.Lock()
+	saved := maps.Clone(seeds.saved)
+	seeds.mu.Unlock()
+	if want := map[string]string{testAtespace + ".tag.snap-snap-1": "substrate-" + actor.GetMetadata().GetUid() + "-home"}; !maps.Equal(saved, want) {
+		t.Fatalf("seeds = %v, want %v", saved, want)
+	}
+
+	_, err = h.g.StartFromSnapshot(ctx, &devboxv1.StartFromSnapshotRequest{
+		Instance: &devboxv1.CreateInstanceRequest{InstanceId: "inst-2", RunnerName: testRunner},
+		Snapshot: &devboxv1.SnapshotRef{SnapshotId: "snap-1", Tag: testAtespace + "/snap-snap-1", TemplateRevision: 2},
+	})
+	if status.Code(err) != codes.Unimplemented || detailOf(err, 0).GetReason() != devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED {
+		t.Fatalf("StartFromSnapshot = %v, want UNSUPPORTED", err)
+	}
+	if h.g.get("inst-2") != nil {
+		t.Fatal("a rejected start registered an instance")
+	}
+
+	if _, err := h.g.DeleteSnapshot(ctx, &devboxv1.DeleteSnapshotRequest{Snapshot: &devboxv1.SnapshotRef{Tag: testAtespace + "/snap-snap-1"}}); err != nil {
+		t.Fatal(err)
+	}
+	seeds.mu.Lock()
+	deleted := slices.Clone(seeds.deleted)
+	seeds.failErr = errors.New("juicefs controller unavailable")
+	seeds.mu.Unlock()
+	if !slices.Equal(deleted, []string{testAtespace + ".tag.snap-snap-1"}) {
+		t.Fatalf("deleted seeds = %v", deleted)
+	}
+
+	if r := snapshot("snap-2"); r.GetState() != devboxv1.SnapshotState_SNAPSHOT_STATE_FAILED {
+		t.Fatalf("a snapshot whose home wasn't saved = %v, want FAILED", r)
+	}
+	if _, err := h.g.deps.Actors.GetTag(ctx, actors.Ref{Atespace: testAtespace, Name: "snap-snap-2"}); status.Code(err) != codes.NotFound {
+		t.Fatalf("the failed snapshot's tag is left behind: %v", err)
 	}
 }
 

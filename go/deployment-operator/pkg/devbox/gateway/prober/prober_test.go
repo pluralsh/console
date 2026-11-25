@@ -246,6 +246,39 @@ func TestProberAppliesAIProxyOnlyPolicy(t *testing.T) {
 	}
 }
 
+func TestProberStartsJuiceFSHomesFromTheTemplatesGoldenTag(t *testing.T) {
+	objs := requestObjects(t, nil)
+	cm := objs[0].(*corev1.ConfigMap)
+	var req probe.Request
+	if err := json.Unmarshal([]byte(cm.Data[probe.RequestKey]), &req); err != nil {
+		t.Fatal(err)
+	}
+	req.JuiceFSHome = true
+	raw, _ := json.Marshal(req)
+	cm.Data[probe.RequestKey] = string(raw)
+
+	f := newProbeFixture(t, "gw-0", objs...)
+	var spec actors.Spec
+	f.prober.deps.Actors = recordSpec{Actors: f.prober.deps.Actors, got: &spec}
+	f.run(t)
+	if cm := f.waitState(t); cm.Annotations[probe.StateAnnotation] != probe.StateDone {
+		t.Fatalf("state %q, error %q", cm.Annotations[probe.StateAnnotation], cm.Data[probe.ErrorKey])
+	}
+	if spec.SourceTag != "" || !spec.Preview {
+		t.Fatalf("probe actor spec = %+v, want no source tag and the preview header", spec)
+	}
+}
+
+type recordSpec struct {
+	Actors
+	got *actors.Spec
+}
+
+func (r recordSpec) CreateActor(ctx context.Context, spec actors.Spec) (*ateapi.Actor, error) {
+	*r.got = spec
+	return r.Actors.CreateActor(ctx, spec)
+}
+
 type recordPolicy struct {
 	Actors
 	got **ateapi.EgressPolicy
