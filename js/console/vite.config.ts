@@ -5,12 +5,9 @@ import { Readable } from 'node:stream'
 import { resolve } from 'path'
 import { defineConfig, type Plugin } from 'vite'
 
-const API_URL = process.env.BASE_URL
-  ? `https://${process.env.BASE_URL}`
-  : 'https://console.plural.sh'
-const WS_URL = process.env.BASE_URL
-  ? `wss://${process.env.BASE_URL}`
-  : 'wss://console.plural.sh'
+const BASE_URL = process.env.BASE_URL || 'console.plrldemo.onplural.sh'
+const API_URL = `https://${BASE_URL}`
+const WS_URL = `wss://${BASE_URL}`
 
 // Dev-only object-store proxy and agent run download shim for local dev.
 const objectStoreDevProxy = {
