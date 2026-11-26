@@ -726,10 +726,16 @@ defmodule Console.Devboxes do
     end
   end
 
-  defp lease_moved?(nil, nil), do: false
-  defp lease_moved?(nil, _), do: true
-  defp lease_moved?(_, nil), do: true
-  defp lease_moved?(old, new), do: abs(DateTime.diff(new, old, :second)) >= @lease_resync
+  # `old` is the last ping's lease, not the last one pushed, so pings closer together than @lease_resync never
+  # move it far enough on their own; pushing whenever the lease crosses a @lease_resync boundary keeps the
+  # gateway's copy within @lease_resync of the real one
+  @doc false
+  def lease_moved?(nil, nil), do: false
+  def lease_moved?(nil, _), do: true
+  def lease_moved?(_, nil), do: true
+  def lease_moved?(old, new), do: lease_window(old) != lease_window(new)
+
+  defp lease_window(ts), do: div(DateTime.to_unix(ts), @lease_resync)
 
   defp maybe_resume(%DevboxInstance{status: :suspended} = inst) do
     with {:ok, claimed} <- claim_resume(inst.id),

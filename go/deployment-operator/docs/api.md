@@ -1049,6 +1049,28 @@ _Appears in:_
 | `interval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Interval between re-resolutions in poll mode. Defaults to 1h. |  | Optional: \{\} <br /> |
 
 
+#### DevboxOAuthProviders
+
+
+
+DevboxOAuthProviders enables egress to each identity provider's login flow (see OAuthProviderHosts).
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `google` _boolean_ | Google: Google sign-in, its OAuth and OpenID Connect endpoints, and the scripts, fonts and avatars its<br />pages load. |  | Optional: \{\} <br /> |
+| `github` _boolean_ | GitHub: github.com sign-in and OAuth apps, the API, and the assets and avatars its pages load. |  | Optional: \{\} <br /> |
+| `microsoft` _boolean_ | Microsoft: Entra ID (work and school accounts), personal Microsoft accounts, Microsoft Graph and the CDNs<br />their sign-in pages load from. |  | Optional: \{\} <br /> |
+| `gitlab` _boolean_ | GitLab: gitlab.com sign-in and OAuth applications, and its asset hosts. |  | Optional: \{\} <br /> |
+| `apple` _boolean_ | Apple: Sign in with Apple. |  | Optional: \{\} <br /> |
+| `okta` _boolean_ | Okta: any Okta or Okta Workforce tenant and Okta's CDN. Custom sign-in domains need httpAllowlist entries. |  | Optional: \{\} <br /> |
+| `auth0` _boolean_ | Auth0: any Auth0 tenant, in every region, and Auth0's CDN. Custom domains need httpAllowlist entries. |  | Optional: \{\} <br /> |
+
+
 #### DevboxOCIRegistries
 
 
@@ -1239,6 +1261,7 @@ _Appears in:_
 | `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `cloudProviders` _[DevboxCloudProviders](#devboxcloudproviders)_ | CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud<br />identity for it, unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `ociRegistries` _[DevboxOCIRegistries](#devboxociregistries)_ | OCIRegistries opens egress to public container registries, for pulling images with podman, docker,<br />crane or helm. Docker Hub and GitHub Container Registry are on unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `oauthProviders` _[DevboxOAuthProviders](#devboxoauthproviders)_ | OAuthProviders opens egress to identity providers' sign-in pages, token endpoints and the assets their<br />login flows load, so apps under development can sign in through the box's browser. All are off unless<br />set to true. |  | Optional: \{\} <br /> |
 | `env` _[DevboxEnvVar](#devboxenvvar) array_ | Env are environment variables for every process the box starts: agents, terminals and git. Plain values<br />are part of the template, so changing them rolls a new revision. Secret values are read when an instance<br />wakes and are never baked into the template, the golden snapshot or the workspace volume. |  | MaxItems: 128 <br />Optional: \{\} <br /> |
 | `browser` _[DevboxBrowser](#devboxbrowser)_ | Browser enables the in-box headless browser. |  | Optional: \{\} <br /> |
 | `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, from the home directory and after repositories are cloned<br />and mise has installed its tools, so its results are baked into the snapshot. It runs with `bash -e` unless<br />it starts with a #! line, and a failure fails the revision; its output is in ~/.plural/golden.log. |  | Optional: \{\} <br /> |

@@ -472,6 +472,42 @@ spec:
               name:
                 description: Name of the Devbox in console. Defaults to metadata.name.
                 type: string
+              oauthProviders:
+                description: |-
+                  OAuthProviders opens egress to identity providers' sign-in pages, token endpoints and the assets their
+                  login flows load, so apps under development can sign in through the box's browser. All are off unless
+                  set to true.
+                properties:
+                  apple:
+                    description: 'Apple: Sign in with Apple.'
+                    type: boolean
+                  auth0:
+                    description: 'Auth0: any Auth0 tenant, in every region, and Auth0''s
+                      CDN. Custom domains need httpAllowlist entries.'
+                    type: boolean
+                  github:
+                    description: 'GitHub: github.com sign-in and OAuth apps, the API,
+                      and the assets and avatars its pages load.'
+                    type: boolean
+                  gitlab:
+                    description: 'GitLab: gitlab.com sign-in and OAuth applications,
+                      and its asset hosts.'
+                    type: boolean
+                  google:
+                    description: |-
+                      Google: Google sign-in, its OAuth and OpenID Connect endpoints, and the scripts, fonts and avatars its
+                      pages load.
+                    type: boolean
+                  microsoft:
+                    description: |-
+                      Microsoft: Entra ID (work and school accounts), personal Microsoft accounts, Microsoft Graph and the CDNs
+                      their sign-in pages load from.
+                    type: boolean
+                  okta:
+                    description: 'Okta: any Okta or Okta Workforce tenant and Okta''s
+                      CDN. Custom sign-in domains need httpAllowlist entries.'
+                    type: boolean
+                type: object
               ociRegistries:
                 default: {}
                 description: |-

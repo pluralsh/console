@@ -255,6 +255,53 @@ func TestForwardingAndResumeIfSuspended(t *testing.T) {
 	}
 }
 
+// policyHosts are the https hosts of an instance's applied egress policy.
+func (h *harness) policyHosts(actor string) []string {
+	var hosts []string
+	for _, r := range h.ate.Policy(testAtespace, actor).GetRules() {
+		hosts = append(hosts, r.GetHttps().GetHostnames()...)
+	}
+	return hosts
+}
+
+// allow edits the test runner's allowlist, as an edit to the DevboxRunner would.
+func (h *harness) allow(host string) {
+	runners := h.g.deps.Runners.(StaticRunners)
+	edited := *runners[testRunner]
+	edited.HTTPAllowlist = append(slices.Clone(edited.HTTPAllowlist), egress.AllowEntry{Host: host, Port: 443})
+	runners[testRunner] = &edited
+}
+
+func TestRunningBoxesPickUpAllowlistEdits(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh") {
+		t.Fatal("the host is allowed before the edit")
+	}
+
+	h.allow("oidc.plural.sh")
+	h.g.backstops(context.Background())
+	h.eventually("the edited allowlist applied", func() bool {
+		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
+	})
+}
+
+func TestResumedBoxesPickUpAllowlistEdits(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+
+	h.allow("oidc.plural.sh")
+	if _, err := h.g.ResumeInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if hosts := h.policyHosts("dbx-inst-1"); !slices.Contains(hosts, "oidc.plural.sh") {
+		t.Fatalf("resumed box's egress hosts %v lack the edited allowlist", hosts)
+	}
+}
+
 func TestIdlenessDoesNotOutliveASuspend(t *testing.T) {
 	h := newHarness(t, nil)
 	h.running("inst-1")

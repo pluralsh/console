@@ -526,6 +526,19 @@ defmodule Console.DevboxesTest do
       assert left.viewers == %{}
     end
 
+    test "a viewer pinging every 30s keeps the gateway's lease from running out" do
+      start = ~U[2026-11-26 12:00:07Z]
+
+      # ten minutes of pings, each leasing 90s ahead, with the gateway holding the last lease pushed
+      Enum.reduce(0..600//30, {nil, nil}, fn t, {stored, pushed} ->
+        now = DateTime.add(start, t, :second)
+        lease = DateTime.add(now, 90, :second)
+        pushed = if Devboxes.lease_moved?(stored, lease), do: lease, else: pushed
+        assert DateTime.diff(pushed, now) >= 45
+        {lease, pushed}
+      end)
+    end
+
     test "pinging a suspended instance resumes it" do
       inst = owned_instance(status: :suspended)
       expect(Control.Test, :resume_instance, fn _ -> :ok end)

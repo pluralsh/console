@@ -219,6 +219,9 @@ func (g *Gateway) backstops(ctx context.Context) {
 		awakeSince, lastContact, suspendedAt := inst.awakeSince, inst.lastContact, inst.rec.SuspendedAt
 		inst.mu.Unlock()
 
+		if st == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING || st == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+			g.refreshEgressInBackground(inst)
+		}
 		switch st {
 		case devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING:
 			maxAwake := policyDuration(policy, (*devboxv1.IdlePolicy).GetMaxContinuousAwake)
@@ -239,6 +242,20 @@ func (g *Gateway) backstops(ctx context.Context) {
 			}
 		}
 	}
+}
+
+// refreshEgressInBackground runs refreshEgress unless a lifecycle operation holds the instance; a resume
+// refreshes egress itself, and anything else is caught on the next backstop.
+func (g *Gateway) refreshEgressInBackground(inst *Instance) {
+	if !inst.op.TryLock() {
+		return
+	}
+	g.goBackground(func(ctx context.Context) {
+		defer inst.op.Unlock()
+		if err := g.refreshEgress(ctx, inst); err != nil {
+			g.log.Error(err, "refreshing egress policy", "instance", inst.ID)
+		}
+	})
 }
 
 // unresponsiveProbes is how many Health calls, unresponsiveProbeInterval apart, a daemon whose event stream went

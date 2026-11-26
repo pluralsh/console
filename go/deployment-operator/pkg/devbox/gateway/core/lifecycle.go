@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strings"
 	"time"
 
@@ -195,6 +196,32 @@ func (g *Gateway) applyEgress(ctx context.Context, inst *Instance) error {
 		g.deps.Egress.Invalidate(inst.ID)
 	}
 	return nil
+}
+
+// refreshEgress re-reads inst's runner and re-applies its egress policy when the runner's allowlist, presets,
+// cloud identities or repositories changed since the policy was built, so live and suspended boxes pick up
+// runner edits. Callers hold inst.op.
+func (g *Gateway) refreshEgress(ctx context.Context, inst *Instance) error {
+	runner, err := g.deps.Runners.Get(ctx, inst.record().Runner)
+	if err != nil {
+		return err
+	}
+	inst.mu.Lock()
+	cur := inst.runner
+	inst.mu.Unlock()
+	if cur != nil && reflect.DeepEqual(egressInputs(cur), egressInputs(runner)) {
+		return nil
+	}
+	inst.mu.Lock()
+	inst.runner = runner
+	inst.mu.Unlock()
+	g.log.Info("re-applying egress policy after a runner change", "instance", inst.ID, "runner", runner.Name)
+	return g.applyEgress(ctx, inst)
+}
+
+// egressInputs are the runner fields instanceInfo builds an egress policy from.
+func egressInputs(r *Runner) any {
+	return []any{r.HTTPAllowlist, r.CloudIdentityHosts, r.AllowedRepositories, r.Repositories}
 }
 
 // wake resumes the actor, waits for its daemon and (re)initializes it. Initialize is idempotent: a restored
@@ -502,6 +529,9 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.In
 	case devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED:
 	default:
 		return st, status.Errorf(codes.FailedPrecondition, "instance %s is %s and can't be resumed", inst.ID, st)
+	}
+	if err := g.refreshEgress(ctx, inst); err != nil {
+		g.log.Error(err, "refreshing egress policy before resume", "instance", inst.ID)
 	}
 	if err := g.wake(ctx, inst); err != nil {
 		if errors.Is(err, actors.ErrCrashed) {

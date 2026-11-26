@@ -99,11 +99,53 @@ func TestPackageServerHostsOpenMiseOnlyWhenAskedFor(t *testing.T) {
 }
 
 func TestEgressPresetHostsIncludeEveryPreset(t *testing.T) {
-	spec := &DevboxRunnerSpec{CloudIdentities: []DevboxCloudIdentity{{Name: "aws", AWS: &DevboxAWSIdentity{}}}}
+	on := true
+	spec := &DevboxRunnerSpec{
+		CloudIdentities: []DevboxCloudIdentity{{Name: "gcp", GCP: &DevboxGCPIdentity{}}},
+		OAuthProviders:  &DevboxOAuthProviders{Google: &on},
+	}
 	got := spec.EgressPresetHosts()
-	for _, h := range []string{"proxy.golang.org", "*.amazonaws.com", "registry-1.docker.io"} {
+	for _, h := range []string{"proxy.golang.org", "*.googleapis.com", "registry-1.docker.io", "oauth2.googleapis.com"} {
 		if !slices.Contains(got, h) {
 			t.Errorf("EgressPresetHosts() = %v, missing %s", got, h)
+		}
+	}
+	// gcp and google sign-in both open accounts.google.com
+	seen := map[string]bool{}
+	for _, h := range got {
+		if seen[h] {
+			t.Errorf("EgressPresetHosts() lists %s twice", h)
+		}
+		seen[h] = true
+	}
+}
+
+func TestOAuthProviderHosts(t *testing.T) {
+	on, off := true, false
+	if got := (&DevboxRunnerSpec{}).OAuthProviderHosts(); got != nil {
+		t.Errorf("unset OAuthProviderHosts() = %v, want none", got)
+	}
+	if got := (&DevboxRunnerSpec{OAuthProviders: &DevboxOAuthProviders{Google: &off}}).OAuthProviderHosts(); got != nil {
+		t.Errorf("disabled OAuthProviderHosts() = %v, want none", got)
+	}
+	got := (&DevboxRunnerSpec{OAuthProviders: &DevboxOAuthProviders{GitHub: &on, Microsoft: &on, Auth0: &on}}).OAuthProviderHosts()
+	for _, h := range []string{"github.com", "github.githubassets.com", "login.microsoftonline.com", "aadcdn.msftauth.net", "*.us.auth0.com"} {
+		if !slices.Contains(got, h) {
+			t.Errorf("OAuthProviderHosts() = %v, missing %s", got, h)
+		}
+	}
+	if slices.Contains(got, "accounts.google.com") {
+		t.Errorf("OAuthProviderHosts() = %v opens a provider that's off", got)
+	}
+}
+
+func TestOAuthProviderHostsAreValidSubstratePatterns(t *testing.T) {
+	for provider, hosts := range oauthProviderHosts {
+		for _, h := range hosts {
+			rest, wild := strings.CutPrefix(h, "*.")
+			if strings.Contains(rest, "*") || h != strings.ToLower(h) || strings.HasSuffix(h, ".") || (wild && !strings.Contains(rest, ".")) {
+				t.Errorf("%s: %q is not a Substrate hostname pattern", provider, h)
+			}
 		}
 	}
 }

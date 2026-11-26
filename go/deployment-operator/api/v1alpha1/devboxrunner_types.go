@@ -188,6 +188,12 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:default={}
 	OCIRegistries *DevboxOCIRegistries `json:"ociRegistries,omitempty"`
 
+	// OAuthProviders opens egress to identity providers' sign-in pages, token endpoints and the assets their
+	// login flows load, so apps under development can sign in through the box's browser. All are off unless
+	// set to true.
+	// +kubebuilder:validation:Optional
+	OAuthProviders *DevboxOAuthProviders `json:"oauthProviders,omitempty"`
+
 	// Env are environment variables for every process the box starts: agents, terminals and git. Plain values
 	// are part of the template, so changing them rolls a new revision. Secret values are read when an instance
 	// wakes and are never baked into the template, the golden snapshot or the workspace volume.
@@ -675,6 +681,39 @@ type DevboxOCIRegistries struct {
 	// ECR opens private Amazon ECR registries, for any account, in the listed regions.
 	// +kubebuilder:validation:Optional
 	ECR *DevboxECRRegistries `json:"ecr,omitempty"`
+}
+
+// DevboxOAuthProviders enables egress to each identity provider's login flow (see OAuthProviderHosts).
+type DevboxOAuthProviders struct {
+	// Google: Google sign-in, its OAuth and OpenID Connect endpoints, and the scripts, fonts and avatars its
+	// pages load.
+	// +kubebuilder:validation:Optional
+	Google *bool `json:"google,omitempty"`
+
+	// GitHub: github.com sign-in and OAuth apps, the API, and the assets and avatars its pages load.
+	// +kubebuilder:validation:Optional
+	GitHub *bool `json:"github,omitempty"`
+
+	// Microsoft: Entra ID (work and school accounts), personal Microsoft accounts, Microsoft Graph and the CDNs
+	// their sign-in pages load from.
+	// +kubebuilder:validation:Optional
+	Microsoft *bool `json:"microsoft,omitempty"`
+
+	// GitLab: gitlab.com sign-in and OAuth applications, and its asset hosts.
+	// +kubebuilder:validation:Optional
+	GitLab *bool `json:"gitlab,omitempty"`
+
+	// Apple: Sign in with Apple.
+	// +kubebuilder:validation:Optional
+	Apple *bool `json:"apple,omitempty"`
+
+	// Okta: any Okta or Okta Workforce tenant and Okta's CDN. Custom sign-in domains need httpAllowlist entries.
+	// +kubebuilder:validation:Optional
+	Okta *bool `json:"okta,omitempty"`
+
+	// Auth0: any Auth0 tenant, in every region, and Auth0's CDN. Custom domains need httpAllowlist entries.
+	// +kubebuilder:validation:Optional
+	Auth0 *bool `json:"auth0,omitempty"`
 }
 
 // DevboxECRRegistries enables egress to private Amazon ECR registries. ECR hosts are regional, so each region
@@ -1222,10 +1261,78 @@ func (in *DevboxRunnerSpec) CloudProviderHosts() []string {
 	return out
 }
 
-// EgressPresetHosts are every host the runner's presets open on 443: package servers, cloud providers and OCI
-// registries.
+// EgressPresetHosts are every host the runner's presets open on 443: package servers, cloud providers, OCI
+// registries and OAuth providers, in a stable order without duplicates.
 func (in *DevboxRunnerSpec) EgressPresetHosts() []string {
-	return append(append(in.PackageServerHosts(), in.CloudProviderHosts()...), in.OCIRegistryHosts()...)
+	var out []string
+	seen := map[string]bool{}
+	for _, hosts := range [][]string{in.PackageServerHosts(), in.CloudProviderHosts(), in.OCIRegistryHosts(), in.OAuthProviderHosts()} {
+		for _, h := range hosts {
+			if !seen[h] {
+				seen[h] = true
+				out = append(out, h)
+			}
+		}
+	}
+	return out
+}
+
+// oauthProviderHosts are the hosts each provider's browser sign-in touches, all on 443. Substrate wildcards
+// cover exactly one label, so Auth0's regional tenants are listed by region.
+var oauthProviderHosts = map[string][]string{
+	"google": {
+		"accounts.google.com", "oauth2.googleapis.com", "openidconnect.googleapis.com", "www.googleapis.com",
+		"apis.google.com", "www.gstatic.com", "ssl.gstatic.com", "fonts.gstatic.com", "fonts.googleapis.com",
+		"lh3.googleusercontent.com", "play.google.com",
+	},
+	"github": {
+		"github.com", "api.github.com", "github.githubassets.com", "avatars.githubusercontent.com",
+	},
+	"microsoft": {
+		"login.microsoftonline.com", "login.microsoft.com", "login.live.com", "account.live.com",
+		"graph.microsoft.com", "aadcdn.msauth.net", "aadcdn.msftauth.net", "logincdn.msauth.net",
+		"logincdn.msftauth.net", "login.windows.net",
+	},
+	"gitlab": {"gitlab.com", "assets.gitlab-static.net"},
+	"apple":  {"appleid.apple.com", "appleid.cdn-apple.com", "idmsa.apple.com"},
+	"okta":   {"*.okta.com", "*.okta-emea.com", "*.oktapreview.com", "*.oktacdn.com"},
+	"auth0": {
+		"*.auth0.com", "*.us.auth0.com", "*.eu.auth0.com", "*.au.auth0.com", "*.jp.auth0.com",
+		"*.ca.auth0.com", "*.uk.auth0.com",
+	},
+}
+
+// OAuthProviderHosts returns the hosts the enabled OAuth providers need, in a stable order without duplicates.
+func (in *DevboxRunnerSpec) OAuthProviderHosts() []string {
+	o := in.OAuthProviders
+	if o == nil {
+		return nil
+	}
+	var out []string
+	seen := map[string]bool{}
+	for _, provider := range []struct {
+		name    string
+		enabled *bool
+	}{
+		{"google", o.Google},
+		{"github", o.GitHub},
+		{"microsoft", o.Microsoft},
+		{"gitlab", o.GitLab},
+		{"apple", o.Apple},
+		{"okta", o.Okta},
+		{"auth0", o.Auth0},
+	} {
+		if provider.enabled == nil || !*provider.enabled {
+			continue
+		}
+		for _, h := range oauthProviderHosts[provider.name] {
+			if !seen[h] {
+				seen[h] = true
+				out = append(out, h)
+			}
+		}
+	}
+	return out
 }
 
 // ociRegistryHosts are the API and blob hosts each registry's pulls touch, all on 443. Substrate wildcards

@@ -43,6 +43,11 @@ spec:
     - host: db.internal.example.com
       port: 5432
       passthrough: true
+  # Sign-in flows apps under development use from the box's browser; okta, auth0, gitlab and apple are also available.
+  oauthProviders:
+    google: true
+    github: true
+    microsoft: true
   browser:
     enabled: true
   bootstrapScript: |
