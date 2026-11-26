@@ -44,6 +44,7 @@ func TestAgentRuntimeWorkbenchMCPCategories(t *testing.T) {
 		WorkbenchMCPCategorySearch,
 		WorkbenchMCPCategorySCM,
 		WorkbenchMCPCategoryInfrastructure,
+		WorkbenchMCPCategoryFilesystem,
 	}
 	if len(got) != len(want) {
 		t.Fatalf("categories = %v, want %v", got, want)

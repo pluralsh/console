@@ -56,7 +56,8 @@ defmodule Console.Schema.WorkbenchTool do
     function: 10,
     coding: 11,
     verification: 12,
-    observability: 13
+    observability: 13,
+    filesystem: 14
 
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
   defenum SplunkTokenType, bearer: 0, splunk: 1

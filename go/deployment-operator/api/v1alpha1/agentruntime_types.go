@@ -157,14 +157,15 @@ type AgentRuntimeSpec struct {
 	// +listMapKey=name
 	MCPServers []MCPServer `json:"mcpServers,omitempty"`
 
-	// WorkbenchMCP exposes the originating workbench's read-only tools to coding
-	// agents through the credential-isolating MCP sidecar.
+	// WorkbenchMCP exposes the originating workbench's tools to coding agents
+	// through the credential-isolating MCP sidecar. Tools are read-only except
+	// workbench filesystem writes, which follow the user's write access.
 	// +kubebuilder:validation:Optional
 	WorkbenchMCP *WorkbenchMCPConfig `json:"workbenchMcp,omitempty"`
 }
 
 // WorkbenchMCPCategory is a workbench tool category accepted by the Console MCP endpoint.
-// +kubebuilder:validation:Enum=metrics;logs;integration;ticketing;traces;error_tracking;infrastructure;search;scm;chat;function;coding;verification;observability
+// +kubebuilder:validation:Enum=metrics;logs;integration;ticketing;traces;error_tracking;infrastructure;search;scm;chat;function;coding;verification;observability;filesystem
 type WorkbenchMCPCategory string
 
 const (
@@ -182,6 +183,7 @@ const (
 	WorkbenchMCPCategoryCoding         WorkbenchMCPCategory = "coding"
 	WorkbenchMCPCategoryVerification   WorkbenchMCPCategory = "verification"
 	WorkbenchMCPCategoryObservability  WorkbenchMCPCategory = "observability"
+	WorkbenchMCPCategoryFilesystem     WorkbenchMCPCategory = "filesystem"
 )
 
 var defaultWorkbenchMCPCategories = []WorkbenchMCPCategory{
@@ -192,6 +194,7 @@ var defaultWorkbenchMCPCategories = []WorkbenchMCPCategory{
 	WorkbenchMCPCategorySearch,
 	WorkbenchMCPCategorySCM,
 	WorkbenchMCPCategoryInfrastructure,
+	WorkbenchMCPCategoryFilesystem,
 }
 
 type WorkbenchMCPConfig struct {
@@ -200,7 +203,7 @@ type WorkbenchMCPConfig struct {
 	Enabled bool `json:"enabled"`
 
 	// Categories limits the exposed workbench tools. When omitted, the default
-	// set is metrics, logs, traces, ticketing, search, scm, and infrastructure.
+	// set is metrics, logs, traces, ticketing, search, scm, infrastructure, and filesystem.
 	// +kubebuilder:validation:Optional
 	Categories []WorkbenchMCPCategory `json:"categories,omitempty"`
 }

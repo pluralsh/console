@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
   """
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Tools.Workbench.{DescribeComponent, Http, Infrastructure, Observability}
+  alias Console.AI.Tools.Workbench.Filesystem
   alias Console.AI.Tools.Workbench.Observability.Plrl
   alias Console.AI.Tools.Workbench.Integration.{
     AzureDevops,
@@ -148,7 +149,11 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Teams.SearchUsers
   ]
 
-  @readonly MapSet.new(@observability ++ @infrastructure ++ @integration)
+  @filesystem_reads [Filesystem.List, Filesystem.Stat, Filesystem.Read, Filesystem.Glob, Filesystem.Grep]
+
+  @filesystem @filesystem_reads ++ [Filesystem.Write, Filesystem.Mkdir, Filesystem.Move, Filesystem.Delete]
+
+  @readonly MapSet.new(@observability ++ @infrastructure ++ @integration ++ @filesystem_reads)
 
   @doc """
   Whether a tool only reads.  The generic http tool is judged by its configured method,
@@ -168,6 +173,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
   @spec bucket(module) :: atom | nil
   def bucket(mod) when mod in @observability, do: :observability
   def bucket(mod) when mod in @infrastructure, do: :infrastructure
+  def bucket(mod) when mod in @filesystem, do: :filesystem
   def bucket(_), do: nil
 
   @doc """

@@ -67,11 +67,12 @@ defmodule Console.Devboxes.CredentialsTest do
       assert claims["typ"] == "devbox"
       assert claims["sub"] == "devbox_instance:#{inst.id}"
       assert claims["workbench_id"] == inst.workbench_id
-      assert claims["scopes"] == ["ai_proxy", "workbench_mcp"]
+      assert claims["scopes"] == ["ai_proxy", "workbench_mcp", "workbench_files"]
       assert DateTime.to_unix(exp) == claims["exp"]
       assert Credentials.devbox_token?(token)
 
       {:ok, verified} = Credentials.verify(token, "workbench_mcp")
+      {:ok, _} = Credentials.verify(token, "workbench_files")
       assert verified.id == inst.id
       assert verified.user.id == inst.user_id
       {:error, _} = Console.Guardian.resource_from_token(token)
@@ -86,6 +87,7 @@ defmodule Console.Devboxes.CredentialsTest do
 
       {:ok, _} = Credentials.verify(token, "ai_proxy")
       {:error, _} = Credentials.verify(token, "workbench_mcp")
+      {:error, _} = Credentials.verify(token, "workbench_files")
     end
 
     test "it rejects tokens whose workbench doesn't match the instance" do
@@ -256,7 +258,7 @@ defmodule Console.Devboxes.CredentialsTest do
   end
 
   defp devbox_jwt(inst, claims, opts \\ []) do
-    %{"workbench_id" => inst.workbench_id, "scopes" => ["ai_proxy", "workbench_mcp"]}
+    %{"workbench_id" => inst.workbench_id, "scopes" => ["ai_proxy", "workbench_mcp", "workbench_files"]}
     |> Map.merge(claims)
     |> then(&Console.Guardian.encode_and_sign(inst, &1, Keyword.put(opts, :token_type, "devbox")))
   end

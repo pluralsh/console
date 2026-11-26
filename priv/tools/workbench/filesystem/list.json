@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Directory to list. Use a sandbox path under /workbench. Defaults to /workbench."
+    }
+  }
+}

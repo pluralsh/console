@@ -43,6 +43,12 @@ defmodule ConsoleWeb.Router do
     plug ConsoleWeb.Plugs.EnsureAuthenticated
   end
 
+  pipeline :workbench_files do
+    plug ConsoleWeb.Plugs.DevboxToken, scope: "workbench_files"
+    plug ConsoleWeb.GuardianPipeline
+    plug ConsoleWeb.Plugs.EnsureAuthenticated
+  end
+
   scope "/oidc/:scope_type/:scope_id", ConsoleWeb do
     get "/.well-known/openid-configuration", OIDCController, :discovery
     get "/jwks", OIDCController, :jwks
@@ -131,6 +137,21 @@ defmodule ConsoleWeb.Router do
         post "/rollback/:cluster/:name", GitController, :rollback
         post "/rollback/:id", GitController, :rollback
       end
+    end
+
+    scope "/v1", ConsoleWeb do
+      pipe_through [:workbench_files]
+
+      get "/workbenches/:id/files/stat",         WorkbenchFilesController, :stat
+      get "/workbenches/:id/files/content",      WorkbenchFilesController, :content
+      get "/workbenches/:id/files/download",     WorkbenchFilesController, :download
+      get "/workbenches/:id/files/glob",         WorkbenchFilesController, :glob
+      post "/workbenches/:id/files/grep",        WorkbenchFilesController, :grep
+      post "/workbenches/:id/files/directories", WorkbenchFilesController, :mkdir
+      post "/workbenches/:id/files/move",        WorkbenchFilesController, :move
+      put "/workbenches/:id/files",              WorkbenchFilesController, :write
+      delete "/workbenches/:id/files",           WorkbenchFilesController, :delete
+      get "/workbenches/:id/files",              WorkbenchFilesController, :index
     end
   end
 

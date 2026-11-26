@@ -153,7 +153,7 @@ func TestWorkbenchMCPServerUsesLocalProxyAndDefaultCategories(t *testing.T) {
 	}
 
 	upstream := workbenchMCPUpstreamURL(run, runtime)
-	if upstream != "https://console.example/mcp/workbench/workbench-id?categories=metrics%2Clogs%2Ctraces%2Cticketing%2Csearch%2Cscm%2Cinfrastructure" {
+	if upstream != "https://console.example/mcp/workbench/workbench-id?categories=metrics%2Clogs%2Ctraces%2Cticketing%2Csearch%2Cscm%2Cinfrastructure%2Cfilesystem" {
 		t.Fatalf("upstream = %q", upstream)
 	}
 

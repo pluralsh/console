@@ -35,6 +35,8 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   }
   alias Console.AI.Tools.Workbench.Infrastructure.Manifests
   alias Console.AI.Tools.Workbench.Observability.Plrl
+  alias Console.AI.Tools.Workbench.Filesystem, as: FileTools
+  alias Console.Deployments.Policies
   alias Console.Schema.{User, Workbench, WorkbenchTool}
 
   @type filter :: :all | {:names, [binary]} | {:categories, [atom]}
@@ -63,6 +65,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
     |> Enum.concat(builtins(bench, user))
     |> Enum.uniq_by(&Tool.name/1)
     |> readonly(Keyword.get(opts, :readonly, true))
+    |> file_writes(bench, user)
   end
 
   @doc """
@@ -126,6 +129,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
     |> Enum.concat(vuln_tools(bench, user))
     |> Enum.concat(plrl_log_tools(bench, user))
     |> Enum.concat(plrl_metric_tools(bench))
+    |> Enum.concat(file_reads(bench, user))
   end
 
   defp cluster_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, %User{} = user) do
@@ -178,6 +182,32 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   defp plrl_metric_tools(%Workbench{configuration: %{observability: %{metrics: true}}}),
     do: [Plrl.Metrics, Plrl.MetricsSearch, Plrl.MetricsLabelSearch]
   defp plrl_metric_tools(_), do: []
+
+  defp file_reads(%Workbench{} = bench, %User{} = user) do
+    [
+      %FileTools.List{workbench: bench, user: user},
+      %FileTools.Stat{workbench: bench, user: user},
+      %FileTools.Read{workbench: bench, user: user},
+      %FileTools.Glob{workbench: bench, user: user},
+      %FileTools.Grep{workbench: bench, user: user}
+    ]
+  end
+
+  # writes stay out of the readonly filter so a read-only MCP session does not gain every mutating
+  # tool. they are added back only for a user who can write this workbench, and each tool checks again.
+  defp file_writes(tools, %Workbench{} = bench, %User{} = user) do
+    case Policies.allow(bench, user, :write) do
+      {:ok, _} ->
+        writes = [
+          %FileTools.Write{workbench: bench, user: user},
+          %FileTools.Mkdir{workbench: bench, user: user},
+          %FileTools.Move{workbench: bench, user: user},
+          %FileTools.Delete{workbench: bench, user: user}
+        ]
+        Enum.uniq_by(tools ++ writes, &Tool.name/1)
+      _ -> tools
+    end
+  end
 
   defp readonly(tools, true), do: Enum.filter(tools, &Classify.readonly?/1)
   defp readonly(tools, _), do: tools

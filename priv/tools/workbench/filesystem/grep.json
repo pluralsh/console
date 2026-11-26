@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string",
+      "description": "Regular expression to search for. Set fixed_string to match the pattern literally."
+    },
+    "path": {
+      "type": "string",
+      "description": "File, directory, or glob to search. Use a sandbox path under /workbench. Defaults to /workbench."
+    },
+    "fixed_string": {
+      "type": "boolean",
+      "description": "Treat pattern as a literal string rather than a regular expression."
+    },
+    "case_insensitive": {
+      "type": "boolean",
+      "description": "Match without regard to case."
+    },
+    "before_context": {
+      "type": "integer",
+      "description": "Number of lines to include before each match."
+    },
+    "after_context": {
+      "type": "integer",
+      "description": "Number of lines to include after each match."
+    },
+    "max_matches": {
+      "type": "integer",
+      "description": "Maximum number of matches to return."
+    }
+  },
+  "required": ["pattern"]
+}

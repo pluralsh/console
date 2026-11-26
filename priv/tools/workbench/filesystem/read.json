@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Text file to read. Use a sandbox path under /workbench. Large or binary files return a download URL instead of their contents."
+    }
+  },
+  "required": ["path"]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "File to create or replace. Use a sandbox path under /workbench. Create parent directories with workbench_mkdir first."
+    },
+    "content": {
+      "type": "string",
+      "description": "Text contents of the file. Large binaries should be uploaded through the workbench files API."
+    }
+  },
+  "required": ["path", "content"]
+}

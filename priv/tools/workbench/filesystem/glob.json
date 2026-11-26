@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string",
+      "description": "Glob to match, such as /workbench/**/*.md. Supports ** and {a,b}."
+    },
+    "max_results": {
+      "type": "integer",
+      "description": "Maximum number of matches to return. Omit for the server default."
+    }
+  },
+  "required": ["pattern"]
+}

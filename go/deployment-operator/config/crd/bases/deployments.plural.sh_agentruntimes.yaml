@@ -19491,13 +19491,14 @@ spec:
                 type: string
               workbenchMcp:
                 description: |-
-                  WorkbenchMCP exposes the originating workbench's read-only tools to coding
-                  agents through the credential-isolating MCP sidecar.
+                  WorkbenchMCP exposes the originating workbench's tools to coding agents
+                  through the credential-isolating MCP sidecar. Tools are read-only except
+                  workbench filesystem writes, which follow the user's write access.
                 properties:
                   categories:
                     description: |-
                       Categories limits the exposed workbench tools. When omitted, the default
-                      set is metrics, logs, traces, ticketing, search, scm, and infrastructure.
+                      set is metrics, logs, traces, ticketing, search, scm, infrastructure, and filesystem.
                     items:
                       description: WorkbenchMCPCategory is a workbench tool category
                         accepted by the Console MCP endpoint.
@@ -19516,6 +19517,7 @@ spec:
                       - coding
                       - verification
                       - observability
+                      - filesystem
                       type: string
                     type: array
                   enabled:

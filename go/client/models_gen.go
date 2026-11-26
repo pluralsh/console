@@ -23993,6 +23993,7 @@ const (
 	WorkbenchToolCategoryCoding         WorkbenchToolCategory = "CODING"
 	WorkbenchToolCategoryVerification   WorkbenchToolCategory = "VERIFICATION"
 	WorkbenchToolCategoryObservability  WorkbenchToolCategory = "OBSERVABILITY"
+	WorkbenchToolCategoryFilesystem     WorkbenchToolCategory = "FILESYSTEM"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -24010,11 +24011,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryCoding,
 	WorkbenchToolCategoryVerification,
 	WorkbenchToolCategoryObservability,
+	WorkbenchToolCategoryFilesystem,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat, WorkbenchToolCategoryFunction, WorkbenchToolCategoryCoding, WorkbenchToolCategoryVerification, WorkbenchToolCategoryObservability:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat, WorkbenchToolCategoryFunction, WorkbenchToolCategoryCoding, WorkbenchToolCategoryVerification, WorkbenchToolCategoryObservability, WorkbenchToolCategoryFilesystem:
 		return true
 	}
 	return false

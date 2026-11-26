@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Directory to create, including parents. Use a sandbox path under /workbench."
+    }
+  },
+  "required": ["path"]
+}

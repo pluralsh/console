@@ -3,8 +3,9 @@ defmodule Console.Devboxes.Credentials do
   Instance-scoped devbox credentials (DBX-12).  Everything is minted per instance and dies with it:
 
     * ai proxy and console tokens are JWTs of type `devbox` whose subject is the instance, carrying its workbench and
-      the `scopes` they reach: `ai_proxy` for ai proxy tokens, `ai_proxy` and `workbench_mcp` (the instance's own
-      workbench MCP, as its owner, `ConsoleWeb.Plugs.DevboxToken`) for console tokens.  They only verify while the
+      the `scopes` they reach: `ai_proxy` for ai proxy tokens, `ai_proxy`, `workbench_mcp` and `workbench_files`
+      (the instance's own workbench MCP and filesystem, as its owner, `ConsoleWeb.Plugs.DevboxToken`) for console
+      tokens.  They only verify while the
       instance is live and its credentials aren't revoked, and are never a console login (`Console.Guardian` rejects
       them): egress injects console tokens on every request to the console host, which anyone with a terminal on the
       instance can make;
@@ -30,7 +31,7 @@ defmodule Console.Devboxes.Credentials do
   @cache Console.conf(:cache_adapter)
   @proxy_ttl :timer.minutes(1)
   @typ "devbox"
-  @scopes ~w(ai_proxy workbench_mcp)
+  @scopes ~w(ai_proxy workbench_mcp workbench_files)
 
   @type credential :: %{
     optional(:metadata) => map,
@@ -65,7 +66,7 @@ defmodule Console.Devboxes.Credentials do
   def mint_ai_proxy_token(%DevboxInstance{} = inst), do: instance_token(inst, ["ai_proxy"])
 
   @doc """
-  Mints an instance-scoped console token, for the AI proxy and the instance's workbench MCP.
+  Mints an instance-scoped console token, for the AI proxy, the instance's workbench MCP, and its filesystem.
   """
   @spec console_token(DevboxInstance.t) :: {:ok, binary, DateTime.t} | Console.error
   def console_token(%DevboxInstance{} = inst), do: instance_token(inst, @scopes)
@@ -79,7 +80,7 @@ defmodule Console.Devboxes.Credentials do
   end
 
   @doc """
-  Verifies an instance token for one of its scopes (`ai_proxy` or `workbench_mcp`), returning the live instance with
+  Verifies an instance token for one of its scopes (`ai_proxy`, `workbench_mcp` or `workbench_files`), returning the live instance with
   its owner and workbench preloaded.
   """
   @spec verify(binary, binary) :: {:ok, DevboxInstance.t} | Console.error
