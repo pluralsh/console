@@ -573,13 +573,16 @@ jobs:
       - name: Install Cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v3.8.2
-      # A src-<hash> tag is only a name: any run of this repository that can write packages can push one. A release
-      # therefore reuses an image only if a release run of this workflow signed that digest, and builds it
-      # otherwise. Pull requests, whose images are never signed, reuse their own pr-src-<hash> as it is.
+      # A src-<hash> tag is only a name: any run of this repository that can write packages can push one, also
+      # pointing it at an older signed image. A release therefore reuses an image only if a release run of this
+      # workflow signed that digest and every platform's image carries this source hash in its
+      # sh.plural.devbox/src-hash label, which the signed digest covers; it builds it otherwise. Pull requests,
+      # whose images are never signed, reuse their own pr-src-<hash> as it is.
       - name: Look for an image of this source hash
         id: existing
         env:
           SRC_REF: ${{ steps.src.outputs.ref }}
+          SRC_HASH: ${{ steps.src.outputs.hash }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           digest="$(docker buildx imagetools inspect "${SRC_REF}" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
@@ -587,13 +590,16 @@ jobs:
           if [[ "${digest}" == sha256:* ]]; then
             if [ "${EVENT_NAME}" = "pull_request" ]; then
               found=true
-            elif cosign verify "${IMAGE}@${digest}" \
+            elif ! cosign verify "${IMAGE}@${digest}" \
                 --certificate-oidc-issuer https://token.actions.githubusercontent.com \
                 --certificate-identity-regexp '^https://github\.com/pluralsh/console/\.github/workflows/deployment-operator-cd-devbox\.yaml@refs/(tags/go/deployment-operator/v[0-9]+\.[0-9]+\.[0-9]+|heads/master)$' \
                 >/dev/null; then
-              found=true
-            else
               echo "::warning::${SRC_REF} (${digest}) is not signed by a release of this workflow; building it again"
+            elif [ "$(docker buildx imagetools inspect "${IMAGE}@${digest}" --format '{{json .Image}}' \
+                | jq -c '[.[].config.Labels["sh.plural.devbox/src-hash"]] | unique')" != "[\"${SRC_HASH}\"]" ]; then
+              echo "::warning::${SRC_REF} (${digest}) is a signed image of other sources; building it again"
+            else
+              found=true
             fi
           fi
           echo "found=${found}" >> "$GITHUB_OUTPUT"
