@@ -45,6 +45,7 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zerofs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -1013,9 +1014,62 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(gatewayEnv()).To(ContainElement(corev1.EnvVar{Name: "DEVBOX_JUICEFS_ADDRESS", Value: "devbox-juicefs.ate-system.svc:9820"}))
 	})
 
+	t.Run("a ZeroFS home gets a StorageClass per revision seeded by its golden boot", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "zerofs", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeZeroFS), Size: lo.ToPtr(resource.MustParse("20Gi"))}
+		})
+		env.reconcile(t, "zerofs", 1)
+		_, _ = env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "zerofs"}})
+		runner := env.get(t, "zerofs")
+		g.Expect(condition(runner, v1alpha1.DevboxTemplateReadyConditionType).Message).
+			To(ContainSubstring("StorageClass devbox-zerofs for ZeroFS homes doesn't exist; enable zerofs in the agent-substrate chart"))
+		g.Expect(runner.Status.Revisions).To(BeEmpty())
+
+		g.Expect(env.client.Create(ctx, &storagev1.StorageClass{
+			ObjectMeta:  metav1.ObjectMeta{Name: v1alpha1.DevboxDefaultZeroFSStorageClass},
+			Provisioner: zerofs.DriverName,
+			Parameters:  map[string]string{"csi.storage.k8s.io/fstype": "ext4"},
+		})).To(Succeed())
+		runner = env.reconcile(t, "zerofs", 1)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1))
+		rev := runner.Status.Revisions[0]
+		g.Expect(rev.HomeStorage).To(HaveValue(Equal(v1alpha1.DevboxHomeZeroFS)))
+		atespace := *runner.Status.Atespace
+
+		tmpl := env.substrate.template(atespace, rev.Name)
+		home, _ := lo.Find(tmpl.Volumes, func(v *ateapi.Volume) bool { return v.Name == devboxHomeVolume })
+		g.Expect(home.GetDurableDir()).To(BeNil())
+		g.Expect(home.GetExternal().GetTemplate().GetCapacityBytes()).To(Equal(int64(20 << 30)))
+		className := home.GetExternal().GetTemplate().GetStorageClassName()
+		g.Expect(className).To(Equal("devbox-home." + atespace + "." + rev.Name))
+		g.Expect(env.substrate.previews[rev.Name]).To(BeTrue())
+
+		sc := &storagev1.StorageClass{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: className}, sc)).To(Succeed())
+		g.Expect(sc.Provisioner).To(Equal(zerofs.DriverName))
+		g.Expect(sc.Parameters).To(Equal(map[string]string{"csi.storage.k8s.io/fstype": "ext4", zerofs.ParamSeed: atespace + "." + rev.Name}))
+		g.Expect(sc.GetOwnerReferences()).To(ContainElement(HaveField("UID", runner.UID)))
+	})
+
+	t.Run("a home StorageClass from the wrong driver is rejected", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "mismatch", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeZeroFS), StorageClassName: lo.ToPtr(v1alpha1.DevboxDefaultJuiceFSStorageClass)}
+		})
+		env.reconcile(t, "mismatch", 1)
+		_, _ = env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "mismatch"}})
+		runner := env.get(t, "mismatch")
+		g.Expect(condition(runner, v1alpha1.DevboxTemplateReadyConditionType).Message).
+			To(ContainSubstring("StorageClass devbox-juicefs is provisioned by " + juicefs.DriverName + ", not " + zerofs.DriverName))
+		g.Expect(runner.Status.Revisions).To(BeEmpty())
+	})
+
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild", "juicefs"} {
+		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild", "juicefs", "zerofs", "mismatch"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())

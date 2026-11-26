@@ -285,7 +285,7 @@ juicefs:
   enabled: false
   image:
     repository: ghcr.io/pluralsh/devbox-juicefs
-    # -- Required unless digest is set.
+    # -- The deployment-operator release; each release's agent-substrate PR pins it. Required unless digest is set.
     tag: ""
     digest: ""
   # -- The filesystem's name; its objects live under <name>/ in the bucket.
@@ -351,12 +351,13 @@ juicefs:
     priorityClassName: system-node-critical
 
 # ZeroFS devbox homes: each home is its own ZeroFS filesystem in the bucket, served on the node its box runs on as
-# an ext4 block device. No metadata database; seeds and snapshots aren't supported yet.
+# an ext4 block device. No metadata database. Each revision's homes start from its golden boot's home; snapshots
+# don't save homes yet.
 zerofs:
   enabled: false
   image:
     repository: ghcr.io/pluralsh/devbox-zerofs
-    # -- Required unless digest is set.
+    # -- The deployment-operator release; each release's agent-substrate PR pins it. Required unless digest is set.
     tag: ""
     digest: ""
   # -- The StorageClass DevboxRunners name (provisioner zerofs.devbox.plural.sh).
@@ -606,7 +607,8 @@ bootstrapJob:
 assetStaging:
   enabled: false
   # -- An image that ships /usr/local/bin/microvm-assets. The deployment-operator
-  # image does, so installs that already vendor it need nothing extra. Pin a tag.
+  # image does, so installs that already vendor it need nothing extra. Each deployment-operator release's
+  # agent-substrate PR pins it.
   image: ghcr.io/pluralsh/deployment-operator:latest
   # -- gocloud.dev blob URL. Defaults to <assetScheme>://<assetBucket>; set it
   # for options like s3://bucket?region=us-east-1.
