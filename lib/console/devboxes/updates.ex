@@ -24,6 +24,8 @@ defmodule Console.Devboxes.Updates do
   # tried again
   @max_attempts 3
   @retry_after 10 * 60
+  # what withdrawing a claim that was never tried restores
+  @unclaimed ~w(rebase_state rebase_error rebase_attempts)a
 
   @doc """
   Updates one instance now, for its owner or anyone who can manage it.  A running instance restarts.
@@ -63,7 +65,7 @@ defmodule Console.Devboxes.Updates do
   # forced campaign's deadline; a failure is, so an unreachable gateway doesn't hold a campaign open.
   defp send_request(pending, inst, opts) do
     case Control.rebase_instance(pending, opts) do
-      {:ok, %{accepted: false}} -> withdraw(pending, inst, ~w(rebase_state rebase_error rebase_attempts)a)
+      {:ok, %{accepted: false}} -> withdraw(pending, inst, @unclaimed)
       res ->
         with {:error, _} = err <- Devboxes.control_result(res, pending) do
           withdraw(pending, inst, ~w(rebase_state rebase_error)a)
@@ -289,8 +291,12 @@ defmodule Console.Devboxes.Updates do
   # aren't when the update starts.
   defp update(pending, %DevboxInstance{} = inst, %DevboxUpdateCampaign{id: id} = campaign, now) do
     reason = if campaign.force, do: "forced update #{id}", else: "update #{id}"
-    case send_request(pending, inst, %{reason: reason, only_if_idle: not forced?(inst, campaign, now)}) do
-      {:ok, _} -> :ok
+    with true <- DevboxUpdateCampaign.active?(Repo.get!(DevboxUpdateCampaign, id)) || :cancelled,
+         {:ok, _} <- send_request(pending, inst, %{reason: reason, only_if_idle: not forced?(inst, campaign, now)}) do
+      :ok
+    else
+      # cancelled since the step claimed it
+      :cancelled -> withdraw(pending, inst, @unclaimed)
       err -> Logger.warning("could not request the update of devbox instance #{inst.id}: #{inspect(err)}")
     end
   end
