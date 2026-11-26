@@ -1,18 +1,14 @@
 # Builds Agent Substrate's Azure Blob objectstore plugin, which upstream doesn't publish, into the image the
-# agent-substrate chart defaults to (objectStore.azureBlob.image.repository). Bump PLUGIN_REF and VERSION to pick up
-# an upstream change; the manual run's inputs override them for one-off builds, and reusing a published version
-# overwrites its tag.
+# agent-substrate chart defaults to (objectStore.azureBlob.image.repository). Upstream has no versions, so the image is
+# tagged with the commit it was built from (sha-<short sha>); bump PLUGIN_REF to pick up an upstream change, or pass
+# another ref to a manual run for a one-off build.
 name: CD / Publish objectstore-azure-blob
 
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Upstream commit to build (defaults to the pinned PLUGIN_REF)
-        required: false
-        type: string
-      version:
-        description: Version tag (defaults to VERSION)
+        description: Upstream ref to build (defaults to the pinned PLUGIN_REF)
         required: false
         type: string
   push:
@@ -27,7 +23,6 @@ permissions:
 env:
   PLUGIN_REPOSITORY: agent-substrate-plugins/objectstore-azure-blob
   PLUGIN_REF: ${{ inputs.ref || 'd960af490bc8a3a72902543a420d0f857f4633d3' }}
-  VERSION: ${{ inputs.version || '0.1.0' }}
   KO_DOCKER_REPO: ghcr.io/pluralsh/objectstore-azure-blob
 
 jobs:
@@ -57,11 +52,11 @@ jobs:
       # KO_DOCKER_REPO itself (upstream's Makefile appends the import path)
       - name: Build and push
         run: |
+          sha=$(git rev-parse HEAD)
           go run github.com/google/ko@v0.19.1 build --bare \
-            --tags "${VERSION},sha-${PLUGIN_REF:0:7}" \
+            --tags "sha-${sha:0:7}" \
             --image-label "org.opencontainers.image.source=https://github.com/${PLUGIN_REPOSITORY}" \
-            --image-label "org.opencontainers.image.revision=${PLUGIN_REF}" \
-            --image-label "org.opencontainers.image.version=${VERSION}" \
+            --image-label "org.opencontainers.image.revision=${sha}" \
             --image-refs image.txt \
             ./cmd/azure-blob-objectstore-plugin
           echo "Pushed $(cat image.txt)" >> "$GITHUB_STEP_SUMMARY"
