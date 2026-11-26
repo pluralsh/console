@@ -3,6 +3,7 @@ package warmer
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -26,6 +27,7 @@ type fakeActors struct {
 	place     func(i int) string
 	resumeErr error
 	listErr   error
+	deleteErr error
 
 	boots   []actors.Spec
 	deleted []string
@@ -48,7 +50,9 @@ func (f *fakeActors) GetActorTemplate(context.Context, actors.Ref) (*ateapi.Acto
 
 func (f *fakeActors) CreateActor(_ context.Context, spec actors.Spec) (*ateapi.Actor, error) {
 	f.boots = append(f.boots, spec)
-	return &ateapi.Actor{}, nil
+	a := &ateapi.Actor{Metadata: &ateapi.ResourceMetadata{Name: spec.Ref.Name}}
+	f.existing = append(f.existing, a)
+	return a, nil
 }
 
 func (f *fakeActors) Resume(context.Context, actors.Ref) error { return f.resumeErr }
@@ -62,7 +66,11 @@ func (f *fakeActors) WaitState(context.Context, actors.Ref, ...ateapi.ActorState
 }
 
 func (f *fakeActors) DeleteActor(_ context.Context, ref actors.Ref) error {
+	if f.deleteErr != nil {
+		return f.deleteErr
+	}
 	f.deleted = append(f.deleted, ref.Name)
+	f.existing = slices.DeleteFunc(f.existing, func(a *ateapi.Actor) bool { return a.GetMetadata().GetName() == ref.Name })
 	return nil
 }
 
@@ -239,6 +247,29 @@ func TestRetriesAFailedBootNextPass(t *testing.T) {
 	mustPass(t, w)
 	if len(f.boots) != 2 {
 		t.Fatalf("booted %d warm actors, want a retry after the failure", len(f.boots))
+	}
+}
+
+func TestRetriesAFailedDeleteNextPass(t *testing.T) {
+	f := &fakeActors{workers: []*ateapi.Worker{worker("node-a", 0, large)}, selector: large}
+	w := newWarmer(f, runner("devbox-large-r2"))
+	mustPass(t, w)
+
+	f.workers = append(f.workers, worker("node-b", 0, large))
+	f.place = func(int) string { return "node-b" }
+	f.deleteErr = errors.New("atelet: connection refused")
+	mustPass(t, w)
+	if len(f.boots) != 1 || len(f.existing) != 1 {
+		t.Fatalf("boots %d existing %d, want one warm actor whose delete failed", len(f.boots), len(f.existing))
+	}
+
+	f.deleteErr = nil
+	mustPass(t, w)
+	if len(f.existing) != 0 || len(f.deleted) != 1 || f.deleted[0] != f.boots[0].Ref.Name {
+		t.Fatalf("deleted %v, existing %d, want the leaked warm actor deleted", f.deleted, len(f.existing))
+	}
+	if len(f.boots) != 1 {
+		t.Fatalf("booted %d warm actors, want node-b left warm", len(f.boots))
 	}
 }
 

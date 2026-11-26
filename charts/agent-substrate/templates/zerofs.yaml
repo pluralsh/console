@@ -137,7 +137,8 @@ spec:
   selector:
     matchLabels:
       app: devbox-zerofs-node
-  # A restart ends every home the plugin serves on the node, so roll by hand.
+  # A restart ends every home the plugin serves on the node, so the
+  # deployment-operator rolls it a node at a time once that node's devboxes are drained.
   updateStrategy:
     type: OnDelete
   template:

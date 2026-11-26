@@ -315,7 +315,10 @@ Without one, the pods fall back to the node's credentials, and CreateVolume fail
   and mounts it at atelet's staging path. Publishing bind-mounts that into the actor. Unstaging
   unmounts the home, disconnects the device and stops the writer, which flushes to the bucket, so
   the home can be staged on any other node. `updateStrategy` is `OnDelete`, because restarting the
-  plugin ends every home on the node.
+  plugin ends every home on the node. While a ZeroFS DevboxRunner exists, the deployment-operator
+  rolls outdated plugin pods one node at a time, idlest first: it drains the node's ZeroFS workers,
+  waits for their devboxes to suspend (at most its drain timeout, 30 minutes by default), deletes the
+  plugin pod, and replaces the drained workers once the new plugin is ready.
 
 A DevboxRunner uses it with `spec.home.storage: ZeroFS`. Each template revision gets a seeded
 StorageClass as with [JuiceFS](#juicefs-homes). The first home from it is the golden boot's. When

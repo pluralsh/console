@@ -3,8 +3,9 @@
 //
 // Substrate can't place an actor on a given node: it samples two eligible workers and takes the less loaded one.
 // A new node's worker is empty, so it wins whenever it's sampled, and the warmer boots up to Attempts actors per
-// cold node until one lands there. Actors run one at a time and are deleted once running, so warming holds at most
-// one worker slot; worker autoscaling doesn't count them (substrate.IsWarmActor).
+// cold node until one lands there. Actors run one at a time and are deleted once running, or on the next pass if
+// that delete fails, so warming holds at most one worker slot; worker autoscaling doesn't count them
+// (substrate.IsWarmActor).
 package warmer
 
 import (
@@ -120,7 +121,8 @@ func (w *Warmer) Run(ctx context.Context) error {
 }
 
 // pass warms every ready runner's current template on the nodes it hasn't been on. The first pass only records
-// the nodes that already exist, and deletes warm actors a previous gateway left behind.
+// the nodes that already exist. Every pass first deletes the warm actors left behind, by a previous gateway or by
+// a delete that failed.
 func (w *Warmer) pass(ctx context.Context) error {
 	workers, err := w.deps.Actors.ListWorkers(ctx)
 	if err != nil {
@@ -131,6 +133,7 @@ func (w *Warmer) pass(ctx context.Context) error {
 		return err
 	}
 	seen := map[string]bool{}
+	listed := map[string][]*ateapi.Actor{}
 	for _, r := range runners {
 		if r.Atespace == "" || r.Template == "" || r.GoldenTag == "" {
 			continue
@@ -142,12 +145,16 @@ func (w *Warmer) pass(ctx context.Context) error {
 			continue
 		}
 		seen[key] = true
+		list, ok := listed[r.Atespace]
+		if !ok {
+			list = w.sweep(ctx, r.Atespace)
+			listed[r.Atespace] = list
+		}
 		nodes := tmpl.nodesWithRoom(workers)
 		if !w.seeded {
 			for n := range nodes {
 				tmpl.warm[n] = true
 			}
-			w.sweep(ctx, r.Atespace)
 			continue
 		}
 		cold := map[string]bool{}
@@ -157,7 +164,7 @@ func (w *Warmer) pass(ctx context.Context) error {
 			}
 		}
 		if len(cold) > 0 {
-			w.warmRunner(ctx, r, tmpl, cold)
+			w.warmRunner(ctx, r, tmpl, cold, list)
 		}
 	}
 	for key := range w.templates {
@@ -218,13 +225,10 @@ func hasRoom(st *ateapi.WorkerStatus, limits *ateapi.Resources) bool {
 	return true
 }
 
-// warmRunner boots warm actors of r's template until each cold node hosted one or ran out of attempts.
-func (w *Warmer) warmRunner(ctx context.Context, r *core.Runner, tmpl *template, cold map[string]bool) {
+// warmRunner boots warm actors of r's template until each cold node hosted one or ran out of attempts. list is
+// the atespace's actors.
+func (w *Warmer) warmRunner(ctx context.Context, r *core.Runner, tmpl *template, cold map[string]bool, list []*ateapi.Actor) {
 	log := w.deps.Log.WithValues("runner", r.Name, "template", r.Template)
-	list, err := w.deps.Actors.ListActors(ctx, r.Atespace)
-	if err != nil {
-		log.Info("can't list actors before warming", "error", err.Error())
-	}
 	for _, a := range list {
 		if a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_RUNNING && a.GetActorTemplate().GetName() == r.Template {
 			node := a.GetStatus().GetWorkerAssignment().GetNodeName()
@@ -295,21 +299,28 @@ func (w *Warmer) boot(ctx context.Context, r *core.Runner) (string, error) {
 	return node, nil
 }
 
-// sweep deletes the warm actors in atespace, which only a gateway that stopped mid-boot leaves behind.
-func (w *Warmer) sweep(ctx context.Context, atespace string) {
+// sweep deletes the warm actors in atespace and returns its other actors. Warm actors boot one at a time within a
+// pass, so any it finds were left behind: by a gateway that stopped mid-boot, or by a delete that failed, as it
+// does while a new node's atelet is still starting.
+func (w *Warmer) sweep(ctx context.Context, atespace string) []*ateapi.Actor {
 	list, err := w.deps.Actors.ListActors(ctx, atespace)
 	if err != nil {
 		w.deps.Log.Info("can't list actors to remove stale warm actors", "atespace", atespace, "error", err.Error())
-		return
+		return nil
 	}
+	var rest []*ateapi.Actor
 	for _, a := range list {
-		if name := a.GetMetadata().GetName(); substrate.IsWarmActor(name) {
-			ref := actors.Ref{Atespace: atespace, Name: name}
-			if err := w.deps.Actors.DeleteActor(ctx, ref); err != nil {
-				w.deps.Log.Info("could not delete a stale warm actor", "actor", ref.String(), "error", err.Error())
-			}
+		name := a.GetMetadata().GetName()
+		if !substrate.IsWarmActor(name) {
+			rest = append(rest, a)
+			continue
+		}
+		ref := actors.Ref{Atespace: atespace, Name: name}
+		if err := w.deps.Actors.DeleteActor(ctx, ref); err != nil {
+			w.deps.Log.Info("could not delete a stale warm actor", "actor", ref.String(), "error", err.Error())
 		}
 	}
+	return rest
 }
 
 func sorted(set map[string]bool) []string {

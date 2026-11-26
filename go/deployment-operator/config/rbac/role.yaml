@@ -40,6 +40,7 @@ rules:
   resources:
   - pods
   verbs:
+  - delete
   - get
   - list
   - patch
@@ -49,6 +50,13 @@ rules:
   - serviceaccounts/token
   verbs:
   - create
+- apiGroups:
+  - apps
+  resources:
+  - controllerrevisions
+  verbs:
+  - get
+  - list
 - apiGroups:
   - apps
   resources:

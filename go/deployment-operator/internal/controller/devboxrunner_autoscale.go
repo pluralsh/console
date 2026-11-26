@@ -44,9 +44,7 @@ func (p devboxWorkerPod) actors() int64 {
 }
 
 func (p devboxWorkerPod) ready() bool {
-	return lo.SomeBy(p.pod.Status.Conditions, func(c corev1.PodCondition) bool {
-		return c.Type == corev1.PodReady && c.Status == corev1.ConditionTrue
-	})
+	return podReady(p.pod)
 }
 
 // devboxPoolView splits the managed pool's live pods by what the autoscaler may do with them.

@@ -150,6 +150,11 @@ func (r *DevboxRunnerReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		r.trySyncConsole(ctx, runner)
 		return jitterRequeue(requeueDevboxRunnerError, jitter), nil
 	}
+	if usesZeroFS(runner) {
+		if err := r.rollZeroFSNodes(ctx, api); err != nil {
+			logger.Error(err, "unable to roll the ZeroFS node plugin")
+		}
+	}
 
 	// The probe request carries the console ID, so the Devbox must exist before revisions advance.
 	if err := r.syncConsole(ctx, runner); err != nil && runner.Status.ID == nil {
