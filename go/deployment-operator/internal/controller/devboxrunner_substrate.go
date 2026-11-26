@@ -600,8 +600,7 @@ func validateDevboxRepositories(runner *v1alpha1.DevboxRunner) error {
 }
 
 // devboxHomeVolumeSource is /home/dev: a durable dir carried in the instance's snapshots, or a JuiceFS volume
-// whose quota is the home's size. A JuiceFS home names the runner's StorageClass here, which keys the template
-// hash; ensureHomeStorageClass swaps in the revision's own class once the template is named.
+// whose quota is the home's size, of the runner's StorageClass in every revision (see devboxGoldenHomeSeed).
 func devboxHomeVolumeSource(runner *v1alpha1.DevboxRunner) *ateapi.Volume {
 	if runner.Spec.HomeStorage() != v1alpha1.DevboxHomeJuiceFS {
 		return &ateapi.Volume{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}}
@@ -697,7 +696,8 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 	}
 
 	latest := runner.LatestRevision()
-	// The latest revision is only Retired without a newer one when its golden boot lost its worker.
+	// The latest revision is only Retired without a newer one when its golden boot lost its worker or its golden home
+	// wasn't captured.
 	if latest == nil || latest.Hash != hash || latest.Phase == v1alpha1.DevboxRevisionRetired {
 		next := int64(1)
 		if latest != nil {
@@ -705,7 +705,7 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 		}
 		name := devboxTemplateName(runner, next)
 		template.Metadata.Name = name
-		if err := r.ensureHomeStorageClass(ctx, runner, template); err != nil {
+		if err := r.checkHomeStorageClass(ctx, runner); err != nil {
 			utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxMisconfiguredReason, err.Error())
 			return err
 		}
@@ -735,8 +735,13 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 			Phase:         v1alpha1.DevboxRevisionBuilding,
 			CreatedAt:     lo.ToPtr(metav1.Now()),
 		}
+		if latest != nil && latest.Hash == hash && strings.HasPrefix(lo.FromPtr(latest.Message), devboxHomeSeedRebuild) {
+			rev.Message = new(devboxHomeSeedRebuilt)
+		}
 		if storage := runner.Spec.HomeStorage(); storage != v1alpha1.DevboxHomeSnapshot {
 			rev.HomeStorage = &storage
+			rev.HomeStorageClass = new(runner.Spec.HomeStorageClass())
+			rev.HomeSize = new(runner.Spec.HomeSize())
 		}
 		runner.Status.Revisions = append([]v1alpha1.DevboxRevision{rev}, runner.Status.Revisions...)
 	}
@@ -768,6 +773,11 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substr
 	}
 	if err != nil {
 		return fmt.Errorf("getting ActorTemplate %s: %w", rev.Name, err)
+	}
+
+	// The gateway claims the golden boot's home for this seed while the boot runs.
+	if rev.HomeStorageClass != nil && rev.HomeSeed == nil {
+		rev.HomeSeed = new(devboxGoldenHomeSeed(tmpl.GetMetadata().GetUid()))
 	}
 
 	golden := tmpl.GetStatus().GetGoldenSnapshotStatus()
@@ -817,6 +827,14 @@ func goldenFailureHint(runner *v1alpha1.DevboxRunner, msg string) string {
 	return ""
 }
 
+// devboxHomeSeedRebuild starts the message of a revision retired because its golden home wasn't captured, and
+// devboxHomeSeedRebuilt the message of the revision built again for it, whose own miss fails instead of rebuilding
+// forever.
+const (
+	devboxHomeSeedRebuild = "the golden boot's home wasn't captured, rebuilding: "
+	devboxHomeSeedRebuilt = "rebuilt because the golden boot's home of the previous revision wasn't captured"
+)
+
 func goldenLostWorker(msg string) bool {
 	return lo.SomeBy(goldenWorkerLossCrashes, func(crash string) bool { return strings.Contains(msg, crash) })
 }
@@ -830,10 +848,20 @@ func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.
 			Revision:      rev.Revision,
 			GoldenTag:     lo.FromPtr(rev.GoldenTag),
 			JuiceFSHome:   lo.FromPtr(rev.HomeStorage) == v1alpha1.DevboxHomeJuiceFS,
+			HomeSeed:      lo.FromPtr(rev.HomeSeed),
+			HomeBytes:     devboxHomeBytes(rev),
 			DevboxID:      lo.FromPtr(runner.Status.ID),
 		},
 		Agents: devboxGuestAgents(runner),
 	}
+}
+
+// devboxHomeBytes is the capacity of a revision's external home, zero for homes the golden tag carries.
+func devboxHomeBytes(rev *v1alpha1.DevboxRevision) int64 {
+	if rev.HomeSize == nil {
+		return 0
+	}
+	return rev.HomeSize.Value()
 }
 
 func (r *DevboxRunnerReconciler) advanceProbing(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {
@@ -844,6 +872,14 @@ func (r *DevboxRunnerReconciler) advanceProbing(ctx context.Context, runner *v1a
 	result, err := r.Probe.Result(ctx, runner.Name, rev.Revision)
 	if err != nil || result == nil {
 		return err
+	}
+
+	// The gateway didn't claim the golden boot's home before Substrate deleted it, so no instance can start on
+	// this revision: build it again, once.
+	if strings.Contains(result.Error, probe.ErrHomeSeedMissing) && !strings.HasPrefix(lo.FromPtr(rev.Message), devboxHomeSeedRebuilt) {
+		rev.Phase = v1alpha1.DevboxRevisionRetired
+		rev.Message = new(devboxHomeSeedRebuild + result.Error)
+		return r.Probe.Cleanup(ctx, runner.Name, rev.Revision)
 	}
 
 	evaluation := EvaluateDevboxProbe(runner, result)
@@ -949,8 +985,8 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.
 		if err := api.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
 			return fmt.Errorf("deleting ActorTemplate %s: %w", rev.Name, err)
 		}
-		if rev.HomeStorage != nil && *rev.HomeStorage == v1alpha1.DevboxHomeJuiceFS {
-			if err := r.deleteHomeStorageClass(ctx, atespace, rev.Name); err != nil {
+		if rev.HomeStorage != nil && *rev.HomeStorage == v1alpha1.DevboxHomeJuiceFS && rev.HomeStorageClass == nil {
+			if err := r.deleteLegacyHomeStorageClass(ctx, atespace, rev.Name); err != nil {
 				return err
 			}
 		}

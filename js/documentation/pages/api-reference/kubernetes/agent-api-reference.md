@@ -1187,6 +1187,9 @@ _Appears in:_
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
 | `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS] <br />Optional: \{\} <br /> |
+| `homeStorageClass` _string_ | HomeStorageClass is the StorageClass of an external home, the runner's for every revision, so instances<br />can move between revisions that keep the same class and size. Unset on revisions from before that, which<br />each had their own class. |  | Optional: \{\} <br /> |
+| `homeSize` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | HomeSize is the capacity of an external home. |  | Optional: \{\} <br /> |
+| `homeSeed` _string_ | HomeSeed is the seed the golden boot's external home is captured into, which new instances' homes are cloned<br />from. |  | Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
 | `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
 

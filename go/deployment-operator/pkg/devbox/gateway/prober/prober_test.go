@@ -24,6 +24,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors/actorstest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -253,13 +254,17 @@ func TestProberStartsJuiceFSHomesFromTheTemplatesGoldenTag(t *testing.T) {
 	if err := json.Unmarshal([]byte(cm.Data[probe.RequestKey]), &req); err != nil {
 		t.Fatal(err)
 	}
-	req.JuiceFSHome = true
+	req.JuiceFSHome, req.HomeSeed, req.HomeBytes = true, "golden.tmpl-uid", 20<<30
 	raw, _ := json.Marshal(req)
 	cm.Data[probe.RequestKey] = string(raw)
 
 	f := newProbeFixture(t, "gw-0", objs...)
 	var spec actors.Spec
 	f.prober.deps.Actors = recordSpec{Actors: f.prober.deps.Actors, got: &spec}
+	// The first seeding finds the JuiceFS controller unavailable, which is retried.
+	seeded := &seededHomes{fail: status.Error(codes.Unavailable, "connection refused")}
+	f.prober.deps.Homes = seeded
+	f.substrate.ExternalHomes = true
 	f.run(t)
 	if cm := f.waitState(t); cm.Annotations[probe.StateAnnotation] != probe.StateDone {
 		t.Fatalf("state %q, error %q", cm.Annotations[probe.StateAnnotation], cm.Data[probe.ErrorKey])
@@ -267,6 +272,25 @@ func TestProberStartsJuiceFSHomesFromTheTemplatesGoldenTag(t *testing.T) {
 	if spec.SourceTag != "" || !spec.Preview {
 		t.Fatalf("probe actor spec = %+v, want no source tag and the preview header", spec)
 	}
+	if seeded.seed != req.HomeSeed || !strings.HasSuffix(seeded.volume, "-home") {
+		t.Fatalf("seeded %s from %q, want the probe actor's home from %s", seeded.volume, seeded.seed, req.HomeSeed)
+	}
+}
+
+// seededHomes records the home SeedVolume created, failing the first call with fail.
+type seededHomes struct {
+	homes.Driver
+	fail         error
+	volume, seed string
+}
+
+func (s *seededHomes) SeedVolume(_ context.Context, volumeID, seedID string, _ int64) error {
+	if err := s.fail; err != nil {
+		s.fail = nil
+		return err
+	}
+	s.volume, s.seed = volumeID, seedID
+	return nil
 }
 
 type recordSpec struct {

@@ -13,9 +13,11 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -50,7 +52,7 @@ func (g *Gateway) create(ctx context.Context, req *devboxv1.CreateInstanceReques
 	if runner.Atespace == "" {
 		return nil, status.Errorf(codes.FailedPrecondition, "%v: %s", ErrRunnerNotReady, runner.Name)
 	}
-	if src != nil && src.snapshot != nil && (runner.JuiceFSHome || runner.Revisions[src.snapshot.GetTemplateRevision()].JuiceFSHome) {
+	if src != nil && src.snapshot != nil && (runner.Home.External() || runner.Revisions[src.snapshot.GetTemplateRevision()].Home.External()) {
 		return nil, statusError(codes.Unimplemented, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED,
 			"devbox runner %s keeps homes on JuiceFS, and starting from a snapshot isn't supported for them yet", runner.Name)
 	}
@@ -110,7 +112,7 @@ func (g *Gateway) provision(ctx context.Context, inst *Instance, src *startSourc
 	}
 }
 
-func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSource) error {
+func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSource) (retErr error) {
 	inst.mu.Lock()
 	runner := inst.runner
 	inst.mu.Unlock()
@@ -153,12 +155,37 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 	inst.mu.Unlock()
 
 	spec := actors.Spec{Ref: ref, Template: template, SourceTag: tag}
-	if runner.JuiceFSHome && src == nil {
+	var homeDriver homes.Driver
+	if runner.Home.External() && src == nil {
 		// Substrate refuses an explicit tag for templates with external volumes; the default is the golden tag.
 		spec.SourceTag, spec.Preview = "", true
+		d, err := g.homeDriver(runner.Home)
+		if err != nil {
+			return err
+		}
+		homeDriver = d
 	}
-	if _, err := g.deps.Actors.CreateActor(ctx, spec); err != nil {
+	actor, err := g.deps.Actors.CreateActor(ctx, spec)
+	if err != nil {
 		return fmt.Errorf("creating actor %s: %w", ref, err)
+	}
+	if homeDriver != nil {
+		// The golden memory snapshot expects the revision's golden home, which Substrate doesn't put in the volume
+		// it creates on the first resume.
+		if err := homes.Seed(ctx, homeDriver, actor, runner.Home.Seed, runner.Home.Bytes); err != nil {
+			return err
+		}
+		defer func() {
+			if retErr == nil {
+				return
+			}
+			ctx := context.WithoutCancel(ctx)
+			if a, err := g.deps.Actors.GetActor(ctx, ref); err == nil {
+				if err := homes.Release(ctx, homeDriver, a); err != nil {
+					g.log.Error(err, "deleting the seeded home of a failed instance", "instance", inst.ID)
+				}
+			}
+		}()
 	}
 	if retarget != "" {
 		if err := g.deps.Actors.SetTemplate(ctx, ref, retarget); err != nil {
@@ -171,8 +198,17 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 	if err := g.applyEgress(ctx, inst); err != nil {
 		return err
 	}
-	if err := g.wake(ctx, inst); err != nil {
-		return err
+	wakeErr := g.wake(ctx, inst)
+	if homeDriver != nil {
+		// Checked even when the resume failed: a home that isn't the seeded one is why a golden restore fails.
+		if a, err := g.deps.Actors.GetActor(ctx, ref); err == nil {
+			if err := homes.Verify(ctx, homeDriver, a); err != nil {
+				return err
+			}
+		}
+	}
+	if wakeErr != nil {
+		return wakeErr
 	}
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
 	g.startForwarder(inst)
@@ -935,25 +971,37 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 // saveHomeSeed copies a JuiceFS home, which isn't in the tag, into the snapshot's seed while the actor is still
 // suspended, so the copy matches the tag.
 func (g *Gateway) saveHomeSeed(ctx context.Context, ref, tag actors.Ref) error {
-	if g.deps.Seeds == nil {
+	if g.deps.Homes == nil {
 		return nil
 	}
 	a, err := g.deps.Actors.GetActor(ctx, ref)
 	if err != nil {
 		return fmt.Errorf("reading actor %s: %w", ref, err)
 	}
-	volume := actors.ExternalVolumeID(a, homeVolume)
+	volume := actors.ExternalVolumeID(a, homes.Volume)
 	if volume == "" {
 		return nil
 	}
-	if err := g.deps.Seeds.SaveSeed(ctx, SnapshotSeedID(tag), volume); err != nil {
+	if err := g.deps.Homes.SaveSeed(ctx, SnapshotSeedID(tag), volume); err != nil {
 		return fmt.Errorf("saving the home of %s: %w", ref, err)
 	}
 	return nil
 }
 
-// homeVolume is the template volume mounted at /home/dev.
-const homeVolume = "home"
+// homeDriver is the driver that seeds an external home from its revision's seed. Revisions from before the
+// runner-wide StorageClass have no seed: their own class seeds their homes.
+func (g *Gateway) homeDriver(home Home) (homes.Driver, error) {
+	if home.Seed == "" {
+		return nil, nil
+	}
+	if home.Storage != v1alpha1.DevboxHomeJuiceFS {
+		return nil, fmt.Errorf("the gateway has no driver to seed %s homes from the golden boot", home.Storage)
+	}
+	if g.deps.Homes == nil {
+		return nil, errors.New("the gateway has no JuiceFS controller address (DEVBOX_JUICEFS_ADDRESS) to seed homes from the golden boot")
+	}
+	return g.deps.Homes, nil
+}
 
 // ---- cancel and complete (DBX-60) ----
 

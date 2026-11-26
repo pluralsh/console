@@ -29,6 +29,7 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -48,6 +49,7 @@ type Actors interface {
 	ApplyEgressPolicy(ctx context.Context, ref actors.Ref, rules []*ateapi.EgressRule) error
 	Resume(ctx context.Context, ref actors.Ref) error
 	WaitState(ctx context.Context, ref actors.Ref, states ...ateapi.ActorState) (*ateapi.Actor, error)
+	GetActor(ctx context.Context, ref actors.Ref) (*ateapi.Actor, error)
 	DeleteActor(ctx context.Context, ref actors.Ref) error
 }
 
@@ -82,8 +84,11 @@ type Deps struct {
 	Actors      Actors
 	Daemons     Daemons
 	Credentials Credentials
-	Log         logr.Logger
-	Now         func() time.Time
+	// Homes seeds probe actors' JuiceFS homes (juicefs.Client); revisions with a home seed can't be probed
+	// without it.
+	Homes homes.Driver
+	Log   logr.Logger
+	Now   func() time.Time
 }
 
 type Prober struct {
@@ -344,6 +349,9 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	if creds == nil {
 		return nil, errors.New("egress isn't running yet")
 	}
+	if req.HomeSeed != "" && p.deps.Homes == nil {
+		return nil, permanentError{errors.New("the gateway has no JuiceFS controller address (DEVBOX_JUICEFS_ADDRESS) to seed the probe's home")}
+	}
 	ref := actors.Ref{Atespace: req.Atespace, Name: name}
 	instanceID := InstanceID(name)
 	aiHost := hostOf(p.cfg.AIProxyURL)
@@ -372,9 +380,17 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 		AIProxyHost: aiHost,
 	}
 	p.mu.Unlock()
+	seeded := false
 	defer func() {
 		cctx, ccancel := context.WithTimeout(context.WithoutCancel(ctx), cleanupTimeout)
 		defer ccancel()
+		if seeded {
+			if a, err := p.deps.Actors.GetActor(cctx, ref); err == nil {
+				if err := homes.Release(cctx, p.deps.Homes, a); err != nil {
+					p.deps.Log.Info("could not delete the probe actor's seeded home", "actor", ref.String(), "error", err.Error())
+				}
+			}
+		}
 		if err := p.deps.Actors.DeleteActor(cctx, ref); err != nil {
 			p.deps.Log.Info("could not delete the probe actor", "actor", ref.String(), "error", err.Error())
 		}
@@ -388,8 +404,17 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	if req.JuiceFSHome {
 		actorSpec.SourceTag, actorSpec.Preview = "", true
 	}
-	if _, err := p.deps.Actors.CreateActor(ctx, actorSpec); err != nil {
+	actor, err := p.deps.Actors.CreateActor(ctx, actorSpec)
+	if err != nil {
 		return nil, fmt.Errorf("creating probe actor %s: %w", ref, err)
+	}
+	if req.HomeSeed != "" {
+		if err := homes.Seed(ctx, p.deps.Homes, actor, req.HomeSeed, req.HomeBytes); errors.Is(err, homes.ErrSeedMissing) {
+			return nil, permanentError{err}
+		} else if err != nil {
+			return nil, err
+		}
+		seeded = true
 	}
 	if err := p.deps.Actors.ApplyEgressPolicy(ctx, ref, rules); err != nil {
 		return nil, fmt.Errorf("applying the probe egress policy: %w", err)
@@ -397,7 +422,13 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	if err := p.deps.Actors.Resume(ctx, ref); err != nil {
 		return nil, fmt.Errorf("resuming probe actor %s: %w", ref, err)
 	}
-	if _, err := p.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING); err != nil {
+	running, err := p.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING)
+	if req.HomeSeed != "" && running != nil {
+		if err := homes.Verify(ctx, p.deps.Homes, running); err != nil {
+			return nil, permanentError{err}
+		}
+	}
+	if err != nil {
 		return nil, fmt.Errorf("waiting for probe actor %s: %w", ref, err)
 	}
 	daemon := p.deps.Daemons.Daemon(ref.String())

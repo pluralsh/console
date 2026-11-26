@@ -1063,6 +1063,18 @@ type DevboxRevision struct {
 	// HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot.
 	// +kubebuilder:validation:Optional
 	HomeStorage *DevboxHomeStorage `json:"homeStorage,omitempty"`
+	// HomeStorageClass is the StorageClass of an external home, the runner's for every revision, so instances
+	// can move between revisions that keep the same class and size. Unset on revisions from before that, which
+	// each had their own class.
+	// +kubebuilder:validation:Optional
+	HomeStorageClass *string `json:"homeStorageClass,omitempty"`
+	// HomeSize is the capacity of an external home.
+	// +kubebuilder:validation:Optional
+	HomeSize *resource.Quantity `json:"homeSize,omitempty"`
+	// HomeSeed is the seed the golden boot's external home is captured into, which new instances' homes are cloned
+	// from.
+	// +kubebuilder:validation:Optional
+	HomeSeed *string `json:"homeSeed,omitempty"`
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 	// +kubebuilder:validation:Optional

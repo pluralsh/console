@@ -33,8 +33,8 @@ type Runner struct {
 	ImageDigest string
 	// DaemonVersion is the devbox-daemon of Revision's runtime sidecar; empty when the daemon is the image's own.
 	DaemonVersion string
-	// JuiceFSHome means the current revision keeps homes on JuiceFS.
-	JuiceFSHome bool
+	// Home is the current revision's home volume.
+	Home Home
 	// Revisions maps every revision that still exists to its template and golden tag.
 	Revisions map[int64]RunnerRevision
 	// UpdateOnResume is the runner's instance update policy: a suspended instance behind Revision moves to it
@@ -58,7 +58,39 @@ type RunnerRevision struct {
 	GoldenTag     string
 	ImageDigest   string
 	DaemonVersion string
-	JuiceFSHome   bool
+	Home          Home
+}
+
+// Home is a revision's home volume: a durable dir in the instance's snapshots (Storage Snapshot), or an external
+// volume of a StorageClass.
+type Home struct {
+	// Storage is empty for Snapshot.
+	Storage v1alpha1.DevboxHomeStorage
+	// Class and Bytes are an external home's StorageClass and capacity. Class is empty for revisions from before
+	// the runner-wide class, which had a class of their own.
+	Class string
+	Bytes int64
+	// Seed is the seed of the revision's golden home, which new instances' homes are cloned from.
+	Seed string
+}
+
+// External reports whether the home is a volume of its own rather than part of the instance's snapshots.
+func (h Home) External() bool { return h.storage() != v1alpha1.DevboxHomeSnapshot }
+
+func (h Home) storage() v1alpha1.DevboxHomeStorage {
+	if h.Storage == "" {
+		return v1alpha1.DevboxHomeSnapshot
+	}
+	return h.Storage
+}
+
+// sameVolume reports whether Substrate sees the two homes as the same template volume, which it requires to move
+// an actor between templates.
+func (h Home) sameVolume(o Home) bool {
+	if h.storage() != o.storage() {
+		return false
+	}
+	return !h.External() || (h.Class != "" && h.Class == o.Class && h.Bytes == o.Bytes)
 }
 
 // revisionTarget is a revision an instance can be moved to.
@@ -67,18 +99,18 @@ type revisionTarget struct {
 	template      string
 	imageDigest   string
 	daemonVersion string
-	juiceFSHome   bool
+	home          Home
 }
 
-// errHomeNotMovable is moving an instance whose home is a JuiceFS volume, which Substrate can't carry to another
-// template: the volume differs between revisions (each JuiceFS revision has its own StorageClass), and a template
-// with other volumes than the actor's is refused.
-var errHomeNotMovable = errors.New("its home is on JuiceFS, which can't move between revisions yet; create a new instance to use the new revision")
+// errHomeNotMovable is moving an instance to a revision whose home is another volume than the instance's: another
+// storage, StorageClass or size, or a revision from before external homes had one class for every revision.
+// Substrate refuses to move an actor to a template with other volumes.
+var errHomeNotMovable = errors.New("its home volume differs between the revisions (storage, StorageClass or size), so it can't move; create a new instance to use the new revision")
 
-// movable reports whether an instance on revision from can move to to: both must keep the home in the instance's
-// snapshots (a durable dir), the only home Substrate moves between templates.
+// movable reports whether an instance on revision from can move to to: Substrate only moves an actor between
+// templates with the same volumes.
 func (r *Runner) movable(from int64, to revisionTarget) error {
-	if to.juiceFSHome || r.Revisions[from].JuiceFSHome {
+	if !r.Revisions[from].Home.sameVolume(to.home) {
 		return errHomeNotMovable
 	}
 	return nil
@@ -95,7 +127,7 @@ func (r *Runner) target(revision int64) (revisionTarget, error) {
 		return revisionTarget{}, fmt.Errorf("devbox runner %s serves revision %d, instances can't be moved to revision %d", r.Name, r.Revision, revision)
 	}
 	return revisionTarget{revision: r.Revision, template: r.Template, imageDigest: r.ImageDigest, daemonVersion: r.DaemonVersion,
-		juiceFSHome: r.JuiceFSHome}, nil
+		home: r.Home}, nil
 }
 
 // ErrRunnerNotReady means the runner has no ready revision to start instances from.
@@ -265,18 +297,18 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 		r.Revision = *st.TemplateRevision
 	}
 	for _, rev := range st.Revisions {
-		juiceFS := deref(rev.HomeStorage) == v1alpha1.DevboxHomeJuiceFS
+		home := homeOf(rev)
 		r.Revisions[rev.Revision] = RunnerRevision{
 			Template:      rev.Name,
 			GoldenTag:     deref(rev.GoldenTag),
 			ImageDigest:   digestOf(rev.Image),
 			DaemonVersion: deref(rev.DaemonVersion),
-			JuiceFSHome:   juiceFS,
+			Home:          home,
 		}
 		if rev.Revision == r.Revision {
 			r.GoldenTag = deref(rev.GoldenTag)
 			r.DaemonVersion = deref(rev.DaemonVersion)
-			r.JuiceFSHome = juiceFS
+			r.Home = home
 			if r.Template == "" {
 				r.Template = rev.Name
 			}
@@ -375,4 +407,12 @@ func digestOf(image string) string {
 		return d
 	}
 	return ""
+}
+
+func homeOf(rev v1alpha1.DevboxRevision) Home {
+	h := Home{Storage: deref(rev.HomeStorage), Class: deref(rev.HomeStorageClass), Seed: deref(rev.HomeSeed)}
+	if rev.HomeSize != nil {
+		h.Bytes = rev.HomeSize.Value()
+	}
+	return h
 }

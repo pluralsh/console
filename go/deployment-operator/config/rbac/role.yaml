@@ -155,6 +155,5 @@ rules:
   resources:
   - storageclasses
   verbs:
-  - create
   - delete
   - get

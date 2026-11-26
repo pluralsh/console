@@ -38,6 +38,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/core"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/prober"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/router"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/tunnel"
@@ -241,7 +242,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	}
 	defer rt.Close() // nolint: errcheck
 
-	var seeds core.Seeds
+	var homeDriver homes.Driver
 	if o.juicefsAddress != "" {
 		host, _, err := net.SplitHostPort(o.juicefsAddress)
 		if err != nil {
@@ -256,7 +257,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 			return err
 		}
 		defer jfs.Close() // nolint: errcheck
-		seeds = jfs
+		homeDriver = jfs
 	}
 
 	token := o.deployToken
@@ -316,7 +317,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		Router:  rt,
 		Records: &core.KubeRecords{Client: kube, Namespace: o.podNamespace},
 		Runners: runners,
-		Seeds:   seeds,
+		Homes:   homeDriver,
 		Log:     log.WithName("core"),
 	})
 	if err != nil {
@@ -332,7 +333,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 			Holder:     o.podName,
 			ConsoleURL: o.consoleURL,
 			AIProxyURL: o.aiProxyURL,
-		}, prober.Deps{Client: kube, Actors: ate, Daemons: rt, Log: log.WithName("prober")})
+		}, prober.Deps{Client: kube, Actors: ate, Daemons: rt, Homes: homeDriver, Log: log.WithName("prober")})
 		if err != nil {
 			return err
 		}
@@ -392,6 +393,10 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	g.Go(func() error { return serveMCPPort(gctx, o, gw, mcpHandler, log) })
 	if prb != nil {
 		g.Go(func() error { return prb.Run(gctx) })
+	}
+	if homeDriver != nil {
+		claimer := &homes.Claimer{Client: kube, Actors: ate, Driver: homeDriver, Log: log.WithName("homes")}
+		g.Go(func() error { return claimer.Run(gctx) })
 	}
 	g.Go(func() error { return serveMetrics(gctx, o.metricsAddr) })
 	log.Info("devbox-gateway started", "version", version, "kas", o.kasURL, "gateway", gatewayURL)

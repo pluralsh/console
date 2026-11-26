@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -458,24 +459,51 @@ func TestAdoptReconcilesAPendingRebaseWithTheActor(t *testing.T) {
 	}
 }
 
-// A home on JuiceFS can't move between revisions (each revision has its own volume class), so neither an explicit
-// rebase nor the onResume policy tries.
-func TestRebaseRefusesJuiceFSHomes(t *testing.T) {
+func TestHomeVolumesMoveOnlyWhenTheyMatch(t *testing.T) {
+	legacy := Home{Storage: v1alpha1.DevboxHomeJuiceFS, Seed: "old"}
+	bigger := juiceFSHome
+	bigger.Bytes *= 2
+	other := juiceFSHome
+	other.Class = "fast-homes"
+	nextSeed := juiceFSHome
+	nextSeed.Seed = "golden.next"
+	for _, tc := range []struct {
+		name     string
+		from, to Home
+		movable  bool
+	}{
+		{"snapshot homes", Home{}, Home{Storage: v1alpha1.DevboxHomeSnapshot}, true},
+		{"one StorageClass, another seed", juiceFSHome, nextSeed, true},
+		{"from a revision with a class of its own", legacy, juiceFSHome, false},
+		{"another size", juiceFSHome, bigger, false},
+		{"another class", juiceFSHome, other, false},
+		{"another storage", Home{}, juiceFSHome, false},
+	} {
+		r := &Runner{Revisions: map[int64]RunnerRevision{1: {Home: tc.from}}}
+		if err := r.movable(1, revisionTarget{home: tc.to}); (err == nil) != tc.movable {
+			t.Errorf("%s: movable = %v, want %v", tc.name, err, tc.movable)
+		}
+	}
+}
+
+// A home whose volume differs between revisions can't move, so neither an explicit rebase nor the onResume policy
+// tries.
+func TestRebaseRefusesHomesOfAnotherVolume(t *testing.T) {
 	h := newHarness(t, nil)
 	inst := h.running("inst-1")
 	h.release(true)
 	runners := h.g.deps.Runners.(StaticRunners)
 	next := *runners[testRunner]
-	next.JuiceFSHome = true
+	next.Home = juiceFSHome
 	next.Revisions = map[int64]RunnerRevision{
-		2: {Template: "tmpl-r2", GoldenTag: "golden-r2", JuiceFSHome: true},
-		3: {Template: "tmpl-r3", GoldenTag: "golden-r3", JuiceFSHome: true},
+		2: {Template: "tmpl-r2", GoldenTag: "golden-r2"},
+		3: {Template: "tmpl-r3", GoldenTag: "golden-r3", Home: juiceFSHome},
 	}
 	runners[testRunner] = &next
 
 	_, err := h.g.RebaseInstance(context.Background(), &devboxv1.RebaseInstanceRequest{InstanceId: inst.ID, TargetRevision: 3, Reason: "test"})
-	if status.Code(err) != codes.FailedPrecondition || !strings.Contains(err.Error(), "JuiceFS") {
-		t.Fatalf("rebase of a JuiceFS home: %v, want FailedPrecondition naming JuiceFS", err)
+	if status.Code(err) != codes.FailedPrecondition || !strings.Contains(err.Error(), "home volume differs") {
+		t.Fatalf("rebase to another home volume: %v, want FailedPrecondition", err)
 	}
 
 	h.suspended(inst)

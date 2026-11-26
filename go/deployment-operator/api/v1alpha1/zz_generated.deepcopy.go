@@ -2000,6 +2000,21 @@ func (in *DevboxRevision) DeepCopyInto(out *DevboxRevision) {
 		*out = new(DevboxHomeStorage)
 		**out = **in
 	}
+	if in.HomeStorageClass != nil {
+		in, out := &in.HomeStorageClass, &out.HomeStorageClass
+		*out = new(string)
+		**out = **in
+	}
+	if in.HomeSize != nil {
+		in, out := &in.HomeSize, &out.HomeSize
+		x := (*in).DeepCopy()
+		*out = &x
+	}
+	if in.HomeSeed != nil {
+		in, out := &in.HomeSeed, &out.HomeSeed
+		*out = new(string)
+		**out = **in
+	}
 	if in.Message != nil {
 		in, out := &in.Message, &out.Message
 		*out = new(string)

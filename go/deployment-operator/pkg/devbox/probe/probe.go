@@ -60,6 +60,10 @@ const (
 	ClaimTTL = 20 * time.Minute
 )
 
+// ErrHomeSeedMissing is in the error of a probe whose revision's golden home was never captured, so no actor can
+// start on it; the operator builds the revision again.
+const ErrHomeSeedMissing = "the revision's golden home wasn't captured"
+
 // Request is request.json. The operator embeds it in its own type, which adds the declared agents.
 type Request struct {
 	Runner        string `json:"runner"`
@@ -70,6 +74,10 @@ type Request struct {
 	// JuiceFSHome means the template's home is a JuiceFS volume, which Substrate won't seed from an explicit tag:
 	// the probe actor starts from the template's golden tag by default instead.
 	JuiceFSHome bool `json:"juiceFSHome,omitempty"`
+	// HomeSeed is the seed of the revision's golden home, which the probe actor's home is cloned from before its
+	// first resume; HomeBytes is the home's capacity. Empty for homes the golden tag carries.
+	HomeSeed  string `json:"homeSeed,omitempty"`
+	HomeBytes int64  `json:"homeBytes,omitempty"`
 	// DevboxID is the console Devbox the probe token is scoped to.
 	DevboxID string `json:"devboxId"`
 	// Probe is a protojson devbox.v1.ProbeAgentsRequest.

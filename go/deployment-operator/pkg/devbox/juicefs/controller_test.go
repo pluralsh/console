@@ -304,6 +304,75 @@ func TestTheGoldenVolumeBecomesItsStorageClassSeed(t *testing.T) {
 	}
 }
 
+func claimSeed(c *Controller, name, seed string) error {
+	_, err := c.CreateVolume(context.Background(), &csi.CreateVolumeRequest{
+		Name:               name,
+		VolumeCapabilities: mountCap(),
+		Parameters:         map[string]string{ParamClaimSeed: seed},
+	})
+	return err
+}
+
+// The gateway claims a seed for the golden actor's home after Substrate created it from a StorageClass without one.
+func TestAnExistingVolumeClaimsASeed(t *testing.T) {
+	c, _ := newController(t)
+	ctx := context.Background()
+	const seed = "golden.0b6f6c1e-uid"
+
+	wantCode(t, claimSeed(c, "substrate-golden-home", seed), codes.NotFound)
+	if _, err := os.Stat(filepath.Join(c.Root, "homes", "substrate-golden-home")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("a claim created the volume: %v", err)
+	}
+	for _, id := range []string{"substrate-golden-home", "substrate-box-home"} {
+		if _, err := createVolume(t, c, id, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(c.Root, "homes", "substrate-golden-home", "built"), []byte("artifact"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for range 2 {
+		if err := claimSeed(c, "substrate-golden-home", seed); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(c.Root, "homes", "substrate-golden-home", "built")); err != nil {
+		t.Fatalf("claiming emptied the volume: %v", err)
+	}
+	wantCode(t, claimSeed(c, "substrate-box-home", seed), codes.AlreadyExists)
+	wantCode(t, claimSeed(c, "substrate-golden-home", "golden.other"), codes.AlreadyExists)
+
+	// Until Substrate deletes the golden actor, the seed is claimed but not captured: a home can't start from it yet.
+	_, err := createVolume(t, c, "substrate-early-home", fromSnapshot(seed))
+	wantCode(t, err, codes.FailedPrecondition)
+
+	if _, err := c.DeleteVolume(ctx, &csi.DeleteVolumeRequest{VolumeId: "substrate-golden-home"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := claimSeed(c, "substrate-golden-home", seed); status.Code(err) != codes.OK {
+		t.Fatalf("claiming the captured seed again from its own volume: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(c.Root, "homes", "substrate-golden-home")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("claiming a captured seed recreated its volume: %v", err)
+	}
+	if _, err := createVolume(t, c, "substrate-new-home", fromSnapshot(seed)); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := os.ReadFile(filepath.Join(c.Root, "homes", "substrate-new-home", "built")); err != nil || string(got) != "artifact" {
+		t.Fatalf("a home seeded from the claim is missing the golden boot's files: %q, %v", got, err)
+	}
+	// Substrate creates the pre-seeded volume again without a source; it keeps the seed's files.
+	if _, err := createVolume(t, c, "substrate-new-home", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(c.Root, "homes", "substrate-new-home", "built")); err != nil {
+		t.Fatalf("creating the pre-seeded volume again replaced it: %v", err)
+	}
+	wantCode(t, claimSeed(c, "substrate-new-home", seed), codes.AlreadyExists)
+	_, err = createVolume(t, c, "substrate-missing-home", fromSnapshot("golden.never-claimed"))
+	wantCode(t, err, codes.NotFound)
+}
+
 func TestOwnerParameters(t *testing.T) {
 	c, _ := newController(t)
 	uid, gid := os.Getuid(), os.Getgid()

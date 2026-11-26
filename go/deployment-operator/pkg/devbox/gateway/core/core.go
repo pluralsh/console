@@ -21,6 +21,7 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 )
 
 // Router reaches daemons through atenet-router (see package router).
@@ -39,12 +40,6 @@ type Egress interface {
 type CredentialService interface {
 	VerifyActorJWT(ctx context.Context, raw string) (*egress.Caller, error)
 	InstanceCredential(ctx context.Context, instanceID string, sel *devboxv1.CredentialSelector) (*devboxv1.InstanceCredential, error)
-}
-
-// Seeds saves the JuiceFS homes of snapshotted instances (juicefs.Client).
-type Seeds interface {
-	SaveSeed(ctx context.Context, seedID, volumeID string) error
-	DeleteSeed(ctx context.Context, seedID string) error
 }
 
 // Config tunes the core. Zero values take the defaults below.
@@ -127,8 +122,9 @@ type Deps struct {
 	Egress Egress
 	// Credentials is optional; SandboxCredentials needs it.
 	Credentials CredentialService
-	// Seeds is optional; without it snapshots of JuiceFS homes keep no copy of the home.
-	Seeds Seeds
+	// Homes is the JuiceFS home driver (juicefs.Client). Optional: without it instances of runners with JuiceFS
+	// homes can't start, and snapshots of JuiceFS homes keep no copy of the home.
+	Homes homes.Driver
 	Log   logr.Logger
 	Now   func() time.Time
 }

@@ -46,6 +46,7 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -1080,7 +1081,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(policy.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())))
 	})
 
-	t.Run("a JuiceFS home gets a StorageClass per revision seeded by its golden boot", func(t *testing.T) {
+	t.Run("a JuiceFS home names the runner's StorageClass in every revision", func(t *testing.T) {
 		g := NewWithT(t)
 		env.push(t, "devbox:v1")
 		env.newRunner(t, "juicefs", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
@@ -1101,20 +1102,16 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.Status.Revisions).To(HaveLen(1))
 		rev := runner.Status.Revisions[0]
 		g.Expect(rev.HomeStorage).To(HaveValue(Equal(v1alpha1.DevboxHomeJuiceFS)))
+		g.Expect(rev.HomeStorageClass).To(HaveValue(Equal(v1alpha1.DevboxDefaultJuiceFSStorageClass)))
+		g.Expect(rev.HomeSize).To(HaveValue(Equal(resource.MustParse("100Gi"))))
 		atespace := *runner.Status.Atespace
 
 		tmpl := env.substrate.template(atespace, rev.Name)
 		home, _ := lo.Find(tmpl.Volumes, func(v *ateapi.Volume) bool { return v.Name == devboxHomeVolume })
 		g.Expect(home.GetExternal().GetTemplate().GetCapacityBytes()).To(Equal(int64(100 << 30)))
-		className := home.GetExternal().GetTemplate().GetStorageClassName()
-		g.Expect(className).To(Equal("devbox-home." + atespace + "." + rev.Name))
+		g.Expect(home.GetExternal().GetTemplate().GetStorageClassName()).To(Equal(v1alpha1.DevboxDefaultJuiceFSStorageClass))
 		g.Expect(env.substrate.previews[rev.Name]).To(BeTrue())
-
-		sc := &storagev1.StorageClass{}
-		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: className}, sc)).To(Succeed())
-		g.Expect(sc.Provisioner).To(Equal(juicefs.DriverName))
-		g.Expect(sc.Parameters).To(Equal(map[string]string{juicefs.ParamUID: "1000", juicefs.ParamSeed: atespace + "." + rev.Name}))
-		g.Expect(sc.GetOwnerReferences()).To(ContainElement(HaveField("UID", runner.UID)))
+		g.Expect(rev.HomeSeed).To(HaveValue(Equal("golden." + tmpl.GetMetadata().GetUid())))
 
 		hash := rev.Hash
 		gatewayEnv := func() []corev1.EnvVar {
@@ -1131,6 +1128,35 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.Status.Revisions).To(HaveLen(1), "the per-revision class doesn't change the template hash")
 		g.Expect(runner.Status.Revisions[0].Hash).To(Equal(hash))
 		g.Expect(gatewayEnv()).To(ContainElement(corev1.EnvVar{Name: "DEVBOX_JUICEFS_ADDRESS", Value: "devbox-juicefs.ate-system.svc:9820"}))
+
+		// The probe starts its actor from the golden home's seed. When the golden home wasn't captured, the
+		// revision is built again, once.
+		failProbe := func(revision int64) {
+			t.Helper()
+			cm := &corev1.ConfigMap{}
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: DevboxProbeConfigMapName("juicefs", revision), Namespace: devboxTestNamespace}, cm)).To(Succeed())
+			var req DevboxProbeRequest
+			g.Expect(json.Unmarshal([]byte(cm.Data[DevboxProbeRequestKey]), &req)).To(Succeed())
+			g.Expect(req.HomeSeed).To(Equal(*runner.RevisionByNumber(revision).HomeSeed))
+			g.Expect(req.HomeBytes).To(Equal(int64(100 << 30)))
+			cm.Annotations = map[string]string{DevboxProbeStateAnnotation: DevboxProbeStateFailed}
+			cm.Data[DevboxProbeErrorKey] = probe.ErrHomeSeedMissing + " (seed golden.x)"
+			g.Expect(env.client.Update(ctx, cm)).To(Succeed())
+		}
+		env.substrate.finishGoldenBoot(atespace, rev.Name)
+		runner = env.reconcile(t, "juicefs", 1)
+		failProbe(1)
+		runner = env.reconcile(t, "juicefs", 2)
+		rebuilt := runner.RevisionByNumber(2)
+		g.Expect(rebuilt).NotTo(BeNil(), "revision 1 is retired and built again")
+		g.Expect(rebuilt.Message).To(HaveValue(Equal(devboxHomeSeedRebuilt)))
+		g.Expect(rebuilt.HomeSeed).NotTo(Equal(rev.HomeSeed), "a new template, so a new seed")
+
+		env.substrate.finishGoldenBoot(atespace, rebuilt.Name)
+		runner = env.reconcile(t, "juicefs", 1)
+		failProbe(2)
+		runner = env.reconcile(t, "juicefs", 1)
+		g.Expect(runner.RevisionByNumber(2).Phase).To(Equal(v1alpha1.DevboxRevisionFailed), "a second miss fails")
 	})
 
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
