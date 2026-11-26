@@ -1234,6 +1234,17 @@ subscription DevboxInstanceStatusDelta($id: ID, $workbenchId: ID) {
     delta
     payload {
       ...DevboxInstanceTiny
+      agentConnections {
+        agent
+        protocolVersion
+        adapterName
+        adapterVersion
+        capabilities
+        billing
+      }
+      checkouts {
+        ...DevboxCheckout
+      }
       idleState {
         idle
         idleSince

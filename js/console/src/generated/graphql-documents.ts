@@ -10258,6 +10258,17 @@ export const DevboxInstanceStatusDeltaDocument = /*#__PURE__*/ gql`
     delta
     payload {
       ...DevboxInstanceTiny
+      agentConnections {
+        agent
+        protocolVersion
+        adapterName
+        adapterVersion
+        capabilities
+        billing
+      }
+      checkouts {
+        ...DevboxCheckout
+      }
       idleState {
         idle
         idleSince
@@ -10268,7 +10279,8 @@ export const DevboxInstanceStatusDeltaDocument = /*#__PURE__*/ gql`
     }
   }
 }
-    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceStatusDeltaSubscription, Types.DevboxInstanceStatusDeltaSubscriptionVariables>;
+    ${DevboxInstanceTinyFragmentDoc}
+${DevboxCheckoutFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceStatusDeltaSubscription, Types.DevboxInstanceStatusDeltaSubscriptionVariables>;
 export const DevboxThreadDeltaDocument = /*#__PURE__*/ gql`
     subscription DevboxThreadDelta($instanceId: ID!) {
   devboxThreadDelta(instanceId: $instanceId) {

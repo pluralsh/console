@@ -10,7 +10,11 @@ import { ReactNode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { DevboxTranscript, TranscriptPlacement } from './DevboxTranscript'
+import {
+  DevboxTranscript,
+  thoughtDuration,
+  TranscriptPlacement,
+} from './DevboxTranscript'
 import { acpContentBlock, acpToolCallContent } from './devboxTimeline'
 
 vi.mock('components/ai/chatbot/ChatMarkdown', async (importOriginal) => ({
@@ -97,6 +101,60 @@ describe('DevboxTranscript', () => {
       </ThemeProvider>
     )
     expect(thinking(container)).toEqual([false])
+  })
+
+  it('says how long a finished thought took', () => {
+    const at = (s: number) =>
+      new Date(Date.UTC(2026, 0, 1, 0, 0, s)).toISOString()
+    const { container } = renderTranscript(
+      <DevboxTranscript
+        running
+        entities={[
+          entity({
+            type: DevboxEntityType.AgentThought,
+            position: 1,
+            createdAt: at(0),
+            updatedAt: at(4),
+            message: { content: [text('long')] },
+          }),
+          entity({
+            type: DevboxEntityType.AgentThought,
+            position: 2,
+            createdAt: at(10),
+            updatedAt: at(11),
+            message: { content: [text('short')] },
+          }),
+          entity({
+            type: DevboxEntityType.AgentThought,
+            position: 3,
+            createdAt: at(20),
+            updatedAt: at(30),
+            message: { content: [text('ongoing')] },
+          }),
+        ]}
+      />
+    )
+    expect(
+      [...container.querySelectorAll('[data-entity="agent-thought"]')].map(
+        (n) => n.textContent?.replace(/long|short|ongoing/, '').trim()
+      )
+    ).toEqual(['Thought 4s', 'Thought briefly', 'Thinking'])
+  })
+
+  it('formats thought durations', () => {
+    const took = (ms: number) =>
+      thoughtDuration({
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: new Date(
+          Date.parse('2026-01-01T00:00:00.000Z') + ms
+        ).toISOString(),
+      })
+    expect(took(1999)).toBe('briefly')
+    expect(took(2000)).toBe('2s')
+    expect(took(59_400)).toBe('59s')
+    expect(took(65_000)).toBe('1m 5s')
+    expect(took(120_000)).toBe('2m')
+    expect(thoughtDuration({ createdAt: null, updatedAt: null })).toBeNull()
   })
 
   it('renders each known entity kind', () => {

@@ -297,6 +297,20 @@ defmodule Console.Devboxes.IngestTest do
 
       assert_receive {:event, %PubSub.DevboxInstanceIndexUpdated{item: %DevboxInstance.IndexDelta{revision: 3, sessions: [_, _], interactions: [_]}}}
       assert_receive {:event, %PubSub.DevboxThreadUpdated{}}
+      assert_receive {:event, %PubSub.DevboxInstanceUpdated{item: %DevboxInstance{running_threads: 1}}}
+    end
+
+    test "it broadcasts the instance when its turns finish, but not for an unchanged aggregate" do
+      inst = insert(:devbox_instance, running_threads: 2, index_revision: 1)
+      cluster = inst.devbox.cluster
+
+      {:ok, _} = Ingest.upsert_instance_index(%{instance_id: inst.id, aggregate: %{revision: 2, running_threads: 2}}, cluster)
+      refute_receive {:event, %PubSub.DevboxInstanceUpdated{}}
+
+      {:ok, _} = Ingest.upsert_instance_index(%{instance_id: inst.id, aggregate: %{revision: 3, running_threads: 0}}, cluster)
+      assert_receive {:event, %PubSub.DevboxInstanceUpdated{item: %DevboxInstance{id: id, running_threads: 0}}}
+      assert id == inst.id
+      assert refetch(inst).running_threads == 0
     end
 
     test "it files a subagent's interaction under the subagent, not its top-level thread" do
@@ -408,6 +422,7 @@ defmodule Console.Devboxes.IngestTest do
       assert refetch(thread).title == "current"
       assert refetch(inst).running_threads == 0
       refute_receive {:event, %PubSub.DevboxInstanceIndexUpdated{}}
+      refute_receive {:event, %PubSub.DevboxInstanceUpdated{}}
     end
 
     test "a failed row rolls back the whole batch" do

@@ -331,7 +331,12 @@ function applyToSession(
     deltaOffset,
     entities: {
       ...session.entities,
-      [key]: { ...updated, settled: false, updatedAt: change.emittedAt },
+      [key]: {
+        ...updated,
+        settled: false,
+        createdAt: existing.createdAt ?? change.emittedAt,
+        updatedAt: change.emittedAt,
+      },
     },
   }
 }

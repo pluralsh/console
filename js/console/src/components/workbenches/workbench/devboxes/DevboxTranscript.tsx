@@ -288,13 +288,28 @@ export function DevboxEntityView({
         >
           <AccordionSection
             label={
-              <Body2P
-                as="span"
-                $color="text-xlight"
-                $shimmer={streaming}
-              >
-                Thinking
-              </Body2P>
+              streaming ? (
+                <Body2P
+                  as="span"
+                  $color="text-xlight"
+                  $shimmer
+                >
+                  Thinking
+                </Body2P>
+              ) : (
+                <Body2P
+                  as="span"
+                  $color="text-light"
+                >
+                  Thought{' '}
+                  <Body2P
+                    as="span"
+                    $color="text-xlight"
+                  >
+                    {thoughtDuration(entity)}
+                  </Body2P>
+                </Body2P>
+              )
             }
           >
             <SimplifiedMarkdown
@@ -796,6 +811,23 @@ function PlanView({
       </AccordionSection>
     </div>
   )
+}
+
+// thinking shorter than this reads as "briefly" rather than a count of seconds
+const BRIEF_THOUGHT_MS = 2000
+
+// how long a finished thought took, from its first chunk to its last
+export function thoughtDuration({
+  createdAt,
+  updatedAt,
+}: Pick<DevboxEntityFragment, 'createdAt' | 'updatedAt'>) {
+  const ms = Date.parse(updatedAt ?? '') - Date.parse(createdAt ?? '')
+  if (Number.isNaN(ms)) return null
+  if (ms < BRIEF_THOUGHT_MS) return 'briefly'
+  const secs = Math.round(ms / 1000)
+  if (secs < 60) return `${secs}s`
+  const rem = secs % 60
+  return rem ? `${Math.floor(secs / 60)}m ${rem}s` : `${secs / 60}m`
 }
 
 const ThoughtSC = styled.div<{ $streaming: boolean }>(
