@@ -657,7 +657,7 @@ spec:
                     description: |-
                       Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with
                       it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then
-                      execs the daemon. Defaults to /bin/sh.
+                      execs the daemon, and the agents' launchers run with it. Defaults to /bin/sh.
                     pattern: ^/[^\s]+$
                     type: string
                 type: object
@@ -1325,6 +1325,21 @@ spec:
                   exist, newest first.
                 items:
                   properties:
+                    agents:
+                      description: |-
+                        Agents are the agents of spec.agents this revision's runtime sidecar installs. An instance only moves to a
+                        revision that still has the agents it was created with. Unset on revisions from before that.
+                      items:
+                        description: DevboxAgentType is a coding-agent harness a devbox
+                          can run (section 4.2a).
+                        enum:
+                        - claude
+                        - codex
+                        - opencode
+                        - gemini
+                        - pi
+                        type: string
+                      type: array
                     createdAt:
                       format: date-time
                       type: string

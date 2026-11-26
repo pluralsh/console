@@ -210,6 +210,9 @@ message RebaseInstanceRequest {
   // Why, for the log and the instance's status message (e.g. "requested by the owner", "remediation <id>").
   string reason = 3;
   Principal requested_by = 4;
+  // Only move a running instance while it is idle, as the gateway sees it when the move starts: an instance in
+  // use is not restarted, and the response (or, after it was accepted, the update's outcome) says so.
+  bool only_if_idle = 5;
 }
 
 message RebaseInstanceResponse {

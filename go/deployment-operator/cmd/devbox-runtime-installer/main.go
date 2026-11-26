@@ -19,6 +19,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/runtimemanifest"
 )
 
 // version is set with -ldflags "-X main.version=...".
@@ -30,12 +32,13 @@ func main() {
 	digest := flag.String("digest", os.Getenv("DEVBOX_RUNTIME_DIGEST"), "the runtime image digest, which with the agents names the install directory and the ready marker")
 	agents := flag.String("agents", "", "comma-separated agents to install (claude, codex, ...)")
 	browser := flag.Bool("browser", false, "install the browser's tools (Playwright MCP)")
+	shell := flag.String("shell", runtimemanifest.DefaultShell, "the environment image's POSIX shell, which the agents' launchers run with")
 	stay := flag.Bool("stay", true, "block after installing until SIGTERM or SIGINT")
 	flag.Parse()
 
 	log := slog.New(slog.NewJSONHandler(os.Stderr, nil)).With("service", "devbox-runtime-installer", "version", version)
 	start := time.Now()
-	res, err := install(*src, *dst, *digest, splitList(*agents), *browser)
+	res, err := install(*src, *dst, *digest, splitList(*agents), *browser, *shell)
 	if err != nil {
 		log.Error("installing the runtime failed", "digest", *digest, "err", err)
 		os.Exit(1)

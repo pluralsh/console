@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strings"
 	"testing"
@@ -126,6 +127,34 @@ func TestRebaseRunningInstance(t *testing.T) {
 	if again := h.rebase("inst-1", 0); again.GetAccepted() {
 		t.Fatalf("an instance on the target revision has nothing to do: %v", again)
 	}
+}
+
+// An update that may only restart an idle instance leaves one in use alone, as its daemon reports it.
+func TestRebaseOnlyIfIdle(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.release(false)
+	rebase := func() *devboxv1.RebaseInstanceResponse {
+		resp, err := h.g.RebaseInstance(context.Background(), &devboxv1.RebaseInstanceRequest{InstanceId: "inst-1", Reason: "test", OnlyIfIdle: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp
+	}
+
+	if resp := rebase(); resp.GetAccepted() || resp.GetMessage() != errInUse.Error() {
+		t.Fatalf("RebaseInstance of an instance in use = %v", resp)
+	}
+	inst.mu.Lock()
+	inst.idle = &devboxv1.IdleState{Idle: true}
+	inst.mu.Unlock()
+	if resp := rebase(); !resp.GetAccepted() {
+		t.Fatalf("RebaseInstance of an idle instance = %v", resp)
+	}
+	h.eventually("running on revision 3", func() bool {
+		rec := inst.record()
+		return rec.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING && rec.TemplateRevision == 3
+	})
 }
 
 // An idle instance is not woken to be updated: it is only pointed at the new template.
@@ -403,6 +432,26 @@ func TestAdoptCompletesARebaseThatAlreadyStarted(t *testing.T) {
 	}
 }
 
+// The gateway stopped after the instance started on the new revision, where its daemon never becomes usable.
+func TestAdoptRollsBackARebaseThatDoesNotStart(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.suspended(inst)
+	h.release(false)
+	h.rebase("inst-1", 0)
+	h.eventually("moved", func() bool { return inst.record().Rebase != nil })
+	h.ate.SetState(testAtespace, "dbx-inst-1", ateapi.ActorState_ACTOR_STATE_RUNNING, "worker-1")
+	h.daemon.mu.Lock()
+	h.daemon.failInitialize = 1
+	h.daemon.mu.Unlock()
+
+	h.g.adopt(context.Background(), inst)
+	if rec := inst.record(); rec.Rebase != nil || rec.TemplateRevision != 2 || rec.SkipRevision != 3 || rebaseStateOf(rec) != devboxv1.RebaseState_REBASE_STATE_FAILED ||
+		rec.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING || h.template(testActor) != "tmpl-r2" {
+		t.Fatalf("record = %+v", rec)
+	}
+}
+
 func TestRebaseRetriesALostActorUpdate(t *testing.T) {
 	h := newHarness(t, nil)
 	inst := h.running("inst-1")
@@ -480,7 +529,26 @@ func TestHomeVolumesMoveOnlyWhenTheyMatch(t *testing.T) {
 		{"another storage", Home{}, juiceFSHome, false},
 	} {
 		r := &Runner{Revisions: map[int64]RunnerRevision{1: {Home: tc.from}}}
-		if err := r.movable(1, revisionTarget{home: tc.to}); (err == nil) != tc.movable {
+		if err := r.movable(1, nil, revisionTarget{home: tc.to}); (err == nil) != tc.movable {
+			t.Errorf("%s: movable = %v, want %v", tc.name, err, tc.movable)
+		}
+	}
+}
+
+// Threads keep the agent they were started with, so an instance doesn't move to a revision without one of its agents.
+func TestRebaseKeepsTheInstancesAgents(t *testing.T) {
+	r := &Runner{Revisions: map[int64]RunnerRevision{1: {}}}
+	uses := []*devboxv1.AgentLaunch{{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, {Agent: devboxv1.AgentType_AGENT_TYPE_PI}}
+	for _, tc := range []struct {
+		name    string
+		agents  []v1alpha1.DevboxAgentType
+		movable bool
+	}{
+		{"every agent and more", []v1alpha1.DevboxAgentType{v1alpha1.DevboxAgentClaude, v1alpha1.DevboxAgentPi, v1alpha1.DevboxAgentCodex}, true},
+		{"a revision that didn't record its agents", nil, true},
+		{"without pi", []v1alpha1.DevboxAgentType{v1alpha1.DevboxAgentClaude}, false},
+	} {
+		if err := r.movable(1, uses, revisionTarget{agents: tc.agents}); (err == nil) != tc.movable || err != nil && !errors.Is(err, errAgentRemoved) {
 			t.Errorf("%s: movable = %v, want %v", tc.name, err, tc.movable)
 		}
 	}

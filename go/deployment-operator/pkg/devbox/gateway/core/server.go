@@ -90,7 +90,13 @@ func (g *Gateway) RebaseInstance(ctx context.Context, req *devboxv1.RebaseInstan
 		resp.Message = "already on this revision"
 		return resp, nil
 	}
-	if err := runner.movable(rec.TemplateRevision, to); err != nil {
+	// Only an unattended move keeps every agent the instance was offered: one a person asked for (its owner's, a
+	// forced update's at its deadline) goes ahead, as the docs say.
+	var keep []*devboxv1.AgentLaunch
+	if req.GetOnlyIfIdle() {
+		keep = inst.request().GetAgents()
+	}
+	if err := runner.movable(rec.TemplateRevision, keep, to); err != nil {
 		return nil, statusError(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED, "instance %s can't be moved: %v", inst.ID, err)
 	}
 	switch st := rec.status(); st {
@@ -101,8 +107,12 @@ func (g *Gateway) RebaseInstance(ctx context.Context, req *devboxv1.RebaseInstan
 	default:
 		return nil, status.Errorf(codes.FailedPrecondition, "instance %s is %s", inst.ID, st)
 	}
-	reason := req.GetReason()
-	g.goBackground(func(ctx context.Context) { g.rebase(ctx, inst, to, reason) })
+	if req.GetOnlyIfIdle() && inst.inUse() {
+		resp.Message = errInUse.Error()
+		return resp, nil
+	}
+	reason, onlyIfIdle := req.GetReason(), req.GetOnlyIfIdle()
+	g.goBackground(func(ctx context.Context) { g.rebase(ctx, inst, to, reason, onlyIfIdle) })
 	resp.Accepted = true
 	return resp, nil
 }

@@ -170,6 +170,13 @@ func (i *Instance) updateRequest(fn func(*devboxv1.CreateInstanceRequest)) Recor
 	return i.rec
 }
 
+// inUse reports whether the instance is running and its daemon hasn't reported it idle.
+func (i *Instance) inUse() bool {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	return i.rec.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING && !i.idle.GetIdle()
+}
+
 func (i *Instance) idlePolicy() *devboxv1.IdlePolicy {
 	i.mu.Lock()
 	defer i.mu.Unlock()

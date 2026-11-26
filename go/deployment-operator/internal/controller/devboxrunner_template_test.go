@@ -39,7 +39,7 @@ func TestDevboxActorTemplateContainers(t *testing.T) {
 	devbox, runtime := tmpl.Containers[0], tmpl.Containers[1]
 	g.Expect(devbox.Name).To(Equal("devbox"))
 	g.Expect(devbox.Image).To(Equal(testEnvImage))
-	id := runtimemanifest.InstallID("sha256:aaaa", nil, false)
+	id := runtimemanifest.InstallID("sha256:aaaa", nil, false, v1alpha1.DevboxDefaultShell)
 	g.Expect(devbox.Command).To(Equal([]string{"/bin/sh", "-c", devboxWaitAndExec, "devbox-runtime", id, "/home/dev/.plural-runtime", runtimemanifest.InstallDirName(id)}))
 	g.Expect(devbox.Args).To(BeEmpty())
 	g.Expect(devbox.WakeupProbe).NotTo(BeNil())
@@ -64,8 +64,17 @@ func TestDevboxActorTemplateContainers(t *testing.T) {
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(withAgents.Containers[1].Args).To(Equal([]string{"--digest", "sha256:aaaa", "--dst", "/mnt/home/.plural-runtime", "--agents", "claude,pi", "--browser"}))
 	// The devbox container waits for the install of exactly these agents, which the sidecar names the same way.
-	g.Expect(withAgents.Containers[0].Command[4]).To(Equal(runtimemanifest.InstallID("sha256:aaaa", []string{"claude", "pi"}, true)))
+	g.Expect(withAgents.Containers[0].Command[4]).To(Equal(runtimemanifest.InstallID("sha256:aaaa", []string{"claude", "pi"}, true, v1alpha1.DevboxDefaultShell)))
 	g.Expect(hashAgents).NotTo(Equal(hashNone), "other agents are another revision")
+
+	// The devbox container and the agents' launchers run with the image's shell.
+	runner = templateRunner()
+	runner.Spec.Runtime = &v1alpha1.DevboxRuntime{Shell: new("/usr/bin/bash")}
+	withShell, _, err := r.buildActorTemplate(runner, "space", testEnvImage, testRuntimeA)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(withShell.Containers[0].Command[0]).To(Equal("/usr/bin/bash"))
+	g.Expect(withShell.Containers[0].Command[4]).To(Equal(runtimemanifest.InstallID("sha256:aaaa", nil, false, "/usr/bin/bash")))
+	g.Expect(withShell.Containers[1].Args).To(Equal([]string{"--digest", "sha256:aaaa", "--dst", "/mnt/home/.plural-runtime", "--agents", "", "--shell", "/usr/bin/bash"}))
 
 	runner = templateRunner()
 	runner.Spec.Runtime = &v1alpha1.DevboxRuntime{Shell: lo.ToPtr("/busybox/sh")}
@@ -112,7 +121,7 @@ func TestDevboxWaitAndExec(t *testing.T) {
 	if err != nil {
 		t.Skip("no sh on PATH")
 	}
-	digest := runtimemanifest.InstallID("sha256:aaaa", []string{"claude"}, false)
+	digest := runtimemanifest.InstallID("sha256:aaaa", []string{"claude"}, false, v1alpha1.DevboxDefaultShell)
 
 	setup := func(t *testing.T) (root string, run func() *exec.Cmd) {
 		root = filepath.Join(t.TempDir(), ".plural-runtime")

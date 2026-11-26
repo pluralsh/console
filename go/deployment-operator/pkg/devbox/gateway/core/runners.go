@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -35,6 +36,8 @@ type Runner struct {
 	DaemonVersion string
 	// Home is the current revision's home volume.
 	Home Home
+	// Agents are the agents the current revision installs; nil for revisions that didn't record them.
+	Agents []v1alpha1.DevboxAgentType
 	// Revisions maps every revision that still exists to its template and golden tag.
 	Revisions map[int64]RunnerRevision
 	// UpdateOnResume is the runner's instance update policy: a suspended instance behind Revision moves to it
@@ -87,6 +90,7 @@ type revisionTarget struct {
 	imageDigest   string
 	daemonVersion string
 	home          Home
+	agents        []v1alpha1.DevboxAgentType
 }
 
 // errHomeNotMovable is moving an instance to a revision whose home is another volume than the instance's: another
@@ -94,11 +98,20 @@ type revisionTarget struct {
 // Substrate refuses to move an actor to a template with other volumes.
 var errHomeNotMovable = errors.New("its home volume differs between the revisions (storage, StorageClass or size), so it can't move; create a new instance to use the new revision")
 
-// movable reports whether an instance on revision from can move to to: Substrate only moves an actor between
-// templates with the same volumes.
-func (r *Runner) movable(from int64, to revisionTarget) error {
+// errAgentRemoved is moving an instance to a revision that doesn't install an agent the instance was created with,
+// which its threads may use.
+var errAgentRemoved = errors.New("the new revision doesn't install an agent it uses")
+
+// movable reports whether an instance on revision from with the agents it was created with can move to to:
+// Substrate only moves an actor between templates with the same volumes, and its threads keep their agents.
+func (r *Runner) movable(from int64, agents []*devboxv1.AgentLaunch, to revisionTarget) error {
 	if !r.Revisions[from].Home.sameVolume(to.home) {
 		return errHomeNotMovable
+	}
+	for _, a := range agents {
+		if name := v1alpha1.DevboxAgentType(a.GetAgent().Name()); to.agents != nil && !slices.Contains(to.agents, name) {
+			return fmt.Errorf("%w (%s), so it can't move; create a new instance to use the new revision", errAgentRemoved, name)
+		}
 	}
 	return nil
 }
@@ -114,7 +127,7 @@ func (r *Runner) target(revision int64) (revisionTarget, error) {
 		return revisionTarget{}, fmt.Errorf("devbox runner %s serves revision %d, instances can't be moved to revision %d", r.Name, r.Revision, revision)
 	}
 	return revisionTarget{revision: r.Revision, template: r.Template, imageDigest: r.ImageDigest, daemonVersion: r.DaemonVersion,
-		home: r.Home}, nil
+		home: r.Home, agents: r.Agents}, nil
 }
 
 // ErrRunnerNotReady means the runner has no ready revision to start instances from.
@@ -290,6 +303,7 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 			r.GoldenTag = deref(rev.GoldenTag)
 			r.DaemonVersion = deref(rev.DaemonVersion)
 			r.Home = home
+			r.Agents = rev.Agents
 			if r.Template == "" {
 				r.Template = rev.Name
 			}

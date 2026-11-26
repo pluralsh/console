@@ -340,14 +340,22 @@ func validPath(p string) bool {
 		strings.Trim(p, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._/@+-") == ""
 }
 
-// InstallID names one install of a runtime: its image digest and the agents (and browser) it was installed
-// for, since the same image installs other components for other agents. The ready marker holds it, and the
-// devbox container execs the daemon only once the marker names the ID its template was rendered with, so it
-// never starts from a runtime that is still being changed for another selection.
-func InstallID(digest string, agents []string, browser bool) string {
+// DefaultShell is the shell the launchers run with unless the environment image's is elsewhere.
+const DefaultShell = "/bin/sh"
+
+// InstallID names one install of a runtime: its image digest, the agents (and browser) it was installed for,
+// since the same image installs other components for other agents, and the shell its launchers run with when
+// it isn't DefaultShell. The ready marker holds it, and the devbox container execs the daemon only once the
+// marker names the ID its template was rendered with, so it never starts from a runtime that is still being
+// changed for another selection.
+func InstallID(digest string, agents []string, browser bool, shell string) string {
 	sorted := slices.Clone(agents)
 	slices.Sort(sorted)
-	sum := sha256.Sum256(fmt.Appendf(nil, "agents=%s\nbrowser=%t\n", strings.Join(slices.Compact(sorted), ","), browser))
+	selection := fmt.Appendf(nil, "agents=%s\nbrowser=%t\n", strings.Join(slices.Compact(sorted), ","), browser)
+	if shell != DefaultShell {
+		selection = fmt.Appendf(selection, "shell=%s\n", shell)
+	}
+	sum := sha256.Sum256(selection)
 	return digest + "+" + hex.EncodeToString(sum[:selectionHashLen])
 }
 

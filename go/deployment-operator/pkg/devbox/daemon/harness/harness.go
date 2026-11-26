@@ -110,7 +110,7 @@ func LoadImageInfo(path string) (*ImageInfo, error) {
 
 // AgentName is the lowercase name used in image.json and CRDs.
 func AgentName(t devboxv1.AgentType) string {
-	return strings.ToLower(strings.TrimPrefix(t.String(), "AGENT_TYPE_"))
+	return t.Name()
 }
 
 // ParseAgent parses an agent name ("claude", "AGENT_TYPE_CLAUDE").

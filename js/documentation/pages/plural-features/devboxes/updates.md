@@ -46,8 +46,8 @@ A devbox instance runs two images side by side in one sandbox, sharing the insta
 
 * **Update available.** An instance behind its devbox's current version shows an "Update available" chip. Its owner, or anyone who can manage it, can choose "Update instance" to move it now. A running instance restarts.
 * **Resuming.** Opening a suspended instance resumes it. If it moves to a new revision on the way, the resume takes a little longer, and the resume button spins until the instance is running.
-* **Updating a whole devbox.** In the devbox's settings (Settings, AI, Devboxes), the Updates section lists outdated instances and their daemon and image versions. "Update outdated instances" starts an update campaign, which moves suspended and idle instances, a few at a time, and leaves instances people are using alone.
-* **Forced updates.** For security fixes, an admin can force an update with a notice period in minutes. People using an affected instance see a notice with the reason and a countdown: "This instance restarts for a required update". At the deadline the instance restarts on the current version, or earlier if they choose "Update now".
+* **Updating a whole devbox.** In the devbox's settings (Settings, AI, Devboxes), the Updates section lists outdated instances and their daemon and image versions. "Update outdated instances" starts an update campaign, which moves suspended and idle instances, a few at a time, and leaves instances people are using alone, checking again just before it restarts one.
+* **Forced updates.** For security fixes, an admin can force an update with a notice period in minutes. People using an affected instance see a notice with the reason and a countdown: "This instance restarts for a required update". At the deadline the instance restarts on the current version, or earlier if they choose "Update now". Someone who starts using an instance later in the campaign gets the full notice too.
 
 ## What an update keeps and resets
 
@@ -77,6 +77,7 @@ Rough figures from a test cluster; your cluster's disks and object storage chang
 ## Limits
 
 * **Changing a JuiceFS or ZeroFS home.** An instance only moves to a revision with the same home volume. Changing `spec.home.storage`, `spec.home.storageClassName` or `spec.home.size` gives new revisions another volume, so existing instances stay where they are. The same goes for JuiceFS instances created before the deployment operator gave all of a runner's revisions one StorageClass. Create a new instance to use the newer revision.
+* **Removing an agent.** Threads keep the agent they were started with. After an agent is removed from `spec.agents`, instances created before stay on their revision when they resume and in ordinary update campaigns. They only move when someone updates them on purpose: their owner with "Update instance", or a forced update at its deadline. Their threads on the removed agent then can't continue.
 * **Snapshots on JuiceFS or ZeroFS homes.** Starting an instance from a snapshot isn't supported yet for these homes.
 * **Environment images.** The runtime's agents need glibc 2.28 or newer. On an image without it, the runner's revision fails with a message that says so. See the [requirements](/plural-features/devboxes/environment-images#requirements).
 

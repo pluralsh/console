@@ -18,12 +18,14 @@ import (
 const (
 	digestA = "sha256:aaaa"
 	digestB = "sha256:bbbb"
+	// testShell is the shell most tests install the launchers for.
+	testShell = runtimemanifest.DefaultShell
 )
 
 // The install IDs and directories of digestA and digestB installed for claude alone, as most tests do.
 var (
-	idA  = runtimemanifest.InstallID(digestA, []string{"claude"}, false)
-	idB  = runtimemanifest.InstallID(digestB, []string{"claude"}, false)
+	idA  = runtimemanifest.InstallID(digestA, []string{"claude"}, false, testShell)
+	idB  = runtimemanifest.InstallID(digestB, []string{"claude"}, false, testShell)
 	dirA = runtimemanifest.InstallDirName(idA)
 	dirB = runtimemanifest.InstallDirName(idB)
 )
@@ -116,7 +118,7 @@ func installed(t *testing.T, dst, dir string) *runtimemanifest.Manifest {
 func TestInstallFresh(t *testing.T) {
 	src, dst := payload(t, "daemon-a", nil), filepath.Join(t.TempDir(), ".plural-runtime")
 
-	res, err := install(src, dst, digestA, []string{"claude"}, false)
+	res, err := install(src, dst, digestA, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 	assert.Equal(t, "installed", res.Action)
 	assert.Equal(t, filepath.Join(dst, dirA), res.Dir)
@@ -146,7 +148,7 @@ func TestInstallFresh(t *testing.T) {
 // The commands run from wherever the home is mounted: links and launchers are relative.
 func TestInstallCommandsRun(t *testing.T) {
 	src, dst := payload(t, "daemon-a", nil), filepath.Join(t.TempDir(), ".plural-runtime")
-	_, err := install(src, dst, digestA, []string{"claude"}, false)
+	_, err := install(src, dst, digestA, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 	moved := filepath.Join(t.TempDir(), "elsewhere")
 	require.NoError(t, os.Rename(dst, moved))
@@ -167,11 +169,11 @@ func TestInstallCommandsRun(t *testing.T) {
 func TestInstallSelectsAgentsAndBrowser(t *testing.T) {
 	src, dst := payload(t, "daemon-a", nil), t.TempDir()
 
-	res, err := install(src, dst, digestA, []string{"pi", "gemini"}, true)
+	res, err := install(src, dst, digestA, []string{"pi", "gemini"}, true, testShell)
 	require.NoError(t, err)
 	assert.Equal(t, []string{"daemon", "node", "pi", "pi-mcp-adapter", "playwright-mcp"}, res.Components)
 	assert.Equal(t, []string{"gemini"}, res.Missing)
-	piID := runtimemanifest.InstallID(digestA, []string{"gemini", "pi"}, true)
+	piID := runtimemanifest.InstallID(digestA, []string{"gemini", "pi"}, true, testShell)
 	assert.Equal(t, piID, res.ID)
 	m := installed(t, dst, runtimemanifest.InstallDirName(piID))
 	assert.Equal(t, []string{"pi"}, slices.Collect(maps.Keys(m.Agents)))
@@ -180,7 +182,7 @@ func TestInstallSelectsAgentsAndBrowser(t *testing.T) {
 
 	// The same image for other agents is another install: the devbox container of a template rendered for them
 	// waits for their marker instead of starting from the pi install while it is replaced.
-	res, err = install(src, dst, digestA, []string{"gemini"}, false)
+	res, err = install(src, dst, digestA, []string{"gemini"}, false, testShell)
 	require.NoError(t, err)
 	assert.Equal(t, []string{"daemon"}, res.Components)
 	assert.NotEqual(t, piID, res.ID)
@@ -192,7 +194,7 @@ func TestInstallSelectsAgentsAndBrowser(t *testing.T) {
 // A matching install must not be touched: the devbox container may be executing it.
 func TestInstallKeepsMatchingRuntime(t *testing.T) {
 	src, dst := payload(t, "daemon-a", nil), t.TempDir()
-	_, err := install(src, dst, digestA, []string{"claude"}, false)
+	_, err := install(src, dst, digestA, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 	bin := filepath.Join(dst, dirA, "bin", "devbox-daemon")
 	before, err := os.Stat(bin)
@@ -200,7 +202,7 @@ func TestInstallKeepsMatchingRuntime(t *testing.T) {
 	marker, err := os.Stat(filepath.Join(dst, readyMarker))
 	require.NoError(t, err)
 
-	res, err := install(src, dst, digestA, []string{"claude"}, false)
+	res, err := install(src, dst, digestA, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 	assert.Equal(t, "kept", res.Action)
 	assert.Empty(t, res.Copied)
@@ -217,14 +219,14 @@ func TestInstallKeepsMatchingRuntime(t *testing.T) {
 // An update copies only the components that changed, and prunes the previous runtime and components.
 func TestInstallUpdateCopiesChangedComponents(t *testing.T) {
 	dst := t.TempDir()
-	_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false)
+	_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 	claude := installed(t, dst, dirA).Components["claude"]
 	before, err := os.Stat(filepath.Join(dst, componentsDir, runtimemanifest.DirName("claude", claude), "bin", "claude"))
 	require.NoError(t, err)
 	require.NoError(t, os.MkdirAll(filepath.Join(dst, "sha256-cccc.tmp"), 0o755))
 
-	res, err := install(payload(t, "daemon-b", nil), dst, digestB, []string{"claude"}, false)
+	res, err := install(payload(t, "daemon-b", nil), dst, digestB, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 	assert.Equal(t, "installed", res.Action)
 	assert.Equal(t, []string{"daemon"}, res.Copied)
@@ -279,11 +281,11 @@ func TestInstallReplacesTamperedRuntime(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			dst := t.TempDir()
-			_, err := install(src, dst, digestA, []string{"claude"}, false)
+			_, err := install(src, dst, digestA, []string{"claude"}, false, testShell)
 			require.NoError(t, err)
 			tc.tamper(t, tc.path(dst))
 
-			res, err := install(src, dst, digestA, []string{"claude"}, false)
+			res, err := install(src, dst, digestA, []string{"claude"}, false, testShell)
 			require.NoError(t, err)
 			assert.Equal(t, "installed", res.Action)
 			assert.Equal(t, "daemon-a", read(t, daemonPath(dst)))
@@ -315,12 +317,12 @@ func claudePath(dst string) string {
 // A failed install never leaves a marker naming the runtime that wasn't installed.
 func TestInstallFailureNeverPublishesTheNewRuntime(t *testing.T) {
 	dst := t.TempDir()
-	_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false)
+	_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 
 	src := payload(t, "daemon-b", nil)
 	require.NoError(t, os.Symlink("/nonexistent", filepath.Join(src, componentsDir, "daemon", "bin", "link")))
-	_, err = install(src, dst, digestB, []string{"claude"}, false)
+	_, err = install(src, dst, digestB, []string{"claude"}, false, testShell)
 	require.Error(t, err)
 	marker, _ := os.ReadFile(filepath.Join(dst, readyMarker))
 	assert.NotContains(t, string(marker), digestB)
@@ -340,7 +342,7 @@ func TestInstallDoesNotFollowLinks(t *testing.T) {
 			}
 			require.NoError(t, os.Symlink(elsewhere, filepath.Join(dst, linked)))
 
-			_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false)
+			_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false, testShell)
 			require.NoError(t, err)
 			info, err := os.Lstat(filepath.Join(dst, linked))
 			require.NoError(t, err)
@@ -356,7 +358,7 @@ func TestInstallDoesNotFollowLinks(t *testing.T) {
 	require.NoError(t, os.WriteFile(keep, []byte("x"), 0o644))
 	require.NoError(t, os.Symlink(keep, filepath.Join(dst, readyMarker+tmpSuffix)))
 	require.NoError(t, os.Symlink(filepath.Dir(keep), filepath.Join(dst, dirA+tmpSuffix)))
-	_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false)
+	_, err := install(payload(t, "daemon-a", nil), dst, digestA, []string{"claude"}, false, testShell)
 	require.NoError(t, err)
 	assert.Equal(t, "x", read(t, keep))
 	assert.Equal(t, []string{"keep"}, names(t, filepath.Dir(keep)))
@@ -364,7 +366,24 @@ func TestInstallDoesNotFollowLinks(t *testing.T) {
 
 func TestInstallRejectsBadInput(t *testing.T) {
 	for _, digest := range []string{"", "../x", "a/b", ".hidden", "sha256:ab cd", "sha256:a+b"} {
-		_, err := install(payload(t, "daemon-a", nil), t.TempDir(), digest, nil, false)
+		_, err := install(payload(t, "daemon-a", nil), t.TempDir(), digest, nil, false, testShell)
 		assert.Error(t, err, digest)
 	}
+	for _, shell := range []string{"", "sh", "/bin/sh -e"} {
+		_, err := install(payload(t, "daemon-a", nil), t.TempDir(), digestA, nil, false, shell)
+		assert.Error(t, err, shell)
+	}
+}
+
+// The launchers run with the environment image's shell, and another shell is another install.
+func TestInstallLaunchersUseTheShell(t *testing.T) {
+	const sh = "/usr/local/bin/sh"
+	src, dst := payload(t, "daemon-a", nil), t.TempDir()
+	res, err := install(src, dst, digestA, []string{"claude"}, false, sh)
+	require.NoError(t, err)
+	assert.Equal(t, runtimemanifest.InstallID(digestA, []string{"claude"}, false, sh), res.ID)
+	assert.NotEqual(t, idA, res.ID)
+	data, err := os.ReadFile(filepath.Join(res.Dir, "bin", "claude-agent-acp"))
+	require.NoError(t, err)
+	assert.Equal(t, "#!"+sh+"\n", string(data[:len(sh)+3]))
 }

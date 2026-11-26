@@ -543,14 +543,8 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance, applyUpdateP
 			// not Unavailable: console reads that as the cluster being offline, which hides the real failure
 			return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s: %v", inst.ID, err)
 		}
-		rolledBack := inst.record()
-		message = fmt.Sprintf("update to revision %d failed and was rolled back: %s", rolledBack.RebaseRevision, rolledBack.RebaseMessage)
-		if err := g.wake(ctx, inst); err != nil {
-			if errors.Is(err, actors.ErrCrashed) {
-				_ = g.deps.Actors.Revert(ctx, inst.ref())
-			}
-			g.reportRecord(ctx, inst)
-			return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s after rolling back its update: %v", inst.ID, err)
+		if message, err = g.wakeRolledBack(ctx, inst); err != nil {
+			return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "%v", err)
 		}
 	} else if rev, ok := g.completeRebase(inst); ok {
 		message = fmt.Sprintf("updated to revision %d", rev)
@@ -558,6 +552,20 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance, applyUpdateP
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, message: message})
 	g.startForwarder(inst)
 	return devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, nil
+}
+
+// wakeRolledBack wakes an instance that rollbackRebase returned to its previous revision, and gives the status
+// message that says so.
+func (g *Gateway) wakeRolledBack(ctx context.Context, inst *Instance) (string, error) {
+	rolledBack := inst.record()
+	if err := g.wake(ctx, inst); err != nil {
+		if errors.Is(err, actors.ErrCrashed) {
+			_ = g.deps.Actors.Revert(ctx, inst.ref())
+		}
+		g.reportRecord(ctx, inst)
+		return "", fmt.Errorf("resuming instance %s after rolling back its update: %w", inst.ID, err)
+	}
+	return fmt.Sprintf("update to revision %d failed and was rolled back: %s", rolledBack.RebaseRevision, rolledBack.RebaseMessage), nil
 }
 
 // ---- moving instances between template revisions (PROD-5487) ----
@@ -723,7 +731,7 @@ func (g *Gateway) updateOnResume(ctx context.Context, inst *Instance) {
 	if err != nil || to.revision <= rec.TemplateRevision || to.revision == rec.SkipRevision {
 		return
 	}
-	if err := runner.movable(rec.TemplateRevision, to); err != nil {
+	if err := runner.movable(rec.TemplateRevision, inst.request().GetAgents(), to); err != nil {
 		g.log.Info("not updating instance on resume", "instance", inst.ID, "revision", to.revision, "why", err.Error())
 		return
 	}
@@ -734,9 +742,13 @@ func (g *Gateway) updateOnResume(ctx context.Context, inst *Instance) {
 	g.log.Info("updating instance on resume", "instance", inst.ID, "from", rec.TemplateRevision, "to", to.revision)
 }
 
+// errInUse is declining to move an instance only while it is idle (RebaseInstanceRequest.only_if_idle).
+var errInUse = errors.New("the instance is in use, so it wasn't restarted for the update")
+
 // rebase moves an instance to another revision on request (RebaseInstance). A running instance is suspended
 // synchronously, moved and resumed; a suspended one is only moved and starts on the revision at its next resume.
-func (g *Gateway) rebase(ctx context.Context, inst *Instance, to revisionTarget, reason string) {
+// With onlyIfIdle, an instance that is in use once the move can start is left alone.
+func (g *Gateway) rebase(ctx context.Context, inst *Instance, to revisionTarget, reason string, onlyIfIdle bool) {
 	inst.op.Lock()
 	defer inst.op.Unlock()
 
@@ -754,6 +766,10 @@ func (g *Gateway) rebase(ctx context.Context, inst *Instance, to revisionTarget,
 		return
 	}
 	if inst.record().TemplateRevision == to.revision {
+		return
+	}
+	if onlyIfIdle && inst.inUse() {
+		fail(errInUse)
 		return
 	}
 	g.log.Info("moving instance to another revision", "instance", inst.ID, "revision", to.revision, "running", wasRunning, "reason", reason)
@@ -1074,13 +1090,22 @@ func (g *Gateway) adopt(ctx context.Context, inst *Instance) {
 	g.adoptRebase(ctx, inst, a)
 	switch a.GetStatus().GetState() {
 	case ateapi.ActorState_ACTOR_STATE_RUNNING, ateapi.ActorState_ACTOR_STATE_RESUMING:
-		if err := g.wake(ctx, inst); err != nil {
-			g.log.Error(err, "re-initializing adopted instance", "instance", inst.ID)
-		} else {
+		message, moved := "", inst.record().Rebase != nil
+		if err := g.wake(ctx, inst); err == nil {
 			// It runs on the revision it was moved to: the move is done, whatever the gateway got to record.
 			g.completeRebase(inst)
+		} else if !moved {
+			g.log.Error(err, "re-initializing adopted instance", "instance", inst.ID)
+		} else if !g.rollbackRebase(ctx, inst, err) {
+			// As on a resume, it was moved, doesn't start there and couldn't go back: it is left suspended.
+			g.adoptFailed(ctx, inst, err)
+			return
+		} else if message, err = g.wakeRolledBack(ctx, inst); err != nil {
+			// It went back, but doesn't start there either.
+			g.adoptFailed(ctx, inst, err)
+			return
 		}
-		g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
+		g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, message: message})
 		g.startForwarder(inst)
 	case ateapi.ActorState_ACTOR_STATE_CRASHED:
 		if err := g.deps.Actors.Revert(ctx, inst.ref()); err != nil {
@@ -1093,6 +1118,12 @@ func (g *Gateway) adopt(ctx context.Context, inst *Instance) {
 			g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: reason})
 		}
 	}
+}
+
+// adoptFailed leaves an adopted instance that was moved and doesn't start suspended, as a resume would.
+func (g *Gateway) adoptFailed(ctx context.Context, inst *Instance, err error) {
+	g.log.Error(err, "adopting instance", "instance", inst.ID)
+	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: devboxv1.SuspendReason_SUSPEND_REASON_UPDATE, message: err.Error()})
 }
 
 // adoptRebase reconciles a pending move with the actor: the record is written before the actor is repointed, so

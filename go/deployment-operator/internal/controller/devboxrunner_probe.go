@@ -275,7 +275,7 @@ func devboxProtoAgentType(t v1alpha1.DevboxAgentType) devboxv1.AgentType {
 }
 
 func devboxAgentTypeFromProto(t devboxv1.AgentType) v1alpha1.DevboxAgentType {
-	return v1alpha1.DevboxAgentType(strings.ToLower(strings.TrimPrefix(t.String(), "AGENT_TYPE_")))
+	return v1alpha1.DevboxAgentType(t.Name())
 }
 
 // probeStatusName maps the proto enum to console's devbox_probe_status values (ok, failed, missing).
@@ -312,8 +312,11 @@ func EvaluateDevboxProbe(runner *v1alpha1.DevboxRunner, result *DevboxProbeResul
 		case entry.GetProbeStatus() == devboxv1.ProbeStatus_PROBE_STATUS_MISSING:
 			// The daemon's reason, which says why the runtime's agents can't run (no glibc).
 			eval.Violations = append(eval.Violations, fmt.Sprintf("agent %s: %s", agent.Type, entry.GetProbeError()))
+		case entry.GetProbeStatus() == devboxv1.ProbeStatus_PROBE_STATUS_FAILED && libcHint(entry.GetProbeError()) != "":
+			// The agent can never start on this image, unlike a probe that fails for want of credentials.
+			eval.Violations = append(eval.Violations, fmt.Sprintf("agent %s probe failed: %s%s", agent.Type, entry.GetProbeError(), libcHint(entry.GetProbeError())))
 		case entry.GetProbeStatus() == devboxv1.ProbeStatus_PROBE_STATUS_FAILED:
-			eval.Warnings = append(eval.Warnings, fmt.Sprintf("agent %s probe failed: %s%s", agent.Type, entry.GetProbeError(), libcHint(entry.GetProbeError())))
+			eval.Warnings = append(eval.Warnings, fmt.Sprintf("agent %s probe failed: %s", agent.Type, entry.GetProbeError()))
 		}
 	}
 	return eval

@@ -451,7 +451,7 @@ exit 1`
 // devboxRuntimeSelection is what the runner's runtime sidecar installs besides the daemon: the runner's agents
 // and, with the browser enabled, its tools.
 func devboxRuntimeSelection(runner *v1alpha1.DevboxRunner) (agents []string, browser bool) {
-	agents = lo.Map(runner.Spec.Agents, func(a v1alpha1.DevboxAgent, _ int) string { return string(a.Type) })
+	agents = lo.Map(runner.Spec.AgentTypes(), func(t v1alpha1.DevboxAgentType, _ int) string { return string(t) })
 	return agents, runner.Spec.Browser != nil && runner.Spec.Browser.Enabled
 }
 
@@ -473,11 +473,16 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 		return nil, "", fmt.Errorf("runtime image %q is not pinned by digest", runtime)
 	}
 	agents, browser := devboxRuntimeSelection(runner)
-	installID := runtimemanifest.InstallID(runtimeDigest, agents, browser)
-	// The sidecar installs only the components of the runner's agents (and browser) into each instance's home.
+	shell := runner.RuntimeShell()
+	installID := runtimemanifest.InstallID(runtimeDigest, agents, browser, shell)
+	// The sidecar installs only the components of the runner's agents (and browser) into each instance's home,
+	// with launchers that run with the environment image's shell.
 	runtimeArgs := []string{"--digest", runtimeDigest, "--dst", runtimeHomeMount + "/" + runtimeInstallDir, "--agents", strings.Join(agents, ",")}
 	if browser {
 		runtimeArgs = append(runtimeArgs, "--browser")
+	}
+	if shell != runtimemanifest.DefaultShell {
+		runtimeArgs = append(runtimeArgs, "--shell", shell)
 	}
 	if err := validateDevboxRepositories(runner); err != nil {
 		return nil, "", err
@@ -518,7 +523,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 		Containers: []*ateapi.Container{{
 			Name:  devboxContainerName,
 			Image: image,
-			Command: []string{runner.RuntimeShell(), "-c", devboxWaitAndExec, "devbox-runtime",
+			Command: []string{shell, "-c", devboxWaitAndExec, "devbox-runtime",
 				installID, devboxHomeMount + "/" + runtimeInstallDir, runtimemanifest.InstallDirName(installID)},
 			Env: append([]*ateapi.EnvVar{{Name: guest.EnvVar, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
 			WakeupProbe: &ateapi.WakeupProbe{
@@ -723,6 +728,7 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 			DaemonVersion: runner.Status.DaemonVersion,
 			Phase:         v1alpha1.DevboxRevisionBuilding,
 			CreatedAt:     lo.ToPtr(metav1.Now()),
+			Agents:        runner.Spec.AgentTypes(),
 		}
 		if latest != nil && latest.Hash == hash && strings.HasPrefix(lo.FromPtr(latest.Message), devboxHomeSeedRebuild) {
 			rev.Message = new(devboxHomeSeedRebuilt)
@@ -1035,7 +1041,7 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api su
 // instance has started on the new revision.
 func (r *DevboxRunnerReconciler) pendingRollbackTemplates(ctx context.Context, runner *v1alpha1.DevboxRunner) ([]string, error) {
 	var records corev1.ConfigMapList
-	if err := r.List(ctx, &records, client.InNamespace(r.Config.OperatorNamespace), client.MatchingLabels{v1alpha1.DevboxInstanceRecordLabel: "true"}); err != nil {
+	if err := r.APIReader.List(ctx, &records, client.InNamespace(r.Config.OperatorNamespace), client.MatchingLabels{v1alpha1.DevboxInstanceRecordLabel: "true"}); err != nil {
 		return nil, fmt.Errorf("listing devbox instance records: %w", err)
 	}
 	var out []string

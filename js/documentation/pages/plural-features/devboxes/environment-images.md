@@ -23,7 +23,7 @@ An image can be a runner's environment image when it meets all of these:
 |---|---|
 | `linux/amd64` or `linux/arm64` | The runtime is built for these platforms. |
 | glibc 2.28 or newer, with libstdc++ | The agents are the upstream binaries, unmodified, and Node.js is the official build. This covers Debian 10+, Ubuntu 20.04+, RHEL and UBI 8+ and Amazon Linux 2023, but not Amazon Linux 2 or CentOS 7. Alpine and other musl-based images are not supported. |
-| A POSIX shell at `/bin/sh`, with `sleep` | The instance starts with it to wait for the runtime and hand over to the daemon. If your shell is elsewhere, set `spec.runtime.shell`. |
+| A POSIX shell at `/bin/sh`, with `sleep` | The instance starts with it to wait for the runtime and hand over to the daemon, and the agents' launchers run with it. If your shell is elsewhere, set `spec.runtime.shell`. |
 | The `sh.plural.devbox/contract=v1` label | It marks the image as built for devboxes. |
 | `USER 1000:1000`, with `/home/dev` as its home | The daemon, the agents and the terminals run as this user, and the home is the instance's workspace volume. Declare the user numerically. |
 | `DEVBOX_TRUST_DIR` set to a directory owned by UID 1000 (for example `/var/lib/devbox/trust`) | The daemon writes the CA bundle there, including the CA of the egress proxy. |

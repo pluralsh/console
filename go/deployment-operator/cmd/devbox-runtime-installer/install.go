@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"unicode"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/runtimemanifest"
 )
@@ -49,7 +50,7 @@ type result struct {
 
 // install installs the components the agents (and the browser) need from the payload in src into
 // <dst>/components, makes <dst>/<install dir> hold their manifest and commands, and makes <dst>/ready name the
-// install ID (the digest and the agent selection):
+// install ID (the digest, the agent selection and the shell):
 //
 //	<dst>/ready                         the install ID the devbox container may exec
 //	<dst>/components/<name>-<hash>/     a component, named after its content
@@ -69,11 +70,15 @@ type result struct {
 // The home is the sandbox user's too, and they can swap any directory in it for a link while this runs, as root.
 // Every change in the home therefore goes through an os.Root opened on dst's parent, which never resolves a path
 // outside it; links planted before the run are replaced rather than followed.
-func install(src, dst, digest string, agents []string, browser bool) (result, error) {
+func install(src, dst, digest string, agents []string, browser bool, shell string) (result, error) {
 	if digest == "" || strings.ContainsAny(digest, "/\\ \t\n+") || strings.HasPrefix(digest, ".") {
 		return result{}, fmt.Errorf("invalid runtime digest %q", digest)
 	}
-	id := runtimemanifest.InstallID(digest, agents, browser)
+	// It is a launcher's #! line, as spec.runtime.shell's pattern allows.
+	if !path.IsAbs(shell) || strings.ContainsFunc(shell, unicode.IsSpace) {
+		return result{}, fmt.Errorf("invalid shell %q", shell)
+	}
+	id := runtimemanifest.InstallID(digest, agents, browser, shell)
 	name := runtimemanifest.InstallDirName(id)
 	res := result{Action: "kept", ID: id, Dir: filepath.Join(dst, name)}
 
@@ -107,7 +112,7 @@ func install(src, dst, digest string, agents []string, browser bool) (result, er
 	if res.Copied, res.Bytes, err = in.installComponents(compRoot, res.Components, dirs); err != nil {
 		return res, err
 	}
-	changed, err := in.publishRuntime(filepath.Join(base, name), runtimeFiles(m, res.Components, dirs))
+	changed, err := in.publishRuntime(filepath.Join(base, name), runtimeFiles(m, res.Components, dirs, shell))
 	if err != nil {
 		return res, err
 	}
@@ -259,7 +264,7 @@ type runtimeFile struct {
 }
 
 // runtimeFiles is what an installed runtime's directory holds, keyed by path relative to it.
-func runtimeFiles(m *runtimemanifest.Manifest, components []string, dirs map[string]string) map[string]runtimeFile {
+func runtimeFiles(m *runtimemanifest.Manifest, components []string, dirs map[string]string, shell string) map[string]runtimeFile {
 	fromRuntime := func(c string) string { return path.Join("..", componentsDir, dirs[c]) }
 	// A Manifest always marshals.
 	data, _ := json.MarshalIndent(m.Installed(components, fromRuntime), "", "  ")
@@ -278,20 +283,20 @@ func runtimeFiles(m *runtimemanifest.Manifest, components []string, dirs map[str
 				continue
 			}
 			ic, ib, _ := m.Interpreter(comp, b)
-			files[name] = runtimeFile{Data: launcher(path.Join("..", fromRuntime(ic), ib.Path), target)}
+			files[name] = runtimeFile{Data: launcher(shell, path.Join("..", fromRuntime(ic), ib.Path), target)}
 		}
 	}
 	return files
 }
 
-// launcher is a script command: POSIX sh, which every environment image has, that runs the script with the
-// runtime's interpreter by paths relative to its own, so it works wherever the home is mounted (but not through
-// a link to it elsewhere). Manifest validation keeps the paths free of characters sh would interpret.
-func launcher(interpreter, script string) []byte {
-	return fmt.Appendf(nil, `#!/bin/sh
+// launcher is a script command for the environment image's POSIX shell that runs the script with the runtime's
+// interpreter by paths relative to its own, so it works wherever the home is mounted (but not through a link to
+// it elsewhere). Manifest validation keeps the paths free of characters sh would interpret.
+func launcher(shell, interpreter, script string) []byte {
+	return fmt.Appendf(nil, `#!%s
 case $0 in */*) d=${0%%/*} ;; *) d=. ;; esac
 exec "$d/%s" "$d/%s" "$@"
-`, interpreter, script)
+`, shell, interpreter, script)
 }
 
 // runtimeMatches reports whether dir holds exactly the files want describes.

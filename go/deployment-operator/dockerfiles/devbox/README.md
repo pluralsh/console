@@ -182,7 +182,7 @@ resolves the image; the rest fails the golden boot or its agent probe.
 
 | What | Value |
 |---|---|
-| Shell | A POSIX shell at `/bin/sh` (`spec.runtime.shell` if it is elsewhere), with `sleep` on `PATH`. It starts the daemon; nothing else is needed from it |
+| Shell | A POSIX shell at `/bin/sh` (`spec.runtime.shell` if it is elsewhere), with `sleep` on `PATH`. It starts the daemon, and the agents' launchers run with it |
 | User | `dev` (1000:1000), declared numerically (`USER 1000:1000`), cwd `/home/dev` |
 | Listen | `:80`; the daemon serves `GET /readyz` there |
 | Labels | `sh.plural.devbox/contract=v1`, `sh.plural.devbox/flavor` (`minimal`, `fat`, `base-ubuntu`, `base-ubi` or your own) |

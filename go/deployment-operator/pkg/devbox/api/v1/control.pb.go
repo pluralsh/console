@@ -752,8 +752,11 @@ type RebaseInstanceRequest struct {
 	// The runner revision to move to. Zero is the runner's current revision.
 	TargetRevision int64 `protobuf:"varint,2,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
 	// Why, for the log and the instance's status message (e.g. "requested by the owner", "remediation <id>").
-	Reason        string     `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
-	RequestedBy   *Principal `protobuf:"bytes,4,opt,name=requested_by,json=requestedBy,proto3" json:"requested_by,omitempty"`
+	Reason      string     `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	RequestedBy *Principal `protobuf:"bytes,4,opt,name=requested_by,json=requestedBy,proto3" json:"requested_by,omitempty"`
+	// Only move a running instance while it is idle, as the gateway sees it when the move starts: an instance in
+	// use is not restarted, and the response (or, after it was accepted, the update's outcome) says so.
+	OnlyIfIdle    bool `protobuf:"varint,5,opt,name=only_if_idle,json=onlyIfIdle,proto3" json:"only_if_idle,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -814,6 +817,13 @@ func (x *RebaseInstanceRequest) GetRequestedBy() *Principal {
 		return x.RequestedBy
 	}
 	return nil
+}
+
+func (x *RebaseInstanceRequest) GetOnlyIfIdle() bool {
+	if x != nil {
+		return x.OnlyIfIdle
+	}
+	return false
 }
 
 type RebaseInstanceResponse struct {
@@ -3471,13 +3481,15 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x121\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x19.devbox.v1.InstanceStatusR\x06status\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\"\xb2\x01\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"\xd4\x01\n" +
 	"\x15RebaseInstanceRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12'\n" +
 	"\x0ftarget_revision\x18\x02 \x01(\x03R\x0etargetRevision\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\x127\n" +
-	"\frequested_by\x18\x04 \x01(\v2\x14.devbox.v1.PrincipalR\vrequestedBy\"\xcb\x01\n" +
+	"\frequested_by\x18\x04 \x01(\v2\x14.devbox.v1.PrincipalR\vrequestedBy\x12 \n" +
+	"\fonly_if_idle\x18\x05 \x01(\bR\n" +
+	"onlyIfIdle\"\xcb\x01\n" +
 	"\x16RebaseInstanceResponse\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x1a\n" +

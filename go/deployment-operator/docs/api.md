@@ -716,6 +716,7 @@ _Validation:_
 _Appears in:_
 - [DevboxAgent](#devboxagent)
 - [DevboxAgentStatus](#devboxagentstatus)
+- [DevboxRevision](#devboxrevision)
 
 | Field | Description |
 | --- | --- |
@@ -1190,6 +1191,7 @@ _Appears in:_
 | `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS ZeroFS] <br />Optional: \{\} <br /> |
 | `homeStorageClass` _string_ | HomeStorageClass is the StorageClass of an external home, the runner's for every revision, so instances<br />can move between revisions that keep the same class and size. Unset on revisions from before that, which<br />each had their own class. |  | Optional: \{\} <br /> |
 | `homeSize` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | HomeSize is the capacity of an external home. |  | Optional: \{\} <br /> |
+| `agents` _[DevboxAgentType](#devboxagenttype) array_ | Agents are the agents of spec.agents this revision's runtime sidecar installs. An instance only moves to a<br />revision that still has the agents it was created with. Unset on revisions from before that. |  | Enum: [claude codex opencode gemini pi] <br />Optional: \{\} <br /> |
 | `homeSeed` _string_ | HomeSeed is the seed the golden boot's external home is captured into, which new instances' homes are cloned<br />from. |  | Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
 | `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
@@ -1310,7 +1312,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `shell` _string_ | Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with<br />it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then<br />execs the daemon. Defaults to /bin/sh. |  | Optional: \{\} <br />Pattern: `^/[^\s]+$` <br /> |
+| `shell` _string_ | Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with<br />it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then<br />execs the daemon, and the agents' launchers run with it. Defaults to /bin/sh. |  | Optional: \{\} <br />Pattern: `^/[^\s]+$` <br /> |
 
 
 #### DevboxSandboxClass

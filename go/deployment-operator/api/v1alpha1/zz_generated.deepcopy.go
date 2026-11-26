@@ -2010,6 +2010,11 @@ func (in *DevboxRevision) DeepCopyInto(out *DevboxRevision) {
 		x := (*in).DeepCopy()
 		*out = &x
 	}
+	if in.Agents != nil {
+		in, out := &in.Agents, &out.Agents
+		*out = make([]DevboxAgentType, len(*in))
+		copy(*out, *in)
+	}
 	if in.HomeSeed != nil {
 		in, out := &in.HomeSeed, &out.HomeSeed
 		*out = new(string)

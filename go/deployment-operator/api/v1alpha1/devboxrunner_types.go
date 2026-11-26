@@ -308,7 +308,7 @@ type DevboxSubstrate struct {
 type DevboxRuntime struct {
 	// Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with
 	// it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then
-	// execs the daemon. Defaults to /bin/sh.
+	// execs the daemon, and the agents' launchers run with it. Defaults to /bin/sh.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern=`^/[^\s]+$`
 	Shell *string `json:"shell,omitempty"`
@@ -410,6 +410,15 @@ func (s *DevboxRunnerSpec) GoldenBootTimeout() time.Duration {
 		d = s.BootstrapTimeout.Duration
 	}
 	return min(d, DevboxMaxBootstrapTimeout)
+}
+
+// AgentTypes are the types of spec.agents, which the runtime sidecar installs.
+func (s *DevboxRunnerSpec) AgentTypes() []DevboxAgentType {
+	types := make([]DevboxAgentType, len(s.Agents))
+	for i, a := range s.Agents {
+		types[i] = a.Type
+	}
+	return types
 }
 
 // HasGoldenBootWork reports whether the golden boot clones, installs or runs anything.
@@ -1072,6 +1081,10 @@ type DevboxRevision struct {
 	// HomeSize is the capacity of an external home.
 	// +kubebuilder:validation:Optional
 	HomeSize *resource.Quantity `json:"homeSize,omitempty"`
+	// Agents are the agents of spec.agents this revision's runtime sidecar installs. An instance only moves to a
+	// revision that still has the agents it was created with. Unset on revisions from before that.
+	// +kubebuilder:validation:Optional
+	Agents []DevboxAgentType `json:"agents,omitempty"`
 	// HomeSeed is the seed the golden boot's external home is captured into, which new instances' homes are cloned
 	// from.
 	// +kubebuilder:validation:Optional
