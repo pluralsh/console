@@ -31,6 +31,8 @@ const (
 type devboxWorkerPod struct {
 	pod    corev1.Pod
 	worker *ateapi.Worker
+	// warm is the gateway's warm actors on the worker, which aren't instances.
+	warm int64
 }
 
 func (p devboxWorkerPod) state() ateapi.WorkerState {
@@ -38,7 +40,7 @@ func (p devboxWorkerPod) state() ateapi.WorkerState {
 }
 
 func (p devboxWorkerPod) actors() int64 {
-	return int64(p.worker.GetStatus().GetAllocated().GetActors())
+	return max(int64(p.worker.GetStatus().GetAllocated().GetActors())-p.warm, 0)
 }
 
 func (p devboxWorkerPod) ready() bool {
@@ -78,9 +80,21 @@ func undurableSnapshotNodes(actors []*ateapi.Actor) map[string]bool {
 	return nodes
 }
 
+// warmActorsByWorker counts the gateway's warm actors on each worker. One lives for a single boot, so counting it
+// would scale the pool up for an instance that never comes, and that new worker would be warmed in turn.
+func warmActorsByWorker(actors []*ateapi.Actor) map[string]int64 {
+	out := map[string]int64{}
+	for _, actor := range actors {
+		if worker := actor.GetStatus().GetWorkerAssignment().GetWorker().GetName(); worker != "" && substrate.IsWarmActor(actor.GetMetadata().GetName()) {
+			out[worker]++
+		}
+	}
+	return out
+}
+
 // newDevboxPoolView classifies the pool's live pods. A drained, empty worker on a node in pinned is held rather
-// than removed, since its node holds undurable snapshots.
-func newDevboxPoolView(pods []corev1.Pod, workers []*ateapi.Worker, namespace, pool string, pinned map[string]bool) devboxPoolView {
+// than removed, since its node holds undurable snapshots. warm counts the warm actors on each worker by name.
+func newDevboxPoolView(pods []corev1.Pod, workers []*ateapi.Worker, namespace, pool string, pinned map[string]bool, warm map[string]int64) devboxPoolView {
 	byPod := map[string]*ateapi.Worker{}
 	for _, w := range workers {
 		if w.GetWorkerNamespace() == namespace && w.GetWorkerPool() == pool {
@@ -94,6 +108,7 @@ func newDevboxPoolView(pods []corev1.Pod, workers []*ateapi.Worker, namespace, p
 			continue
 		}
 		p := devboxWorkerPod{pod: pod, worker: byPod[string(pod.UID)]}
+		p.warm = warm[p.worker.GetMetadata().GetName()]
 		switch {
 		case p.state() == ateapi.WorkerState_WORKER_STATE_DRAINING && p.actors() == 0 && !pinned[pod.Spec.NodeName]:
 			view.drainedIdle = append(view.drainedIdle, p)
@@ -173,15 +188,17 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, api su
 		return current, fmt.Errorf("listing Substrate workers: %w", err)
 	}
 	var pinned map[string]bool
+	var warm map[string]int64
 	if atespace := lo.FromPtr(runner.Status.Atespace); atespace != "" {
 		actors, err := api.ListActors(ctx, atespace)
 		if err != nil {
 			return current, fmt.Errorf("listing actors: %w", err)
 		}
 		pinned = undurableSnapshotNodes(actors)
+		warm = warmActorsByWorker(actors)
 	}
 
-	view := newDevboxPoolView(pods.Items, workers, pool.GetNamespace(), pool.GetName(), pinned)
+	view := newDevboxPoolView(pods.Items, workers, pool.GetNamespace(), pool.GetName(), pinned, warm)
 	additional := lo.SliceToMap(runner.Status.AdditionalWorkerPools, func(p string) (string, bool) { return p, true })
 	additionalFree := additionalFreeInstances(workers, additional, class, capacity)
 	desired := desiredDevboxWorkers(as, capacity.PerWorker, view.used(), additionalFree)

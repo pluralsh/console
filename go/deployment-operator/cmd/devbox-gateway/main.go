@@ -41,6 +41,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/prober"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/router"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/tunnel"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/warmer"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
@@ -88,6 +89,7 @@ type options struct {
 	minIdle        int
 	logLevel       string
 	insecureEgress bool
+	warmNodes      bool
 	showVersion    bool
 }
 
@@ -101,6 +103,13 @@ func env(k, def string) string {
 func envBool(k string) bool {
 	v, _ := strconv.ParseBool(os.Getenv(k))
 	return v
+}
+
+func envBoolOr(k string, def bool) bool {
+	if v, err := strconv.ParseBool(os.Getenv(k)); err == nil {
+		return v
+	}
+	return def
 }
 
 func envInt(k string, def int) int {
@@ -147,6 +156,7 @@ func register(fs *flag.FlagSet) *options {
 	fs.IntVar(&o.minIdle, "min-idle-tunnels", envInt("DEVBOX_MIN_IDLE_TUNNELS", tunnel.DefaultMinIdle), "idle KAS tunnels to keep open (DEVBOX_MIN_IDLE_TUNNELS)")
 	fs.StringVar(&o.logLevel, "log-level", env("DEVBOX_LOG_LEVEL", "info"), "debug, info, warn or error (DEVBOX_LOG_LEVEL)")
 	fs.BoolVar(&o.insecureEgress, "insecure-egress-listeners", envBool("DEVBOX_INSECURE_EGRESS_LISTENERS"), "serve the credential provider and ext_proc without mTLS; local development only")
+	fs.BoolVar(&o.warmNodes, "warm-nodes", envBoolOr("DEVBOX_WARM_NODES", true), "boot a throwaway actor of each template on new nodes so they pull its image before instances resume there (DEVBOX_WARM_NODES)")
 	fs.BoolVar(&o.showVersion, "version", false, "print the version and exit")
 	return o
 }
@@ -392,6 +402,10 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	g.Go(func() error { return serveMCPPort(gctx, o, gw, mcpHandler, log) })
 	if prb != nil {
 		g.Go(func() error { return prb.Run(gctx) })
+	}
+	if o.warmNodes {
+		wm := warmer.New(warmer.Config{}, warmer.Deps{Actors: ate, Runners: runners, Log: log.WithName("warmer")})
+		g.Go(func() error { return wm.Run(gctx) })
 	}
 	g.Go(func() error { return serveMetrics(gctx, o.metricsAddr) })
 	log.Info("devbox-gateway started", "version", version, "kas", o.kasURL, "gateway", gatewayURL)

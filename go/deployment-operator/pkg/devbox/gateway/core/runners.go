@@ -197,6 +197,19 @@ func (k *KubeRunners) ByAtespace(ctx context.Context, atespace string) (*Runner,
 	return r, nil
 }
 
+// List returns every DevboxRunner, without its secret env.
+func (k *KubeRunners) List(ctx context.Context) ([]*Runner, error) {
+	list := &v1alpha1.DevboxRunnerList{}
+	if err := k.Client.List(ctx, list); err != nil {
+		return nil, fmt.Errorf("listing devbox runners: %w", err)
+	}
+	out := make([]*Runner, 0, len(list.Items))
+	for i := range list.Items {
+		out = append(out, RunnerFromCRD(&list.Items[i]))
+	}
+	return out, nil
+}
+
 // Invalidate drops a cached runner.
 func (k *KubeRunners) Invalidate(name string) {
 	k.mu.Lock()

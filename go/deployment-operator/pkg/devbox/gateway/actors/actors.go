@@ -34,6 +34,7 @@ const (
 
 	pageSize     = 500
 	pollInterval = time.Second
+	capacityWait = time.Minute
 )
 
 // Ref names an actor or tag.
@@ -56,10 +57,11 @@ func ParseRef(s, defaultAtespace string) Ref {
 
 // Client wraps substrate.ateapi.v1.Control.
 type Client struct {
-	control ateapi.ControlClient
-	conn    *grpc.ClientConn
-	poll    time.Duration
-	backoff time.Duration
+	control      ateapi.ControlClient
+	conn         *grpc.ClientConn
+	poll         time.Duration
+	backoff      time.Duration
+	capacityWait time.Duration
 }
 
 // Dial connects to ate-api-server like substrate.Dial: TLS with the servicedns CA bundle, plus the projected
@@ -93,7 +95,7 @@ func Dial(cfg substrate.Config) (*Client, error) {
 
 // New wraps an existing Control client.
 func New(control ateapi.ControlClient) *Client {
-	return &Client{control: control, poll: pollInterval, backoff: retryBackoff}
+	return &Client{control: control, poll: pollInterval, backoff: retryBackoff, capacityWait: capacityWait}
 }
 
 // WithPollInterval sets how often the Wait* helpers poll and, at most, how long Suspend and Resume back off
@@ -101,6 +103,12 @@ func New(control ateapi.ControlClient) *Client {
 func (c *Client) WithPollInterval(d time.Duration) *Client {
 	c.poll = d
 	c.backoff = min(c.backoff, d)
+	return c
+}
+
+// WithCapacityWait sets how long Resume keeps trying while no worker has room; tests shorten it.
+func (c *Client) WithCapacityWait(d time.Duration) *Client {
+	c.capacityWait = d
 	return c
 }
 
@@ -271,12 +279,23 @@ func transient(s ateapi.ActorState) bool {
 }
 
 // Resume resumes an actor, first finishing a suspend that was interrupted and reverting a crashed actor to its
-// last snapshot. It returns once Substrate accepted the resume; WaitState waits for RUNNING.
+// last snapshot. It returns once Substrate accepted the resume; WaitState waits for RUNNING. When no worker has
+// room it keeps trying for capacityWait, which outlasts a warm actor holding a pool's last slot.
 func (c *Client) Resume(ctx context.Context, ref Ref) error {
+	var full time.Time
 	return c.converge(ctx, func() (bool, error) {
 		_, err := c.control.ResumeActor(ctx, &ateapi.ResumeActorRequest{Actor: ref.object()})
 		if err == nil {
 			return true, nil
+		}
+		if status.Code(err) == codes.ResourceExhausted {
+			if full.IsZero() {
+				full = time.Now()
+			}
+			if time.Since(full) < c.capacityWait {
+				return false, status.Error(codes.Aborted, err.Error())
+			}
+			return false, err
 		}
 		if status.Code(err) != codes.FailedPrecondition && !retryable(err) {
 			return false, err
@@ -374,18 +393,29 @@ func (c *Client) ListActors(ctx context.Context, atespace string) ([]*ateapi.Act
 // DrainingWorkers returns the names of workers being drained: their actors get SIGTERM and must be suspended
 // synchronously within the drain window.
 func (c *Client) DrainingWorkers(ctx context.Context) (map[string]bool, error) {
+	workers, err := c.ListWorkers(ctx)
+	if err != nil {
+		return nil, err
+	}
 	out := map[string]bool{}
+	for _, w := range workers {
+		if w.GetStatus().GetState() == ateapi.WorkerState_WORKER_STATE_DRAINING {
+			out[w.GetMetadata().GetName()] = true
+		}
+	}
+	return out, nil
+}
+
+// ListWorkers returns every Substrate worker.
+func (c *Client) ListWorkers(ctx context.Context) ([]*ateapi.Worker, error) {
+	var out []*ateapi.Worker
 	token := ""
 	for {
 		resp, err := c.control.ListWorkers(ctx, &ateapi.ListWorkersRequest{Options: &ateapi.ListOptions{PageSize: pageSize, PageToken: token}})
 		if err != nil {
 			return nil, err
 		}
-		for _, w := range resp.GetWorkers() {
-			if w.GetStatus().GetState() == ateapi.WorkerState_WORKER_STATE_DRAINING {
-				out[w.GetMetadata().GetName()] = true
-			}
-		}
+		out = append(out, resp.GetWorkers()...)
 		if token = resp.GetNextPageToken(); token == "" {
 			return out, nil
 		}

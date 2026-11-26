@@ -170,6 +170,33 @@ func TestResumeRetriesAnOperationInFlight(t *testing.T) {
 	}
 }
 
+func TestResumeWaitsBrieflyForAWorkerWithRoom(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	c, fake := newClient(t)
+	ref := actors.Ref{Atespace: "rs-1", Name: "i-abc"}
+	if _, err := c.CreateActor(ctx, actors.Spec{Ref: ref, Template: "t"}); err != nil {
+		t.Fatal(err)
+	}
+	fake.FailResume = status.Error(codes.ResourceExhausted, "no worker that meets the constraints has room")
+	fake.FailResumeTimes = 2
+	if err := c.Resume(ctx, ref); err != nil {
+		t.Fatal(err)
+	}
+	if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("state = %s", got)
+	}
+
+	fake.SetState(ref.Atespace, ref.Name, ateapi.ActorState_ACTOR_STATE_SUSPENDED, "")
+	fake.FailResume, fake.FailResumeTimes = status.Error(codes.ResourceExhausted, "no worker that meets the constraints has room"), 0
+	if err := c.WithCapacityWait(30*time.Millisecond).Resume(ctx, ref); status.Code(err) != codes.ResourceExhausted {
+		t.Fatalf("resume with the pool full past the wait = %v", err)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("resume kept waiting past the capacity wait")
+	}
+}
+
 func TestResumeDoesNotRetryAHardFailure(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

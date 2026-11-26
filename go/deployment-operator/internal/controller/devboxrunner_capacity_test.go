@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -151,7 +152,7 @@ func TestDevboxPoolView(t *testing.T) {
 		testWorker("other", "starting", ateapi.WorkerState_WORKER_STATE_ACTIVE, 3),
 	}
 
-	view := newDevboxPoolView(pods, workers, "ns", "pool", map[string]bool{"node-pinned": true})
+	view := newDevboxPoolView(pods, workers, "ns", "pool", map[string]bool{"node-pinned": true}, nil)
 	names := func(ps []devboxWorkerPod) []string {
 		return lo.Map(ps, func(p devboxWorkerPod, _ int) string { return p.pod.Name })
 	}
@@ -159,6 +160,34 @@ func TestDevboxPoolView(t *testing.T) {
 	g.Expect(names(view.drainedIdle)).To(ConsistOf("drained"))
 	g.Expect(names(view.held)).To(ConsistOf("draining", "pinned", "lost"), "a drained worker whose node holds undurable snapshots is kept")
 	g.Expect(view.used()).To(Equal(int64(2)), "a worker of another pool sharing a pod UID is not counted")
+}
+
+func TestWarmActorsDontCountAsInstances(t *testing.T) {
+	g := NewWithT(t)
+	on := func(name, worker string) *ateapi.Actor {
+		a := &ateapi.Actor{Metadata: &ateapi.ResourceMetadata{Name: name}, Status: &ateapi.ActorStatus{}}
+		if worker != "" {
+			a.Status.WorkerAssignment = &ateapi.WorkerAssignment{Worker: &ateapi.ObjectRef{Name: worker}}
+		}
+		return a
+	}
+	warm := warmActorsByWorker([]*ateapi.Actor{
+		on(substrate.WarmActorPrefix+"1", "w-new"),
+		on(substrate.WarmActorPrefix+"2", ""),
+		on("dbx-instance", "w-busy"),
+	})
+	g.Expect(warm).To(Equal(map[string]int64{"w-new": 1}))
+
+	pods := []corev1.Pod{
+		{ObjectMeta: metav1.ObjectMeta{Name: "new", UID: "new"}},
+		{ObjectMeta: metav1.ObjectMeta{Name: "busy", UID: "busy"}},
+	}
+	workers := []*ateapi.Worker{
+		testWorker("pool", "new", ateapi.WorkerState_WORKER_STATE_ACTIVE, 1),
+		testWorker("pool", "busy", ateapi.WorkerState_WORKER_STATE_ACTIVE, 1),
+	}
+	view := newDevboxPoolView(pods, workers, "ns", "pool", nil, warm)
+	g.Expect(view.used()).To(Equal(int64(1)), "the warm actor on w-new isn't an instance")
 }
 
 func TestUndurableSnapshotNodes(t *testing.T) {
