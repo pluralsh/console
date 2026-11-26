@@ -261,18 +261,3 @@ export function devboxStreamSocketUrl(
 
 export const ticketSubprotocols = (ticket: DevboxStreamTicket) =>
   (ticket.subprotocols ?? []).filter((p): p is string => !!p)
-
-// The page loads in the instance's own browser, so the app sees localhost and its absolute URLs resolve.
-export function devboxBrowserUrl(target: string) {
-  const t = target.trim()
-  if (/^\d{2,5}$/.test(t))
-    return Number(t) <= 65535 ? `http://localhost:${t}` : null
-  try {
-    const url = new URL(/^[a-z]+:\/\//i.test(t) ? t : `http://${t}`)
-    return url.protocol === 'http:' || url.protocol === 'https:'
-      ? url.toString()
-      : null
-  } catch {
-    return null
-  }
-}

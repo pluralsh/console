@@ -9,6 +9,7 @@ import {
   Flex,
   GitCompareIcon,
   ICON_FRAME_ICON_SIZE,
+  IconFrame,
   Input,
   ListBoxItem,
   Modal,
@@ -379,21 +380,25 @@ export function DevboxInstanceHeader({
   )
 }
 
-// opens the instance browser in the main view, for boxes that run one
+// opens the instance browser in the side panel, for boxes that run one
 function BrowserButton({ instance }: { instance: DevboxInstanceFragment }) {
   const { featureFlags } = use(FeatureFlagContext)
-  const { openBrowser, browserOpen } = useDevboxPanel()
+  const { browserToPanel, browserInMain, isOpen, tab } = useDevboxPanel()
   if (!featureFlags.DevboxBrowser || !instance.devbox?.browser) return null
+  const shown = browserInMain || (isOpen && tab === 'browser')
+  const label = browserInMain
+    ? 'Move the browser to the sidebar'
+    : "View the box's browser"
   return (
-    <Button
-      small
-      secondary={!browserOpen}
-      startIcon={<MonitorIcon />}
-      aria-pressed={browserOpen}
-      onClick={openBrowser}
-    >
-      Browser
-    </Button>
+    <IconFrame
+      clickable
+      type={shown ? 'floating' : 'secondary'}
+      icon={<MonitorIcon />}
+      tooltip={label}
+      textValue={label}
+      aria-pressed={shown}
+      onClick={browserToPanel}
+    />
   )
 }
 

@@ -120,6 +120,31 @@ func TestPreviewNothingListening(t *testing.T) {
 	}
 }
 
+func TestStartFailsFastWithTheExitedProcessOutput(t *testing.T) {
+	b := New(Options{Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	s, err := b.spawn("chromium", "sh", "-c", "echo 'No usable sandbox!' >&2; exit 3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	begin := time.Now()
+	err = waitFor(func() bool { return false }, time.Now().Add(10*time.Second), []started{s})
+	if err == nil || !strings.Contains(err.Error(), "chromium exited") || !strings.Contains(err.Error(), "No usable sandbox!") {
+		t.Fatalf("err %v, want chromium's exit and output", err)
+	}
+	if time.Since(begin) > 5*time.Second {
+		t.Fatalf("waited %s for a process that had exited", time.Since(begin))
+	}
+}
+
+func TestTailKeepsTheLastBytes(t *testing.T) {
+	out := &tail{max: 4}
+	_, _ = out.Write([]byte("abc"))
+	_, _ = out.Write([]byte("defg"))
+	if got := out.String(); got != "defg" {
+		t.Fatalf("tail %q, want %q", got, "defg")
+	}
+}
+
 func TestBrowserStartStop(t *testing.T) {
 	for _, bin := range []string{"chromium", "Xvfb", "x11vnc"} {
 		if _, err := exec.LookPath(bin); err != nil {

@@ -1,21 +1,13 @@
 import { styledThemeDark } from '@pluralsh/design-system'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
-import { TopLevelSidePanelProvider } from 'components/layout/TopLevelSidePanelState'
-import { ReactNode } from 'react'
-import { MemoryRouter } from 'react-router-dom'
-import { ThemeProvider } from 'styled-components'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ThemeProvider } from 'styled-components'
 
 import { DevboxBrowserView } from './DevboxBrowserTab'
-import { useDevboxPanel } from './DevboxControlPanel'
 import { DevboxWorkspaceApi } from './devboxWorkspaceApi'
 
-vi.mock('components/ai/useLegacyAiChatEnabled', () => ({
-  useLegacyAiChatEnabled: () => false,
-}))
-
 const rfb = vi.hoisted(() => ({
+  connects: true,
   instances: [] as {
     url: string
     viewOnly: boolean
@@ -38,7 +30,7 @@ vi.mock('@novnc/novnc/lib/rfb', () => ({
       rfb.instances.push(this)
     }
     addEventListener(name: string, fn: () => void) {
-      if (name === 'connect') fn()
+      if (name === 'connect' && rfb.connects) fn()
     }
     disconnect() {}
     focus() {
@@ -54,24 +46,25 @@ const openStream = vi.fn(async () => ({
 
 const api = { openStream } as unknown as DevboxWorkspaceApi
 
-function renderView(
-  props: Partial<{
-    live: boolean
-    browserEnabled: boolean
-    api: DevboxWorkspaceApi
-    onClose: () => void
-  }> = {}
-) {
+const onMove = vi.fn()
+
+function renderView({
+  view = api,
+  live = true,
+  placement = 'panel',
+}: {
+  view?: DevboxWorkspaceApi
+  live?: boolean
+  placement?: 'panel' | 'main'
+} = {}) {
   return render(
     <ThemeProvider theme={styledThemeDark}>
-      <SimpleToastProvider>
-        <DevboxBrowserView
-          api={props.api ?? api}
-          live={props.live ?? true}
-          browserEnabled={props.browserEnabled ?? true}
-          onClose={props.onClose ?? vi.fn()}
-        />
-      </SimpleToastProvider>
+      <DevboxBrowserView
+        api={view}
+        live={live}
+        placement={placement}
+        onMove={onMove}
+      />
     </ThemeProvider>
   )
 }
@@ -81,12 +74,14 @@ describe('DevboxBrowserView', () => {
 
   beforeEach(() => {
     rfb.instances = []
+    rfb.connects = true
     openStream.mockClear()
+    onMove.mockClear()
     requestFullscreen.mockClear()
     HTMLElement.prototype.requestFullscreen = requestFullscreen
   })
 
-  it('opens a vnc stream and starts in control', async () => {
+  it('shows the browser in control, with no controls in the way', async () => {
     renderView()
     await waitFor(() =>
       expect(openStream).toHaveBeenCalledWith({ kind: 'vnc' })
@@ -94,76 +89,69 @@ describe('DevboxBrowserView', () => {
     await waitFor(() => expect(rfb.instances).toHaveLength(1))
     expect(rfb.instances[0].url).toContain('token=tok')
     expect(rfb.instances[0].viewOnly).toBe(false)
-    expect(screen.getByText('connected')).toBeTruthy()
+    await waitFor(() =>
+      expect(screen.queryByText(/Starting the box's browser/)).toBeNull()
+    )
+    expect(screen.queryByRole('textbox')).toBeNull()
+    expect(screen.queryByRole('switch')).toBeNull()
   })
 
-  it('returns to the session', () => {
-    const onClose = vi.fn()
-    renderView({ onClose, browserEnabled: false })
-    fireEvent.click(screen.getByRole('button', { name: 'Back to session' }))
-    expect(onClose).toHaveBeenCalled()
-    expect(openStream).not.toHaveBeenCalled()
+  it('says why the browser could not be reached, and reconnects', async () => {
+    openStream.mockRejectedValueOnce(
+      new Error('chromium exited (exit status 1): No usable sandbox!')
+    )
+    renderView()
+    expect(await screen.findByText(/No usable sandbox!/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Reconnect' }))
+    await waitFor(() => expect(openStream).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(rfb.instances).toHaveLength(1))
   })
 
-  it('clears the browser view', async () => {
-    function Harness() {
-      const { browserOpen, openBrowser, closeBrowser } = useDevboxPanel()
-      return (
-        <>
-          <button onClick={openBrowser}>Open browser</button>
-          <span>{browserOpen ? 'browser' : 'session'}</span>
-          {browserOpen && (
-            <DevboxBrowserView
-              api={api}
-              live
-              browserEnabled
-              onClose={closeBrowser}
-            />
-          )}
-        </>
-      )
-    }
-    render(shell(<Harness />))
-    fireEvent.click(screen.getByRole('button', { name: 'Open browser' }))
-    expect(screen.getByText('browser')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Back to session' }))
-    expect(screen.getByText('session')).toBeTruthy()
+  it('shows the browser starting until it connects', async () => {
+    rfb.connects = false
+    renderView()
+    await waitFor(() => expect(rfb.instances).toHaveLength(1))
+    expect(screen.getByText(/Starting the box's browser/)).toBeTruthy()
   })
 
   it('requests fullscreen and focuses the session', async () => {
     renderView()
     await waitFor(() => expect(rfb.instances).toHaveLength(1))
-    fireEvent.click(screen.getByRole('button', { name: 'View fullscreen' }))
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'View fullscreen' })
+    )
     await waitFor(() => expect(requestFullscreen).toHaveBeenCalled())
     await waitFor(() => expect(rfb.instances[0].focused).toBe(true))
   })
 
-  it('explains a box without a browser', () => {
-    renderView({ browserEnabled: false })
-    expect(screen.getByText(/doesn't run a browser/)).toBeTruthy()
-    expect(openStream).not.toHaveBeenCalled()
+  it('moves from the sidebar to the main view', async () => {
+    renderView()
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Open in main view' })
+    )
+    expect(onMove).toHaveBeenCalledTimes(1)
   })
 
-  it('explains an instance that is not running', () => {
+  it('moves from the main view back to the sidebar', async () => {
+    renderView({ placement: 'main' })
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Move to sidebar' })
+    )
+    expect(onMove).toHaveBeenCalledTimes(1)
+    expect(
+      screen.queryByRole('button', { name: 'Open in main view' })
+    ).toBeNull()
+  })
+
+  it('asks to resume a suspended box', () => {
     renderView({ live: false })
     expect(screen.getByText("Instance isn't running")).toBeTruthy()
     expect(openStream).not.toHaveBeenCalled()
   })
 
   it('explains when streams are unavailable', () => {
-    renderView({ api: {} })
+    renderView({ view: {} as DevboxWorkspaceApi })
     expect(screen.getByText('Browser unavailable')).toBeTruthy()
+    expect(openStream).not.toHaveBeenCalled()
   })
 })
-
-function shell(node: ReactNode) {
-  return (
-    <ThemeProvider theme={styledThemeDark}>
-      <SimpleToastProvider>
-        <MemoryRouter>
-          <TopLevelSidePanelProvider>{node}</TopLevelSidePanelProvider>
-        </MemoryRouter>
-      </SimpleToastProvider>
-    </ThemeProvider>
-  )
-}

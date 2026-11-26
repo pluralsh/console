@@ -1,88 +1,64 @@
 import type RFB from '@novnc/novnc/lib/rfb'
 import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
   Button,
-  CaretLeftIcon,
-  Chip,
-  CloseIcon,
   ExpandIcon,
-  Flex,
   IconFrame,
-  Input,
   ReloadIcon,
-  Switch,
+  ShrinkIcon,
+  Spinner,
 } from '@pluralsh/design-system'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { DevboxUnavailable } from './DevboxUnavailable'
 import {
-  devboxBrowserUrl,
   devboxStreamSocketUrl,
   DevboxWorkspaceApi,
   ticketSubprotocols,
 } from './devboxWorkspaceApi'
 
-type VncState = 'connecting' | 'connected' | 'disconnected'
+type VncState =
+  | { kind: 'connecting' }
+  | { kind: 'connected' }
+  | { kind: 'disconnected'; error?: string }
 type RfbClient = RFB & { focus?: (options?: FocusOptions) => void }
 
+export type DevboxBrowserPlacement = 'panel' | 'main'
+
+// the box's browser lives in the side panel, and can move to the main view and back
 export function DevboxBrowserView({
   api,
   live,
-  browserEnabled,
-  onClose,
+  placement,
+  onMove,
 }: {
   api: DevboxWorkspaceApi
   live: boolean
-  browserEnabled: boolean
-  onClose: () => void
+  placement: DevboxBrowserPlacement
+  onMove: () => void
 }) {
   return (
-    <ViewSC>
+    <ViewSC $placement={placement}>
       {!api.openStream ? (
-        <>
-          <BackButton onClose={onClose} />
-          <DevboxUnavailable
-            title="Browser unavailable"
-            message="Console doesn't serve devbox streams yet (openDevboxStream)."
-          />
-        </>
+        <DevboxUnavailable
+          title="Browser unavailable"
+          message="Console doesn't serve devbox streams yet (openDevboxStream)."
+        />
       ) : !live ? (
-        <>
-          <BackButton onClose={onClose} />
-          <DevboxUnavailable
-            title="Instance isn't running"
-            message="Resume the instance to view its browser."
-          />
-        </>
-      ) : browserEnabled ? (
-        <DevboxVnc
-          openStream={api.openStream}
-          onClose={onClose}
+        <DevboxUnavailable
+          title="Instance isn't running"
+          message="Resume the instance to view its browser."
         />
       ) : (
-        <>
-          <BackButton onClose={onClose} />
-          <CaptionP $color="text-xlight">
-            This box doesn't run a browser. Enable it in the box's spec to watch
-            the agent browse.
-          </CaptionP>
-        </>
+        <DevboxVnc
+          openStream={api.openStream}
+          placement={placement}
+          onMove={onMove}
+        />
       )}
     </ViewSC>
-  )
-}
-
-function BackButton({ onClose }: { onClose: () => void }) {
-  return (
-    <Button
-      small
-      secondary
-      startIcon={<CaretLeftIcon />}
-      onClick={onClose}
-    >
-      Back to session
-    </Button>
   )
 }
 
@@ -99,26 +75,28 @@ async function connectVnc(
   const rfb = new RFBClient(target, devboxStreamSocketUrl(ticket), {
     wsProtocols: protocols.length ? protocols : ['binary'],
   }) as RfbClient
-  // the session is 1280x800; scale it into the column and the full screen
+  // the session is 1280x800; scale it into the view and the full screen
   rfb.scaleViewport = true
   rfb.resizeSession = false
   rfb.viewOnly = false
-  rfb.addEventListener('connect', () => onState('connected'))
-  rfb.addEventListener('disconnect', () => onState('disconnected'))
+  rfb.addEventListener('connect', () => onState({ kind: 'connected' }))
+  rfb.addEventListener('disconnect', () => onState({ kind: 'disconnected' }))
   return rfb
 }
 
 function DevboxVnc({
   openStream,
-  onClose,
+  placement,
+  onMove,
 }: {
   openStream: NonNullable<DevboxWorkspaceApi['openStream']>
-  onClose: () => void
+  placement: DevboxBrowserPlacement
+  onMove: () => void
 }) {
+  const frameRef = useRef<HTMLDivElement>(null)
   const targetRef = useRef<HTMLDivElement>(null)
   const rfbRef = useRef<Nullable<RfbClient>>(null)
-  const [state, setState] = useState<VncState>('connecting')
-  const [control, setControl] = useState(true)
+  const [state, setState] = useState<VncState>({ kind: 'connecting' })
   const [fullscreen, setFullscreen] = useState(false)
   const [attempt, setAttempt] = useState(0)
 
@@ -133,8 +111,9 @@ function DevboxVnc({
           if (disposed) rfb.disconnect()
           else rfbRef.current = rfb
         })
-        .catch(() => {
-          if (!disposed) setState('disconnected')
+        .catch((e) => {
+          if (!disposed)
+            setState({ kind: 'disconnected', error: (e as Error).message })
         })
     return () => {
       disposed = true
@@ -144,156 +123,166 @@ function DevboxVnc({
   }, [openStream, attempt])
 
   useEffect(() => {
-    if (rfbRef.current) rfbRef.current.viewOnly = !control
-  }, [control, state])
-
-  useEffect(() => {
     const onChange = () =>
-      setFullscreen(document.fullscreenElement === targetRef.current)
+      setFullscreen(document.fullscreenElement === frameRef.current)
     document.addEventListener('fullscreenchange', onChange)
     return () => document.removeEventListener('fullscreenchange', onChange)
   }, [])
 
   const toggleFullscreen = () => {
-    const target = targetRef.current
-    if (!target) return
-    if (document.fullscreenElement === target) {
+    const frame = frameRef.current
+    if (!frame) return
+    if (document.fullscreenElement === frame) {
       document.exitFullscreen?.()
       return
     }
-    void target.requestFullscreen?.()?.then(() => rfbRef.current?.focus?.())
+    void frame.requestFullscreen?.()?.then(() => rfbRef.current?.focus?.())
   }
+  const fullscreenLabel = fullscreen ? 'Exit fullscreen' : 'View fullscreen'
 
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      flex={1}
-      height="100%"
-      minHeight={0}
-    >
-      <Flex
-        justify="space-between"
-        align="center"
-        gap="small"
-      >
-        <Flex
-          gap="small"
-          align="center"
-        >
-          <BackButton onClose={onClose} />
-          <Chip
-            size="small"
-            severity={state === 'connected' ? 'success' : 'warning'}
+    <>
+      <ToolbarSC>
+        {placement === 'main' ? (
+          <Button
+            small
+            secondary
+            startIcon={<ArrowRightIcon />}
+            onClick={onMove}
           >
-            {state}
-          </Chip>
-          <Switch
-            checked={control}
-            onChange={setControl}
-          >
-            Take control
-          </Switch>
-        </Flex>
-        <Flex
-          gap="small"
-          align="center"
-        >
-          <DevboxOpenInBrowser openStream={openStream} />
-          {state === 'disconnected' && (
-            <Button
-              small
-              tertiary
-              startIcon={<ReloadIcon />}
-              onClick={() => {
-                setState('connecting')
-                setAttempt((a) => a + 1)
-              }}
-            >
-              Reconnect
-            </Button>
-          )}
+            Move to sidebar
+          </Button>
+        ) : (
           <IconFrame
             clickable
-            textValue={fullscreen ? 'Exit fullscreen' : 'View fullscreen'}
-            icon={fullscreen ? <CloseIcon /> : <ExpandIcon />}
-            tooltip={fullscreen ? 'Exit fullscreen' : 'View fullscreen'}
-            onClick={toggleFullscreen}
+            textValue="Open in main view"
+            icon={<ArrowLeftIcon />}
+            tooltip="Open in main view"
+            onClick={onMove}
           />
-        </Flex>
-      </Flex>
-      <VncSC ref={targetRef} />
-    </Flex>
-  )
-}
-
-function DevboxOpenInBrowser({
-  openStream,
-}: {
-  openStream: NonNullable<DevboxWorkspaceApi['openStream']>
-}) {
-  const { popToast } = useSimpleToast()
-  const [target, setTarget] = useState('3000')
-  const [opening, setOpening] = useState(false)
-  const url = devboxBrowserUrl(target)
-
-  const open = () => {
-    if (!url) return
-    setOpening(true)
-    openStream({ kind: 'vnc', url })
-      .catch((e) =>
-        popToast({ content: (e as Error).message, severity: 'danger' })
-      )
-      .then(() => setOpening(false))
-  }
-
-  return (
-    <Flex
-      gap="small"
-      align="center"
-    >
-      <Input
-        aria-label="Port or URL to open in the browser"
-        placeholder="3000 or localhost:3000/path"
-        value={target}
-        width={260}
-        onChange={(e) => setTarget(e.currentTarget.value)}
-        onEnter={open}
-      />
-      <Button
-        small
-        secondary
-        disabled={!url}
-        loading={opening}
-        onClick={open}
+        )}
+        <IconFrame
+          clickable
+          disabled={state.kind !== 'connected'}
+          textValue={fullscreenLabel}
+          icon={fullscreen ? <ShrinkIcon /> : <ExpandIcon />}
+          tooltip={fullscreenLabel}
+          onClick={toggleFullscreen}
+        />
+      </ToolbarSC>
+      <FrameSC
+        ref={frameRef}
+        $placement={placement}
       >
-        Open in browser
-      </Button>
-    </Flex>
+        <VncSC ref={targetRef} />
+        {fullscreen && (
+          <FullscreenActionsSC>
+            <IconFrame
+              clickable
+              type="floating"
+              textValue="Exit fullscreen"
+              icon={<ShrinkIcon />}
+              tooltip="Exit fullscreen"
+              onClick={toggleFullscreen}
+            />
+          </FullscreenActionsSC>
+        )}
+        {state.kind !== 'connected' && (
+          <OverlaySC>
+            {state.kind === 'connecting' ? (
+              <>
+                <Spinner size={16} />
+                <CaptionP $color="text-light">
+                  Starting the box's browser…
+                </CaptionP>
+              </>
+            ) : (
+              <>
+                <CaptionP $color="text-light">
+                  {state.error
+                    ? `Couldn't reach the box's browser: ${state.error}`
+                    : 'The browser disconnected.'}
+                </CaptionP>
+                <Button
+                  small
+                  secondary
+                  startIcon={<ReloadIcon />}
+                  onClick={() => {
+                    setState({ kind: 'connecting' })
+                    setAttempt((a) => a + 1)
+                  }}
+                >
+                  Reconnect
+                </Button>
+              </>
+            )}
+          </OverlaySC>
+        )}
+      </FrameSC>
+    </>
   )
 }
 
-const ViewSC = styled.div(({ theme }) => ({
+const ViewSC = styled.div<{ $placement: DevboxBrowserPlacement }>(
+  ({ theme, $placement }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minHeight: 0,
+    minWidth: 0,
+    gap: theme.spacing.small,
+    padding: $placement === 'main' ? theme.spacing.medium : theme.spacing.small,
+  })
+)
+
+const ToolbarSC = styled.div(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.xsmall,
+  flexShrink: 0,
+}))
+
+const FrameSC = styled.div<{ $placement: DevboxBrowserPlacement }>(
+  ({ theme, $placement }) => ({
+    position: 'relative',
+    display: 'flex',
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+    borderRadius:
+      $placement === 'main'
+        ? theme.borderRadiuses.large
+        : theme.borderRadiuses.medium,
+    border: theme.borders.default,
+    backgroundColor: theme.colors['fill-zero'],
+    '&:fullscreen': {
+      border: 'none',
+      borderRadius: 0,
+    },
+  })
+)
+
+const VncSC = styled.div({
   flex: 1,
   minHeight: 0,
   minWidth: 0,
-  padding: theme.spacing.medium,
+})
+
+const FullscreenActionsSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing.small,
+  right: theme.spacing.small,
 }))
 
-const VncSC = styled.div(({ theme }) => ({
-  flex: 1,
-  minHeight: 0,
-  overflow: 'hidden',
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders.default,
-  backgroundColor: theme.colors['fill-zero'],
-  '&:fullscreen': {
-    width: '100%',
-    height: '100%',
-    border: 'none',
-    borderRadius: 0,
-  },
+const OverlaySC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: theme.spacing.small,
+  padding: theme.spacing.large,
+  textAlign: 'center',
 }))

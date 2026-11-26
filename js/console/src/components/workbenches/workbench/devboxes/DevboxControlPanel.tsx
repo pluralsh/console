@@ -1,6 +1,9 @@
 import {
+  Button,
   CliIcon,
   CloseIcon,
+  EmptyState,
+  MonitorIcon,
   GitCompareIcon,
   FolderIcon,
   IconFrame,
@@ -22,9 +25,11 @@ import {
   DevboxPullRequestFragment,
   useDevboxInstanceQuery,
 } from 'generated/graphql'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import {
   ReactElement,
   ReactNode,
+  use,
   useCallback,
   useEffect,
   useState,
@@ -40,6 +45,7 @@ import {
   WORKBENCH_DEVBOX_VIEW_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
+import { DevboxBrowserView } from './DevboxBrowserTab'
 import { useDevboxChangeStat } from './devboxChanges'
 import {
   DevboxDiffBlock,
@@ -57,7 +63,12 @@ import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 const SIDE_PANEL_TYPE: SidePanel = 'devbox'
 const OPEN_KEY = 'plural-devbox-panel-open'
 
-export type DevboxPanelTab = 'files' | 'changes' | 'prs' | 'terminal'
+export type DevboxPanelTab =
+  | 'files'
+  | 'changes'
+  | 'prs'
+  | 'terminal'
+  | 'browser'
 
 const PANEL_TABS: {
   key: DevboxPanelTab
@@ -68,10 +79,21 @@ const PANEL_TABS: {
   { key: 'changes', label: 'Changes', icon: <GitCompareIcon size={14} /> },
   { key: 'prs', label: 'Pull requests', icon: <PrIcon size={14} /> },
   { key: 'terminal', label: 'Terminal', icon: <CliIcon size={14} /> },
+  { key: 'browser', label: 'Browser', icon: <MonitorIcon size={14} /> },
 ]
 
 export const isPanelTab = (tab: Nullable<string>): tab is DevboxPanelTab =>
   PANEL_TABS.some((t) => t.key === tab)
+
+// the browser tab is only for boxes that run one
+function usePanelTabs(instance: Nullable<DevboxInstanceFragment>) {
+  const { featureFlags } = use(FeatureFlagContext)
+  return PANEL_TABS.filter(
+    (t) =>
+      t.key !== 'browser' ||
+      (featureFlags.DevboxBrowser && instance?.devbox?.browser)
+  )
+}
 
 const readOpen = () => localStorage.getItem(OPEN_KEY) !== 'false'
 
@@ -154,18 +176,27 @@ export function useDevboxPanel() {
     })
     setOpen(true)
   }
-  const openBrowser = () =>
+  // the browser shows in one place at a time, so moving it to the main view
+  // takes it out of the panel
+  const browserToMain = () =>
     update({
       [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: 'browser',
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: null,
       [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: null,
     })
-  const closeBrowser = () =>
-    update({ [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null })
+  const browserToPanel = () => {
+    update({
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: 'browser',
+      [WORKBENCH_DEVBOX_PR_QUERY_PARAM]: null,
+    })
+    setOpen(true)
+  }
 
   const file = params.get(WORKBENCH_DEVBOX_FILE_QUERY_PARAM)
   const change = params.get(WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM)
-  const browserOpen =
+  const browserInMain =
     params.get(WORKBENCH_DEVBOX_VIEW_QUERY_PARAM) === 'browser'
 
   return {
@@ -181,9 +212,9 @@ export function useDevboxPanel() {
     openFile,
     change,
     selectChange,
-    browserOpen,
-    openBrowser,
-    closeBrowser,
+    browserInMain,
+    browserToMain,
+    browserToPanel,
   }
 }
 
@@ -207,7 +238,7 @@ export function DevboxPanelRail({
     isInstanceLive(instance.status)
   )
   const { pullRequests, open } = useDevboxPullRequests(instance.id)
-  const tabs = PANEL_TABS
+  const tabs = usePanelTabs(instance)
   if (isOpen) return null
   return (
     <PanelRail
@@ -258,6 +289,9 @@ export function DevboxPanelContent() {
     selectFile,
     change,
     selectChange,
+    browserInMain,
+    browserToMain,
+    browserToPanel,
   } = useDevboxPanel()
 
   const [headerActions, setHeaderActions] =
@@ -265,7 +299,7 @@ export function DevboxPanelContent() {
 
   const changes = useDevboxChangeStat(instanceId || null, live)
   const { pullRequests } = useDevboxPullRequests(instanceId || null)
-  const tabs = PANEL_TABS
+  const tabs = usePanelTabs(instance)
   const active = tabs.find((t) => t.key === tab) ?? tabs[0]
 
   return (
@@ -316,7 +350,8 @@ export function DevboxPanelContent() {
           $flush={
             active.key === 'changes' ||
             active.key === 'files' ||
-            active.key === 'terminal'
+            active.key === 'terminal' ||
+            active.key === 'browser'
           }
         >
           {active.key === 'files' && (
@@ -351,6 +386,28 @@ export function DevboxPanelContent() {
               headerActions={headerActions}
             />
           )}
+          {active.key === 'browser' &&
+            (browserInMain ? (
+              <EmptyState
+                message="The browser is in the main view"
+                description="Move it back here to keep it beside the session."
+              >
+                <Button
+                  small
+                  secondary
+                  onClick={browserToPanel}
+                >
+                  Move to sidebar
+                </Button>
+              </EmptyState>
+            ) : (
+              <DevboxBrowserView
+                api={api}
+                live={live}
+                placement="panel"
+                onMove={browserToMain}
+              />
+            ))}
         </PanelBodySC>
       )}
     </SidePanelContent>

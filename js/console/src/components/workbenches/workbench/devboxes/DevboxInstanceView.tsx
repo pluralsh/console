@@ -133,8 +133,8 @@ export function DevboxInstanceView({
     change,
     selectChange,
     openFile,
-    browserOpen,
-    closeBrowser,
+    browserInMain,
+    browserToPanel,
   } = useDevboxPanel()
   const api = useDevboxWorkspaceApi(instanceId)
   useDevboxPresence(instanceId, live)
@@ -246,12 +246,15 @@ export function DevboxInstanceView({
             onImportSession={() => setImportOpen(true)}
           />
         </HeaderBarSC>
-        {live && browserOpen && featureFlags.DevboxBrowser ? (
+        {live &&
+        browserInMain &&
+        featureFlags.DevboxBrowser &&
+        instance.devbox?.browser ? (
           <DevboxBrowserView
             api={api}
             live={live}
-            browserEnabled={!!instance.devbox?.browser}
-            onClose={closeBrowser}
+            placement="main"
+            onMove={browserToPanel}
           />
         ) : live && change ? (
           <DevboxChangesViewer
