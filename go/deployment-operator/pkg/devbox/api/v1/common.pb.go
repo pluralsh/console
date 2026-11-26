@@ -567,6 +567,8 @@ const (
 	SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE  SuspendReason = 4
 	SuspendReason_SUSPEND_REASON_EVICTION             SuspendReason = 5
 	SuspendReason_SUSPEND_REASON_SNAPSHOT             SuspendReason = 6
+	// The workspace volume stopped taking writes; the gateway resumes the instance right after, remounting it.
+	SuspendReason_SUSPEND_REASON_HOME_UNAVAILABLE SuspendReason = 7
 )
 
 // Enum value maps for SuspendReason.
@@ -579,6 +581,7 @@ var (
 		4: "SUSPEND_REASON_DAEMON_UNRESPONSIVE",
 		5: "SUSPEND_REASON_EVICTION",
 		6: "SUSPEND_REASON_SNAPSHOT",
+		7: "SUSPEND_REASON_HOME_UNAVAILABLE",
 	}
 	SuspendReason_value = map[string]int32{
 		"SUSPEND_REASON_UNSPECIFIED":          0,
@@ -588,6 +591,7 @@ var (
 		"SUSPEND_REASON_DAEMON_UNRESPONSIVE":  4,
 		"SUSPEND_REASON_EVICTION":             5,
 		"SUSPEND_REASON_SNAPSHOT":             6,
+		"SUSPEND_REASON_HOME_UNAVAILABLE":     7,
 	}
 )
 
@@ -1685,7 +1689,7 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"#BUSY_REASON_KIND_INTERACTIVE_STREAM\x10\x04\x12!\n" +
 	"\x1dBUSY_REASON_KIND_VIEWER_LEASE\x10\x05\x12#\n" +
 	"\x1fBUSY_REASON_KIND_DEFERRAL_LEASE\x10\x06\x12(\n" +
-	"$BUSY_REASON_KIND_PENDING_INTERACTION\x10\a*\xec\x01\n" +
+	"$BUSY_REASON_KIND_PENDING_INTERACTION\x10\a*\x91\x02\n" +
 	"\rSuspendReason\x12\x1e\n" +
 	"\x1aSUSPEND_REASON_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13SUSPEND_REASON_IDLE\x10\x01\x12\x17\n" +
@@ -1693,7 +1697,8 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"#SUSPEND_REASON_MAX_CONTINUOUS_AWAKE\x10\x03\x12&\n" +
 	"\"SUSPEND_REASON_DAEMON_UNRESPONSIVE\x10\x04\x12\x1b\n" +
 	"\x17SUSPEND_REASON_EVICTION\x10\x05\x12\x1b\n" +
-	"\x17SUSPEND_REASON_SNAPSHOT\x10\x06BOZMgithub.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1b\x06proto3"
+	"\x17SUSPEND_REASON_SNAPSHOT\x10\x06\x12#\n" +
+	"\x1fSUSPEND_REASON_HOME_UNAVAILABLE\x10\aBOZMgithub.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1b\x06proto3"
 
 var (
 	file_devbox_v1_common_proto_rawDescOnce sync.Once

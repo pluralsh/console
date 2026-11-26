@@ -144,6 +144,10 @@ spec:
     metadata:
       labels:
         app: devbox-zerofs-node
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9821"
+        prometheus.io/path: /metrics
     spec:
       serviceAccountName: devbox-zerofs
       priorityClassName: {{ $z.node.priorityClassName }}
@@ -176,7 +180,9 @@ spec:
             - --cache-disk-gb={{ $z.node.cacheDiskGB }}
             - --cache-memory-gb={{ $z.node.cacheMemoryGB }}
             - --nbds-max={{ $z.node.nbdsMax }}
-            - --mount-options={{ $z.node.mountOptions }}
+            {{- with $z.node.mountOptions }}
+            - --mount-options={{ . }}
+            {{- end }}
             {{- range $z.node.nbdClientFlags }}
             - --nbd-client-flag={{ . }}
             {{- end }}

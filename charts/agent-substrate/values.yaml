@@ -405,8 +405,9 @@ zerofs:
       - "600"
       - -block-size
       - "4096"
-    # -- ext4 mount options. discard returns freed blocks to the bucket as they're freed.
-    mountOptions: discard
+    # -- ext4 mount options. Unstaging trims free blocks back from the bucket in one pass, which is much cheaper
+    # than discard trimming on every delete.
+    mountOptions: ""
     # -- Extra object_store options for every writer, e.g. {region: us-east-2}. allow_http is set for RustFS and
     # http:// S3 endpoints.
     objectStoreOptions: {}

@@ -279,7 +279,8 @@ func (d *Daemon) SubscribeEvents(req *devboxv1.SubscribeEventsRequest, stream gr
 			case <-t.C:
 				head := d.events.Head()
 				if err := send(&devboxv1.DaemonEvent{Offset: head, EmittedAt: timestamppb.Now(),
-					Event: &devboxv1.DaemonEvent_Heartbeat{Heartbeat: &devboxv1.DaemonHeartbeat{HeadOffset: head, Idle: d.idle.State()}}}); err != nil {
+					Event: &devboxv1.DaemonEvent_Heartbeat{Heartbeat: &devboxv1.DaemonHeartbeat{HeadOffset: head, Idle: d.idle.State(),
+						HomeError: d.home.error()}}}); err != nil {
 					cancel()
 					return
 				}

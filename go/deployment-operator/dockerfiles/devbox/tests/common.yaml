@@ -27,6 +27,8 @@ metadataTest:
       value: /bin/bash
     - key: DEVBOX_TRUST_DIR
       value: /var/lib/devbox/trust
+    - key: DEVBOX_SYSTEM_CA_BUNDLE
+      value: /var/lib/devbox/trust/system-ca.pem
     - key: DEVBOX_IDENTITY_DIR
       value: /run/plural/identity
     - key: DEVBOX_CHROMIUM
@@ -35,21 +37,39 @@ metadataTest:
       value: ":99"
     - key: SSL_CERT_FILE
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: NODE_EXTRA_CA_CERTS
-      value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: REQUESTS_CA_BUNDLE
-      value: /var/lib/devbox/trust/ca-bundle.pem
     - key: CURL_CA_BUNDLE
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: GIT_SSL_CAINFO
       value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: AWS_CA_BUNDLE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: NODE_EXTRA_CA_CERTS
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: NPM_CONFIG_CAFILE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: YARN_CAFILE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: YARN_HTTPS_CA_FILE_PATH
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: DENO_CERT
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: REQUESTS_CA_BUNDLE
+      value: /var/lib/devbox/trust/ca-bundle.pem
     - key: PIP_CERT
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: AWS_CA_BUNDLE
+    - key: TWINE_CERT
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: CONDA_SSL_VERIFY
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: CARGO_HTTP_CAINFO
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE
+    - key: HEX_CACERTS_PATH
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: BUNDLE_SSL_CA_CERT
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: NIX_SSL_CERT_FILE
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: PATH
       value: "^/home/dev/.local/share/mise/shims:/home/dev/.local/bin:"
@@ -125,6 +145,14 @@ fileExistenceTests:
 # before the command runs, so these scripts avoid shell variables. Go regexps
 # need (?m) for ^ and $ to match around the trailing newline.
 commandTests:
+  - name: system CA bundle is the devbox trust bundle
+    command: readlink
+    args: ["/etc/ssl/certs/ca-certificates.crt"]
+    expectedOutput: ["(?m)^/var/lib/devbox/trust/ca-bundle.pem$"]
+  - name: trust bundle and system roots are dev-writable files
+    command: stat
+    args: ["-c", "%F %u", "/var/lib/devbox/trust/ca-bundle.pem", "/var/lib/devbox/trust/system-ca.pem"]
+    expectedOutput: ["(?m)^regular file 1000\\nregular file 1000$"]
   - name: dev is UID 1000 with home /home/dev
     command: getent
     args: ["passwd", "dev"]

@@ -1,6 +1,8 @@
 package zerofs
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -141,5 +143,34 @@ func TestFreeNBDSkipsConnectedDevices(t *testing.T) {
 	device("nbd10", "8", false)
 	if _, err := freeNBD(sys, held); err == nil || !strings.Contains(err.Error(), "nbds_max") {
 		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestRemoveEmptyLostFound(t *testing.T) {
+	root := t.TempDir()
+	lostFound := filepath.Join(root, "lost+found")
+	if err := os.Mkdir(lostFound, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := removeEmptyLostFound(root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(lostFound); !errors.Is(err, fs.ErrNotExist) {
+		t.Fatalf("an empty lost+found survived: %v", err)
+	}
+	// Staging a home without one, as every stage after the first does.
+	if err := removeEmptyLostFound(root); err != nil {
+		t.Fatal(err)
+	}
+
+	// What e2fsck placed there is kept.
+	if err := os.MkdirAll(filepath.Join(lostFound, "#12"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := removeEmptyLostFound(root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(lostFound, "#12")); err != nil {
+		t.Fatalf("a lost+found holding orphans was removed: %v", err)
 	}
 }

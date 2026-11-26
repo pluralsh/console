@@ -64,6 +64,8 @@ defmodule Console.Devboxes.ThreadsTest do
       expect(Control.Test, :create_thread, fn _, _, _ -> {:error, :not_connected} end)
 
       {:error, %{extensions: %{code: "CLUSTER_OFFLINE"}}} = Threads.create_thread(%{}, inst.id, inst.user)
+
+      [%{status: :deleted}] = Console.Repo.all(DevboxInstanceSession.for_instance(inst.id))
     end
   end
 

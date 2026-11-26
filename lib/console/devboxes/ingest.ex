@@ -321,7 +321,7 @@ defmodule Console.Devboxes.Ingest do
       kind: enum(attrs[:kind], "session_kind_"),
       parent_acp_session_id: blank(attrs[:parent_session_id]),
       agent: enum(attrs[:agent], "agent_type_"),
-      title: blank(attrs[:title]),
+      title: title(attrs[:title]),
       cwd: blank(attrs[:cwd]) |> relative_cwd(),
       worktree_repos: attrs[:worktree_repos],
       status: enum(attrs[:status], "thread_status_"),
@@ -440,7 +440,7 @@ defmodule Console.Devboxes.Ingest do
       tool_call_id: blank(attrs[:tool_call_id]),
       kind: interaction_kind(attrs[:kind]),
       state: enum(attrs[:state], "interaction_state_"),
-      title: blank(attrs[:title]),
+      title: title(attrs[:title]),
       message: blank(Acp.get(elicitation, :message)),
       requested_schema: mapify(Acp.get(elicitation, :requested_schema)),
       url: blank(Acp.get(elicitation, :url)),
@@ -923,6 +923,9 @@ defmodule Console.Devboxes.Ingest do
 
   defp blank(""), do: nil
   defp blank(v), do: v
+
+  defp title(v) when is_binary(v) and v != "", do: String.slice(v, 0, 255)
+  defp title(_), do: nil
 
   defp drop_nils(map), do: Map.reject(map, fn {_, v} -> is_nil(v) end)
 end

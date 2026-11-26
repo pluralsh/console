@@ -255,6 +255,8 @@ enum SuspendReason {
   SUSPEND_REASON_DAEMON_UNRESPONSIVE = 4;
   SUSPEND_REASON_EVICTION = 5;
   SUSPEND_REASON_SNAPSHOT = 6;
+  // The workspace volume stopped taking writes; the gateway resumes the instance right after, remounting it.
+  SUSPEND_REASON_HOME_UNAVAILABLE = 7;
 }
 
 // AgentLaunch configures one agent connection in an instance. Billing is fixed per agent connection because the

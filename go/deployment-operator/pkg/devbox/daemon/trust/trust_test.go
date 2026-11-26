@@ -63,3 +63,30 @@ func TestBuildReplacesSymlinkAndDedupes(t *testing.T) {
 		t.Fatal("bundle not parseable")
 	}
 }
+
+func TestTheImageSetsEveryTrustVariable(t *testing.T) {
+	images := filepath.Join("..", "..", "..", "..", "dockerfiles", "devbox")
+	read := func(rel string) string {
+		data, err := os.ReadFile(filepath.Join(images, rel))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(data)
+	}
+	dockerfile, sudoers, tests := read("minimal.Dockerfile"), read("rootfs/minimal/etc/sudoers.d/dev"), read("tests/common.yaml")
+	kept := map[string]bool{}
+	for _, f := range strings.FieldsFunc(sudoers, func(r rune) bool { return r == ' ' || r == '"' || r == '\n' }) {
+		kept[f] = true
+	}
+	for _, k := range EnvVars {
+		if !strings.Contains(dockerfile, k+"=/var/lib/devbox/trust/ca-bundle.pem") {
+			t.Errorf("minimal.Dockerfile doesn't point %s at the trust bundle", k)
+		}
+		if !kept[k] {
+			t.Errorf("sudoers.d/dev doesn't keep %s", k)
+		}
+		if !strings.Contains(tests, "key: "+k+"\n") {
+			t.Errorf("tests/common.yaml doesn't check %s", k)
+		}
+	}
+}

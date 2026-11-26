@@ -19,8 +19,31 @@ const DefaultSystemBundle = "/etc/ssl/certs/ca-certificates.crt"
 // DefaultEgressCAGlobs are where Substrate projects the egress trust bundle.
 var DefaultEgressCAGlobs = []string{"/run/ate/egress-trust-bundle/*.pem", "/var/run/ate/egress-trust-bundle/*.pem"}
 
-// EnvVars are the variables that must point at the bundle.
-var EnvVars = []string{"SSL_CERT_FILE", "NODE_EXTRA_CA_CERTS", "REQUESTS_CA_BUNDLE", "GIT_SSL_CAINFO", "CURL_CA_BUNDLE", "AWS_CA_BUNDLE"}
+// EnvVars are the variables that must point at the bundle: OpenSSL's, and those of the tools that keep their own
+// trust store instead of reading it. Tools with no override read the system bundle, which the image links to
+// ours. The image's ENV, its sudoers env_keep and its structure tests list the same variables.
+var EnvVars = []string{
+	"SSL_CERT_FILE",
+	"CURL_CA_BUNDLE",
+	"GIT_SSL_CAINFO",
+	"AWS_CA_BUNDLE",
+	"CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE",
+	// Node, npm and pnpm; Deno 2.8+ and newer Bun read NODE_EXTRA_CA_CERTS too.
+	"NODE_EXTRA_CA_CERTS",
+	"NPM_CONFIG_CAFILE",
+	"YARN_CAFILE",
+	"YARN_HTTPS_CA_FILE_PATH",
+	"DENO_CERT",
+	// Python: requests (pip, poetry), pip, twine, conda.
+	"REQUESTS_CA_BUNDLE",
+	"PIP_CERT",
+	"TWINE_CERT",
+	"CONDA_SSL_VERIFY",
+	"CARGO_HTTP_CAINFO",
+	"HEX_CACERTS_PATH",
+	"BUNDLE_SSL_CA_CERT",
+	"NIX_SSL_CERT_FILE",
+}
 
 // Build writes system + extra certificates to out (replacing a symlink with a file) and returns the number of
 // extra certificates added. Duplicate certificates are written once.

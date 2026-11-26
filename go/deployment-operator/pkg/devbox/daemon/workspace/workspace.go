@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc/codes"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
@@ -44,6 +45,8 @@ const (
 	maxCloneBackoff      = 20 * time.Second
 	// refetchTimeout bounds each git command refreshing a precloned repository on an instance's first boot.
 	refetchTimeout = 5 * time.Minute
+	// worktreeParallelism bounds the concurrent checkouts when a thread gets worktrees of many repositories.
+	worktreeParallelism = 4
 )
 
 // Options configure a Manager.
@@ -712,26 +715,35 @@ func (m *Manager) Worktrees(threadID string, repos []string) (string, error) {
 	if err := os.MkdirAll(base, 0o755); err != nil {
 		return "", err
 	}
-	ctx := context.Background()
-	var created []string
+	created := make([]string, 0, len(repos))
 	for _, name := range repos {
-		src := filepath.Join(m.opts.Home, name)
-		if strings.ContainsAny(name, "/\\") || !gitutil.IsRepo(src) {
+		if strings.ContainsAny(name, "/\\") || !gitutil.IsRepo(filepath.Join(m.opts.Home, name)) {
 			return "", derr.New(codes.InvalidArgument, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, "no checkout ~/"+name, nil)
 		}
-		dst := filepath.Join(base, name)
-		created = append(created, dst)
+		created = append(created, filepath.Join(base, name))
+	}
+	branch := WorktreeBranch(threadID)
+	ctx := context.Background()
+	var g errgroup.Group
+	g.SetLimit(worktreeParallelism)
+	for i, name := range repos {
+		src, dst := filepath.Join(m.opts.Home, name), created[i]
 		if gitutil.IsRepo(dst) {
 			continue
 		}
-		branch := WorktreeBranch(threadID)
-		args := []string{"worktree", "add", "--quiet", "-b", branch, dst}
-		if _, err := gitutil.Run(ctx, src, "rev-parse", "--verify", "-q", "refs/heads/"+branch); err == nil {
-			args = []string{"worktree", "add", "--quiet", dst, branch}
-		}
-		if _, err := gitutil.Run(ctx, src, args...); err != nil {
-			return "", derr.New(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, err.Error(), nil)
-		}
+		g.Go(func() error {
+			args := []string{"worktree", "add", "--quiet", "-b", branch, dst}
+			if _, err := gitutil.Run(ctx, src, "rev-parse", "--verify", "-q", "refs/heads/"+branch); err == nil {
+				args = []string{"worktree", "add", "--quiet", dst, branch}
+			}
+			if _, err := gitutil.Run(ctx, src, args...); err != nil {
+				return derr.New(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, err.Error(), nil)
+			}
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return "", err
 	}
 	for _, name := range []string{ProjectMD, "AGENTS.md", "CLAUDE.md", "GEMINI.md"} {
 		if err := linkIfAbsent(filepath.Join(base, name), filepath.Join(m.opts.Home, name)); err != nil {

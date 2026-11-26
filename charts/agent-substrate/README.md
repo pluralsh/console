@@ -299,6 +299,10 @@ home is its own [ZeroFS](https://www.zerofs.net) filesystem under
 `<zerofs.prefix>/homes/<volume>/` in the snapshot bucket (or `zerofs.storageUrl`), encrypted with
 the password in `devbox-zerofs-encryption`. The secrets hook generates that secret once, or you can
 supply your own with `zerofs.encryption.existingSecret`. Losing the password loses every home.
+Both pods reach the bucket as ServiceAccount `devbox-zerofs`. Give it its own workload identity
+with list, get, put and delete on the bucket: an EKS Pod Identity association, or
+`zerofs.serviceAccount.annotations` for IRSA or Workload Identity (`zerofs.azureClientId` for Azure).
+Without one, the pods fall back to the node's credentials, and CreateVolume fails with `AccessDenied`.
 
 - **The controller** (`devbox-zerofs-controller`, unprivileged) passes a home's size and owner to
   the node and deletes the home's objects when Substrate deletes the volume. Only ate-api-server can

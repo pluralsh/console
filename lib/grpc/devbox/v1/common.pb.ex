@@ -153,6 +153,7 @@ defmodule Devbox.V1.SuspendReason do
   field :SUSPEND_REASON_DAEMON_UNRESPONSIVE, 4
   field :SUSPEND_REASON_EVICTION, 5
   field :SUSPEND_REASON_SNAPSHOT, 6
+  field :SUSPEND_REASON_HOME_UNAVAILABLE, 7
 end
 
 defmodule Devbox.V1.AutonomyPolicy do

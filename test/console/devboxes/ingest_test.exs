@@ -309,6 +309,28 @@ defmodule Console.Devboxes.IngestTest do
       assert Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-sub").session_id == child.id
     end
 
+    test "it truncates overlong session and interaction titles instead of rejecting the batch" do
+      inst = insert(:devbox_instance)
+      thread = insert(:devbox_instance_session, instance: inst, acp_session_id: "parent")
+      long = String.duplicate("echo x; ", 100)
+
+      {:ok, %{sessions_applied: 1, interactions_applied: 1}} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [%{thread_id: thread.id, session_id: "parent", title: long, revision: 1}],
+        interactions: [%{
+          interaction_id: "int-long",
+          session_id: "parent",
+          kind: :INTERACTION_KIND_PERMISSION,
+          state: :INTERACTION_STATE_PENDING,
+          title: long,
+          revision: 1
+        }]
+      }, inst.devbox.cluster)
+
+      assert refetch(thread).title == String.slice(long, 0, 255)
+      assert Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-long").title == String.slice(long, 0, 255)
+    end
+
     test "it links a subagent indexed before its parent, in the same batch or a later one" do
       inst = insert(:devbox_instance)
       cluster = inst.devbox.cluster

@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -36,6 +37,9 @@ const (
 	cacheDir   = "cache"
 	// stoppedFile marks a volume whose writer flushed and exited cleanly when the plugin shut down.
 	stoppedFile = "stopped"
+	// writerOOMScoreAdj has the kernel kill nearly anything else on the node before a writer: a killed writer
+	// loses the writes it acknowledged but hadn't flushed, which the box's page cache believes are on disk.
+	writerOOMScoreAdj = -900
 )
 
 var nbdDevice = regexp.MustCompile(`^/dev/nbd[0-9]+$`)
@@ -60,7 +64,7 @@ type Manager struct {
 	// and its paths must fit a Unix socket address.
 	SocketDir string
 	Cache     CacheConfig
-	// MountOptions are the ext4 mount's data options, such as discard, which returns freed blocks to the bucket.
+	// MountOptions are the ext4 mount's data options. Unstage trims free blocks, so discard isn't needed.
 	MountOptions string
 	Mountinfo    string
 	SysBlock     string
@@ -70,6 +74,8 @@ type Manager struct {
 	writers map[string]*process
 	// attach serializes choosing a free NBD device and connecting it.
 	attach sync.Mutex
+	// writerExits counts writers that exited without being stopped.
+	writerExits atomic.Int64
 }
 
 type process struct {
@@ -144,6 +150,9 @@ func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err erro
 			return err
 		}
 	}
+	if err := removeEmptyLostFound(staging); err != nil {
+		m.Log.Error(err, "removing lost+found from the home", "volume", v.ID)
+	}
 	m.Log.Info("serving volume", "volume", v.ID, "device", dev, "formatted", formatted, "grown", grown)
 	return nil
 }
@@ -151,11 +160,20 @@ func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err erro
 // Unstage stops serving a volume so another node can open it, in the reverse order of Stage: unmount, which
 // writes back the page cache to the device; flush the writer to object storage; disconnect the device; stop the
 // writer. Every step must succeed before the next, and the volume's state is only removed once the writer has
-// exited cleanly, so a failed Unstage leaves everything in place for a retry.
+// exited cleanly, so a failed Unstage leaves everything in place for a retry. The home's free blocks are trimmed
+// first, in one pass rather than on every delete as the discard mount option would.
 func (m *Manager) Unstage(ctx context.Context, id, staging string) error {
 	if ok, err := m.Mounted(staging); err != nil {
 		return err
 	} else if ok {
+		if p := m.writer(id); p != nil && !p.exited() {
+			start := time.Now()
+			if err := trim(staging); err != nil {
+				m.Log.Error(err, "trimming the home's free blocks", "volume", id)
+			} else {
+				m.Log.Info("trimmed the home's free blocks", "volume", id, "took", time.Since(start))
+			}
+		}
 		if err := unmount(staging); err != nil {
 			return fmt.Errorf("unmounting %s: %w", staging, err)
 		}
@@ -290,6 +308,9 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 	if err := cmd.Start(); err != nil {
 		return s, fmt.Errorf("starting the writer: %w", err)
 	}
+	if err := setOOMScoreAdj(cmd.Process.Pid, writerOOMScoreAdj); err != nil {
+		m.Log.Info("couldn't lower the writer's OOM priority", "volume", id, "error", err.Error())
+	}
 	p := &process{cmd: cmd, done: make(chan struct{})}
 	m.mu.Lock()
 	if m.writers == nil {
@@ -304,7 +325,8 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 		m.mu.Unlock()
 		close(p.done)
 		if !stopping {
-			m.Log.Error(p.err, "writer exited while serving a volume", "volume", id)
+			m.writerExits.Add(1)
+			m.Log.Error(p.err, "writer exited while serving a volume; the box sees I/O errors until it's suspended", "volume", id)
 		}
 	}()
 
@@ -615,6 +637,17 @@ func (o Owner) apply(root string) error {
 		}
 	}
 	return nil
+}
+
+// removeEmptyLostFound removes the root-only lost+found mkfs.ext4 leaves at the root of the filesystem, which is
+// the home itself. ext4 doesn't need it; e2fsck recreates it if it has orphans to place, and then it isn't empty
+// and stays.
+func removeEmptyLostFound(root string) error {
+	err := os.Remove(filepath.Join(root, "lost+found"))
+	if err == nil || errors.Is(err, fs.ErrNotExist) || errors.Is(err, syscall.ENOTEMPTY) || errors.Is(err, syscall.EEXIST) {
+		return nil
+	}
+	return err
 }
 
 // waitFor polls cond until it holds, the process exits, or the timeout passes.

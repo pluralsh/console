@@ -31,6 +31,8 @@ defmodule Console.Devboxes.Control.Grpc do
   @timeout :timer.seconds(30)
   # the box writes, commits and pushes, and the writer may be an agent CLI
   @prepare_timeout :timer.minutes(6)
+  # a new thread gets a worktree of every repository before the agent's session/new
+  @thread_timeout :timer.minutes(2)
   @unavailable GRPC.Status.unavailable()
   @unimplemented GRPC.Status.unimplemented()
   @internal GRPC.Status.internal()
@@ -140,7 +142,7 @@ defmodule Console.Devboxes.Control.Grpc do
       resume_if_suspended: true
     }
 
-    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :create_thread, req),
+    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :create_thread, req, @thread_timeout),
          session_id = session && Proto.to_map(session.session_id),
          :ok <- first_prompt(inst, %{thread | acp_session_id: session_id}, opts) do
       {:ok, %{session_id: session_id}}
@@ -200,7 +202,7 @@ defmodule Console.Devboxes.Control.Grpc do
       title: Proto.str(target.user_title),
       resume_if_suspended: true
     }
-    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :fork_thread, req),
+    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :fork_thread, req, @thread_timeout),
       do: {:ok, %{session_id: session && Proto.to_map(session.session_id)}}
   end
 

@@ -503,6 +503,57 @@ func TestSuspendRequestedEvent(t *testing.T) {
 	}
 }
 
+func TestHomeErrorRemountsTheHome(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	homeSuspends := func() (n int) {
+		h.ingest.mu.Lock()
+		defer h.ingest.mu.Unlock()
+		for _, s := range h.ingest.statuses {
+			if s.GetSuspendReason() == devboxv1.SuspendReason_SUSPEND_REASON_HOME_UNAVAILABLE {
+				n++
+			}
+		}
+		return n
+	}
+	failing := func() {
+		h.daemon.events <- &devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Heartbeat{
+			Heartbeat: &devboxv1.DaemonHeartbeat{HomeError: "writing to the home: input/output error"}}}
+	}
+
+	failing()
+	h.eventually("suspended and resumed", func() bool {
+		inst.mu.Lock()
+		defer inst.mu.Unlock()
+		return !inst.homeRemounted.IsZero() && inst.rec.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING
+	})
+	if n := homeSuspends(); n != 1 {
+		t.Fatalf("home suspends = %d", n)
+	}
+	inst.mu.Lock()
+	cond := inst.conditions[homeCondition]
+	inst.mu.Unlock()
+	if cond.GetMessage() == "" {
+		t.Fatal("no home condition for console")
+	}
+
+	// The error the daemon reported before the suspend, until its next probe clears it.
+	failing()
+	time.Sleep(50 * time.Millisecond)
+	if n := homeSuspends(); n != 1 {
+		t.Fatalf("remounted again within the grace period: %d", n)
+	}
+
+	// Failing again soon after: suspended, not resumed into the same failure.
+	h.clock.advance(homeRemountGrace + time.Minute)
+	failing()
+	h.eventually("suspended", func() bool { return inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED })
+	time.Sleep(50 * time.Millisecond)
+	if st := inst.status(); st != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("status = %s", st)
+	}
+}
+
 func TestEvictionSuspendsSynchronously(t *testing.T) {
 	h := newHarness(t, nil)
 	inst := h.running("inst-1")

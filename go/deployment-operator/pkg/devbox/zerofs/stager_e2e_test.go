@@ -39,7 +39,6 @@ func TestStageRoundTrip(t *testing.T) {
 		StateRoot:          filepath.Join(root, "state"),
 		SocketDir:          "/run/zerofs-e2e",
 		Cache:              CacheConfig{DiskGB: 1, MemoryGB: 0.1},
-		MountOptions:       "discard",
 		Mountinfo:          "/proc/self/mountinfo",
 		SysBlock:           "/sys/block",
 		Log:                testr.New(t),
@@ -67,6 +66,9 @@ func TestStageRoundTrip(t *testing.T) {
 	st := info.Sys().(*syscall.Stat_t)
 	if info.Mode().Perm() != 0o750 || st.Uid != 1000 || st.Gid != 1000 {
 		t.Fatalf("home root is %v %d:%d", info.Mode().Perm(), st.Uid, st.Gid)
+	}
+	if _, err := os.Stat(filepath.Join(staging, "lost+found")); !os.IsNotExist(err) {
+		t.Fatalf("the home shows mkfs's lost+found: %v", err)
 	}
 	if err := binder.Bind(staging, target, false); err != nil {
 		t.Fatal(err)

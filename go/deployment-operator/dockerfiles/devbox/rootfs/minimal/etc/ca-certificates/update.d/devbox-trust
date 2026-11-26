@@ -1,0 +1,30 @@
+#!/bin/sh
+# Links the system CA bundle to the devbox trust bundle, which the daemon rebuilds at boot from the system roots
+# and the egress interception CA, so tools that only read the system bundle (Erlang's cacerts_get, rebar3, Bun's
+# installer, Dart, pixi) trust the egress gateway too. update-ca-certificates replaces the link with a fresh
+# bundle and then runs this hook, which keeps the fresh roots as the daemon's input and restores the link.
+set -eu
+
+trust=/var/lib/devbox/trust
+system=/etc/ssl/certs/ca-certificates.crt
+
+[ -d "$trust" ] || exit 0
+[ -f "$system" ] || exit 0
+[ -L "$system" ] && exit 0
+
+install -o 1000 -g 1000 -m 0644 "$system" "$trust/system-ca.pem"
+tmp=$(mktemp "$trust/.ca-bundle.XXXXXX")
+cat "$trust/system-ca.pem" > "$tmp"
+for dir in /run/ate/egress-trust-bundle /var/run/ate/egress-trust-bundle; do
+  found=
+  for f in "$dir"/*.pem; do
+    [ -f "$f" ] || continue
+    cat "$f" >> "$tmp"
+    found=1
+  done
+  if [ -n "$found" ]; then break; fi
+done
+chown 1000:1000 "$tmp"
+chmod 0644 "$tmp"
+mv -f "$tmp" "$trust/ca-bundle.pem"
+ln -sf "$trust/ca-bundle.pem" "$system"

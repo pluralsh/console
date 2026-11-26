@@ -250,6 +250,7 @@ func (f *forwarder) handle(ev *devboxv1.DaemonEvent, b *eventBatch) {
 		if hb.GetIdle() != nil {
 			f.setIdle(hb.GetIdle())
 		}
+		f.setHomeError(hb.GetHomeError())
 		return
 	}
 
@@ -328,6 +329,25 @@ func (f *forwarder) handle(ev *devboxv1.DaemonEvent, b *eventBatch) {
 			delete(inst.conditions, c.GetType())
 		}
 		inst.mu.Unlock()
+	}
+}
+
+// homeCondition is the condition type the daemon reports a failed home under, set from heartbeats too since its
+// event log lives on that home.
+const homeCondition = "home_unavailable"
+
+func (f *forwarder) setHomeError(msg string) {
+	inst := f.inst
+	inst.mu.Lock()
+	if msg == "" {
+		delete(inst.conditions, homeCondition)
+	} else {
+		inst.conditions[homeCondition] = &devboxv1.ErrorDetail{Message: msg,
+			Metadata: map[string]string{"type": homeCondition, "severity": "error"}}
+	}
+	inst.mu.Unlock()
+	if msg != "" {
+		f.g.remountHome(inst, msg)
 	}
 }
 
@@ -432,5 +452,52 @@ func (g *Gateway) requestSuspend(inst *Instance, reason devboxv1.SuspendReason) 
 		if _, err := g.suspend(ctx, inst, reason); err != nil {
 			g.log.Error(err, "suspending instance", "instance", inst.ID, "reason", reason)
 		}
+	})
+}
+
+var (
+	// homeRemountGrace is how long after remounting a home the gateway ignores home errors, while the daemon's
+	// next probes clear (or confirm) the one it reported before the suspend.
+	homeRemountGrace = 3 * time.Minute
+	// homeRemountBackoff is how long after remounting a home a new failure only suspends the instance, rather
+	// than resuming it into the same failure.
+	homeRemountBackoff = 15 * time.Minute
+)
+
+// remountHome suspends and resumes an instance whose daemon reports that its home stopped taking writes, once.
+// Suspending unmounts the workspace volume (restarting a dead ZeroFS writer to flush and release it) and resuming
+// mounts it afresh. What the box wrote after the failure is lost either way.
+func (g *Gateway) remountHome(inst *Instance, why string) {
+	now := g.now()
+	inst.mu.Lock()
+	since := now.Sub(inst.homeRemounted)
+	if inst.suspending || (!inst.homeRemounted.IsZero() && since < homeRemountGrace) {
+		inst.mu.Unlock()
+		return
+	}
+	inst.suspending = true
+	resume := inst.homeRemounted.IsZero() || since > homeRemountBackoff
+	inst.mu.Unlock()
+	g.goBackground(func(ctx context.Context) {
+		defer func() {
+			inst.mu.Lock()
+			inst.suspending = false
+			inst.mu.Unlock()
+		}()
+		g.log.Info("the box's home stopped taking writes; suspending it", "instance", inst.ID, "why", why, "resume", resume)
+		st, err := g.suspend(ctx, inst, devboxv1.SuspendReason_SUSPEND_REASON_HOME_UNAVAILABLE)
+		if err != nil {
+			g.log.Error(err, "suspending instance", "instance", inst.ID, "reason", devboxv1.SuspendReason_SUSPEND_REASON_HOME_UNAVAILABLE)
+			return
+		}
+		if !resume || st != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+			return
+		}
+		if _, err := g.resume(ctx, inst); err != nil {
+			g.log.Error(err, "resuming instance after remounting its home", "instance", inst.ID)
+		}
+		inst.mu.Lock()
+		inst.homeRemounted = g.now()
+		inst.mu.Unlock()
 	})
 }

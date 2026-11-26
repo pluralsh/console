@@ -93,6 +93,7 @@ type Daemon struct {
 	idle       *idle.Detector
 	creds      *creds.Manager
 	verifier   *authn.Verifier
+	home       homeCheck
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -254,6 +255,7 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	d.bg.Go(func() { d.creds.RunOIDC(d.ctx) })
 	d.bg.Go(func() { d.idleLoop(d.ctx) })
 	d.bg.Go(func() { d.restoreLoop(d.ctx) })
+	d.bg.Go(func() { d.homeLoop(d.ctx) })
 	d.bg.Go(func() { d.loginLoop(d.ctx) })
 	d.bg.Go(d.importJavaTrust)
 
@@ -416,7 +418,7 @@ func (d *Daemon) baseEnv() []string {
 		set[k] = harness.PlaceholderKey
 	}
 	if d.trustOK {
-		for _, k := range append(trust.EnvVars, "PIP_CERT", "CARGO_HTTP_CAINFO", "CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE") {
+		for _, k := range trust.EnvVars {
 			set[k] = d.cfg.TrustBundle()
 		}
 	}
@@ -545,6 +547,7 @@ func (d *Daemon) restoreLoop(ctx context.Context) {
 func (d *Daemon) onRestore(skew time.Duration) {
 	d.log.Info("memory restore detected", "skew", skew.String())
 	d.idle.Reset()
+	d.home.reset(d.cfg.Clock.Now())
 	d.mu.Lock()
 	d.restored = true
 	d.mu.Unlock()

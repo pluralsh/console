@@ -299,6 +299,9 @@ message DaemonCondition {
 message DaemonHeartbeat {
   uint64 head_offset = 1;
   IdleState idle = 2;
+  // Set while writes to the workspace volume fail or hang. Heartbeats bypass the event log, which lives on that
+  // volume. The gateway suspends and resumes the instance, which remounts it.
+  string home_error = 3;
 }
 
 message AckEventsRequest {

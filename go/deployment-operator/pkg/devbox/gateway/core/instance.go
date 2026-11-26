@@ -85,6 +85,8 @@ type Instance struct {
 	suspending  bool
 	// probing is set while confirmUnresponsive checks a silent daemon.
 	probing bool
+	// homeRemounted is when remountHome last resumed the instance.
+	homeRemounted time.Time
 	// waking is the resume in flight, shared by every caller that needs the instance running.
 	waking     *wakeOp
 	sharedSnap bool

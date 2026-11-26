@@ -62,19 +62,29 @@ defmodule Console.Devboxes.Threads do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
-    |> add_operation(:control, fn %{instance: inst, thread: thread, catalog: catalog} ->
+    |> execute()
+    |> start_thread(fn %{instance: inst, thread: thread, catalog: catalog} ->
       Control.create_thread(inst, thread, %{
         model: catalog.model,
         config_options: catalog.config_options,
         prompt: attrs[:prompt] && Acp.prompt(attrs[:prompt]),
         principal: principal(user)
       })
-      |> Error.control_ok()
     end)
-    |> add_operation(:session, fn %{thread: thread, control: result} -> attach_session(thread, result) end)
-    |> execute(extract: :session)
     |> notify(:update)
   end
+
+  # The gateway checks out every repository for the thread before answering, which can outlast the repo's
+  # transaction timeout, so the thread is committed first and dropped again if the gateway refuses it.
+  defp start_thread({:ok, %{thread: thread} = res}, control) do
+    case Error.control_ok(control.(res)) do
+      {:ok, result} -> attach_session(thread, result)
+      err ->
+        update_thread(thread, %{status: :deleted})
+        err
+    end
+  end
+  defp start_thread(err, _), do: err
 
   defp attach_session(thread, %{session_id: id}) when is_binary(id) and byte_size(id) > 0 do
     thread
@@ -188,12 +198,8 @@ defmodule Console.Devboxes.Threads do
       })
       |> Repo.insert()
     end)
-    |> add_operation(:control, fn %{instance: inst, source: src, thread: thread} ->
-      Control.fork_thread(inst, src, thread)
-      |> Error.control_ok()
-    end)
-    |> add_operation(:session, fn %{thread: thread, control: result} -> attach_session(thread, result) end)
-    |> execute(extract: :session)
+    |> execute()
+    |> start_thread(fn %{instance: inst, source: src, thread: thread} -> Control.fork_thread(inst, src, thread) end)
     |> notify(:update)
   end
 
