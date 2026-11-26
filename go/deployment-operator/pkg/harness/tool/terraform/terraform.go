@@ -129,6 +129,7 @@ func (in *Terraform) state() (*tfjson.State, error) {
 		"terraform",
 		exec.WithArgs([]string{"show", "-json"}),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return state, fmt.Errorf("failed executing terraform show -json: %s: %w", string(output), err)
@@ -179,6 +180,7 @@ func (in *Terraform) plan() (string, error) {
 		"terraform",
 		exec.WithArgs([]string{"show", in.planFileName}),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return "", fmt.Errorf("failed executing terraform show: %s: %w", string(output), err)
@@ -222,6 +224,7 @@ func (in *Terraform) planJSONRaw() (string, error) {
 		"terraform",
 		exec.WithArgs([]string{"show", "-json", in.planFileName}),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return "", fmt.Errorf("failed executing terraform show -json: %s: %w", string(output), err)
@@ -332,5 +335,6 @@ func New(config v1.Config) v1.Tool {
 		variables:   config.Variables,
 		parallelism: config.Run.Parallelism,
 		refresh:     config.Run.Refresh,
+		env:         config.Env,
 	}).init()
 }
