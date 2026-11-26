@@ -382,6 +382,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Coding]: 'Coding',
   [WorkbenchToolCategory.Verification]: 'Verification',
   [WorkbenchToolCategory.Observability]: 'Observability',
+  [WorkbenchToolCategory.Filesystem]: 'Filesystem',
 }
 
 export type WorkbenchToolCard = {

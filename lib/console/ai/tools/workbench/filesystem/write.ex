@@ -13,7 +13,8 @@ defmodule Console.AI.Tools.Workbench.Filesystem.Write do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:path, :content])
+    |> cast(attrs, [:path])
+    |> cast(attrs, [:content], empty_values: [])
     |> validate_required([:path, :content])
   end
 

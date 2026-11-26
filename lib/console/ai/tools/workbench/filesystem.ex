@@ -45,11 +45,7 @@ defmodule Console.AI.Tools.Workbench.Filesystem do
   end
 
   def render_grep([]), do: "no matches"
-  def render_grep(matches) do
-    Enum.map_join(matches, "\n", fn %{path: path, line_number: n, line: line} ->
-      "#{Mount.virtual(path)}:#{n}:#{line}"
-    end)
-  end
+  def render_grep(matches), do: Enum.map_join(matches, "\n", &render_grep_match/1)
 
   def cap_write(content) when is_binary(content) and byte_size(content) <= @write_cap, do: :ok
   def cap_write(content) when is_binary(content),
@@ -61,6 +57,22 @@ defmodule Console.AI.Tools.Workbench.Filesystem do
   defp sandbox(path) when is_binary(path), do: path
 
   defp render_entry(%{path: path, kind: kind}), do: "#{Mount.virtual(path)} #{kind}"
+
+  defp render_grep_match(%{path: path, line_number: n, line: line} = match) do
+    virtual = Mount.virtual(path)
+    [
+      grep_context(virtual, match[:before]),
+      ["#{virtual}:#{n}:#{line}"],
+      grep_context(virtual, match[:after])
+    ]
+    |> List.flatten()
+    |> Enum.join("\n")
+  end
+
+  defp grep_context(_path, lines) when lines in [nil, []], do: []
+  defp grep_context(path, lines) do
+    Enum.map(lines, fn %{line_number: n, text: text} -> "#{path}-#{n}-#{text}" end)
+  end
 
   defp body(_, %{kind: :directory}, _), do: {:error, "cannot read a directory"}
   defp body(%Workbench{id: id} = bench, %{kind: :file, size: size, path: path} = file, %User{} = user)

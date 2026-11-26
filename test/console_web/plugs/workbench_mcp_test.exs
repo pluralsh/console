@@ -335,7 +335,13 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
         {:ok, [%{path: "/reports/a.md", name: "a.md", kind: :file}]}
       end)
       expect(PseudoFS, :grep, fn ^wid, "/", "hello", _ ->
-        {:ok, [%{path: "/reports/a.md", line_number: 1, line: "hello", before: [], after: []}]}
+        {:ok, [%{
+          path: "/reports/a.md",
+          line_number: 2,
+          line: "hello",
+          before: [%{line_number: 1, text: "prev"}],
+          after: [%{line_number: 3, text: "next"}]
+        }]}
       end)
 
       {user, bench, session} = handshake(user, bench)
@@ -371,7 +377,8 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
         "name" => "workbench_grep_files",
         "arguments" => %{"pattern" => "hello"}
       })
-      assert hd(grep["content"])["text"] =~ "/workbench/reports/a.md:1:hello"
+      assert hd(grep["content"])["text"] ==
+        "/workbench/reports/a.md-1-prev\n/workbench/reports/a.md:2:hello\n/workbench/reports/a.md-3-next"
     end
 
     test "a file larger than the inline cap returns a download url" do
@@ -401,11 +408,13 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
       wid = bench.id
 
       expect(PseudoFS, :write_file, fn ^wid, "/notes/a.md", ["hello"] -> {:ok, 5} end)
+      expect(PseudoFS, :write_file, fn ^wid, "/notes/empty.md", [""] -> {:ok, 0} end)
       expect(PseudoFS, :mkdir, fn ^wid, "/notes", [parents: true, exist_ok: true] -> :ok end)
       expect(PseudoFS, :rename, fn ^wid, "/notes/a.md", "/notes/b.md" -> {:ok, "/notes/b.md"} end)
       expect(PseudoFS, :delete, fn ^wid, "/notes/b.md" -> :ok end)
       stub(PseudoFS, :stat, fn
         ^wid, "/notes/a.md" -> {:ok, %StatResponse{kind: :FILE, size: 5}}
+        ^wid, "/notes/empty.md" -> {:ok, %StatResponse{kind: :FILE, size: 0}}
         ^wid, "/notes" -> {:ok, %StatResponse{kind: :DIRECTORY, size: 0}}
         ^wid, "/notes/b.md" -> {:ok, %StatResponse{kind: :FILE, size: 5}}
       end)
@@ -423,6 +432,13 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
       })
       refute written["isError"]
       assert hd(written["content"])["text"] =~ "/workbench/notes/a.md"
+
+      %{"result" => cleared} = call(writer, bench, session, "tools/call", %{
+        "name" => "workbench_write_file",
+        "arguments" => %{"path" => "/workbench/notes/empty.md", "content" => ""}
+      })
+      refute cleared["isError"]
+      assert hd(cleared["content"])["text"] =~ "/workbench/notes/empty.md"
 
       for {name, args} <- [
         {"workbench_mkdir", %{"path" => "/workbench/notes"}},
