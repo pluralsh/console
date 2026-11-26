@@ -16,6 +16,9 @@ on:
       - master
     paths:
       - .github/workflows/objectstore-azure-blob.yaml
+  pull_request:
+    paths:
+      - .github/workflows/objectstore-azure-blob.yaml
 
 permissions:
   contents: read
@@ -28,6 +31,8 @@ env:
 jobs:
   publish:
     name: Build and push
+    # fork PRs get no packages: write token
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     permissions:
       contents: read
