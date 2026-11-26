@@ -115,7 +115,12 @@ defmodule Console.Devboxes.Control.Grpc do
 
   @impl true
   def rebase_instance(inst, opts) do
-    req = %V1.RebaseInstanceRequest{instance_id: inst.id, reason: Proto.str(opts[:reason]), requested_by: principal(opts[:principal])}
+    req = %V1.RebaseInstanceRequest{
+      instance_id: inst.id,
+      reason: Proto.str(opts[:reason]),
+      requested_by: principal(opts[:principal]),
+      only_if_idle: opts[:only_if_idle] || false
+    }
     call(cluster_id(inst), :rebase_instance, req) |> to_map()
   end
 

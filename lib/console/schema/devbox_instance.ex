@@ -222,6 +222,11 @@ defmodule Console.Schema.DevboxInstance do
     from(i in query, where: i.update_campaign_id == ^campaign_id)
   end
 
+  @doc "the instance while it still holds the update claimed at `requested_at`, which no outcome has settled yet"
+  def claimed(query \\ __MODULE__, id, requested_at) do
+    from(i in query, where: i.id == ^id and i.rebase_state == ^:in_progress and i.rebase_requested_at == ^requested_at)
+  end
+
   @doc """
   Instances on another template revision than the one their box serves.  The gateway reports an instance's revision
   by number, which is what `Devbox.revision` is (`Devbox.template_revision` is the template's name).  An instance

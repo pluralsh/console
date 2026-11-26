@@ -25,8 +25,6 @@ defmodule Console.Devboxes.Updates do
   @max_attempts 3
   @retry_after 10 * 60
 
-  def get_campaign!(id), do: Repo.get!(DevboxUpdateCampaign, id)
-
   @doc """
   Updates one instance now, for its owner or anyone who can manage it.  A running instance restarts.
   """
@@ -45,22 +43,42 @@ defmodule Console.Devboxes.Updates do
     end
   end
 
-  # Asks the gateway, and records that an update is on its way so nothing asks again until it reports or times
-  # out.  The gateway declines (`accepted: false`) when it already has the instance on the revision, which it
-  # won't report again: then only the request is noted, and the instance's next status report settles the rest.
   defp request(%DevboxInstance{} = inst, opts, attrs) do
-    case Control.rebase_instance(inst, opts) do
-      {:ok, %{accepted: false}} -> note_request(inst, attrs)
+    with {:ok, pending} <- claim(inst, attrs) |> Devboxes.notify(:update),
+      do: send_request(pending, inst, opts)
+  end
+
+  # Records that an update is on its way before asking the gateway, which can report the outcome before it
+  # responds, and so nothing asks again until it reports or times out.
+  defp claim(inst, attrs) do
+    inst
+    |> DevboxInstance.changeset(Map.merge(%{rebase_state: :in_progress, rebase_error: nil, rebase_requested_at: DateTime.utc_now()}, attrs))
+    |> Repo.update()
+  end
+
+  # The gateway declines (`accepted: false`) when it already has the instance on the revision, which it won't
+  # report again, or when an update that may only restart an idle instance finds it in use.  Then, as when the
+  # request fails, the claim is withdrawn and only the request is noted: the instance's next status report
+  # settles the rest.  A decline isn't an attempt, so an instance that stays in use isn't given up on before a
+  # forced campaign's deadline; a failure is, so an unreachable gateway doesn't hold a campaign open.
+  defp send_request(pending, inst, opts) do
+    case Control.rebase_instance(pending, opts) do
+      {:ok, %{accepted: false}} -> withdraw(pending, inst, ~w(rebase_state rebase_error rebase_attempts)a)
       res ->
-        with {:ok, _} <- Devboxes.control_result(res, inst),
-          do: note_request(inst, Map.merge(%{rebase_state: :in_progress, rebase_error: nil}, attrs))
+        with {:error, _} = err <- Devboxes.control_result(res, pending) do
+          withdraw(pending, inst, ~w(rebase_state rebase_error)a)
+          err
+        end
     end
   end
 
-  defp note_request(inst, attrs) do
-    inst
-    |> DevboxInstance.changeset(Map.put(attrs, :rebase_requested_at, DateTime.utc_now()))
-    |> Repo.update()
+  # Restores the fields the claim changed, unless an outcome the gateway reported since settled it.
+  defp withdraw(pending, inst, fields) do
+    DevboxInstance.claimed(pending.id, pending.rebase_requested_at)
+    |> Repo.update_all(set: Enum.map(fields, &{&1, Map.get(inst, &1)}))
+
+    Repo.get(DevboxInstance, pending.id)
+    |> then(&{:ok, &1})
     |> Devboxes.notify(:update)
   end
 
@@ -105,10 +123,23 @@ defmodule Console.Devboxes.Updates do
   """
   @spec cancel_campaign(binary, User.t) :: campaign_resp
   def cancel_campaign(id, %User{} = user) do
-    campaign = get_campaign!(id) |> Repo.preload([:devbox])
-    with {:ok, _} <- allow(campaign.devbox, user, :write),
-         true <- DevboxUpdateCampaign.active?(campaign) || {:error, "this campaign has already ended"},
-      do: finish(campaign, :cancelled)
+    start_transaction()
+    |> add_operation(:campaign, fn _ -> {:ok, locked_campaign!(id)} end)
+    |> add_operation(:allowed, fn %{campaign: campaign} -> allow(campaign.devbox, user, :write) end)
+    |> add_operation(:cancelled, fn %{campaign: campaign} ->
+      case DevboxUpdateCampaign.active?(campaign) do
+        true -> finish(campaign, :cancelled)
+        false -> {:error, "this campaign has already ended"}
+      end
+    end)
+    |> execute(extract: :cancelled)
+  end
+
+  # Cancelling and each step of a campaign hold its lock, so a cancelled campaign takes no further step.
+  defp locked_campaign!(id) do
+    DevboxUpdateCampaign.with_lock()
+    |> Repo.get!(id)
+    |> Repo.preload([:devbox])
   end
 
   defp finish(%DevboxUpdateCampaign{id: id} = campaign, status) do
@@ -161,7 +192,6 @@ defmodule Console.Devboxes.Updates do
     DevboxUpdateCampaign.active()
     |> DevboxUpdateCampaign.started()
     |> Repo.all()
-    |> Repo.preload([:devbox])
     |> Enum.each(fn campaign ->
       case advance(campaign) do
         {:error, err} -> Logger.error("failed to advance devbox update campaign #{campaign.id}: #{inspect(err)}")
@@ -173,10 +203,25 @@ defmodule Console.Devboxes.Updates do
   @doc """
   One step of a campaign: announce the deadline of a forced one, then request as many updates as its concurrency
   allows, the instances nobody is using first.  It completes once nothing is left that it could still update, or
-  when it expires.
+  when it expires.  The step's decisions are made under the campaign's lock, and its requests sent after.
   """
   @spec advance(DevboxUpdateCampaign.t, DateTime.t) :: campaign_resp
-  def advance(%DevboxUpdateCampaign{} = campaign, now \\ DateTime.utc_now()) do
+  def advance(%DevboxUpdateCampaign{id: id}, now \\ DateTime.utc_now()) do
+    start_transaction()
+    |> add_operation(:step, fn _ -> step(locked_campaign!(id), now) end)
+    |> execute(extract: :step)
+    |> case do
+      {:ok, {campaign, claims}} ->
+        Enum.each(claims, fn {pending, inst} ->
+          Devboxes.notify({:ok, pending}, :update)
+          update(pending, inst, campaign, now)
+        end)
+        {:ok, campaign}
+      err -> err
+    end
+  end
+
+  defp step(%DevboxUpdateCampaign{} = campaign, now) do
     outdated =
       DevboxInstance.for_devbox(campaign.devbox_id)
       |> DevboxInstance.live()
@@ -187,21 +232,31 @@ defmodule Console.Devboxes.Updates do
     remaining = Enum.reject(outdated, &exhausted?(&1, campaign))
 
     cond do
-      DateTime.compare(now, campaign.expires_at) != :lt -> finish(campaign, :completed)
-      remaining == [] and in_flight == 0 -> finish(campaign, :completed)
+      not DevboxUpdateCampaign.active?(campaign) -> {:ok, {campaign, []}}
+      DateTime.compare(now, campaign.expires_at) != :lt -> finished(campaign)
+      remaining == [] and in_flight == 0 -> finished(campaign)
       true ->
         with {:ok, campaign} <- mark_running(campaign) do
-          remaining = announce(campaign, remaining)
+          claims =
+            announce(campaign, remaining, now)
+            |> Enum.filter(&due?(&1, campaign, now))
+            |> Enum.sort_by(&priority/1)
+            |> Enum.take(max(campaign.max_concurrency - in_flight, 0))
+            |> Enum.flat_map(fn inst ->
+              case claim(inst, %{update_campaign_id: campaign.id, rebase_attempts: attempts(inst, campaign.id) + 1}) do
+                {:ok, pending} -> [{pending, inst}]
+                _ -> []
+              end
+            end)
 
-          remaining
-          |> Enum.filter(&due?(&1, campaign, now))
-          |> Enum.sort_by(&priority/1)
-          |> Enum.take(max(campaign.max_concurrency - in_flight, 0))
-          |> Enum.each(&update(&1, campaign))
-
-          {:ok, campaign}
+          {:ok, {campaign, claims}}
         end
     end
+  end
+
+  defp finished(campaign) do
+    with {:ok, campaign} <- finish(campaign, :completed),
+      do: {:ok, {campaign, []}}
   end
 
   defp mark_running(%DevboxUpdateCampaign{status: :running} = campaign), do: {:ok, campaign}
@@ -211,8 +266,10 @@ defmodule Console.Devboxes.Updates do
     |> Repo.update()
   end
 
-  # A forced campaign shows people using an instance when it will be restarted.
-  defp announce(%DevboxUpdateCampaign{force: true, id: id, deadline_at: deadline}, instances) do
+  # A forced campaign shows people using an instance when it will be restarted, with the full notice even when
+  # the instance became outdated or was resumed later in the campaign.
+  defp announce(%DevboxUpdateCampaign{force: true, id: id} = campaign, instances, now) do
+    deadline = Enum.max([campaign.deadline_at, Timex.shift(now, minutes: campaign.notice_minutes)], DateTime)
     Enum.map(instances, fn
       %DevboxInstance{status: :running, update_deadline_at: nil} = inst ->
         DevboxInstance.changeset(inst, %{update_deadline_at: deadline, update_campaign_id: id, rebase_attempts: attempts(inst, id)})
@@ -225,17 +282,16 @@ defmodule Console.Devboxes.Updates do
       inst -> inst
     end)
   end
-  defp announce(_, instances), do: instances
+  defp announce(_, instances, _), do: instances
 
-  defp update(%DevboxInstance{} = inst, %DevboxUpdateCampaign{id: id} = campaign) do
+  # The claim counts the attempt, so an instance the gateway keeps refusing doesn't hold the campaign open.  Only
+  # an instance past its forced deadline is restarted while in use; the gateway checks that the others still
+  # aren't when the update starts.
+  defp update(pending, %DevboxInstance{} = inst, %DevboxUpdateCampaign{id: id} = campaign, now) do
     reason = if campaign.force, do: "forced update #{id}", else: "update #{id}"
-    case request(inst, %{reason: reason}, %{update_campaign_id: id, rebase_attempts: attempts(inst, id) + 1}) do
+    case send_request(pending, inst, %{reason: reason, only_if_idle: not forced?(inst, campaign, now)}) do
       {:ok, _} -> :ok
-      err ->
-        Logger.warning("could not request the update of devbox instance #{inst.id}: #{inspect(err)}")
-        # count it, so an instance the gateway keeps refusing doesn't hold the campaign open
-        DevboxInstance.changeset(inst, %{update_campaign_id: id, rebase_attempts: attempts(inst, id) + 1, rebase_requested_at: DateTime.utc_now()})
-        |> Repo.update()
+      err -> Logger.warning("could not request the update of devbox instance #{inst.id}: #{inspect(err)}")
     end
   end
 
@@ -264,7 +320,7 @@ defmodule Console.Devboxes.Updates do
   defp quiet?(%DevboxInstance{status: :running, idle_state: %{idle: true}}), do: true
   defp quiet?(_), do: false
 
-  defp forced?(%DevboxInstance{status: :running}, %DevboxUpdateCampaign{force: true, deadline_at: %DateTime{} = deadline}, now),
+  defp forced?(%DevboxInstance{status: :running, update_campaign_id: id, update_deadline_at: %DateTime{} = deadline}, %DevboxUpdateCampaign{force: true, id: id}, now),
     do: DateTime.compare(now, deadline) != :lt
   defp forced?(_, _, _), do: false
 

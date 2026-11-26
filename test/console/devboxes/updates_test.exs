@@ -75,6 +75,21 @@ defmodule Console.Devboxes.UpdatesTest do
       assert same.rebase_requested_at
     end
 
+    test "an outcome the gateway reports before it responds isn't overwritten" do
+      inst = outdated_instance(status: :suspended)
+      expect(Control.Test, :rebase_instance, fn %{id: id}, _ ->
+        # a suspended instance is only repointed, and the gateway reports that at once
+        Repo.get!(DevboxInstance, id)
+        |> DevboxInstance.changeset(%{rebase_state: :succeeded, template_revision: "3"})
+        |> Repo.update!()
+        {:ok, %{accepted: true}}
+      end)
+
+      {:ok, _} = Updates.rebase_instance(inst.id, inst.user)
+
+      assert refetch(inst).rebase_state == :succeeded
+    end
+
     test "a gateway failure leaves the instance as it was" do
       inst = outdated_instance()
       expect(Control.Test, :rebase_instance, fn _, _ -> {:error, :not_connected} end)
@@ -168,6 +183,39 @@ defmodule Console.Devboxes.UpdatesTest do
       refute_receive {:rebase, _}
     end
 
+    test "an ordinary campaign asks the gateway to restart only idle instances" do
+      devbox = insert(:devbox, revision: 3)
+      idle = insert(:devbox_instance, devbox: devbox, template_revision: "2", idle_state: %{idle: true})
+      campaign = insert(:devbox_update_campaign, devbox: devbox)
+      me = self()
+      expect(Control.Test, :rebase_instance, fn %{id: id}, opts ->
+        send(me, {:rebase, id, opts})
+        # the instance got busy since its idle state was reported
+        {:ok, %{accepted: false}}
+      end)
+
+      {:ok, _} = Updates.advance(campaign)
+
+      id = idle.id
+      assert_receive {:rebase, ^id, %{only_if_idle: true}}
+      declined = refetch(idle)
+      refute declined.rebase_state
+      # a decline isn't an attempt, but the instance waits before it is asked again
+      assert (declined.rebase_attempts || 0) == 0
+      assert declined.rebase_requested_at
+    end
+
+    test "a cancelled campaign takes no further step" do
+      devbox = insert(:devbox, revision: 3)
+      insert(:devbox_instance, devbox: devbox, template_revision: "2", status: :suspended)
+      campaign = insert(:devbox_update_campaign, devbox: devbox)
+      {:ok, _} = Updates.cancel_campaign(campaign.id, admin_user())
+      reject(Control.Test, :rebase_instance, 2)
+
+      # a pass that loaded the campaign before it was cancelled
+      {:ok, %{status: :cancelled}} = Updates.advance(campaign)
+    end
+
     test "it respects the campaign's concurrency, suspended instances first" do
       devbox = insert(:devbox, revision: 3)
       insert_list(2, :devbox_instance, devbox: devbox, template_revision: "2", idle_state: %{idle: true})
@@ -221,6 +269,36 @@ defmodule Console.Devboxes.UpdatesTest do
 
       assert_receive {:rebase, ^id}
       assert refetch(busy).rebase_state == :in_progress
+    end
+
+    test "an instance in use that a forced campaign notices late gets the full notice" do
+      devbox = insert(:devbox, revision: 3)
+      now = DateTime.utc_now()
+      campaign = insert(:devbox_update_campaign,
+        devbox: devbox,
+        force: true,
+        status: :running,
+        notice_minutes: 15,
+        starts_at: now,
+        deadline_at: Timex.shift(now, minutes: 15)
+      )
+      # resumed after the campaign's deadline
+      late = insert(:devbox_instance, devbox: devbox, template_revision: "2", idle_state: %{idle: false})
+      later = Timex.shift(now, minutes: 20)
+      me = self()
+      stub(Control.Test, :rebase_instance, fn %{id: id}, opts ->
+        send(me, {:rebase, id, opts})
+        {:ok, %{accepted: true}}
+      end)
+
+      {:ok, _} = Updates.advance(campaign, later)
+
+      refute_receive {:rebase, _, _}
+      assert DateTime.compare(refetch(late).update_deadline_at, Timex.shift(later, minutes: 15)) == :eq
+
+      {:ok, _} = Updates.advance(refetch(campaign), Timex.shift(later, minutes: 16))
+      id = late.id
+      assert_receive {:rebase, ^id, %{only_if_idle: false}}
     end
 
     test "it retries a failed update, gives up after three attempts and then completes" do

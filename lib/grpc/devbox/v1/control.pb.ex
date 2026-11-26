@@ -164,6 +164,7 @@ defmodule Devbox.V1.RebaseInstanceRequest do
   field :target_revision, 2, type: :int64, json_name: "targetRevision"
   field :reason, 3, type: :string
   field :requested_by, 4, type: Devbox.V1.Principal, json_name: "requestedBy"
+  field :only_if_idle, 5, type: :bool, json_name: "onlyIfIdle"
 end
 
 defmodule Devbox.V1.RebaseInstanceResponse do
