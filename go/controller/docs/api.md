@@ -6039,6 +6039,7 @@ _Appears in:_
 | `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
 | `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
 | `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
+| `runAll` _boolean_ | RunAll runs terragrunt across every unit under the stack folder.<br />Units whose plans are empty are not applied. |  | Optional: \{\} <br /> |
 
 
 #### Tools

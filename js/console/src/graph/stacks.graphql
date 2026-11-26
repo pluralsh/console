@@ -72,6 +72,7 @@ fragment Stack on InfrastructureStack {
     terragrunt {
       parallelism
       refresh
+      runAll
     }
     pulumi {
       parallel
@@ -272,6 +273,7 @@ fragment StackConfiguration on StackConfiguration {
   terragrunt {
     parallelism
     refresh
+    runAll
   }
   pulumi {
     parallel

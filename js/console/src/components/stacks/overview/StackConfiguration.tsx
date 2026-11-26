@@ -39,6 +39,7 @@ export default function StackConfiguration() {
         ? pulumiConfig?.refresh
         : terraformConfig?.refresh
   )
+  const [runAll, setRunAll] = useState(terragruntConfig?.runAll ?? false)
 
   const changed =
     image !== stack.configuration.image ||
@@ -56,7 +57,8 @@ export default function StackConfiguration() {
         ? terragruntConfig?.refresh
         : isPulumi
           ? pulumiConfig?.refresh
-          : terraformConfig?.refresh)
+          : terraformConfig?.refresh) ||
+    (isTerragrunt && runAll !== (terragruntConfig?.runAll ?? false))
 
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
@@ -71,7 +73,7 @@ export default function StackConfiguration() {
           image,
           version,
           ...(isTerragrunt
-            ? { terragrunt: { refresh, parallelism } }
+            ? { terragrunt: { refresh, parallelism, runAll } }
             : isPulumi
               ? {
                   pulumi: {
@@ -145,6 +147,26 @@ export default function StackConfiguration() {
               <Switch
                 checked={refresh ?? false}
                 onChange={(checked) => setRefresh(checked)}
+                css={{ gap: 0 }}
+              />
+              <span>On</span>
+            </div>
+          </FormField>
+        )}
+        {isTerragrunt && (
+          <FormField label="Run all units">
+            <div
+              css={{
+                display: 'flex',
+                gap: theme.spacing.small,
+                alignItems: 'center',
+                height: '38px',
+              }}
+            >
+              <span>Off</span>
+              <Switch
+                checked={runAll}
+                onChange={(checked) => setRunAll(checked)}
                 css={{ gap: 0 }}
               />
               <span>On</span>

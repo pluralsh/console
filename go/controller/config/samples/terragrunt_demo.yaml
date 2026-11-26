@@ -1,0 +1,100 @@
+# https://github.com/zreigz/terragrunt-demo
+# Replace configuration.tag with the harness image from the new build.
+# Do not add a Cluster here. handle mgmt already belongs to infra/mgmt.
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: terragrunt-demo
+  namespace: default
+spec:
+  url: https://github.com/zreigz/terragrunt-demo.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-demo-live
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  approval: true
+  manageState: false
+  repositoryRef:
+    name: terragrunt-demo
+    namespace: default
+  clusterRef:
+    name: mgmt
+    namespace: infra
+  git:
+    ref: main
+    folder: live
+  configuration:
+    tag: sha-59bfa6b-terragrunt-1.8
+    terragrunt:
+      runAll: true
+  jobSpec:
+    namespace: plrl-deploy-operator
+    serviceAccount: stacks
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Policy
+metadata:
+  name: terragrunt-demo-approval
+spec:
+  type: STACK
+  description: Require the merged parent-folder plan to list every Terragrunt unit.
+  policy: |
+    package plrl.stack
+
+    required_addresses := {
+      "app.local_file.app",
+      "network.local_file.network",
+      "nested/storage.local_file.storage",
+    }
+
+    deny[{"msg": sprintf("structured plan is missing %s", [address])}] if {
+      input.stage == "approval"
+      some address in required_addresses
+      not unit_present(address)
+    }
+
+    unit_present(address) if {
+      some rc in input.plan.resource_changes
+      rc.address == address
+      rc.type == "local_file"
+    }
+
+    approve[{"msg": "merged plan lists every terragrunt unit"}] if {
+      input.stage == "approval"
+      unit_present("app.local_file.app")
+      unit_present("network.local_file.network")
+      unit_present("nested/storage.local_file.storage")
+    }
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Policy
+metadata:
+  name: terragrunt-demo-binding
+spec:
+  type: BINDING
+  description: Select the terragrunt-demo-live stack.
+  policy: |
+    package plrl.binding
+
+    bind if {
+      input.stack.name == "terragrunt-demo-live"
+    }
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: BindingPolicy
+metadata:
+  name: terragrunt-demo-approval
+spec:
+  type: STACK
+  policyRef:
+    name: terragrunt-demo-approval
+  bindPolicyRef:
+    name: terragrunt-demo-binding
+  matches:
+    stack:
+      type: APPROVAL

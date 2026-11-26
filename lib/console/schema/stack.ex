@@ -65,6 +65,7 @@ defmodule Console.Schema.Stack do
         field :parallelism,   :integer
         field :refresh,       :boolean
         field :approve_empty, :boolean
+        field :run_all,       :boolean
       end
 
       embeds_one :pulumi, Pulumi, on_replace: :update do
@@ -117,7 +118,7 @@ defmodule Console.Schema.Stack do
 
     def terragrunt_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(parallelism refresh approve_empty)a)
+      |> cast(attrs, ~w(parallelism refresh approve_empty run_all)a)
     end
 
     def pulumi_changeset(model, attrs) do
@@ -330,6 +331,7 @@ defmodule Console.Schema.Stack do
     |> cast_embed(:configuration)
     |> cast_embed(:policy_engine)
     |> validate_policy_engine()
+    |> validate_terragrunt_state()
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:environment)
@@ -366,6 +368,16 @@ defmodule Console.Schema.Stack do
     case {get_field(changeset, :type), get_field(changeset, :policy_engine)} do
       {:pulumi, %{type: _}} ->
         add_error(changeset, :policy_engine, "policy engine is not supported for Pulumi stacks")
+
+      _ ->
+        changeset
+    end
+  end
+
+  defp validate_terragrunt_state(changeset) do
+    case {get_field(changeset, :manage_state), get_field(changeset, :configuration)} do
+      {true, %{terragrunt: %{run_all: true}}} ->
+        add_error(changeset, :manage_state, "cannot manage state when terragrunt runAll is enabled")
 
       _ ->
         changeset

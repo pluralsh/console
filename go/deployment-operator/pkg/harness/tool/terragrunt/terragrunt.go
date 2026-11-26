@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/mitchellh/copystructure"
@@ -45,6 +48,10 @@ func (in *Terragrunt) State() (*console.StackStateAttributes, error) {
 
 // Plan implements [v1.Tool] interface.
 func (in *Terragrunt) Plan() (*console.StackStateAttributes, error) {
+	if in.runAll {
+		return in.planAllState()
+	}
+
 	plan, err := in.plan()
 	if err != nil {
 		return nil, err
@@ -52,6 +59,30 @@ func (in *Terragrunt) Plan() (*console.StackStateAttributes, error) {
 
 	return &console.StackStateAttributes{
 		Plan: &plan,
+	}, nil
+}
+
+func (in *Terragrunt) planAllState() (*console.StackStateAttributes, error) {
+	units, err := loadUnitPlans(in.jsonOutDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var b strings.Builder
+	for _, unit := range units {
+		b.WriteString(formatUnitPlan(unit.rel, unit.plan))
+		b.WriteByte('\n')
+	}
+
+	raw, err := combinedPlanJSON(units)
+	if err != nil {
+		return nil, err
+	}
+
+	text := b.String()
+	return &console.StackStateAttributes{
+		Plan:     &text,
+		PlanJSON: &raw,
 	}, nil
 }
 
@@ -135,6 +166,10 @@ func (in *Terragrunt) Scan() ([]*console.StackPolicyViolationAttributes, error) 
 		return result, nil
 	}
 
+	if in.runAll {
+		return in.scanAll()
+	}
+
 	result, err := in.Scanner.Scan(console.StackTypeTerragrunt, securityv1.WithTerraform(securityv1.TerraformScanOptions{
 		WorkDir:           in.workDir,
 		Dir:               in.dir,
@@ -146,7 +181,57 @@ func (in *Terragrunt) Scan() ([]*console.StackPolicyViolationAttributes, error) 
 	return result, err
 }
 
+// scanAll scans each unit plan. A failure stops the run so apply cannot
+// proceed when a required scan did not complete.
+func (in *Terragrunt) scanAll() ([]*console.StackPolicyViolationAttributes, error) {
+	plans, err := planFiles(in.jsonOutDir, planJSONBase)
+	if err != nil {
+		return nil, fmt.Errorf("could not list terragrunt plans to scan: %w", err)
+	}
+
+	result := make([]*console.StackPolicyViolationAttributes, 0)
+	for _, plan := range plans {
+		violations, err := in.Scanner.Scan(console.StackTypeTerragrunt, securityv1.WithTerraform(securityv1.TerraformScanOptions{
+			WorkDir:           in.workDir,
+			Dir:               filepath.Join(in.dir, filepath.FromSlash(plan.rel)),
+			PlanFileName:      plan.path,
+			VariablesFileName: in.variablesFileName,
+		}))
+		if err != nil {
+			return nil, fmt.Errorf("security scan failed for %s: %w", plan.rel, err)
+		}
+
+		result = append(result, violations...)
+	}
+
+	klog.V(log.LogLevelTrace).InfoS("terragrunt scanner scan", "units", len(plans), "violations", len(result))
+	return result, nil
+}
+
+// ApplyArgs implements [v1.ApplyArgumentPreparer]. It adds --filter flags for
+// units whose saved JSON plans contain changes. The plan directory is empty
+// until the plan step finishes, so this must run immediately before apply.
+func (in *Terragrunt) ApplyArgs(args []string) ([]string, error) {
+	if !in.runAll {
+		return args, nil
+	}
+
+	filters, err := changedUnitFilters(in.jsonOutDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not determine changed terragrunt units: %w", err)
+	}
+	if len(filters) == 0 {
+		return nil, fmt.Errorf("could not determine changed terragrunt units: no units with changes")
+	}
+
+	return forwardCommand(insertBeforeSubcommand(args, filters...)), nil
+}
+
 func (in *Terragrunt) plan() (string, error) {
+	if in.runAll {
+		return in.planAll()
+	}
+
 	output, err := exec.NewExecutable(
 		"terragrunt",
 		exec.WithArgs([]string{"show", in.planFileName}),
@@ -158,6 +243,23 @@ func (in *Terragrunt) plan() (string, error) {
 
 	klog.V(log.LogLevelTrace).InfoS("terragrunt plan file read successfully", "file", in.planFileName, "output", string(output))
 	return string(output), nil
+}
+
+func (in *Terragrunt) planAll() (string, error) {
+	// Use the JSON written by run --all. terragrunt show re-evaluates each
+	// unit and fails when a dependency has not been applied yet.
+	units, err := loadUnitPlans(in.jsonOutDir)
+	if err != nil {
+		return "", err
+	}
+
+	var b strings.Builder
+	for _, unit := range units {
+		b.WriteString(formatUnitPlan(unit.rel, unit.plan))
+		b.WriteByte('\n')
+	}
+
+	return b.String(), nil
 }
 
 // planJSON parses the terraform plan file as JSON and returns a structured plan.
@@ -183,50 +285,34 @@ func (in *Terragrunt) planJSON() (*tfjson.Plan, error) {
 
 // HasChanges deterministically checks if the terraform plan contains any changes.
 func (in *Terragrunt) HasChanges() (bool, error) {
+	if in.runAll {
+		return in.runAllHasChanges()
+	}
+
 	plan, err := in.planJSON()
 	if err != nil {
 		return false, err
 	}
 
-	if len(plan.DeferredChanges) > 0 {
-		klog.V(log.LogLevelDebug).InfoS("plan has deferred changes", "count", len(plan.DeferredChanges))
+	if planHasChanges(plan) {
 		return true, nil
 	}
 
-	hasResourceChanges := false
-	for _, rc := range plan.ResourceChanges {
-		if rc.Change != nil && !rc.Change.Actions.NoOp() {
-			klog.V(log.LogLevelDebug).InfoS("plan has resource changes",
-				"resource", rc.Address,
-				"actions", rc.Change.Actions)
-			hasResourceChanges = true
-			break
+	klog.V(log.LogLevelInfo).InfoS("terragrunt plan has no changes")
+	return false, nil
+}
+
+func (in *Terragrunt) runAllHasChanges() (bool, error) {
+	units, err := loadUnitPlans(in.jsonOutDir)
+	if err != nil {
+		return false, err
+	}
+
+	for _, unit := range units {
+		if planHasChanges(unit.plan) {
+			klog.V(log.LogLevelDebug).InfoS("terragrunt unit has changes", "unit", unit.rel)
+			return true, nil
 		}
-	}
-
-	if hasResourceChanges {
-		return true, nil
-	}
-
-	hasOutputChanges := false
-	for name, oc := range plan.OutputChanges {
-		if oc != nil && !oc.Actions.NoOp() {
-			klog.V(log.LogLevelDebug).InfoS("plan has output changes",
-				"output", name,
-				"actions", oc.Actions)
-			hasOutputChanges = true
-			break
-		}
-	}
-
-	if hasOutputChanges {
-		return true, nil
-	}
-
-	if len(plan.ResourceDrift) > 0 {
-		klog.V(log.LogLevelDebug).InfoS("plan detected resource drift",
-			"count", len(plan.ResourceDrift))
-		return true, nil
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("terragrunt plan has no changes")
@@ -239,17 +325,66 @@ func (in *Terragrunt) init() v1.Tool {
 	}
 
 	in.planFileName = "terraform.tfplan"
+	if in.runAll {
+		root, err := os.MkdirTemp("", "plural-terragrunt-")
+		if err != nil {
+			klog.Fatalf("could not create terragrunt plan directory: %v", err)
+		}
 
-	if in.variables != nil && len(*in.variables) > 0 {
-		in.variablesFileName = "plural.auto.tfvars.json"
-		helpers.EnsureFileOrDie(path.Join(in.dir, in.variablesFileName), in.variables)
+		in.outDir = filepath.Join(root, "plans")
+		in.jsonOutDir = filepath.Join(root, "json")
+		if err := os.MkdirAll(in.outDir, 0o755); err != nil {
+			klog.Fatalf("could not create terragrunt plan directory: %v", err)
+		}
+		if err := os.MkdirAll(in.jsonOutDir, 0o755); err != nil {
+			klog.Fatalf("could not create terragrunt plan directory: %v", err)
+		}
 	}
 
+	in.writeVariables()
 	return in
+}
+
+func (in *Terragrunt) writeVariables() {
+	if in.variables == nil || len(*in.variables) == 0 {
+		return
+	}
+
+	in.variablesFileName = "plural.auto.tfvars.json"
+	if !in.runAll {
+		helpers.EnsureFileOrDie(path.Join(in.dir, in.variablesFileName), in.variables)
+		return
+	}
+
+	err := filepath.WalkDir(in.dir, func(p string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if d.Name() == ".terragrunt-cache" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if d.Name() != "terragrunt.hcl" {
+			return nil
+		}
+
+		helpers.EnsureFileOrDie(filepath.Join(filepath.Dir(p), in.variablesFileName), in.variables)
+		return nil
+	})
+	if err != nil {
+		klog.Fatalf("could not write terragrunt variables: %v", err)
+	}
 }
 
 // New creates a Terragrunt structure that implements v1.Tool interface.
 func New(config v1.Config) v1.Tool {
+	runAll := false
+	if config.Run != nil {
+		runAll = config.Run.RunAll
+	}
+
 	return (&Terragrunt{
 		DefaultTool: v1.DefaultTool{Scanner: config.Scanner},
 		workDir:     config.WorkDir,
@@ -257,6 +392,7 @@ func New(config v1.Config) v1.Tool {
 		variables:   config.Variables,
 		parallelism: config.Run.Parallelism,
 		refresh:     config.Run.Refresh,
+		runAll:      runAll,
 	}).init()
 }
 

@@ -11594,6 +11594,8 @@ type TerragruntConfiguration struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to run terragrunt across every unit under the stack folder
+	RunAll *bool `json:"runAll,omitempty"`
 }
 
 type TerragruntConfigurationAttributes struct {
@@ -11603,6 +11605,8 @@ type TerragruntConfigurationAttributes struct {
 	Refresh *bool `json:"refresh,omitempty"`
 	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// whether to run terragrunt across every unit under the stack folder
+	RunAll *bool `json:"runAll,omitempty"`
 }
 
 type ToolConfigAttributes struct {
