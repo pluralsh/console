@@ -78,12 +78,14 @@ spec:
                   provided, a default interval of 1 minute will be used.
                 type: string
               bindings:
-                description: Bindings define the creation permissions for this agent
-                  runtime.
+                description: |-
+                  Bindings define who can create agent runs on this runtime. Omit them to leave the runtime's bindings
+                  unchanged in console (eg managed by an AgentRuntimePolicy), or set an empty create list to clear them.
+                  Only applied on clusters configured to allow agent workloads.
                 properties:
                   create:
-                    description: Create bindings control who can generate new agent
-                      runtimes.
+                    description: Create bindings control who can create agent runs
+                      on this runtime.
                     items:
                       description: Binding ...
                       properties:

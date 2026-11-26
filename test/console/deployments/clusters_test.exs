@@ -373,6 +373,45 @@ defmodule Console.Deployments.ClustersTest do
       assert cluster.project_id == proj.id
     end
 
+    test "it can set a remediation workbench the creator can write" do
+      user = admin_user()
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      workbench = insert(:workbench)
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        remediation_workbench_id: workbench.id
+      }, user)
+
+      assert cluster.remediation_workbench_id == workbench.id
+    end
+
+    test "creators cannot target a remediation workbench they cannot read" do
+      user = insert(:user)
+      deployment_settings(create_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: insert(:project))
+
+      {:error, _} = Clusters.create_cluster(%{
+        name: "test",
+        remediation_workbench_id: workbench.id
+      }, user)
+
+      refute Clusters.get_cluster_by_handle("test")
+    end
+
+    test "creators cannot target a remediation workbench they can only read" do
+      user = insert(:user)
+      deployment_settings(create_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      {:error, _} = Clusters.create_cluster(%{
+        name: "test",
+        remediation_workbench_id: workbench.id
+      }, user)
+
+      refute Clusters.get_cluster_by_handle("test")
+    end
+
     test "it will respect rbac" do
       user = insert(:user)
       deployment_settings(create_bindings: [%{user_id: user.id}])
@@ -593,6 +632,116 @@ defmodule Console.Deployments.ClustersTest do
 
       assert Enum.find(cluster.write_bindings, & &1.user_id == admin.id)
     end
+
+    test "writers cannot target a remediation workbench they can only read" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      {:error, _} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id
+      }, cluster.id, user)
+
+      refute Console.Repo.reload!(cluster).remediation_workbench_id
+    end
+
+    test "writers can target a remediation workbench they can write" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+
+      {:ok, updated} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id
+      }, cluster.id, user)
+
+      assert updated.remediation_workbench_id == workbench.id
+    end
+
+    test "writers can set a remediation workbench they can write" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      workbench = insert(:workbench)
+
+      {:ok, updated} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{min_priority: :critical, window: 3600, max_jobs: 1}
+      }, cluster.id, user)
+
+      assert updated.remediation_workbench_id == workbench.id
+      assert updated.remediation.min_priority == :critical
+      assert updated.remediation.window == 3600
+      assert updated.remediation.max_jobs == 1
+    end
+
+    test "admins can run remediation as a user who can read the workbench" do
+      admin = admin_user()
+      actor = insert(:user)
+      cluster = insert(:cluster)
+      workbench = insert(:workbench, read_bindings: [%{user_id: actor.id}])
+
+      {:ok, updated} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: actor.id, modes: %{budget: %{tokens: 50}}}
+      }, cluster.id, admin)
+
+      assert updated.remediation.user_id == actor.id
+      assert updated.remediation.modes.budget.tokens == 50
+    end
+
+    test "writers can run remediation as themselves" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+
+      {:ok, updated} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: user.id, max_jobs: 2}
+      }, cluster.id, user)
+
+      assert updated.remediation.user_id == user.id
+      assert updated.remediation.max_jobs == 2
+    end
+
+    test "writers cannot run remediation as another user" do
+      user = insert(:user)
+      other = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench,
+        write_bindings: [%{user_id: user.id}],
+        read_bindings: [%{user_id: other.id}]
+      )
+
+      assert {:error, "you can only run remediation as yourself"} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: other.id}
+      }, cluster.id, user)
+
+      refute Console.Repo.reload!(cluster).remediation_workbench_id
+    end
+
+    test "admins cannot run remediation as a user who cannot read the workbench" do
+      admin = admin_user()
+      actor = insert(:user)
+      cluster = insert(:cluster)
+      workbench = insert(:workbench, project: insert(:project))
+
+      assert {:error, "remediation user cannot read this workbench"} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: actor.id}
+      }, cluster.id, admin)
+
+      refute Console.Repo.reload!(cluster).remediation_workbench_id
+    end
+
+    test "writers cannot target a remediation workbench they cannot read" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: insert(:project))
+
+      {:error, _} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id
+      }, cluster.id, user)
+    end
   end
 
   describe "#upsert_virtual_cluster/3" do
@@ -640,6 +789,63 @@ defmodule Console.Deployments.ClustersTest do
       {:error, _} = Clusters.upsert_virtual_cluster(%{
         name: "new-cluster",
       }, cluster.id, insert(:user))
+    end
+
+    test "it can set a remediation workbench the caller can write" do
+      cluster = insert(:cluster)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      workbench = insert(:workbench)
+
+      {:ok, virt} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+        remediation_workbench_id: workbench.id
+      }, cluster.id, admin_user())
+
+      assert virt.remediation_workbench_id == workbench.id
+
+      other = insert(:workbench)
+      {:ok, updated} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+        remediation_workbench_id: other.id
+      }, cluster.id, admin_user())
+
+      assert updated.id == virt.id
+      assert updated.remediation_workbench_id == other.id
+    end
+
+    test "it rejects a remediation workbench the caller cannot read" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: insert(:project))
+
+      {:error, _} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+        remediation_workbench_id: workbench.id
+      }, cluster.id, user)
+
+      refute Clusters.get_cluster_by_handle("new-cluster")
+
+      insert(:cluster, virtual: true, parent_cluster: cluster, handle: "existing")
+
+      {:error, _} = Clusters.upsert_virtual_cluster(%{
+        name: "existing",
+        remediation_workbench_id: workbench.id
+      }, cluster.id, user)
+
+      refute Clusters.get_cluster_by_handle!("existing").remediation_workbench_id
+    end
+
+    test "it rejects a remediation workbench the caller can only read" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      {:error, _} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+        remediation_workbench_id: workbench.id
+      }, cluster.id, user)
+
+      refute Clusters.get_cluster_by_handle("new-cluster")
     end
 
     test "it will not upsert existing non-virtual clusters" do
@@ -1559,6 +1765,74 @@ defmodule Console.Deployments.ClustersTest do
       assert is_binary(blocker.fix.release_url)
       assert blocker.fix.version
       assert blocker.addon.name == "ingress-nginx"
+    end
+  end
+
+  describe "allow_agents" do
+    test "cluster writers cannot change whether a cluster allows agents" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:error, "only admins can configure agent workloads"} =
+        Clusters.update_cluster(%{allow_agents: true}, cluster.id, user)
+
+      {:ok, updated} = Clusters.update_cluster(%{allow_agents: false, protect: true}, cluster.id, user)
+      assert updated.protect
+      refute Clusters.allow_agents?(updated)
+    end
+
+    test "cluster creators cannot allow agents" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:error, "only admins can configure agent workloads"} =
+        Clusters.create_cluster(%{name: "test", project_id: project.id, allow_agents: true}, user)
+    end
+
+    test "admins can allow agents on a cluster" do
+      cluster = insert(:cluster)
+
+      {:ok, updated} = Clusters.update_cluster(%{allow_agents: true}, cluster.id, admin_user())
+
+      assert updated.allow_agents
+      assert Clusters.allow_agents?(updated)
+    end
+
+    test "clusters don't allow agents by default" do
+      refute Clusters.allow_agents?(insert(:cluster))
+    end
+
+    test "the management cluster allows agents unless configured otherwise" do
+      cluster = insert(:cluster, self: true)
+      assert Clusters.allow_agents?(cluster)
+
+      {:ok, cluster} = Clusters.update_cluster(%{allow_agents: false}, cluster.id, admin_user())
+      refute Clusters.allow_agents?(cluster)
+    end
+
+    test "cluster writers cannot clear a disabled management cluster back to its default" do
+      user = insert(:user)
+      cluster = insert(:cluster, self: true, allow_agents: false, write_bindings: [%{user_id: user.id}])
+
+      {:error, "only admins can configure agent workloads"} =
+        Clusters.update_cluster(%{allow_agents: nil}, cluster.id, user)
+
+      refute Clusters.allow_agents?(cluster)
+    end
+
+    test "cluster writers can clear a setting when it leaves agent workloads unchanged" do
+      user = insert(:user)
+      cluster = insert(:cluster, allow_agents: false, write_bindings: [%{user_id: user.id}])
+
+      {:ok, updated} = Clusters.update_cluster(%{allow_agents: nil}, cluster.id, user)
+      refute Clusters.allow_agents?(updated)
+    end
+
+    test "a project allows agents for all its clusters" do
+      project = insert(:project, allow_agents: true)
+
+      assert Clusters.allow_agents?(insert(:cluster, project: project))
+      assert Clusters.allow_agents?(insert(:cluster, project: project, allow_agents: false))
     end
   end
 

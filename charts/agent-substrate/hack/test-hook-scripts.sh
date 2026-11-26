@@ -27,7 +27,7 @@ chmod +x "$TMP/bin/kubectl"
 PATH="$TMP/bin:$PATH"
 export FAKE_STATE="$TMP/state" NAMESPACE=ate-system PODCERT_NAMESPACE=podcertificate-controller-system \
   PG_READ_WRITE_SECRET=ate-postgres-readwrite PG_READ_WRITE_USER=substrate_readwrite_user \
-  PG_JUICEFS_SECRET=ate-postgres-juicefs PG_JUICEFS_USER=juicefs
+  PG_JUICEFS_SECRET=ate-postgres-juicefs PG_JUICEFS_USER=juicefs ZEROFS_SECRET=devbox-zerofs-encryption
 mkdir -p "$FAKE_STATE"
 
 failures=0
@@ -36,7 +36,8 @@ pass() { echo "ok: $*"; }
 
 secrets="ate-system/actor-id-jwt-pool ate-system/actor-id-ca-pool ate-system/egress-mitm-ca-pool
 podcertificate-controller-system/service-dns-ca-pool podcertificate-controller-system/pod-identity-ca-pool
-podcertificate-controller-system/postgres-ca-pool ate-system/ate-postgres-readwrite ate-system/ate-postgres-juicefs"
+podcertificate-controller-system/postgres-ca-pool ate-system/ate-postgres-readwrite ate-system/ate-postgres-juicefs
+ate-system/devbox-zerofs-encryption"
 
 run_hook() {
   rm -rf "$TMP/work" && mkdir -p "$TMP/work"
@@ -91,13 +92,15 @@ cmp -s "$FAKE_STATE/secret/ate-system/actor-id-ca-certs/ca.crt" "$pool/tls.crt" 
   fail "read-write username"
 [ "$(cat "$FAKE_STATE/secret/ate-system/ate-postgres-juicefs/username")" = juicefs ] ||
   fail "juicefs username"
+grep -Eq '^[0-9a-f]{64}$' "$FAKE_STATE/secret/ate-system/devbox-zerofs-encryption/password" ||
+  fail "zerofs encryption password isn't 32 random bytes in hex"
 pass "pools are well formed"
 
 # 3. Re-running (helm upgrade) keeps every secret.
 before="$(fingerprint)"
 run_hook || fail "second run failed"
 [ "$(fingerprint)" = "$before" ] || fail "second run changed existing secrets"
-[ "$(grep -c 'exists; keeping it' "$TMP/apply.log")" -eq 8 ] || fail "second run didn't keep all 8 secrets"
+[ "$(grep -c 'exists; keeping it' "$TMP/apply.log")" -eq 9 ] || fail "second run didn't keep all 9 secrets"
 pass "upgrade keeps existing secrets"
 
 # 4. A deleted secret is recreated; the others stay.

@@ -55,6 +55,10 @@ defmodule Console.Schema.ClusterInsightComponent do
     )
   end
 
+  def key(%__MODULE__{group: g, version: v, kind: k, namespace: ns, name: n}) do
+    Enum.map_join([g, v, k, ns, n], "/", &(&1 || ""))
+  end
+
   @valid ~w(group version kind namespace name priority cluster_id service_id)a
 
   def changeset(model, attrs \\ %{}) do

@@ -8,7 +8,7 @@ defmodule Console.Devboxes do
   import Console.Deployments.Policies
   require Logger
   alias Console.PubSub
-  alias Console.Deployments.{Git, Workbenches}
+  alias Console.Deployments.{Clusters, Git, Workbenches}
   alias Console.Devboxes.{Billing, Control, Credentials, Error, Names, ProxyModels}
   alias Console.WorkloadIdentity
   alias Console.Services.Users
@@ -58,6 +58,7 @@ defmodule Console.Devboxes do
     devbox = get_devbox_by_name(cid, name) |> Repo.preload([:scm_connection_associations, :create_bindings])
 
     with {:ok, _} <- allow(devbox || %Devbox{cluster_id: cid}, actor || cluster, :write),
+         :ok <- Clusters.agents_allowed(cid),
          {:ok, attrs} <- resolve_scm_connections(attrs, devbox) do
       attrs = stabilize_bindings(Map.put_new(attrs, :create_bindings, []), devbox)
       start_transaction()

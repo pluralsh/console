@@ -195,6 +195,32 @@ spec:
         - protocol: TCP
           port: grpc
 {{- end }}
+{{- if .Values.zerofs.enabled }}
+---
+# The ZeroFS controller: ate-api-server creates and deletes homes, and is also
+# checked by its SPIFFE ID.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: devbox-zerofs-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: devbox-zerofs-controller
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ate-api-server
+      ports:
+        - protocol: TCP
+          port: grpc
+{{- end }}
 {{- if eq .Values.postgres.mode "cnpg" }}
 ---
 # CNPG instances: ate-api-server, the other instances (replication) and the
@@ -288,7 +314,7 @@ spec:
             matchExpressions:
               - key: app
                 operator: In
-                values: [ate-api-server, atelet, agent-substrate-microvm-assets{{ if .Values.juicefs.enabled }}, devbox-juicefs-controller, devbox-juicefs-node{{ end }}]
+                values: [ate-api-server, atelet, agent-substrate-microvm-assets{{ if .Values.juicefs.enabled }}, devbox-juicefs-controller, devbox-juicefs-node{{ end }}{{ if .Values.zerofs.enabled }}, devbox-zerofs-controller, devbox-zerofs-node{{ end }}]
         - podSelector:
             matchLabels:
               batch.kubernetes.io/job-name: rustfs-bucket-init

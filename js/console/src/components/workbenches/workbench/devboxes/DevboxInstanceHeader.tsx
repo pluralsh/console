@@ -410,6 +410,7 @@ function ChangesButton({ instanceId }: { instanceId: string }) {
 function CreatePrButton({ instance }: { instance: DevboxInstanceFragment }) {
   const [params] = useSearchParams()
   const { refetch } = useDevboxPullRequests(instance.id)
+  const { setOpen, setTab, showPullRequest } = useDevboxPanel()
   const thread = rootThread(
     instance.threads,
     selectedThread(
@@ -422,7 +423,14 @@ function CreatePrButton({ instance }: { instance: DevboxInstanceFragment }) {
       instanceId={instance.id}
       threadId={thread?.id}
       agentsRunning={(instance.runningThreads ?? 0) > 0}
-      onCreated={() => refetch()}
+      onCreated={(url) => {
+        refetch()
+        if (url) showPullRequest(url)
+        else {
+          setTab('prs')
+          setOpen(true)
+        }
+      }}
     />
   )
 }

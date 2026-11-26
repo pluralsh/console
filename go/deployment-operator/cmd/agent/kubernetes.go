@@ -324,10 +324,12 @@ func registerKubeReconcilersOrDie(
 		setupLog.Error(err, "unable to create controller", "controller", "AgentConfiguration")
 	}
 
+	agentsGate := controller.NewConsoleAgentsGate(consoleURL, deployToken)
 	agentRuntimeReconciler := &controller.AgentRuntimeReconciler{
 		Client:            manager.GetClient(),
 		Scheme:            manager.GetScheme(),
 		ConsoleClient:     extConsoleClient,
+		Agents:            agentsGate,
 		CacheSyncTimeout:  args.PollInterval() * 3,
 		Ctx:               ctx,
 		ClusterID:         cluster.MyCluster.ID,
@@ -338,7 +340,7 @@ func registerKubeReconcilersOrDie(
 	}
 	consoleManager.Socket.AddPublisher("agent_run", agentRuntimeReconciler)
 
-	registerDevboxRunner(manager, operatorNamespace, consoleURL, deployToken, cluster.MyCluster.ID)
+	registerDevboxRunner(manager, operatorNamespace, consoleURL, deployToken, cluster.MyCluster.ID, agentsGate)
 
 	if err := (&controller.ImageWarmerReconciler{
 		Client: manager.GetClient(),

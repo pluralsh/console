@@ -409,6 +409,52 @@ defmodule Devbox.V1.DevboxPullRequestResponse do
   field :number, 3, type: :int64
 end
 
+defmodule Devbox.V1.ListDevboxPullRequestsRequest do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.ListDevboxPullRequestsRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :instance_id, 1, type: :string, json_name: "instanceId"
+  field :url, 2, type: :string
+end
+
+defmodule Devbox.V1.ListDevboxPullRequestsResponse do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.ListDevboxPullRequestsResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :pull_requests, 1,
+    repeated: true,
+    type: Devbox.V1.DevboxPullRequestRecord,
+    json_name: "pullRequests"
+end
+
+defmodule Devbox.V1.DevboxPullRequestRecord do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.DevboxPullRequestRecord",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :pull_request_id, 1, type: :string, json_name: "pullRequestId"
+  field :url, 2, type: :string
+  field :number, 3, type: :int64
+  field :title, 4, type: :string
+  field :status, 5, type: :string
+  field :source, 6, type: :string
+  field :devbox_id, 7, type: :string, json_name: "devboxId"
+  field :instance_id, 8, type: :string, json_name: "instanceId"
+  field :thread_id, 9, type: :string, json_name: "threadId"
+  field :created_at, 10, type: Google.Protobuf.Timestamp, json_name: "createdAt"
+end
+
 defmodule Devbox.V1.Ingest.Service do
   @moduledoc false
 
@@ -443,6 +489,10 @@ defmodule Devbox.V1.Ingest.Service do
   rpc :ReportPullRequest, Devbox.V1.ReportPullRequestRequest, Devbox.V1.ReportPullRequestResponse
 
   rpc :DevboxPullRequest, Devbox.V1.DevboxPullRequestRequest, Devbox.V1.DevboxPullRequestResponse
+
+  rpc :ListDevboxPullRequests,
+      Devbox.V1.ListDevboxPullRequestsRequest,
+      Devbox.V1.ListDevboxPullRequestsResponse
 end
 
 defmodule Devbox.V1.Ingest.Stub do

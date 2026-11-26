@@ -45,6 +45,7 @@ var pendingAgentRunFetchDelay = 2 * time.Second
 type AgentRuntimeReconciler struct {
 	client.Client
 	ConsoleClient     consoleclient.Client
+	Agents            AgentsGate
 	Scheme            *runtime.Scheme
 	CacheSyncTimeout  time.Duration
 	Ctx               context.Context
@@ -88,6 +89,16 @@ func (r *AgentRuntimeReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	result := r.addOrRemoveFinalizer(ctx, agentRuntime)
 	if result != nil {
 		return *result, nil
+	}
+
+	enabled, err := r.Agents.AgentsEnabled(ctx)
+	if err != nil {
+		utils.MarkCondition(agentRuntime.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if !enabled {
+		markAgentsNotAllowed(agentRuntime.SetCondition)
+		return jitterRequeue(requeueAgentsNotAllowed, jitter), nil
 	}
 
 	changed, sha, err := agentRuntime.Diff(utils.HashObject)
@@ -353,6 +364,12 @@ func (r *AgentRuntimeReconciler) Publish(runID string, kick bool) {
 
 func (r *AgentRuntimeReconciler) createRunFromID(runID string) error {
 	logger := log.FromContext(r.Ctx)
+	if enabled, err := r.Agents.AgentsEnabled(r.Ctx); err != nil {
+		return fmt.Errorf("failed to check whether agents are enabled: %w", err)
+	} else if !enabled {
+		return fmt.Errorf("%s", AgentsNotAllowedMessage)
+	}
+
 	// Console broadcasts every update of a run, not only its creation, so skip runs that already
 	// have a custom resource instead of refetching them from Console.
 	if exists, err := r.agentRunExists(r.Ctx, runID); err != nil {

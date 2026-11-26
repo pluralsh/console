@@ -96,6 +96,29 @@ defmodule Console.GRPC.Devbox.Ingest do
     |> reply!()
   end
 
+  def list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: id, url: url}, stream) do
+    cluster = Auth.authenticate!(stream)
+    with {:ok, prs} <- Ingest.list_devbox_pull_requests(id, url, cluster) do
+      %V1.ListDevboxPullRequestsResponse{pull_requests: Enum.map(prs, &pull_request/1)}
+    end
+    |> reply!()
+  end
+
+  defp pull_request(%PullRequest{} = pr) do
+    %V1.DevboxPullRequestRecord{
+      pull_request_id: pr.id,
+      url: Proto.str(pr.url),
+      number: pr_number(pr),
+      title: Proto.str(pr.title),
+      status: Proto.str(pr.status),
+      source: Proto.str(pr.source),
+      devbox_id: Proto.str(pr.devbox_id),
+      instance_id: Proto.str(pr.devbox_instance_id),
+      thread_id: Proto.str(pr.devbox_instance_session_id),
+      created_at: Proto.timestamp(pr.inserted_at)
+    }
+  end
+
   defp summary(inst) do
     %V1.InstanceSummary{
       instance_id: inst.instance_id,

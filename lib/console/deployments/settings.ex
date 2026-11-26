@@ -218,10 +218,12 @@ defmodule Console.Deployments.Settings do
   """
   @spec create_project(map, User.t()) :: project_resp
   def create_project(attrs, %User{} = user) do
-    %Project{}
-    |> Project.changeset(attrs)
-    |> allow(user, :create)
-    |> when_ok(:insert)
+    with {:ok, _} <- Clusters.authorize_allow_agents(attrs, nil, user) do
+      %Project{}
+      |> Project.changeset(attrs)
+      |> allow(user, :create)
+      |> when_ok(:insert)
+    end
   end
 
   @doc """
@@ -232,7 +234,10 @@ defmodule Console.Deployments.Settings do
     get_project!(id)
     |> Repo.preload([:read_bindings, :write_bindings])
     |> allow(user, :write)
-    |> when_ok(&Project.changeset(&1, attrs))
+    |> when_ok(fn project ->
+      with {:ok, _} <- Clusters.authorize_allow_agents(attrs, project, user),
+        do: Project.changeset(project, attrs)
+    end)
     |> when_ok(:update)
   end
 

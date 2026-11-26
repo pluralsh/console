@@ -227,6 +227,12 @@ query MyCluster {
     }
 }
 
+query MyClusterAgentsEnabled {
+    myCluster {
+        agentsEnabled
+    }
+}
+
 mutation UpsertVirtualCluster($parentID: ID!, $attributes: ClusterAttributes!) {
     upsertVirtualCluster(parentId: $parentID, attributes: $attributes) {
         deployToken

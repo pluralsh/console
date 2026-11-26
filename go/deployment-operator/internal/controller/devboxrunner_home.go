@@ -14,15 +14,16 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zerofs"
 )
 
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=storageclasses,verbs=get;create;delete
 
-// A JuiceFS home can't come from the golden tag, since Substrate doesn't clone tags of templates with external
-// volumes, so each revision gets its own StorageClass whose seed parameter ties its volumes to the golden boot:
-// the driver captures the golden actor's home as the seed and clones every later home from it.
+// A JuiceFS or ZeroFS home can't come from the golden tag, since Substrate doesn't clone tags of templates with
+// external volumes, so each revision gets its own StorageClass whose seed parameter ties its volumes to the
+// golden boot: the driver captures the golden actor's home as the seed and starts every later home from it.
 
-// devboxHomeSeed is the seed of a revision's JuiceFS homes.
+// devboxHomeSeed is the seed of a revision's homes.
 func devboxHomeSeed(atespace, template string) string {
 	return atespace + "." + template
 }
@@ -32,30 +33,41 @@ func devboxHomeStorageClassName(atespace, template string) string {
 	return "devbox-home." + devboxHomeSeed(atespace, template)
 }
 
-// ensureHomeStorageClass points a JuiceFS template's home at its revision's StorageClass, a copy of the
+// devboxHomeDriver is the CSI driver serving a kind of external home, and the agent-substrate chart value that
+// installs it.
+func devboxHomeDriver(storage v1alpha1.DevboxHomeStorage) (driver, seedParam, chartValue string) {
+	if storage == v1alpha1.DevboxHomeZeroFS {
+		return zerofs.DriverName, zerofs.ParamSeed, "zerofs"
+	}
+	return juicefs.DriverName, juicefs.ParamSeed, "juicefs"
+}
+
+// ensureHomeStorageClass points an external home template's home at its revision's StorageClass, a copy of the
 // runner's class with the revision's seed, creating it first. Substrate reads the class when it creates each
 // actor's volumes, so it must exist before the template's golden boot.
 func (r *DevboxRunnerReconciler) ensureHomeStorageClass(ctx context.Context, runner *v1alpha1.DevboxRunner, template *ateapi.ActorTemplate) error {
-	if runner.Spec.HomeStorage() != v1alpha1.DevboxHomeJuiceFS {
+	storage := runner.Spec.HomeStorage()
+	if !storage.External() {
 		return nil
 	}
+	driver, seedParam, chartValue := devboxHomeDriver(storage)
 	atespace, name := template.GetMetadata().GetAtespace(), template.GetMetadata().GetName()
 	base := &storagev1.StorageClass{}
 	if err := r.APIReader.Get(ctx, client.ObjectKey{Name: runner.Spec.HomeStorageClass()}, base); err != nil {
 		if apierrors.IsNotFound(err) {
-			return fmt.Errorf("StorageClass %s for JuiceFS homes doesn't exist; enable juicefs in the agent-substrate chart", runner.Spec.HomeStorageClass())
+			return fmt.Errorf("StorageClass %s for %s homes doesn't exist; enable %s in the agent-substrate chart", runner.Spec.HomeStorageClass(), storage, chartValue)
 		}
 		return fmt.Errorf("reading StorageClass %s: %w", runner.Spec.HomeStorageClass(), err)
 	}
-	if base.Provisioner != juicefs.DriverName {
-		return fmt.Errorf("StorageClass %s is provisioned by %s, not %s", base.Name, base.Provisioner, juicefs.DriverName)
+	if base.Provisioner != driver {
+		return fmt.Errorf("StorageClass %s is provisioned by %s, not %s", base.Name, base.Provisioner, driver)
 	}
 
 	params := maps.Clone(base.Parameters)
 	if params == nil {
 		params = map[string]string{}
 	}
-	params[juicefs.ParamSeed] = devboxHomeSeed(atespace, name)
+	params[seedParam] = devboxHomeSeed(atespace, name)
 	sc := &storagev1.StorageClass{
 		ObjectMeta:    metav1.ObjectMeta{Name: devboxHomeStorageClassName(atespace, name), Labels: map[string]string{v1alpha1.DevboxRunnerNameLabel: runner.Name}},
 		Provisioner:   base.Provisioner,
@@ -78,7 +90,7 @@ func (r *DevboxRunnerReconciler) ensureHomeStorageClass(ctx context.Context, run
 }
 
 // deleteHomeStorageClass removes a collected revision's StorageClass.
-// TODO: delete the revision's seed too; it stays in JuiceFS until then.
+// TODO: delete the revision's seed too; it stays in JuiceFS or the ZeroFS bucket until then.
 func (r *DevboxRunnerReconciler) deleteHomeStorageClass(ctx context.Context, atespace, template string) error {
 	sc := &storagev1.StorageClass{ObjectMeta: metav1.ObjectMeta{Name: devboxHomeStorageClassName(atespace, template)}}
 	if err := r.Delete(ctx, sc); client.IgnoreNotFound(err) != nil {

@@ -246,14 +246,14 @@ func TestProberAppliesAIProxyOnlyPolicy(t *testing.T) {
 	}
 }
 
-func TestProberStartsJuiceFSHomesFromTheTemplatesGoldenTag(t *testing.T) {
+func TestProberStartsExternalHomesFromTheTemplatesGoldenTag(t *testing.T) {
 	objs := requestObjects(t, nil)
 	cm := objs[0].(*corev1.ConfigMap)
 	var req probe.Request
 	if err := json.Unmarshal([]byte(cm.Data[probe.RequestKey]), &req); err != nil {
 		t.Fatal(err)
 	}
-	req.JuiceFSHome = true
+	req.ExternalHome = true
 	raw, _ := json.Marshal(req)
 	cm.Data[probe.RequestKey] = string(raw)
 

@@ -523,11 +523,11 @@ func validateDevboxRepositories(runner *v1alpha1.DevboxRunner) error {
 	return nil
 }
 
-// devboxHomeVolumeSource is /home/dev: a durable dir carried in the instance's snapshots, or a JuiceFS volume
-// whose quota is the home's size. A JuiceFS home names the runner's StorageClass here, which keys the template
+// devboxHomeVolumeSource is /home/dev: a durable dir carried in the instance's snapshots, or a JuiceFS or ZeroFS
+// volume of the home's size. An external home names the runner's StorageClass here, which keys the template
 // hash; ensureHomeStorageClass swaps in the revision's own class once the template is named.
 func devboxHomeVolumeSource(runner *v1alpha1.DevboxRunner) *ateapi.Volume {
-	if runner.Spec.HomeStorage() != v1alpha1.DevboxHomeJuiceFS {
+	if !runner.Spec.HomeStorage().External() {
 		return &ateapi.Volume{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}}
 	}
 	size := runner.Spec.HomeSize()
@@ -735,7 +735,7 @@ func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.
 			ActorTemplate: rev.Name,
 			Revision:      rev.Revision,
 			GoldenTag:     lo.FromPtr(rev.GoldenTag),
-			JuiceFSHome:   lo.FromPtr(rev.HomeStorage) == v1alpha1.DevboxHomeJuiceFS,
+			ExternalHome:  lo.FromPtr(rev.HomeStorage).External(),
 			DevboxID:      lo.FromPtr(runner.Status.ID),
 		},
 		Agents: devboxGuestAgents(runner),
@@ -852,7 +852,7 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.
 		if err := api.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
 			return fmt.Errorf("deleting ActorTemplate %s: %w", rev.Name, err)
 		}
-		if rev.HomeStorage != nil && *rev.HomeStorage == v1alpha1.DevboxHomeJuiceFS {
+		if lo.FromPtr(rev.HomeStorage).External() {
 			if err := r.deleteHomeStorageClass(ctx, atespace, rev.Name); err != nil {
 				return err
 			}

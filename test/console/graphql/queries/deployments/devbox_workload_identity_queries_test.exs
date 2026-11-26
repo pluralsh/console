@@ -3,7 +3,7 @@ defmodule Console.GraphQl.Deployments.DevboxWorkloadIdentityQueriesTest do
 
   describe "devbox.workloadIdentity" do
     test "a cluster's box exposes its issuer and trust snippets" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
 
       {:ok, %{data: %{"upsertDevbox" => %{"id" => id, "cloudIdentities" => [identity]}}}} = run_query("""
         mutation Upsert($attrs: DevboxAttributes!) {
@@ -43,7 +43,7 @@ defmodule Console.GraphQl.Deployments.DevboxWorkloadIdentityQueriesTest do
 
   describe "deleteDevbox" do
     test "it disables the box's issuer" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       {:ok, devbox} = Console.Devboxes.upsert_devbox(%{name: "dev"}, cluster)
 
       {:ok, %{data: %{"deleteDevbox" => _}}} = run_query("""

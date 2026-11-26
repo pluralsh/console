@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
@@ -777,7 +778,7 @@ func (f *fakeSeeds) DeleteSeed(_ context.Context, seedID string) error {
 
 func TestJuiceFSHomes(t *testing.T) {
 	h := newHarness(t, nil)
-	h.g.deps.Runners.(StaticRunners)[testRunner].JuiceFSHome = true
+	h.g.deps.Runners.(StaticRunners)[testRunner].HomeStorage = v1alpha1.DevboxHomeJuiceFS
 	seeds := &fakeSeeds{}
 	h.g.deps.Seeds = seeds
 	h.ate.ExternalHomes = true
@@ -1038,5 +1039,64 @@ func TestResumeOutlivesTheCallersDeadline(t *testing.T) {
 	}
 	if inits, _, _, _ := h.daemon.snapshot(); inits != 2 {
 		t.Fatalf("the daemon should be initialized once per wake, got %d inits", inits)
+	}
+}
+
+func TestZeroFSHomes(t *testing.T) {
+	h := newHarness(t, nil)
+	runner := h.g.deps.Runners.(StaticRunners)[testRunner]
+	runner.HomeStorage = v1alpha1.DevboxHomeZeroFS
+	runner.Revisions[2] = RunnerRevision{Template: "tmpl-r2", GoldenTag: "golden-r2", HomeStorage: v1alpha1.DevboxHomeZeroFS}
+	// The JuiceFS seed client must never see a ZeroFS volume.
+	seeds := &fakeSeeds{failErr: errors.New("not a JuiceFS volume")}
+	h.g.deps.Seeds = seeds
+	h.ate.ExternalHomes = true
+	ctx := context.Background()
+
+	h.running("inst-1")
+	ref := actors.Ref{Atespace: testAtespace, Name: "dbx-inst-1"}
+	actor, err := h.g.deps.Actors.GetActor(ctx, ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if actor.GetSourceTag() != nil || !h.ate.Preview(ref.Atespace, ref.Name) {
+		t.Fatalf("the actor must take the template's golden tag with the preview header: source %v", actor.GetSourceTag())
+	}
+
+	// As after a restart whose adopt couldn't read the runner.
+	inst := h.g.get("inst-1")
+	inst.mu.Lock()
+	inst.runner = nil
+	inst.mu.Unlock()
+	if _, err := h.g.SnapshotInstance(ctx, &devboxv1.SnapshotInstanceRequest{InstanceId: "inst-1", SnapshotId: "snap-1"}); err != nil {
+		t.Fatal(err)
+	}
+	var report *devboxv1.ReportSnapshotRequest
+	h.eventually("snapshot", func() bool {
+		h.ingest.mu.Lock()
+		defer h.ingest.mu.Unlock()
+		for _, r := range h.ingest.snapshots {
+			if r.GetSnapshotId() == "snap-1" {
+				report = r
+			}
+		}
+		return report != nil
+	})
+	if report.GetState() != devboxv1.SnapshotState_SNAPSHOT_STATE_SUCCEEDED {
+		t.Fatalf("snapshot report = %v", report)
+	}
+	seeds.mu.Lock()
+	saved := len(seeds.saved)
+	seeds.mu.Unlock()
+	if saved != 0 {
+		t.Fatalf("a ZeroFS home was saved as a JuiceFS seed: %v", seeds.saved)
+	}
+
+	_, err = h.g.StartFromSnapshot(ctx, &devboxv1.StartFromSnapshotRequest{
+		Instance: &devboxv1.CreateInstanceRequest{InstanceId: "inst-2", RunnerName: testRunner},
+		Snapshot: &devboxv1.SnapshotRef{SnapshotId: "snap-1", Tag: testAtespace + "/snap-snap-1", TemplateRevision: 2},
+	})
+	if status.Code(err) != codes.Unimplemented || !strings.Contains(err.Error(), "ZeroFS") {
+		t.Fatalf("StartFromSnapshot = %v, want Unimplemented for ZeroFS homes", err)
 	}
 }

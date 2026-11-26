@@ -161,11 +161,11 @@ var (
 
 	// Check .github/workflows/deployment-operator-cd-agent-harness.yaml to see images being published.
 	defaultContainerVersions = map[console.AgentRuntimeType]string{
-		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.236",
-		console.AgentRuntimeTypeGemini:   "%s-gemini-0.44.1",
-		console.AgentRuntimeTypeOpencode: "%s-opencode-1.18.23",
-		console.AgentRuntimeTypeCodex:    "%s-codex-0.153.4",
-		console.AgentRuntimeTypePi:       "%s-pi-0.84.1",
+		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.332",
+		console.AgentRuntimeTypeGemini:   "%s-gemini-0.71.1",
+		console.AgentRuntimeTypeOpencode: "%s-opencode-1.19.6",
+		console.AgentRuntimeTypeCodex:    "%s-codex-0.172.0",
+		console.AgentRuntimeTypePi:       "%s-pi-1.6.1",
 	}
 
 	defaultBrowserImages = map[v1alpha1.Browser]string{

@@ -83,6 +83,7 @@ type ConsoleClient interface {
 	ListClusterServices(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListClusterServices, error)
 	ListServiceDeployments(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployments, error)
 	MyCluster(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*MyCluster, error)
+	MyClusterAgentsEnabled(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*MyClusterAgentsEnabled, error)
 	UpsertVirtualCluster(ctx context.Context, parentID string, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVirtualCluster, error)
 	UpsertCustomCompatibilityMatrix(ctx context.Context, attributes CustomCompatibilityMatrixAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCustomCompatibilityMatrix, error)
 	DeleteCustomCompatibilityMatrix(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*DeleteCustomCompatibilityMatrix, error)
@@ -23742,6 +23743,17 @@ func (t *MyCluster_MyCluster_) GetRestore() *ClusterRestoreFragment {
 		t = &MyCluster_MyCluster_{}
 	}
 	return t.Restore
+}
+
+type MyClusterAgentsEnabled_MyCluster struct {
+	AgentsEnabled *bool "json:\"agentsEnabled,omitempty\" graphql:\"agentsEnabled\""
+}
+
+func (t *MyClusterAgentsEnabled_MyCluster) GetAgentsEnabled() *bool {
+	if t == nil {
+		t = &MyClusterAgentsEnabled_MyCluster{}
+	}
+	return t.AgentsEnabled
 }
 
 type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
@@ -52843,6 +52855,17 @@ func (t *MyCluster) GetMyCluster() *MyCluster_MyCluster_ {
 	return t.MyCluster
 }
 
+type MyClusterAgentsEnabled struct {
+	MyCluster *MyClusterAgentsEnabled_MyCluster "json:\"myCluster,omitempty\" graphql:\"myCluster\""
+}
+
+func (t *MyClusterAgentsEnabled) GetMyCluster() *MyClusterAgentsEnabled_MyCluster {
+	if t == nil {
+		t = &MyClusterAgentsEnabled{}
+	}
+	return t.MyCluster
+}
+
 type UpsertVirtualCluster struct {
 	UpsertVirtualCluster *UpsertVirtualCluster_UpsertVirtualCluster "json:\"upsertVirtualCluster,omitempty\" graphql:\"upsertVirtualCluster\""
 }
@@ -61672,6 +61695,28 @@ func (c *Client) MyCluster(ctx context.Context, interceptors ...clientv2.Request
 
 	var res MyCluster
 	if err := c.Client.Post(ctx, "MyCluster", MyClusterDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const MyClusterAgentsEnabledDocument = `query MyClusterAgentsEnabled {
+	myCluster {
+		agentsEnabled
+	}
+}
+`
+
+func (c *Client) MyClusterAgentsEnabled(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*MyClusterAgentsEnabled, error) {
+	vars := map[string]any{}
+
+	var res MyClusterAgentsEnabled
+	if err := c.Client.Post(ctx, "MyClusterAgentsEnabled", MyClusterAgentsEnabledDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -85085,6 +85130,7 @@ var DocumentOperationNames = map[string]string{
 	ListClusterServicesDocument:                       "ListClusterServices",
 	ListServiceDeploymentsDocument:                    "ListServiceDeployments",
 	MyClusterDocument:                                 "MyCluster",
+	MyClusterAgentsEnabledDocument:                    "MyClusterAgentsEnabled",
 	UpsertVirtualClusterDocument:                      "UpsertVirtualCluster",
 	UpsertCustomCompatibilityMatrixDocument:           "UpsertCustomCompatibilityMatrix",
 	DeleteCustomCompatibilityMatrixDocument:           "DeleteCustomCompatibilityMatrix",

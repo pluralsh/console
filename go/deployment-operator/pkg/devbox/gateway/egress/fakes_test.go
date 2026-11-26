@@ -30,6 +30,26 @@ type fakeIngest struct {
 	reports []*devboxv1.ReportPullRequestRequest
 	prs     []*devboxv1.DevboxPullRequestRequest
 	prErr   error
+	// records are the PRs console knows, answering ListDevboxPullRequests; listErr makes it fail.
+	records []*devboxv1.DevboxPullRequestRecord
+	listErr error
+}
+
+// ListDevboxPullRequests filters by URL without checking the devbox, leaving that check to the caller as console's
+// own query would.
+func (f *fakeIngest) ListDevboxPullRequests(_ context.Context, in *devboxv1.ListDevboxPullRequestsRequest, _ ...grpc.CallOption) (*devboxv1.ListDevboxPullRequestsResponse, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.listErr != nil {
+		return nil, f.listErr
+	}
+	out := &devboxv1.ListDevboxPullRequestsResponse{}
+	for _, r := range f.records {
+		if (in.GetUrl() != "" && r.GetUrl() == in.GetUrl()) || (in.GetUrl() == "" && r.GetInstanceId() == in.GetInstanceId()) {
+			out.PullRequests = append(out.PullRequests, r)
+		}
+	}
+	return out, nil
 }
 
 func (f *fakeIngest) GetInstanceCredentials(ctx context.Context, in *devboxv1.GetInstanceCredentialsRequest, _ ...grpc.CallOption) (*devboxv1.GetInstanceCredentialsResponse, error) {

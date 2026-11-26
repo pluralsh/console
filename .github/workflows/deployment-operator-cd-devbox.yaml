@@ -358,3 +358,169 @@ jobs:
         with:
           digest: ${{ steps.build.outputs.digest }}
           images: ghcr.io/pluralsh/devbox-juicefs
+
+  publish-zerofs:
+    name: Build, test and publish devbox-zerofs
+    needs: [version]
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/pluralsh/devbox-zerofs
+          tags: ${{ env.IMAGE_TAGS }}
+      # The runtime stage installs its block tooling with apk for each platform.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hardened Images
+        uses: docker/login-action@v4
+        with:
+          registry: dhi.io
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: "./go"
+          file: "./go/deployment-operator/dockerfiles/devbox/zerofs.Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=${{ env.CACHE }}:devbox-zerofs
+          cache-to: type=registry,ref=${{ env.CACHE }}:devbox-zerofs,mode=max,ignore-error=true
+          build-args: |
+            VERSION=${{ needs.version.outputs.version }}
+      - name: Test
+        run: |
+          for platform in linux/amd64 linux/arm64; do
+            docker run --rm --platform "${platform}" "${ZEROFS_IMAGE}" -version
+            docker run --rm --platform "${platform}" --entrypoint /usr/local/bin/zerofs "${ZEROFS_IMAGE}" --version
+            docker run --rm --platform "${platform}" --entrypoint sh "${ZEROFS_IMAGE}" -c \
+              'command -v nbd-client mkfs.ext4 resize2fs blkid modprobe'
+          done
+        env:
+          ZEROFS_IMAGE: ghcr.io/pluralsh/devbox-zerofs@${{ steps.build.outputs.digest }}
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.build.outputs.digest }}
+          images: ghcr.io/pluralsh/devbox-zerofs
+
+  # Opens a PR pinning agent-substrate's images to the release; merging it publishes the chart. Only release tags
+  # run it, since a manual run doesn't build the deployment-operator image assetStaging uses.
+  bump-agent-substrate:
+    name: Bump agent-substrate chart
+    needs: [version, publish-juicefs, publish-zerofs]
+    if: startsWith(github.ref, 'refs/tags/go/deployment-operator/v')
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Bump
+        run: charts/agent-substrate/hack/bump.sh "${{ needs.version.outputs.version }}"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          title: "agent-substrate: images at deployment-operator ${{ needs.version.outputs.version }}"
+          body: |
+            Automated PR pinning `devbox-zerofs`, `devbox-juicefs` and the asset-staging `deployment-operator` image in `charts/agent-substrate` to ${{ needs.version.outputs.version }}, and bumping the chart's patch version.
+          commit-message: "agent-substrate: images at deployment-operator ${{ needs.version.outputs.version }}"
+          branch: agent-substrate-${{ needs.version.outputs.version }}
+          labels: release
+          base: master
+
+  # Releases are copied, by digest, from GHCR to the registries clusters without GHCR access pull from. Pull
+  # requests stay on GHCR.
+  mirror:
+    name: Mirror ${{ matrix.image }} to ${{ matrix.registry }}
+    needs: [version, publish, publish-gateway, publish-juicefs, publish-zerofs]
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [devbox-minimal, devbox-fat, devbox-gateway, devbox-juicefs, devbox-zerofs]
+        registry: [gcr.io, docker.io]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Authenticate to Google Cloud
+        if: matrix.registry == 'gcr.io'
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
+          service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          create_credentials_file: true
+      - name: Set up gcloud
+        if: matrix.registry == 'gcr.io'
+        uses: google-github-actions/setup-gcloud@v3.0.1
+      - name: Login to GCR
+        if: matrix.registry == 'gcr.io'
+        run: gcloud auth configure-docker -q
+      - name: Login to Docker Hub
+        if: matrix.registry == 'docker.io'
+        uses: docker/login-action@v4
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ matrix.registry }}/pluralsh/${{ matrix.image }}
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Resolve digest
+        id: inspect
+        run: |
+          digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/${{ matrix.image }}:${{ needs.version.outputs.version }} --format '{{.Manifest.Digest}}')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - name: Copy the manifest list
+        env:
+          DIGEST: ${{ steps.inspect.outputs.digest }}
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            "ghcr.io/pluralsh/${{ matrix.image }}@${DIGEST}"
+          echo "${{ matrix.registry }}/pluralsh/${{ matrix.image }}@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.inspect.outputs.digest }}
+          images: ${{ matrix.registry }}/pluralsh/${{ matrix.image }}

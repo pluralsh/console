@@ -86,4 +86,7 @@ fi
 if [ -n "${PG_JUICEFS_SECRET:-}" ]; then
   password "$PG_JUICEFS_SECRET" "$PG_JUICEFS_USER"
 fi
+if [ -n "${ZEROFS_SECRET:-}" ]; then
+  password "$ZEROFS_SECRET" zerofs
+fi
 echo "generated candidate key material in $WORK"

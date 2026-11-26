@@ -13,14 +13,17 @@ import { threadTitle } from './devboxThreads'
 // the instance's pull requests, each linking back to the thread that opened it
 export function DevboxPullRequestsTab({
   instance,
+  highlighted,
 }: {
   instance: DevboxInstanceFragment
+  highlighted?: Nullable<string>
 }) {
   const { pullRequests } = useDevboxPullRequests(instance.id)
 
   return pullRequests.length ? (
     <PullRequestList
       pullRequests={pullRequests}
+      highlighted={highlighted}
       titleTooltip={prProvenance}
       caption={(pr) => {
         const threadLink = prThreadLink(pr)
