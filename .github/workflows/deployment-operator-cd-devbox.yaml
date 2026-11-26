@@ -423,6 +423,35 @@ jobs:
           digest: ${{ steps.build.outputs.digest }}
           images: ghcr.io/pluralsh/devbox-zerofs
 
+  # Opens a PR pinning agent-substrate's images to the release; merging it publishes the chart. Only release tags
+  # run it, since a manual run doesn't build the deployment-operator image assetStaging uses.
+  bump-agent-substrate:
+    name: Bump agent-substrate chart
+    needs: [version, publish-juicefs, publish-zerofs]
+    if: startsWith(github.ref, 'refs/tags/go/deployment-operator/v')
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Bump
+        run: charts/agent-substrate/hack/bump.sh "${{ needs.version.outputs.version }}"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          title: "agent-substrate: images at deployment-operator ${{ needs.version.outputs.version }}"
+          body: |
+            Automated PR pinning `devbox-zerofs`, `devbox-juicefs` and the asset-staging `deployment-operator` image in `charts/agent-substrate` to ${{ needs.version.outputs.version }}, and bumping the chart's patch version.
+          commit-message: "agent-substrate: images at deployment-operator ${{ needs.version.outputs.version }}"
+          branch: agent-substrate-${{ needs.version.outputs.version }}
+          labels: release
+          base: master
+
   # Releases are copied, by digest, from GHCR to the registries clusters without GHCR access pull from. Pull
   # requests stay on GHCR.
   mirror:

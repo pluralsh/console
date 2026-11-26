@@ -262,7 +262,7 @@ End to end on a cluster (e.g. `hack/kind-up.sh`), in this order:
 
 ### JuiceFS homes
 
-`juicefs.enabled: true` (opt-in, needs `juicefs.image.tag` or `.digest`) adds a JuiceFS filesystem a
+`juicefs.enabled: true` (opt-in; `juicefs.image.tag` is pinned to the chart's deployment-operator release) adds a JuiceFS filesystem a
 DevboxRunner can keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`,
 capped at `spec.home.size`, default `spec.resources.disk`). It reuses the chart's Postgres and
 bucket:
@@ -293,7 +293,7 @@ The operator needs `get`, `create` and `delete` on `storageclasses.storage.k8s.i
 
 ### ZeroFS homes
 
-`zerofs.enabled: true` (opt-in, needs `zerofs.image.tag` or `.digest`) adds a second home driver,
+`zerofs.enabled: true` (opt-in; `zerofs.image.tag` is pinned to the chart's deployment-operator release) adds a second home driver,
 `zerofs.devbox.plural.sh` (StorageClass `zerofs.storageClassName`), with no metadata database. Each
 home is its own [ZeroFS](https://www.zerofs.net) filesystem under
 `<zerofs.prefix>/homes/<volume>/` in the snapshot bucket (or `zerofs.storageUrl`), encrypted with
