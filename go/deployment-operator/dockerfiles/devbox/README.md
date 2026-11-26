@@ -102,7 +102,7 @@ revision on every runner. So the digest must only change when the daemon does:
   `pr-src-<hash>` tags. The runtime build uses no registry cache, which pull
   requests can write.
 - The build itself is reproducible (pinned toolchain and Node, pinned agent
-  versions whose dependencies npm resolves as of a day after each release
+  versions whose dependencies npm resolves as of two hours after each release
   (`--before`; see below for the limits), `-trimpath -buildid=`, the adapters bundled from a fixed
   path, `SOURCE_DATE_EPOCH=0`, `rewrite-timestamp`, no attestations or
   build-time labels), so the same sources give the same digest anyway.
@@ -115,7 +115,7 @@ release will ship the previous daemon.
 To update an agent, change its `ARG` in `runtime-core.Dockerfile` (Renovate does
 this); `test.sh versions` checks the pins against `dockerfiles/agent-harness`.
 There are no lockfiles: an agent's dependencies resolve to the versions that
-existed a day after its release, and the build refuses a version younger than
+existed two hours after its release, and the build refuses a version younger than
 that (Renovate waits two days). npm still prefers non-deprecated versions and
 the current `latest` tag, so a dependency deprecated or retagged later can
 change a component when the image is rebuilt; its hash in the manifest then

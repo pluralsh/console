@@ -9,11 +9,11 @@
 # installed on its own and without install scripts. ESBUILD_VERSION is the bundler's. The versions file gets
 # "<component> <version>" lines, for the manifest.
 #
-# There is no lockfile. Every package is installed with npm's --before set to a day after its version was
+# There is no lockfile. Every package is installed with npm's --before set to two hours after its version was
 # published, so its dependencies resolve to versions that existed then, not to whatever is newest in range when the
-# image is built. The day is for the packages published with it: claude's platform binaries come out up to an hour
-# after the package that depends on them. A version younger than that is refused, since nothing would pin its
-# dependencies yet (Renovate waits two days). npm still prefers versions that aren't deprecated and the current
+# image is built. The two hours are for the packages published with it: claude's platform binaries come out up to
+# an hour after the package that depends on them. A version younger than that is refused, since nothing would pin
+# its dependencies yet (Renovate waits two days). npm still prefers versions that aren't deprecated and the current
 # "latest" tag, so a dependency deprecated or retagged later can change a component on a rebuild: its hash in the
 # manifest changes, and instances copy it again.
 #
@@ -65,14 +65,14 @@ package() {
 }
 
 # npm_get <dir> <package> <version> [cpu]: installs the package into $work/<dir>, for the target CPU unless
-# another is given, as of a day after that version was published.
+# another is given, as of two hours after that version was published.
 npm_get() {
   before=$(npm view "$2@$3" time --json | node -e 'let s = ""
     process.stdin.on("data", d => s += d).on("end", () => {
       const t = JSON.parse(s)[process.argv[1]]
       if (!t) { console.error(`no publish time for ${process.argv[1]}`); process.exit(1) }
-      const before = Date.parse(t) + 24 * 3600 * 1000
-      if (before > Date.now()) { console.error(`${process.argv[1]} is less than a day old, so its dependencies are not pinned yet`); process.exit(1) }
+      const before = Date.parse(t) + 2 * 3600 * 1000
+      if (before > Date.now()) { console.error(`${process.argv[1]} is less than two hours old, so its dependencies are not pinned yet`); process.exit(1) }
       console.log(new Date(before).toISOString())
     })' "$3")
   mkdir -p "$work/$1"

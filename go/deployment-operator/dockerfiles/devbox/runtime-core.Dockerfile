@@ -14,7 +14,7 @@
 #     a source hash is built, see runtime-src-hash.sh and the CD workflow)
 #   - build with SOURCE_DATE_EPOCH=0 and the image output's rewrite-timestamp=true
 #   - GO_IMAGE and NODE_IMAGE are pinned by digest, the agents by version below, and their dependencies to
-#     what existed a day after each version's release (runtime/assemble.sh, which explains the limits)
+#     what existed two hours after each version's release (runtime/assemble.sh, which explains the limits)
 #
 # The payload is one directory per component (runtime/components.json) plus the manifest that lists them. The
 # agents are the upstream binaries and packages, unmodified, so the environment image must have glibc 2.28 or
@@ -29,25 +29,25 @@ ARG NODE_IMAGE=node:${NODE_VERSION}-trixie-slim@sha256:4623e8ac1eb5f35b0a91b8542
 # The agents, their ACP adapters and Playwright MCP: the agent-run images' pins (dockerfiles/agent-harness/*);
 # test.sh fails if they drift.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
-ARG CLAUDE_VERSION=2.1.236
+ARG CLAUDE_VERSION=2.1.332
 # renovate: datasource=npm depName=@agentclientprotocol/claude-agent-acp
-ARG CLAUDE_ACP_VERSION=0.75.1
+ARG CLAUDE_ACP_VERSION=0.112.0
 # renovate: datasource=npm depName=@openai/codex
-ARG CODEX_VERSION=0.153.4
+ARG CODEX_VERSION=0.172.0
 # renovate: datasource=npm depName=@agentclientprotocol/codex-acp
-ARG CODEX_ACP_VERSION=1.10.0
+ARG CODEX_ACP_VERSION=2.12.0
 # renovate: datasource=npm depName=opencode-ai
-ARG OPENCODE_VERSION=1.18.23
+ARG OPENCODE_VERSION=1.19.6
 # renovate: datasource=npm depName=@google/gemini-cli
-ARG GEMINI_VERSION=0.44.1
+ARG GEMINI_VERSION=0.71.1
 # renovate: datasource=npm depName=@earendil-works/pi-coding-agent
-ARG PI_VERSION=0.84.1
+ARG PI_VERSION=1.6.1
 # renovate: datasource=npm depName=pi-acp
-ARG PI_ACP_VERSION=0.0.33
+ARG PI_ACP_VERSION=0.0.35
 # renovate: datasource=npm depName=pi-mcp-adapter
-ARG PI_MCP_ADAPTER_VERSION=2.21.2
+ARG PI_MCP_ADAPTER_VERSION=7.0.1
 # renovate: datasource=npm depName=@playwright/mcp
-ARG PLAYWRIGHT_MCP_VERSION=0.0.85
+ARG PLAYWRIGHT_MCP_VERSION=0.0.86
 # Bundles the ACP adapters; not shipped.
 # renovate: datasource=npm depName=esbuild
 ARG ESBUILD_VERSION=0.28.2
