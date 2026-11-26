@@ -1,11 +1,13 @@
 // Package browser runs the sandbox's visible Chromium (DBX-45): Xvfb, Chromium with a CDP port the agent's
-// Playwright MCP drives, x11vnc on localhost bridged to the /browser/vnc WebSocket, and the /preview/:port/*
-// reverse proxy. The browser starts on demand (StartBrowser, a VNC viewer, or the first CDP connection) and stops
-// when idle.
+// Playwright MCP drives, the display's streamer on localhost, and the /preview/:port/* reverse proxy. The
+// streamer is voxl (H.264, bridged to /browser/stream) when the image ships it, else x11vnc (RFB for noVNC,
+// bridged to /browser/vnc). The browser starts on demand (StartBrowser, a viewer, or the first CDP connection)
+// and stops when idle.
 package browser
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
@@ -34,8 +36,13 @@ const (
 	DefaultDisplay     = ":99"
 	DefaultCDPPort     = 9222
 	DefaultVNCPort     = 5900
+	DefaultVoxlPort    = 6901
 	DefaultIdleTimeout = 15 * time.Minute
 	VNCPath            = "/browser/vnc"
+	StreamPath         = devboxv1.BrowserStreamPath
+	// voxlMaxKbps caps voxl's adaptive bitrate (30 Mbps by default) for a stream that crosses KAS and the
+	// gateway.
+	voxlMaxKbps = 10000
 	// startTimeout bounds a whole start, within console's 30s deadline on the OpenStream that triggers it, so
 	// the caller sees why it failed.
 	startTimeout = 20 * time.Second
@@ -48,11 +55,13 @@ type Options struct {
 	Chromium string
 	Xvfb     string
 	X11VNC   string
+	Voxl     string
 	Display  string
 	// CDPPort is the localhost port agents connect to; the daemon proxies it to Chromium's own port (CDPPort+1)
 	// so the first connection can start the browser.
 	CDPPort     int
 	VNCPort     int
+	VoxlPort    int
 	ProfileDir  string
 	ExtraFlags  []string
 	IdleTimeout time.Duration
@@ -66,6 +75,9 @@ type Options struct {
 type Browser struct {
 	opts Options
 	log  *slog.Logger
+	// voxl streams the display when the image ships it; voxlPassword guards its localhost port.
+	voxl         bool
+	voxlPassword string
 
 	mu       sync.Mutex
 	running  bool
@@ -100,6 +112,12 @@ func New(opts Options) *Browser {
 	if opts.VNCPort == 0 {
 		opts.VNCPort = DefaultVNCPort
 	}
+	if opts.Voxl == "" {
+		opts.Voxl = "voxl"
+	}
+	if opts.VoxlPort == 0 {
+		opts.VoxlPort = DefaultVoxlPort
+	}
 	if opts.IdleTimeout == 0 {
 		opts.IdleTimeout = DefaultIdleTimeout
 	}
@@ -116,6 +134,9 @@ func New(opts Options) *Browser {
 		opts.Supervisor = proc.NewSupervisor(opts.Log)
 	}
 	b := &Browser{opts: opts, log: opts.Log.With("component", "browser")}
+	if _, err := exec.LookPath(opts.Voxl); err == nil {
+		b.voxl, b.voxlPassword = true, rand.Text()
+	}
 	b.touch()
 	return b
 }
@@ -132,9 +153,9 @@ func firstExisting(paths ...string) string {
 	return "chromium"
 }
 
-// Available reports whether Chromium, Xvfb and x11vnc are installed.
+// Available reports whether Chromium, Xvfb and a streamer (voxl or x11vnc) are installed.
 func (b *Browser) Available() bool {
-	for _, bin := range []string{b.opts.Chromium, b.opts.Xvfb, b.opts.X11VNC} {
+	for _, bin := range []string{b.opts.Chromium, b.opts.Xvfb, b.streamer()} {
 		if _, err := exec.LookPath(bin); err != nil {
 			return false
 		}
@@ -152,18 +173,40 @@ func (b *Browser) Streams() int { return int(b.streams.Load()) }
 
 func (b *Browser) internalCDPPort() int { return b.opts.CDPPort + 1 }
 
+func (b *Browser) streamer() string {
+	if b.voxl {
+		return b.opts.Voxl
+	}
+	return b.opts.X11VNC
+}
+
+func (b *Browser) streamerPort() int {
+	if b.voxl {
+		return b.opts.VoxlPort
+	}
+	return b.opts.VNCPort
+}
+
+// StreamPath is the daemon path viewers connect to: StreamPath with voxl, else VNCPath.
+func (b *Browser) StreamPath() string {
+	if b.voxl {
+		return StreamPath
+	}
+	return VNCPath
+}
+
 // Info returns the browser state.
 func (b *Browser) Info() *devboxv1.BrowserInfo {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	info := &devboxv1.BrowserInfo{Running: b.running, VncPath: VNCPath, CdpPort: int32(b.opts.CDPPort), Width: b.width, Height: b.height}
+	info := &devboxv1.BrowserInfo{Running: b.running, VncPath: b.StreamPath(), CdpPort: int32(b.opts.CDPPort), Width: b.width, Height: b.height}
 	if b.running {
 		info.StartedAt = timestamppb.New(b.started)
 	}
 	return info
 }
 
-// Start starts Xvfb, x11vnc and Chromium if they aren't running.
+// Start starts Xvfb, the streamer and Chromium if they aren't running.
 func (b *Browser) Start(ctx context.Context, width, height int32, url string) (*devboxv1.BrowserInfo, error) {
 	if width <= 0 {
 		width = 1280
@@ -218,8 +261,12 @@ type started struct {
 }
 
 func (b *Browser) spawn(name string, args ...string) (started, error) {
+	return b.spawnEnv(name, nil, args...)
+}
+
+func (b *Browser) spawnEnv(name string, env []string, args ...string) (started, error) {
 	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Env = append(b.opts.Env(), "DISPLAY="+b.opts.Display)
+	cmd.Env = append(append(b.opts.Env(), "DISPLAY="+b.opts.Display), env...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	out := &tail{max: outputTail}
 	cmd.Stdout, cmd.Stderr = out, out
@@ -250,10 +297,9 @@ func (b *Browser) start(width, height int32, url string) error {
 			return fail(fmt.Errorf("xvfb didn't start: %w", err))
 		}
 	}
-	s, err := b.spawn("x11vnc", b.opts.X11VNC, "-display", b.opts.Display, "-rfbport", strconv.Itoa(b.opts.VNCPort), "-localhost",
-		"-forever", "-shared", "-nopw", "-quiet", "-noxdamage")
+	s, err := b.spawnStreamer()
 	if err != nil {
-		return fail(fmt.Errorf("start x11vnc: %w", err))
+		return fail(fmt.Errorf("start %s: %w", b.streamer(), err))
 	}
 	procs = append(procs, s)
 	profile := b.opts.ProfileDir
@@ -279,8 +325,8 @@ func (b *Browser) start(width, height int32, url string) error {
 		return fail(fmt.Errorf("start chromium: %w", err))
 	}
 	procs = append(procs, s)
-	if err := waitFor(func() bool { return dialable(b.internalCDPPort()) && dialable(b.opts.VNCPort) }, deadline, procs); err != nil {
-		return fail(fmt.Errorf("chromium or x11vnc didn't come up: %w", err))
+	if err := waitFor(func() bool { return dialable(b.internalCDPPort()) && dialable(b.streamerPort()) }, deadline, procs); err != nil {
+		return fail(fmt.Errorf("chromium or %s didn't come up: %w", b.streamer(), err))
 	}
 	running := make([]*proc.Process, len(procs))
 	for i, s := range procs {
@@ -292,8 +338,20 @@ func (b *Browser) start(width, height int32, url string) error {
 	for _, p := range running {
 		go b.watch(p)
 	}
-	b.log.Info("browser started", "display", b.opts.Display, "cdp", b.opts.CDPPort, "vnc", b.opts.VNCPort)
+	b.log.Info("browser started", "display", b.opts.Display, "cdp", b.opts.CDPPort, "streamer", b.streamer(), "port", b.streamerPort())
 	return nil
+}
+
+// spawnStreamer starts voxl or x11vnc on localhost. voxl's password stays out of its arguments, where any process
+// could read it.
+func (b *Browser) spawnStreamer() (started, error) {
+	if !b.voxl {
+		return b.spawn("x11vnc", b.opts.X11VNC, "-display", b.opts.Display, "-rfbport", strconv.Itoa(b.opts.VNCPort), "-localhost",
+			"-forever", "-shared", "-nopw", "-quiet", "-noxdamage")
+	}
+	return b.spawnEnv("voxl", []string{"VOXL_PASSWORD=" + b.voxlPassword}, b.opts.Voxl,
+		"--addr=127.0.0.1", "--port="+strconv.Itoa(b.opts.VoxlPort), "--max-kbps="+strconv.Itoa(voxlMaxKbps),
+		"--audio-enabled=false", "--microphone-enabled=false", "--file-transfers=none")
 }
 
 // watch tears the stack down when one of its processes dies.

@@ -187,8 +187,8 @@ func New(cfg Config) (*Daemon, error) {
 		ChangesCache: files.NewChangesCache(d.log.With("component", "changes"))}
 	d.terms = terminal.New(terminal.Options{Home: cfg.Home, Shell: cfg.Shell, Env: d.baseEnv, Clock: cfg.Clock,
 		Log: d.log.With("component", "terminal")})
-	d.browser = browser.New(browser.Options{Chromium: cfg.Chromium, Xvfb: cfg.Xvfb, X11VNC: cfg.X11VNC,
-		Display: cfg.Display, CDPPort: cfg.CDPPort, VNCPort: cfg.VNCPort, ProfileDir: filepath.Join(cfg.StateDir, "browser"),
+	d.browser = browser.New(browser.Options{Chromium: cfg.Chromium, Xvfb: cfg.Xvfb, X11VNC: cfg.X11VNC, Voxl: cfg.Voxl,
+		Display: cfg.Display, CDPPort: cfg.CDPPort, VNCPort: cfg.VNCPort, VoxlPort: cfg.VoxlPort, ProfileDir: filepath.Join(cfg.StateDir, "browser"),
 		IdleTimeout: cfg.BrowserIdle, Env: d.baseEnv, Supervisor: d.sup, Clock: cfg.Clock,
 		Log: d.log.With("component", "browser")})
 	d.creds = creds.New(creds.Options{Home: cfg.Home, IdentityDir: cfg.IdentityDir, AgentAuthDir: cfg.AgentAuthDir,

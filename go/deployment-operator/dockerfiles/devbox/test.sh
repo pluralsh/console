@@ -164,7 +164,7 @@ step_versions() {
 step_lint() {
   log "hadolint"
   local f rc=0
-  for f in minimal.Dockerfile fat.Dockerfile gateway.Dockerfile examples/Dockerfile; do
+  for f in minimal.Dockerfile fat.Dockerfile gateway.Dockerfile voxl.Dockerfile examples/Dockerfile; do
     echo "  ${f}"
     docker run --rm -i -v "${here}/.hadolint.yaml:/.hadolint.yaml:ro" "${HADOLINT_IMAGE}" \
       hadolint --config /.hadolint.yaml - < "${here}/${f}" || rc=1

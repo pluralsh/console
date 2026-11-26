@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ThemeProvider } from 'styled-components'
 
-import { DevboxBrowserView } from './DevboxBrowserTab'
+import { DevboxBrowserView, rfbConstructor } from './DevboxBrowserTab'
 import { DevboxWorkspaceApi } from './devboxWorkspaceApi'
 
 const rfb = vi.hoisted(() => ({
@@ -39,10 +39,34 @@ vi.mock('@novnc/novnc/lib/rfb', () => ({
   },
 }))
 
-const openStream = vi.fn(async () => ({
-  url: 'https://console.example.com/ext/devbox/streams/s1',
-  token: 'tok',
+const voxl = vi.hoisted(() => ({
+  urls: [] as { url: string; protocols: string[] }[],
 }))
+
+vi.mock('./voxlClient', () => ({
+  VOXL_SUBPROTOCOL: 'voxl',
+  connectVoxl: (
+    _target: HTMLElement,
+    url: string,
+    protocols: string[],
+    { onConnect }: { onConnect: () => void }
+  ) => {
+    voxl.urls.push({ url, protocols })
+    onConnect()
+    return { disconnect() {}, focus() {} }
+  },
+}))
+
+const openStream = vi.fn(
+  async (): Promise<{
+    url: string
+    token: string
+    subprotocols?: string[]
+  }> => ({
+    url: 'https://console.example.com/ext/devbox/streams/s1',
+    token: 'tok',
+  })
+)
 
 const api = { openStream } as unknown as DevboxWorkspaceApi
 
@@ -75,6 +99,7 @@ describe('DevboxBrowserView', () => {
   beforeEach(() => {
     rfb.instances = []
     rfb.connects = true
+    voxl.urls = []
     openStream.mockClear()
     onMove.mockClear()
     requestFullscreen.mockClear()
@@ -94,6 +119,22 @@ describe('DevboxBrowserView', () => {
     )
     expect(screen.queryByRole('textbox')).toBeNull()
     expect(screen.queryByRole('switch')).toBeNull()
+  })
+
+  it('streams with voxl when the ticket carries its subprotocol', async () => {
+    openStream.mockResolvedValueOnce({
+      url: 'https://console.example.com/ext/devbox/streams/s1',
+      token: 'tok',
+      subprotocols: ['voxl'],
+    })
+    renderView()
+    await waitFor(() => expect(voxl.urls).toHaveLength(1))
+    expect(voxl.urls[0].url).toContain('token=tok')
+    expect(voxl.urls[0].protocols).toEqual(['voxl'])
+    expect(rfb.instances).toHaveLength(0)
+    await waitFor(() =>
+      expect(screen.queryByText(/Starting the box's browser/)).toBeNull()
+    )
   })
 
   it('says why the browser could not be reached, and reconnects', async () => {
@@ -147,6 +188,13 @@ describe('DevboxBrowserView', () => {
     renderView({ live: false })
     expect(screen.getByText("Instance isn't running")).toBeTruthy()
     expect(openStream).not.toHaveBeenCalled()
+  })
+
+  it('finds the client class however the CommonJS module is wrapped', () => {
+    class Client {}
+    expect(rfbConstructor({ default: Client })).toBe(Client)
+    expect(rfbConstructor({ default: { default: Client } })).toBe(Client)
+    expect(() => rfbConstructor({ default: {} })).toThrow(/didn't load/)
   })
 
   it('explains when streams are unavailable', () => {

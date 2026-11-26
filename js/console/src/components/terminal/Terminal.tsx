@@ -10,6 +10,7 @@ import { socket } from 'helpers/client'
 
 import TerminalThemeContext from './TerminalThemeContext'
 import { normalizedThemes } from './themes'
+import { loadWebglRenderer } from './webgl'
 
 enum ChannelEvent {
   OnData = 'command',
@@ -87,6 +88,7 @@ export function TerminalScreen({
     const fitAddon = new FitAddon()
     xterm.loadAddon(fitAddon)
     xterm.open(terminalElRef.current)
+    loadWebglRenderer(xterm)
     xterm.write(`${isFirstConnect.current ? '' : '\r\n\r\n'}${header}\r\n`)
     fitAddon.fit()
 

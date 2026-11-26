@@ -73,6 +73,10 @@ commandTests:
     command: yarn
     args: ["--version"]
     expectedOutput: ["1\\.22\\.22"]
+  - name: yarn 4 accepts the image's environment
+    command: sh
+    args: ["-c", "cd \"$(mktemp -d)\" && echo '{\"packageManager\":\"yarn@4.18.1\"}' > package.json && yarn config get enableStrictSsl"]
+    expectedOutput: ["^true"]
   - name: rust
     command: rustc
     args: ["--version"]

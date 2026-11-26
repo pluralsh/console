@@ -11,6 +11,9 @@
 
 ARG DEBIAN_IMAGE=debian:trixie-20261104-slim
 ARG GO_IMAGE=golang:1.27.2-trixie
+# The statically linked voxl, published by devbox-voxl.yaml from voxl.Dockerfile; bump the tag with its
+# VOXL_VERSION.
+ARG VOXL_IMAGE=ghcr.io/pluralsh/devbox-voxl:0.4.0
 # renovate: datasource=docker depName=node
 ARG NODE_VERSION=24.11.1
 ARG DAEMON_SOURCE=build
@@ -81,6 +84,11 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOWORK=off \
 
 # hadolint ignore=DL3006
 FROM daemon-${DAEMON_SOURCE} AS daemon
+
+# voxl streams the browser's Xvfb display as H.264 (voxl.Dockerfile). It links
+# x264, so the binary is GPL-2.0.
+# hadolint ignore=DL3006
+FROM ${VOXL_IMAGE} AS voxl
 
 # ---------------------------------------------------------------------------
 # Harnesses, ACP adapters, Playwright MCP and the Node runtime they share
@@ -181,7 +189,7 @@ RUN apt-get update && \
       build-essential pkg-config \
       unzip zip xz-utils bzip2 tzdata \
       libatomic1 \
-      chromium xvfb xauth x11vnc \
+      chromium xvfb xauth \
       fonts-liberation fonts-dejavu-core fonts-noto-color-emoji && \
     ln -s /usr/bin/fdfind /usr/local/bin/fd && \
     git lfs install --system && \
@@ -218,6 +226,7 @@ RUN set -eux; \
 COPY --from=harnesses /usr/local/ /usr/local/
 COPY --from=harnesses /opt/pi-mcp-adapter /opt/pi-mcp-adapter
 COPY --from=daemon /out/devbox-daemon /usr/local/bin/devbox-daemon
+COPY --from=voxl /voxl /usr/local/bin/voxl
 COPY deployment-operator/dockerfiles/devbox/rootfs/minimal/ /
 
 # The dev user's home is the workspace volume, so nothing is written under it
@@ -275,22 +284,15 @@ ENV HOME=/home/dev \
     MISE_TRUSTED_CONFIG_PATHS=/home/dev \
     MISE_YES=1 \
     SSL_CERT_FILE=/var/lib/devbox/trust/ca-bundle.pem \
-    CURL_CA_BUNDLE=/var/lib/devbox/trust/ca-bundle.pem \
-    GIT_SSL_CAINFO=/var/lib/devbox/trust/ca-bundle.pem \
     AWS_CA_BUNDLE=/var/lib/devbox/trust/ca-bundle.pem \
     CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE=/var/lib/devbox/trust/ca-bundle.pem \
     NODE_EXTRA_CA_CERTS=/var/lib/devbox/trust/ca-bundle.pem \
-    NPM_CONFIG_CAFILE=/var/lib/devbox/trust/ca-bundle.pem \
-    YARN_CAFILE=/var/lib/devbox/trust/ca-bundle.pem \
-    YARN_HTTPS_CA_FILE_PATH=/var/lib/devbox/trust/ca-bundle.pem \
     DENO_CERT=/var/lib/devbox/trust/ca-bundle.pem \
     REQUESTS_CA_BUNDLE=/var/lib/devbox/trust/ca-bundle.pem \
     PIP_CERT=/var/lib/devbox/trust/ca-bundle.pem \
     TWINE_CERT=/var/lib/devbox/trust/ca-bundle.pem \
     CONDA_SSL_VERIFY=/var/lib/devbox/trust/ca-bundle.pem \
-    CARGO_HTTP_CAINFO=/var/lib/devbox/trust/ca-bundle.pem \
     HEX_CACERTS_PATH=/var/lib/devbox/trust/ca-bundle.pem \
-    BUNDLE_SSL_CA_CERT=/var/lib/devbox/trust/ca-bundle.pem \
     NIX_SSL_CERT_FILE=/var/lib/devbox/trust/ca-bundle.pem
 
 USER 1000:1000

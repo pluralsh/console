@@ -22,6 +22,14 @@ const (
 	ThreadHeader = "X-Devbox-Thread"
 )
 
+// The daemon streams its browser with voxl (H.264 over a WebSocket) on BrowserStreamPath when the image ships
+// voxl, else with x11vnc for noVNC on /browser/vnc. A VNC-kind stream to BrowserStreamPath carries
+// BrowserStreamSubprotocol, which tells console to use its voxl client.
+const (
+	BrowserStreamPath        = "/browser/stream"
+	BrowserStreamSubprotocol = "voxl"
+)
+
 var (
 	controlMethodPrefix = "/" + Control_ServiceDesc.ServiceName + "/"
 	gatewayMethodPrefix = "/" + Gateway_ServiceDesc.ServiceName + "/"

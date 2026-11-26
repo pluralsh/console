@@ -34,6 +34,9 @@ const (
 type fakeDaemon struct {
 	devboxv1.UnimplementedDaemonServer
 
+	// browserPath is the browser stream path the daemon reports (default /browser/vnc).
+	browserPath string
+
 	mu          sync.Mutex
 	initialized []*devboxv1.InitializeRequest
 	prompts     []*devboxv1.PromptRequest
@@ -116,12 +119,19 @@ func (d *fakeDaemon) CreateTerminal(_ context.Context, req *devboxv1.CreateTermi
 	return &devboxv1.TerminalInfo{TerminalId: id}, nil
 }
 
+func (d *fakeDaemon) streamPath() string {
+	if d.browserPath != "" {
+		return d.browserPath
+	}
+	return "/browser/vnc"
+}
+
 func (d *fakeDaemon) GetBrowser(context.Context, *devboxv1.GetBrowserRequest) (*devboxv1.BrowserInfo, error) {
-	return &devboxv1.BrowserInfo{VncPath: "/browser/vnc"}, nil
+	return &devboxv1.BrowserInfo{VncPath: d.streamPath()}, nil
 }
 
 func (d *fakeDaemon) StartBrowser(_ context.Context, req *devboxv1.StartBrowserRequest) (*devboxv1.BrowserInfo, error) {
-	return &devboxv1.BrowserInfo{Running: true, VncPath: "/browser/vnc", Width: req.GetWidth(), Height: req.GetHeight()}, nil
+	return &devboxv1.BrowserInfo{Running: true, VncPath: d.streamPath(), Width: req.GetWidth(), Height: req.GetHeight()}, nil
 }
 
 func (d *fakeDaemon) PrepareSuspend(_ context.Context, req *devboxv1.PrepareSuspendRequest) (*devboxv1.PrepareSuspendResponse, error) {

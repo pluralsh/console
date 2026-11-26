@@ -90,3 +90,13 @@ func TestTheImageSetsEveryTrustVariable(t *testing.T) {
 		}
 	}
 }
+
+// Yarn 2+ reads every YARN_* variable as a setting and refuses to run on one it doesn't know.
+func TestOnlySetsYarnSettingsYarnKnows(t *testing.T) {
+	berry := map[string]bool{"YARN_HTTPS_CA_FILE_PATH": true, "YARN_CA_FILE_PATH": true}
+	for _, k := range EnvVars {
+		if strings.HasPrefix(k, "YARN_") && !berry[k] {
+			t.Errorf("%s isn't a Yarn 2+ setting, so yarn install fails with it set", k)
+		}
+	}
+}

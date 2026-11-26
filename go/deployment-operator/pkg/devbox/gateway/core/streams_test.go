@@ -221,6 +221,28 @@ func TestProxyStreamTerminalUpgrade(t *testing.T) {
 	}
 }
 
+func TestOpenStreamMarksVoxlStreams(t *testing.T) {
+	h := newHarness(t, sandboxHTTP(t))
+	h.running("inst-1")
+	gc := gatewayClient(t, h.g)
+	open := func() *devboxv1.OpenStreamResponse {
+		t.Helper()
+		resp, err := gc.OpenStream(context.Background(), &devboxv1.OpenStreamRequest{InstanceId: "inst-1", Kind: devboxv1.StreamKind_STREAM_KIND_VNC})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp
+	}
+	if vnc := open(); len(vnc.GetSubprotocols()) != 0 {
+		t.Fatalf("a VNC stream carries subprotocols %v", vnc.GetSubprotocols())
+	}
+	h.daemon.browserPath = devboxv1.BrowserStreamPath
+	voxl := open()
+	if voxl.GetDaemonPath() != devboxv1.BrowserStreamPath || len(voxl.GetSubprotocols()) != 1 || voxl.GetSubprotocols()[0] != "voxl" {
+		t.Fatalf("OpenStream = %v", voxl)
+	}
+}
+
 func TestProxyStreamVNC(t *testing.T) {
 	h := newHarness(t, sandboxHTTP(t))
 	h.running("inst-1")

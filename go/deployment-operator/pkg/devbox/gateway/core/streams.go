@@ -121,6 +121,9 @@ func (g *Gateway) OpenStream(ctx context.Context, req *devboxv1.OpenStreamReques
 		if resp.DaemonPath == "" {
 			resp.DaemonPath = "/browser/vnc"
 		}
+		if resp.DaemonPath == devboxv1.BrowserStreamPath {
+			resp.Subprotocols = []string{devboxv1.BrowserStreamSubprotocol}
+		}
 	case devboxv1.StreamKind_STREAM_KIND_PREVIEW:
 		if req.GetPort() <= 0 || req.GetPort() > 65535 {
 			return nil, status.Errorf(codes.InvalidArgument, "invalid preview port %d", req.GetPort())

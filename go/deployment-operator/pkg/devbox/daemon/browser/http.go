@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
+
+	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 )
 
 // ServeVNC bridges the /browser/vnc WebSocket (noVNC, binary frames) to x11vnc on localhost, starting the browser
@@ -33,6 +36,59 @@ func (b *Browser) ServeVNC(w http.ResponseWriter, r *http.Request) {
 	c.SetReadLimit(-1)
 	nc := websocket.NetConn(r.Context(), c, websocket.MessageBinary)
 	b.Pipe(nc, up)
+}
+
+// ServeStream bridges the /browser/stream WebSocket (console's voxl client) to voxl's on localhost, message by
+// message so text and binary frames keep their type, starting the browser if needed.
+func (b *Browser) ServeStream(w http.ResponseWriter, r *http.Request) {
+	if !b.voxl {
+		http.Error(w, "this image streams the browser over VNC", http.StatusNotFound)
+		return
+	}
+	if _, err := b.Start(r.Context(), 0, 0, ""); err != nil {
+		http.Error(w, "browser unavailable: "+err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+	ctx := r.Context()
+	dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	up, _, err := websocket.Dial(dialCtx, fmt.Sprintf("ws://127.0.0.1:%d/ws", b.opts.VoxlPort), &websocket.DialOptions{
+		HTTPHeader: http.Header{"Authorization": []string{"Bearer " + b.voxlPassword}},
+	})
+	if err != nil {
+		http.Error(w, "browser stream unavailable", http.StatusBadGateway)
+		return
+	}
+	defer func() { _ = up.CloseNow() }()
+	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{
+		Subprotocols: []string{devboxv1.BrowserStreamSubprotocol}, InsecureSkipVerify: true,
+	})
+	if err != nil {
+		return
+	}
+	defer func() { _ = c.CloseNow() }()
+	up.SetReadLimit(-1)
+	c.SetReadLimit(-1)
+
+	b.streams.Add(1)
+	defer b.streams.Add(-1)
+	ctx, stop := context.WithCancel(ctx)
+	defer stop()
+	relay := func(dst, src *websocket.Conn) {
+		defer stop()
+		for {
+			typ, data, err := src.Read(ctx)
+			if err != nil {
+				return
+			}
+			b.touch()
+			if err := dst.Write(ctx, typ, data); err != nil {
+				return
+			}
+		}
+	}
+	go relay(c, up)
+	relay(up, c)
 }
 
 // PreviewProxy serves /preview/<port>/* by reverse-proxying to 127.0.0.1:<port> (WebSockets included).

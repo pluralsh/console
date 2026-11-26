@@ -40,9 +40,11 @@ type Config struct {
 	Chromium    string
 	Xvfb        string
 	X11VNC      string
+	Voxl        string
 	Display     string
 	CDPPort     int
 	VNCPort     int
+	VoxlPort    int
 	BrowserIdle time.Duration
 	// PlaywrightMCP is the Playwright MCP command added to every session (empty: image.json's playwrightMcp).
 	PlaywrightMCP string
@@ -95,6 +97,9 @@ func (c *Config) defaults() {
 	}
 	if c.VNCPort == 0 {
 		c.VNCPort = 5900
+	}
+	if c.VoxlPort == 0 {
+		c.VoxlPort = 6901
 	}
 	if c.Version == "" {
 		c.Version = "dev"

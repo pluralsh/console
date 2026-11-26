@@ -145,6 +145,69 @@ func TestTailKeepsTheLastBytes(t *testing.T) {
 	}
 }
 
+func TestServeStreamRelaysVoxlMessages(t *testing.T) {
+	b := New(Options{Voxl: "sh", Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if !b.voxl || b.StreamPath() != StreamPath || b.Info().GetVncPath() != StreamPath {
+		t.Fatalf("an image with voxl streams on %q", b.StreamPath())
+	}
+	auth := make(chan string, 1)
+	b.opts.VoxlPort = upstream(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		auth <- r.Header.Get("Authorization")
+		c, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer c.CloseNow()
+		_ = c.Write(r.Context(), websocket.MessageText, []byte(`{"t":"hello","w":1280,"h":800}`))
+		typ, data, err := c.Read(r.Context())
+		if err == nil {
+			_ = c.Write(r.Context(), websocket.MessageBinary, append([]byte{byte(typ)}, data...))
+		}
+	}))
+	b.running = true
+	srv := httptest.NewServer(http.HandlerFunc(b.ServeStream))
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	c, resp, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+StreamPath,
+		&websocket.DialOptions{Subprotocols: []string{"voxl"}})
+	if err != nil {
+		t.Fatalf("dial: %v", err)
+	}
+	defer c.CloseNow()
+	if p := resp.Header.Get("Sec-WebSocket-Protocol"); p != "voxl" {
+		t.Fatalf("subprotocol %q, want voxl", p)
+	}
+	if got := <-auth; got != "Bearer "+b.voxlPassword || b.voxlPassword == "" {
+		t.Fatalf("voxl saw Authorization %q", got)
+	}
+	typ, data, err := c.Read(ctx)
+	if err != nil || typ != websocket.MessageText || !strings.Contains(string(data), `"hello"`) {
+		t.Fatalf("hello: %v %q %v", typ, data, err)
+	}
+	if b.Streams() != 1 {
+		t.Fatalf("streams %d, want 1", b.Streams())
+	}
+	_ = c.Write(ctx, websocket.MessageText, []byte("m,10,20"))
+	typ, data, err = c.Read(ctx)
+	if err != nil || typ != websocket.MessageBinary || string(data) != "\x01m,10,20" {
+		t.Fatalf("relayed command: %v %q %v", typ, data, err)
+	}
+}
+
+func TestWithoutVoxlTheBrowserStreamsOverVNC(t *testing.T) {
+	b := New(Options{Voxl: "voxl-not-installed", Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
+	if b.StreamPath() != VNCPath || b.streamer() != "x11vnc" {
+		t.Fatalf("path %q streamer %q", b.StreamPath(), b.streamer())
+	}
+	rec := httptest.NewRecorder()
+	b.ServeStream(rec, httptest.NewRequest(http.MethodGet, StreamPath, nil))
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("status %d", rec.Code)
+	}
+}
+
 func TestBrowserStartStop(t *testing.T) {
 	for _, bin := range []string{"chromium", "Xvfb", "x11vnc"} {
 		if _, err := exec.LookPath(bin); err != nil {
@@ -152,7 +215,7 @@ func TestBrowserStartStop(t *testing.T) {
 		}
 	}
 	chromium, _ := exec.LookPath("chromium")
-	b := New(Options{Chromium: chromium, ProfileDir: t.TempDir(), Display: ":97", CDPPort: 19222, VNCPort: 15900,
+	b := New(Options{Chromium: chromium, Voxl: "voxl-not-installed", ProfileDir: t.TempDir(), Display: ":97", CDPPort: 19222, VNCPort: 15900,
 		Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()

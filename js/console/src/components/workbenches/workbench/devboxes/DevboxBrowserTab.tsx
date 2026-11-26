@@ -18,12 +18,14 @@ import {
   DevboxWorkspaceApi,
   ticketSubprotocols,
 } from './devboxWorkspaceApi'
+import { connectVoxl, VOXL_SUBPROTOCOL } from './voxlClient'
 
 type VncState =
   | { kind: 'connecting' }
   | { kind: 'connected' }
   | { kind: 'disconnected'; error?: string }
 type RfbClient = RFB & { focus?: (options?: FocusOptions) => void }
+type BrowserClient = { disconnect: () => void; focus: () => void }
 
 export type DevboxBrowserPlacement = 'panel' | 'main'
 
@@ -62,16 +64,23 @@ export function DevboxBrowserView({
   )
 }
 
-async function connectVnc(
+// boxes with voxl stream H.264 (their tickets carry its subprotocol); older
+// images serve VNC for noVNC
+async function connectBrowser(
   target: HTMLElement,
   openStream: NonNullable<DevboxWorkspaceApi['openStream']>,
   onState: (state: VncState) => void
-): Promise<RfbClient> {
-  const [{ default: RFBClient }, ticket] = await Promise.all([
-    import('@novnc/novnc/lib/rfb'),
-    openStream({ kind: 'vnc' }),
-  ])
+): Promise<BrowserClient> {
+  const ticket = await openStream({ kind: 'vnc' })
   const protocols = ticketSubprotocols(ticket)
+  if (protocols.includes(VOXL_SUBPROTOCOL))
+    return connectVoxl(target, devboxStreamSocketUrl(ticket), protocols, {
+      onConnect: () => onState({ kind: 'connected' }),
+      onDisconnect: () => onState({ kind: 'disconnected' }),
+    })
+  // lib/rfb is CommonJS, and the production build hands its whole exports
+  // object back as the default
+  const RFBClient = rfbConstructor(await import('@novnc/novnc/lib/rfb'))
   const rfb = new RFBClient(target, devboxStreamSocketUrl(ticket), {
     wsProtocols: protocols.length ? protocols : ['binary'],
   }) as RfbClient
@@ -81,7 +90,20 @@ async function connectVnc(
   rfb.viewOnly = false
   rfb.addEventListener('connect', () => onState({ kind: 'connected' }))
   rfb.addEventListener('disconnect', () => onState({ kind: 'disconnected' }))
-  return rfb
+  return {
+    disconnect: () => rfb.disconnect(),
+    focus: () => rfb.focus?.(),
+  }
+}
+
+type RfbConstructor = typeof import('@novnc/novnc/lib/rfb').default
+
+export function rfbConstructor(mod: unknown): RfbConstructor {
+  let m = mod as { default?: unknown }
+  while (typeof m !== 'function' && m?.default) m = m.default as typeof m
+  if (typeof m !== 'function')
+    throw new Error("the browser client (noVNC) didn't load")
+  return m as unknown as RfbConstructor
 }
 
 function DevboxVnc({
@@ -95,7 +117,7 @@ function DevboxVnc({
 }) {
   const frameRef = useRef<HTMLDivElement>(null)
   const targetRef = useRef<HTMLDivElement>(null)
-  const rfbRef = useRef<Nullable<RfbClient>>(null)
+  const clientRef = useRef<Nullable<BrowserClient>>(null)
   const [state, setState] = useState<VncState>({ kind: 'connecting' })
   const [fullscreen, setFullscreen] = useState(false)
   const [attempt, setAttempt] = useState(0)
@@ -104,12 +126,12 @@ function DevboxVnc({
     let disposed = false
     const target = targetRef.current
     if (target)
-      connectVnc(target, openStream, (s) => {
+      connectBrowser(target, openStream, (s) => {
         if (!disposed) setState(s)
       })
-        .then((rfb) => {
-          if (disposed) rfb.disconnect()
-          else rfbRef.current = rfb
+        .then((client) => {
+          if (disposed) client.disconnect()
+          else clientRef.current = client
         })
         .catch((e) => {
           if (!disposed)
@@ -117,8 +139,8 @@ function DevboxVnc({
         })
     return () => {
       disposed = true
-      rfbRef.current?.disconnect()
-      rfbRef.current = null
+      clientRef.current?.disconnect()
+      clientRef.current = null
     }
   }, [openStream, attempt])
 
@@ -136,7 +158,7 @@ function DevboxVnc({
       document.exitFullscreen?.()
       return
     }
-    void frame.requestFullscreen?.()?.then(() => rfbRef.current?.focus?.())
+    void frame.requestFullscreen?.()?.then(() => clientRef.current?.focus())
   }
   const fullscreenLabel = fullscreen ? 'Exit fullscreen' : 'View fullscreen'
 
@@ -264,9 +286,13 @@ const FrameSC = styled.div<{ $placement: DevboxBrowserPlacement }>(
 )
 
 const VncSC = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   flex: 1,
   minHeight: 0,
   minWidth: 0,
+  overflow: 'hidden',
 })
 
 const FullscreenActionsSC = styled.div(({ theme }) => ({

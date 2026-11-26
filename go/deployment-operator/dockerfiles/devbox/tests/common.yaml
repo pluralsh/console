@@ -37,21 +37,11 @@ metadataTest:
       value: ":99"
     - key: SSL_CERT_FILE
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: CURL_CA_BUNDLE
-      value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: GIT_SSL_CAINFO
-      value: /var/lib/devbox/trust/ca-bundle.pem
     - key: AWS_CA_BUNDLE
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: NODE_EXTRA_CA_CERTS
-      value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: NPM_CONFIG_CAFILE
-      value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: YARN_CAFILE
-      value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: YARN_HTTPS_CA_FILE_PATH
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: DENO_CERT
       value: /var/lib/devbox/trust/ca-bundle.pem
@@ -63,11 +53,7 @@ metadataTest:
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: CONDA_SSL_VERIFY
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: CARGO_HTTP_CAINFO
-      value: /var/lib/devbox/trust/ca-bundle.pem
     - key: HEX_CACERTS_PATH
-      value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: BUNDLE_SSL_CA_CERT
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: NIX_SSL_CERT_FILE
       value: /var/lib/devbox/trust/ca-bundle.pem
@@ -278,10 +264,14 @@ commandTests:
     command: sh
     args: ["-c", "chromium --headless --no-sandbox --disable-gpu --dump-dom 'data:text/html,<p>devbox-ok</p>' 2>/dev/null"]
     expectedOutput: ["devbox-ok"]
-  - name: Xvfb and x11vnc
+  - name: Xvfb and voxl
     command: which
-    args: ["Xvfb", "x11vnc"]
+    args: ["Xvfb", "voxl"]
     exitCode: 0
+  - name: voxl runs
+    command: voxl
+    args: ["--version"]
+    expectedOutput: ["voxl \\d+\\.\\d+\\.\\d+"]
 
   # Interactive shell environment.
   - name: shells, editors and CLI tools
