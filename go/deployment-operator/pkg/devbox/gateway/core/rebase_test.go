@@ -25,8 +25,8 @@ func (h *harness) release(updateOnResume bool) {
 	next.ImageDigest, next.DaemonVersion = "sha256:env", "0.12.1"
 	next.UpdateOnResume = updateOnResume
 	next.Revisions = map[int64]RunnerRevision{
-		2: {Template: "tmpl-r2", GoldenTag: "golden-r2", ImageDigest: "sha256:env", DaemonVersion: "0.12.0"},
-		3: {Template: "tmpl-r3", GoldenTag: "golden-r3", ImageDigest: "sha256:env", DaemonVersion: "0.12.1"},
+		2: {Template: "tmpl-r2", GoldenTag: "golden-r2"},
+		3: {Template: "tmpl-r3", GoldenTag: "golden-r3"},
 	}
 	runners[testRunner] = &next
 }
@@ -434,7 +434,7 @@ func TestRebaseFailureToMoveResumesOnTheOldRevision(t *testing.T) {
 	if rec.TemplateRevision != 2 || rec.Template != "tmpl-r2" || rec.Rebase != nil || !strings.Contains(rec.RebaseMessage, "volumes differ") {
 		t.Fatalf("record = %+v", rec)
 	}
-	if persisted, _ := h.records.Get(context.Background(), "inst-1"); persisted.TemplateRevision != 2 || persisted.Rebase != nil {
+	if persisted, err := h.records.Get(context.Background(), "inst-1"); err != nil || persisted.TemplateRevision != 2 || persisted.Rebase != nil {
 		t.Fatalf("persisted record = %+v", persisted)
 	}
 }

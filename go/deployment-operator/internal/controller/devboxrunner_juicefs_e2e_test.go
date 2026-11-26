@@ -4,9 +4,6 @@ package controller
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	"fmt"
 	"net"
 	"os"
 	"path/filepath"
@@ -21,8 +18,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/homedriver"
@@ -52,27 +47,11 @@ import (
 // devbox-juicefs.<ns>.svc:9820), E2E_POD_IDENTITY_DIR (the pod's podidentity credential bundle) and
 // E2E_SERVICEDNS_CA_DIR (the servicedns trust bundle), and optionally E2E_JUICEFS_CLASS (devbox-juicefs).
 func TestDevboxJuiceFSHomesOnSubstrate(t *testing.T) {
-	cfg := map[string]string{}
-	for _, k := range []string{"E2E_ATE_ADDRESS", "E2E_ATE_CA", "E2E_ATE_TOKEN", "E2E_ENV_IMAGE", "E2E_RUNTIME_A", "E2E_RUNTIME_B",
-		"E2E_JUICEFS_ADDRESS", "E2E_POD_IDENTITY_DIR", "E2E_SERVICEDNS_CA_DIR"} {
-		if cfg[k] = os.Getenv(k); cfg[k] == "" {
-			t.Skipf("%s is not set", k)
-		}
-	}
+	e, cfg := startDevboxE2E(t, "e2e-jfs", "E2E_JUICEFS_ADDRESS", "E2E_POD_IDENTITY_DIR", "E2E_SERVICEDNS_CA_DIR")
+	// External volumes are a Substrate preview feature, for every call that touches their templates.
+	e.ctx = metadata.AppendToOutgoingContext(e.ctx, substrate.PreviewHeader, "true")
+	ctx := e.ctx
 	class := lo.CoalesceOrEmpty(os.Getenv("E2E_JUICEFS_CLASS"), v1alpha1.DevboxDefaultJuiceFSStorageClass)
-	ca, err := os.ReadFile(cfg["E2E_ATE_CA"])
-	if err != nil {
-		t.Fatal(err)
-	}
-	pool := x509.NewCertPool()
-	pool.AppendCertsFromPEM(ca)
-	conn, err := grpc.NewClient(cfg["E2E_ATE_ADDRESS"],
-		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool, ServerName: "api.ate-system.svc", MinVersion: tls.VersionTLS12})),
-		grpc.WithPerRPCCredentials(e2eToken(cfg["E2E_ATE_TOKEN"])))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer conn.Close()
 	host, _, err := net.SplitHostPort(cfg["E2E_JUICEFS_ADDRESS"])
 	if err != nil {
 		t.Fatal(err)
@@ -89,19 +68,7 @@ func TestDevboxJuiceFSHomesOnSubstrate(t *testing.T) {
 	defer jfsConn.Close()
 	driver := homedriver.NewClient(jfsConn)
 
-	base, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
-	defer cancel()
-	// External volumes are a Substrate preview feature, for every call that touches their templates.
-	ctx := metadata.AppendToOutgoingContext(base, substrate.PreviewHeader, "true")
-	e := &devboxE2E{t: t, ctx: ctx, c: ateapi.NewControlClient(conn), api: substrate.NewFromConn(conn), atespace: fmt.Sprintf("e2e-jfs-%d", time.Now().Unix())}
-	if err := e.api.EnsureAtespace(ctx, e.atespace); err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("atespace %s", e.atespace)
-
-	runner := &v1alpha1.DevboxRunner{ObjectMeta: metav1.ObjectMeta{Name: "e2e", UID: types.UID("e2e")}}
-	runner.Spec.Agents = []v1alpha1.DevboxAgent{{Type: v1alpha1.DevboxAgentClaude, Default: lo.ToPtr(true)}, {Type: v1alpha1.DevboxAgentCodex}}
-	runner.Spec.Resources = &v1alpha1.DevboxResources{CPU: lo.ToPtr(resource.MustParse("500m")), Memory: lo.ToPtr(resource.MustParse("1Gi"))}
+	runner := e2eRunner()
 	size := resource.MustParse("5Gi")
 	runner.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeJuiceFS), Size: &size, StorageClassName: &class}
 	seeds, uids := map[string]string{}, map[string]string{}

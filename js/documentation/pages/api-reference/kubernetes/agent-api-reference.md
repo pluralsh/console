@@ -1310,25 +1310,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `flavor` _[DevboxRuntimeFlavor](#devboxruntimeflavor)_ | Flavor of the runtime. Only core (devbox-daemon, the coding agents and their ACP adapters) exists. | core | Enum: [core] <br />Optional: \{\} <br /> |
 | `shell` _string_ | Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with<br />it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then<br />execs the daemon. Defaults to /bin/sh. |  | Optional: \{\} <br />Pattern: `^/[^\s]+$` <br /> |
-
-
-#### DevboxRuntimeFlavor
-
-_Underlying type:_ _string_
-
-DevboxRuntimeFlavor names what the runtime image delivers next to the environment image.
-
-_Validation:_
-- Enum: [core]
-
-_Appears in:_
-- [DevboxRuntime](#devboxruntime)
-
-| Field | Description |
-| --- | --- |
-| `core` | DevboxRuntimeCore is devbox-daemon with the coding agents, their ACP adapters and Playwright MCP; the<br />browser and the tools come from the environment image.<br /> |
 
 
 #### DevboxSandboxClass

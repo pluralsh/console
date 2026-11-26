@@ -4,8 +4,6 @@ metadataTest:
   labels:
     - key: sh.plural.devbox/runtime-contract
       value: v1
-    - key: sh.plural.devbox/flavor
-      value: core
     - key: sh.plural.devbox/daemon-version
       value: .+
       isRegex: true

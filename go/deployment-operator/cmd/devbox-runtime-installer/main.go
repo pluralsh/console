@@ -56,11 +56,5 @@ func main() {
 }
 
 func splitList(s string) []string {
-	var out []string
-	for _, v := range strings.Split(s, ",") {
-		if v = strings.TrimSpace(v); v != "" {
-			out = append(out, v)
-		}
-	}
-	return out
+	return strings.FieldsFunc(s, func(r rune) bool { return r == ',' })
 }

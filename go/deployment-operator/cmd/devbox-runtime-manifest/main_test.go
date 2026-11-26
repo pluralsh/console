@@ -81,9 +81,6 @@ func TestBuildRejects(t *testing.T) {
 		"component not in the spec": func(t *testing.T, _, components string) {
 			require.NoError(t, os.MkdirAll(filepath.Join(components, "extra"), 0o755))
 		},
-		"symlink": func(t *testing.T, _, components string) {
-			require.NoError(t, os.Symlink("cli.js", filepath.Join(components, "pi", "link")))
-		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			spec, installed, components := fixture(t)

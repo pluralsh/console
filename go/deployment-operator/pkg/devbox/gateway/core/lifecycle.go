@@ -114,7 +114,7 @@ func (g *Gateway) provision(ctx context.Context, inst *Instance, src *startSourc
 	}
 }
 
-func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSource) (retErr error) {
+func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSource) error {
 	inst.mu.Lock()
 	runner := inst.runner
 	inst.mu.Unlock()
@@ -171,46 +171,29 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 	if err != nil {
 		return fmt.Errorf("creating actor %s: %w", ref, err)
 	}
+	start := func() error {
+		if retarget != "" {
+			if err := g.deps.Actors.SetTemplate(ctx, ref, retarget); err != nil {
+				return fmt.Errorf("moving actor %s to template %s: %w", ref, retarget, err)
+			}
+			inst.mu.Lock()
+			inst.rec.Template = retarget
+			inst.mu.Unlock()
+		}
+		if err := g.applyEgress(ctx, inst); err != nil {
+			return err
+		}
+		return g.wake(ctx, inst)
+	}
 	if homeDriver != nil {
 		// The golden memory snapshot expects the revision's golden home, which Substrate doesn't put in the volume
 		// it creates on the first resume.
-		if err := homes.Seed(ctx, homeDriver, actor, runner.Home.Seed, runner.Home.Bytes); err != nil {
-			return err
-		}
-		defer func() {
-			if retErr == nil {
-				return
-			}
-			ctx := context.WithoutCancel(ctx)
-			if a, err := g.deps.Actors.GetActor(ctx, ref); err == nil {
-				if err := homes.Release(ctx, homeDriver, a); err != nil {
-					g.log.Error(err, "deleting the seeded home of a failed instance", "instance", inst.ID)
-				}
-			}
-		}()
+		err = homes.Start(ctx, homeDriver, g.deps.Actors, actor, runner.Home.Seed, runner.Home.Bytes, start)
+	} else {
+		err = start()
 	}
-	if retarget != "" {
-		if err := g.deps.Actors.SetTemplate(ctx, ref, retarget); err != nil {
-			return fmt.Errorf("moving actor %s to template %s: %w", ref, retarget, err)
-		}
-		inst.mu.Lock()
-		inst.rec.Template = retarget
-		inst.mu.Unlock()
-	}
-	if err := g.applyEgress(ctx, inst); err != nil {
+	if err != nil {
 		return err
-	}
-	wakeErr := g.wake(ctx, inst)
-	if homeDriver != nil {
-		// Checked even when the resume failed: a home that isn't the seeded one is why a golden restore fails.
-		if a, err := g.deps.Actors.GetActor(ctx, ref); err == nil {
-			if err := homes.Verify(ctx, homeDriver, a); err != nil {
-				return err
-			}
-		}
-	}
-	if wakeErr != nil {
-		return wakeErr
 	}
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
 	g.startForwarder(inst)
@@ -669,9 +652,7 @@ func (g *Gateway) rollbackRebase(ctx context.Context, inst *Instance, cause erro
 	fail := func(step string, err error) bool {
 		g.log.Error(err, step, "instance", inst.ID, "template", intent.FromTemplate)
 		inst.mu.Lock()
-		inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
-		inst.rec.RebaseMessage = fmt.Sprintf("%v; rolling back failed, the instance is still on revision %d: %s: %v", cause, intent.ToRevision, step, err)
-		inst.rec.RebaseRevision = intent.ToRevision
+		inst.rec.failRebase(intent.ToRevision, fmt.Sprintf("%v; rolling back failed, the instance is still on revision %d: %s: %v", cause, intent.ToRevision, step, err))
 		inst.rec.SkipRevision = intent.ToRevision
 		inst.mu.Unlock()
 		return false
@@ -715,9 +696,7 @@ func (g *Gateway) rollbackRebase(ctx context.Context, inst *Instance, cause erro
 		// Losing its worker says nothing about the revision, so the onResume policy may try it again.
 		r.SkipRevision = intent.ToRevision
 	}
-	r.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
-	r.RebaseMessage = cause.Error()
-	r.RebaseRevision = intent.ToRevision
+	r.failRebase(intent.ToRevision, cause.Error())
 	after := *r
 	inst.mu.Unlock()
 	if err := g.persist(ctx, &after); err != nil {
@@ -726,24 +705,8 @@ func (g *Gateway) rollbackRebase(ctx context.Context, inst *Instance, cause erro
 	return true
 }
 
-// workerLossCrashes are Substrate's crash messages for losing the worker or node, which are no fault of the
-// template the actor ran (the controller's goldenWorkerLossCrashes).
-var workerLossCrashes = []string{
-	"worker pod went away while hosting the actor",
-	"worker restarted while hosting the actor",
-	"assigned worker is draining",
-	"assigned worker no longer satisfies the actor's placement constraints",
-	"node holding the actor's latest snapshot no longer exists",
-}
-
 func crashedWithoutFault(a *ateapi.Actor) bool {
-	crash := a.GetStatus().GetCrash().String()
-	for _, msg := range workerLossCrashes {
-		if strings.Contains(crash, msg) {
-			return true
-		}
-	}
-	return false
+	return substrate.LostWorker(a.GetStatus().GetCrash().String())
 }
 
 // updateOnResume applies the runner's onResume update policy to a suspended instance about to be resumed: when
@@ -782,9 +745,7 @@ func (g *Gateway) rebase(ctx context.Context, inst *Instance, to revisionTarget,
 	fail := func(err error) {
 		g.log.Error(err, "moving instance to another revision", "instance", inst.ID, "revision", to.revision, "reason", reason)
 		inst.mu.Lock()
-		inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
-		inst.rec.RebaseMessage = err.Error()
-		inst.rec.RebaseRevision = to.revision
+		inst.rec.failRebase(to.revision, err.Error())
 		inst.mu.Unlock()
 		g.reportRecord(ctx, inst)
 	}

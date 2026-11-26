@@ -68,11 +68,9 @@ const (
 	devboxEgressTrustMount = "/run/ate/egress-trust-bundle"
 	devboxActorMetaMount   = "/run/ate/actor"
 	devboxReadyzPort       = 80
-	// devboxReadyzTimeout is how long a box without golden boot work may take to answer its wakeup probe. It
-	// outlasts the devbox container's wait for the runtime (devboxWaitAndExec, about 270 s) by a minute, for the
-	// polls' own cost and the daemon's start, so a runtime that never installed is reported as such. Copying
-	// claude and codex into a home takes about 10 s under gVisor; several installs on one worker at once took up
-	// to 108 s. Golden boot work gets its own timeout on top.
+	// devboxReadyzTimeout is how long a box without golden boot work may take to answer its wakeup probe: a minute
+	// longer than the devbox container waits for the runtime (devboxWaitAndExec, about 270 s), so a runtime that
+	// never installed is reported as such. Golden boot work gets its own timeout on top.
 	devboxReadyzTimeout = 330 * time.Second
 	// substrateEnvValueLimit is Substrate's per-value env limit.
 	substrateEnvValueLimit = 32 * 1024
@@ -435,15 +433,12 @@ func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substra
 	return atespace, nil
 }
 
-// devboxWaitAndExec is the devbox container's command: it waits for the runtime sidecar to publish the ready
-// marker for the template's install ID (runtimemanifest.InstallID: the runtime digest and the runner's agents),
-// then execs the daemon the sidecar installed in the home volume, so the daemon is PID 1 as before, and tells it
-// where the runtime (and its agents) is. Arguments: the install ID, the install root and the ID's directory.
-// It is POSIX sh with builtins only, apart from sleep, so it runs in any environment image with a shell. It waits
-// about 270 s (1350 polls of 0.2 s, or of 1 s counted as 5 where sleep takes whole seconds) for the first install
-// of the runner's agents into a home, and then says so, before Substrate's wakeup probe gives up. The marker is
-// compared with the ID because the home volume outlives a template change: after an update it still holds the
-// previous install until the sidecar replaces it.
+// devboxWaitAndExec is the devbox container's command: it waits about 270 s (1350 polls of 0.2 s, a 1 s sleep counting
+// as 5) for the runtime sidecar's ready marker to name the template's install ID (runtimemanifest.InstallID), then
+// execs the daemon the sidecar installed, as
+// PID 1, with the runtime's directory. Arguments: the install ID, the install root and the ID's directory. POSIX
+// sh with builtins only, apart from sleep, so any environment image with a shell runs it. The ID, not just the
+// marker, matters because the home outlives a template change and holds the previous install until replaced.
 const devboxWaitAndExec = `d=$1; r=$2; i=0
 while [ "$i" -lt 1350 ]; do
   v=; [ -r "$r/ready" ] && read -r v < "$r/ready"
@@ -458,17 +453,6 @@ exit 1`
 func devboxRuntimeSelection(runner *v1alpha1.DevboxRunner) (agents []string, browser bool) {
 	agents = lo.Map(runner.Spec.Agents, func(a v1alpha1.DevboxAgent, _ int) string { return string(a.Type) })
 	return agents, runner.Spec.Browser != nil && runner.Spec.Browser.Enabled
-}
-
-// devboxRuntimeArgs are the runtime sidecar's arguments: the digest it installs and the runner's agents (and
-// browser), so each instance's home holds only the components the runner uses.
-func devboxRuntimeArgs(runner *v1alpha1.DevboxRunner, digest string) []string {
-	agents, browser := devboxRuntimeSelection(runner)
-	args := []string{"--digest", digest, "--dst", runtimeHomeMount + "/" + runtimeInstallDir, "--agents", strings.Join(agents, ",")}
-	if browser {
-		args = append(args, "--browser")
-	}
-	return args
 }
 
 // buildActorTemplate renders the immutable ActorTemplate for the runner's current spec, resolved environment
@@ -490,6 +474,11 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 	}
 	agents, browser := devboxRuntimeSelection(runner)
 	installID := runtimemanifest.InstallID(runtimeDigest, agents, browser)
+	// The sidecar installs only the components of the runner's agents (and browser) into each instance's home.
+	runtimeArgs := []string{"--digest", runtimeDigest, "--dst", runtimeHomeMount + "/" + runtimeInstallDir, "--agents", strings.Join(agents, ",")}
+	if browser {
+		runtimeArgs = append(runtimeArgs, "--browser")
+	}
 	if err := validateDevboxRepositories(runner); err != nil {
 		return nil, "", err
 	}
@@ -546,7 +535,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 			Name:  runtimeContainerName,
 			Image: runtime,
 			// The image's entrypoint is devbox-runtime-installer, which installs into runtimeHomeMount and blocks.
-			Args:         devboxRuntimeArgs(runner, runtimeDigest),
+			Args:         runtimeArgs,
 			VolumeMounts: []*ateapi.VolumeMount{{Name: devboxHomeVolume, MountPath: runtimeHomeMount}},
 			// It runs as root to write into a home owned by the environment image's user.
 			SecurityContext: &ateapi.SecurityContext{Capabilities: &ateapi.Capabilities{Add: []string{"DAC_OVERRIDE", "FOWNER"}}},
@@ -782,7 +771,8 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substr
 
 	golden := tmpl.GetStatus().GetGoldenSnapshotStatus()
 	if msg := golden.GetErrorMessage(); msg != "" {
-		if goldenLostWorker(msg) {
+		// Losing the worker is no fault of the image, so the revision is rebuilt.
+		if substrate.LostWorker(msg) {
 			rev.Phase = v1alpha1.DevboxRevisionRetired
 			rev.Message = lo.ToPtr("golden boot lost its worker, rebuilding: " + msg)
 			return nil
@@ -799,16 +789,6 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substr
 	rev.GoldenTag = &tag
 	rev.Phase = v1alpha1.DevboxRevisionProbing
 	return r.Probe.Request(ctx, probeRequest(runner, atespace, rev))
-}
-
-// goldenWorkerLossCrashes are Substrate's fixed actor crash messages for losing the worker or node, not a fault of
-// the image, so a golden boot that failed with one is rebuilt rather than failing the revision.
-var goldenWorkerLossCrashes = []string{
-	"worker pod went away while hosting the actor",
-	"worker restarted while hosting the actor",
-	"assigned worker is draining",
-	"assigned worker no longer satisfies the actor's placement constraints",
-	"node holding the actor's latest snapshot no longer exists",
 }
 
 // goldenFailureHint explains the golden boot failures that come from the environment image not being able to
@@ -835,11 +815,11 @@ const (
 	devboxHomeSeedRebuilt = "rebuilt because the golden boot's home of the previous revision wasn't captured"
 )
 
-func goldenLostWorker(msg string) bool {
-	return lo.SomeBy(goldenWorkerLossCrashes, func(crash string) bool { return strings.Contains(msg, crash) })
-}
-
 func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) DevboxProbeRequest {
+	var homeBytes int64
+	if rev.HomeSize != nil {
+		homeBytes = rev.HomeSize.Value()
+	}
 	return DevboxProbeRequest{
 		Request: probe.Request{
 			Runner:        runner.Name,
@@ -850,19 +830,11 @@ func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.
 			ExternalHome:  lo.FromPtr(rev.HomeStorage).External(),
 			HomeSeed:      lo.FromPtr(rev.HomeSeed),
 			HomeStorage:   string(lo.FromPtr(rev.HomeStorage)),
-			HomeBytes:     devboxHomeBytes(rev),
+			HomeBytes:     homeBytes,
 			DevboxID:      lo.FromPtr(runner.Status.ID),
 		},
 		Agents: devboxGuestAgents(runner),
 	}
-}
-
-// devboxHomeBytes is the capacity of a revision's external home, zero for homes the golden tag carries.
-func devboxHomeBytes(rev *v1alpha1.DevboxRevision) int64 {
-	if rev.HomeSize == nil {
-		return 0
-	}
-	return rev.HomeSize.Value()
 }
 
 func (r *DevboxRunnerReconciler) advanceProbing(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {

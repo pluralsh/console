@@ -653,13 +653,6 @@ spec:
                 description: Runtime configures how the operator's devbox-daemon runs
                   next to the environment image.
                 properties:
-                  flavor:
-                    default: core
-                    description: Flavor of the runtime. Only core (devbox-daemon,
-                      the coding agents and their ACP adapters) exists.
-                    enum:
-                    - core
-                    type: string
                   shell:
                     description: |-
                       Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with

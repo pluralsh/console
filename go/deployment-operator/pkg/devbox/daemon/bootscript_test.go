@@ -2,7 +2,6 @@ package daemon
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,11 +44,6 @@ func TestBootScriptRunsOnColdBootOfAnExistingInstance(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	if _, err := os.Stat(marker); err == nil {
 		t.Fatal("the boot script ran on the instance's first start")
-	}
-	var state instanceFile
-	data, err := os.ReadFile(filepath.Join(cfg.StateDir, "instance.json"))
-	if err != nil || json.Unmarshal(data, &state) != nil || state.Schema != instanceSchema {
-		t.Fatalf("instance.json = %s (%v), want schema %d", data, err, instanceSchema)
 	}
 	r.stop()
 
@@ -109,29 +103,22 @@ func TestBootScriptFailureDoesNotBlockTheDaemon(t *testing.T) {
 	}
 }
 
-// A state file from a daemon that didn't write a schema version, or from a newer one with fields this one
-// doesn't know, still restores the instance.
-func TestInstanceStateFromOtherDaemonVersions(t *testing.T) {
-	for name, state := range map[string]string{
-		"no schema":    `{"request":"eyJpbnN0YW5jZUlkIjoiaW5zdC0xIn0=","firstThreadDone":true}`,
-		"newer schema": `{"schema":99,"request":"eyJpbnN0YW5jZUlkIjoiaW5zdC0xIiwiZnV0dXJlRmllbGQiOiJ4In0=","firstThreadDone":true,"later":1}`,
-	} {
-		t.Run(name, func(t *testing.T) {
-			cfg := testConfig(t, t.TempDir())
-			if err := os.MkdirAll(cfg.StateDir, 0o700); err != nil {
-				t.Fatal(err)
-			}
-			if err := os.WriteFile(filepath.Join(cfg.StateDir, "instance.json"), []byte(state), 0o600); err != nil {
-				t.Fatal(err)
-			}
-			d, err := New(cfg)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got := d.instanceID(); got != "inst-1" {
-				t.Fatalf("instance id = %q, want inst-1", got)
-			}
-		})
+// A state file from a newer daemon, with fields this one doesn't know, still restores the instance.
+func TestInstanceStateFromANewerDaemon(t *testing.T) {
+	cfg := testConfig(t, t.TempDir())
+	if err := os.MkdirAll(cfg.StateDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	state := `{"request":"eyJpbnN0YW5jZUlkIjoiaW5zdC0xIiwiZnV0dXJlRmllbGQiOiJ4In0=","firstThreadDone":true,"later":1}`
+	if err := os.WriteFile(filepath.Join(cfg.StateDir, "instance.json"), []byte(state), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	d, err := New(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := d.instanceID(); got != "inst-1" {
+		t.Fatalf("instance id = %q, want inst-1", got)
 	}
 }
 

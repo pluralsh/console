@@ -41,39 +41,11 @@ import (
 //
 // and a WorkerPool labelled devboxes.plural.sh/runner.e2e=true.
 func TestDevboxInstanceUpdatesOnSubstrate(t *testing.T) {
-	cfg := map[string]string{}
-	for _, k := range []string{"E2E_ATE_ADDRESS", "E2E_ATE_CA", "E2E_ATE_TOKEN", "E2E_ENV_IMAGE", "E2E_RUNTIME_A", "E2E_RUNTIME_B"} {
-		if cfg[k] = os.Getenv(k); cfg[k] == "" {
-			t.Skipf("%s is not set", k)
-		}
-	}
-	ca, err := os.ReadFile(cfg["E2E_ATE_CA"])
-	if err != nil {
-		t.Fatal(err)
-	}
-	pool := x509.NewCertPool()
-	pool.AppendCertsFromPEM(ca)
-	conn, err := grpc.NewClient(cfg["E2E_ATE_ADDRESS"],
-		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool, ServerName: "api.ate-system.svc", MinVersion: tls.VersionTLS12})),
-		grpc.WithPerRPCCredentials(e2eToken(cfg["E2E_ATE_TOKEN"])))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer conn.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
-	defer cancel()
-
-	e := &devboxE2E{t: t, ctx: ctx, c: ateapi.NewControlClient(conn), api: substrate.NewFromConn(conn), atespace: fmt.Sprintf("e2e-%d", time.Now().Unix())}
-	if err := e.api.EnsureAtespace(ctx, e.atespace); err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("atespace %s", e.atespace)
+	e, cfg := startDevboxE2E(t, "e2e")
+	ctx := e.ctx
 
 	runner := func(mutate ...func(*v1alpha1.DevboxRunner)) *v1alpha1.DevboxRunner {
-		r := &v1alpha1.DevboxRunner{ObjectMeta: metav1.ObjectMeta{Name: "e2e", UID: types.UID("e2e")}}
-		// The runtime installs these into every instance's home, from the runtime image.
-		r.Spec.Agents = []v1alpha1.DevboxAgent{{Type: v1alpha1.DevboxAgentClaude, Default: lo.ToPtr(true)}, {Type: v1alpha1.DevboxAgentCodex}}
-		r.Spec.Resources = &v1alpha1.DevboxResources{CPU: lo.ToPtr(resource.MustParse("500m")), Memory: lo.ToPtr(resource.MustParse("1Gi"))}
+		r := e2eRunner()
 		if shell := os.Getenv("E2E_SHELL"); shell != "" {
 			r.Spec.Runtime = &v1alpha1.DevboxRuntime{Shell: &shell}
 		}
@@ -196,6 +168,47 @@ func TestDevboxInstanceUpdatesOnSubstrate(t *testing.T) {
 		}
 		e.suspend("fresh")
 	})
+}
+
+// startDevboxE2E connects to the Substrate the environment names (see TestDevboxInstanceUpdatesOnSubstrate) and
+// creates a fresh atespace, skipping the test when one of the variables, or of extra, is unset.
+func startDevboxE2E(t *testing.T, prefix string, extra ...string) (*devboxE2E, map[string]string) {
+	cfg := map[string]string{}
+	for _, k := range append([]string{"E2E_ATE_ADDRESS", "E2E_ATE_CA", "E2E_ATE_TOKEN", "E2E_ENV_IMAGE", "E2E_RUNTIME_A", "E2E_RUNTIME_B"}, extra...) {
+		if cfg[k] = os.Getenv(k); cfg[k] == "" {
+			t.Skipf("%s is not set", k)
+		}
+	}
+	ca, err := os.ReadFile(cfg["E2E_ATE_CA"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	pool := x509.NewCertPool()
+	pool.AppendCertsFromPEM(ca)
+	conn, err := grpc.NewClient(cfg["E2E_ATE_ADDRESS"],
+		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool, ServerName: "api.ate-system.svc", MinVersion: tls.VersionTLS12})),
+		grpc.WithPerRPCCredentials(e2eToken(cfg["E2E_ATE_TOKEN"])))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	t.Cleanup(cancel)
+
+	e := &devboxE2E{t: t, ctx: ctx, c: ateapi.NewControlClient(conn), api: substrate.NewFromConn(conn), atespace: fmt.Sprintf("%s-%d", prefix, time.Now().Unix())}
+	if err := e.api.EnsureAtespace(ctx, e.atespace); err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("atespace %s", e.atespace)
+	return e, cfg
+}
+
+// e2eRunner is the runner the e2e tests build templates of; the runtime installs its agents into every home.
+func e2eRunner() *v1alpha1.DevboxRunner {
+	r := &v1alpha1.DevboxRunner{ObjectMeta: metav1.ObjectMeta{Name: "e2e", UID: types.UID("e2e")}}
+	r.Spec.Agents = []v1alpha1.DevboxAgent{{Type: v1alpha1.DevboxAgentClaude, Default: lo.ToPtr(true)}, {Type: v1alpha1.DevboxAgentCodex}}
+	r.Spec.Resources = &v1alpha1.DevboxResources{CPU: lo.ToPtr(resource.MustParse("500m")), Memory: lo.ToPtr(resource.MustParse("1Gi"))}
+	return r
 }
 
 type devboxE2E struct {

@@ -17,9 +17,12 @@ import (
 
 // Actors is the slice of Substrate the claimer reads (*actors.Client).
 type Actors interface {
+	ActorReader
 	GetActorTemplate(ctx context.Context, ref actors.Ref) (*ateapi.ActorTemplate, error)
-	GetActor(ctx context.Context, ref actors.Ref) (*ateapi.Actor, error)
 }
+
+// claimInterval is how often the claimer looks for golden actors, well inside a golden boot's few minutes.
+const claimInterval = 2 * time.Second
 
 // Claimer claims the external home of every building revision's golden actor for the revision's seed. Claims are
 // idempotent, so several gateways may run it.
@@ -27,20 +30,15 @@ type Claimer struct {
 	Client client.Reader
 	Actors Actors
 	// Drivers are the home drivers by storage; revisions of a storage without one are skipped.
-	Drivers  map[v1alpha1.DevboxHomeStorage]Driver
-	Interval time.Duration
-	Log      logr.Logger
+	Drivers map[v1alpha1.DevboxHomeStorage]Driver
+	Log     logr.Logger
 
 	claimed map[string]bool
 }
 
 // Run claims until ctx is done.
 func (c *Claimer) Run(ctx context.Context) error {
-	interval := c.Interval
-	if interval <= 0 {
-		interval = 2 * time.Second
-	}
-	t := time.NewTicker(interval)
+	t := time.NewTicker(claimInterval)
 	defer t.Stop()
 	for {
 		if err := c.Pass(ctx); err != nil && ctx.Err() == nil {

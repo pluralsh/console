@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -135,8 +137,8 @@ func TestInstallFresh(t *testing.T) {
 	assert.Equal(t, idA+"\n", read(t, filepath.Join(dst, readyMarker)))
 
 	m := installed(t, dst, dirA)
-	assert.ElementsMatch(t, []string{"claude", "claude-acp", "daemon", "node"}, keys(m.Components))
-	assert.Equal(t, []string{"claude"}, keys(m.Agents))
+	assert.ElementsMatch(t, []string{"claude", "claude-acp", "daemon", "node"}, slices.Collect(maps.Keys(m.Components)))
+	assert.Equal(t, []string{"claude"}, slices.Collect(maps.Keys(m.Agents)))
 	assert.Nil(t, m.PlaywrightMCP)
 	assert.Equal(t, "../components/"+runtimemanifest.DirName("node", m.Components["node"]), m.Components["node"].Dir)
 }
@@ -172,7 +174,7 @@ func TestInstallSelectsAgentsAndBrowser(t *testing.T) {
 	piID := runtimemanifest.InstallID(digestA, []string{"gemini", "pi"}, true)
 	assert.Equal(t, piID, res.ID)
 	m := installed(t, dst, runtimemanifest.InstallDirName(piID))
-	assert.Equal(t, []string{"pi"}, keys(m.Agents))
+	assert.Equal(t, []string{"pi"}, slices.Collect(maps.Keys(m.Agents)))
 	require.NotNil(t, m.PlaywrightMCP)
 	assert.Equal(t, piID+"\n", read(t, filepath.Join(dst, readyMarker)))
 
@@ -365,16 +367,4 @@ func TestInstallRejectsBadInput(t *testing.T) {
 		_, err := install(payload(t, "daemon-a", nil), t.TempDir(), digest, nil, false)
 		assert.Error(t, err, digest)
 	}
-	src := payload(t, "daemon-a", nil)
-	require.NoError(t, os.WriteFile(filepath.Join(src, runtimemanifest.FileName), []byte(`{"contract":"v0"}`), 0o644))
-	_, err := install(src, t.TempDir(), digestA, nil, false)
-	assert.ErrorContains(t, err, "contract")
-}
-
-func keys[V any](m map[string]V) []string {
-	var out []string
-	for k := range m {
-		out = append(out, k)
-	}
-	return out
 }

@@ -31,7 +31,7 @@ func TestDevboxActorTemplateContainers(t *testing.T) {
 	g := NewWithT(t)
 	r := &DevboxRunnerReconciler{}
 
-	tmpl, _, err := r.buildActorTemplate(templateRunner(), "space", testEnvImage, testRuntimeA)
+	tmpl, hashNone, err := r.buildActorTemplate(templateRunner(), "space", testEnvImage, testRuntimeA)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(tmpl.Containers).To(HaveLen(2))
 
@@ -65,8 +65,6 @@ func TestDevboxActorTemplateContainers(t *testing.T) {
 	g.Expect(withAgents.Containers[1].Args).To(Equal([]string{"--digest", "sha256:aaaa", "--dst", "/mnt/home/.plural-runtime", "--agents", "claude,pi", "--browser"}))
 	// The devbox container waits for the install of exactly these agents, which the sidecar names the same way.
 	g.Expect(withAgents.Containers[0].Command[4]).To(Equal(runtimemanifest.InstallID("sha256:aaaa", []string{"claude", "pi"}, true)))
-	_, hashNone, err := r.buildActorTemplate(templateRunner(), "space", testEnvImage, testRuntimeA)
-	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(hashAgents).NotTo(Equal(hashNone), "other agents are another revision")
 
 	runner = templateRunner()

@@ -43,7 +43,7 @@ type CredentialService interface {
 	InstanceCredential(ctx context.Context, instanceID string, sel *devboxv1.CredentialSelector) (*devboxv1.InstanceCredential, error)
 }
 
-// Seeds saves the JuiceFS homes of snapshotted instances (juicefs.Client).
+// Seeds saves the JuiceFS homes of snapshotted instances (homedriver.Client).
 type Seeds interface {
 	SaveSeed(ctx context.Context, seedID, volumeID string) error
 	DeleteSeed(ctx context.Context, seedID string) error

@@ -44,7 +44,6 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/router"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/tunnel"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/homedriver"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
@@ -246,24 +245,11 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	}
 	defer rt.Close() // nolint: errcheck
 
-	// The home drivers' CSI controllers: they seed new homes from their revision's golden home, and JuiceFS's also
-	// saves the homes of snapshots.
-	var seeds core.Seeds
-	homeDrivers := map[v1alpha1.DevboxHomeStorage]homes.Driver{}
-	for storage, address := range map[v1alpha1.DevboxHomeStorage]string{v1alpha1.DevboxHomeJuiceFS: o.juicefsAddress, v1alpha1.DevboxHomeZeroFS: o.zerofsAddress} {
-		if address == "" {
-			continue
-		}
-		conn, err := dialHomeDriver(o, address)
-		if err != nil {
-			return fmt.Errorf("dialing the %s controller: %w", storage, err)
-		}
-		defer conn.Close() // nolint: errcheck
-		homeDrivers[storage] = homedriver.NewClient(conn)
-		if storage == v1alpha1.DevboxHomeJuiceFS {
-			seeds = juicefs.NewClient(conn)
-		}
+	homeDrivers, seeds, closeDrivers, err := o.dialHomeDrivers()
+	if err != nil {
+		return err
 	}
+	defer closeDrivers()
 
 	token := o.deployToken
 	kas, err := tunnel.Dial(tunnel.DialConfig{
@@ -559,16 +545,46 @@ func portOf(addr string, def int32) int32 {
 	return int32(n)
 }
 
-// dialHomeDriver connects to a home driver's CSI controller with the gateway's pod identity, which the driver
-// allows by SPIFFE ID.
-func dialHomeDriver(o *options, address string) (*grpc.ClientConn, error) {
-	host, _, err := net.SplitHostPort(address)
-	if err != nil {
-		return nil, fmt.Errorf("parsing %s: %w", address, err)
+// dialHomeDrivers connects to the CSI controllers of the home drivers with addresses, with the gateway's pod
+// identity, which they allow by SPIFFE ID. They seed new homes from their revision's golden home, and JuiceFS's
+// also saves the homes of snapshots.
+func (o *options) dialHomeDrivers() (map[v1alpha1.DevboxHomeStorage]homes.Driver, core.Seeds, func(), error) {
+	drivers := map[v1alpha1.DevboxHomeStorage]homes.Driver{}
+	var seeds core.Seeds
+	var conns []*grpc.ClientConn
+	closeAll := func() {
+		for _, c := range conns {
+			_ = c.Close()
+		}
 	}
-	tlsCfg, err := podcert.ClientTLS(filepath.Join(o.podIdentityDir, "credential-bundle.pem"), filepath.Join(o.serviceDNSCA, "trust-bundle.pem"), host)
-	if err != nil {
-		return nil, err
+	for _, d := range []struct {
+		storage v1alpha1.DevboxHomeStorage
+		address string
+	}{{v1alpha1.DevboxHomeJuiceFS, o.juicefsAddress}, {v1alpha1.DevboxHomeZeroFS, o.zerofsAddress}} {
+		if d.address == "" {
+			continue
+		}
+		host, _, err := net.SplitHostPort(d.address)
+		if err != nil {
+			closeAll()
+			return nil, nil, nil, fmt.Errorf("parsing the %s controller address: %w", d.storage, err)
+		}
+		tlsCfg, err := podcert.ClientTLS(filepath.Join(o.podIdentityDir, "credential-bundle.pem"), filepath.Join(o.serviceDNSCA, "trust-bundle.pem"), host)
+		if err != nil {
+			closeAll()
+			return nil, nil, nil, fmt.Errorf("configuring the %s controller client: %w", d.storage, err)
+		}
+		conn, err := grpc.NewClient(d.address, grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg)))
+		if err != nil {
+			closeAll()
+			return nil, nil, nil, fmt.Errorf("dialing the %s controller: %w", d.storage, err)
+		}
+		conns = append(conns, conn)
+		driver := homedriver.NewClient(conn)
+		drivers[d.storage] = driver
+		if d.storage == v1alpha1.DevboxHomeJuiceFS {
+			seeds = driver
+		}
 	}
-	return grpc.NewClient(address, grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg)))
+	return drivers, seeds, closeAll, nil
 }

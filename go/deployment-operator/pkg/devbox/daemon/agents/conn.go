@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -268,13 +267,12 @@ func (m *Manager) startConn(ctx context.Context, launch *devboxv1.AgentLaunch, b
 		"clientInfo":         map[string]any{"name": "devbox-daemon", "title": "Plural DevBox", "version": Version},
 	})
 	if err != nil {
-		exited := c.exitedOnItsOwn()
 		c.stop(time.Second)
 		failure := agentFailure(err, "initialize")
-		if tail := c.stderr.Tail(); exited && tail != "" {
-			// A harness that can't start (a missing library, an older glibc) only says why on stderr. Only the
-			// loader's lines are kept: other stderr can quote the user's config, and this message reaches the
-			// runner's status and console.
+		if tail := c.stderr.Tail(); tail != "" {
+			// A harness that can't start (a missing library, an older glibc) only says why on stderr, read in full
+			// once it stopped. Only the loader's lines are kept: other stderr can quote the user's config, and this
+			// message reaches the runner's status and console.
 			var ae *AgentCallError
 			if errors.As(failure, &ae) && ae.Err != nil {
 				ae.Err.Message += " (stderr: " + tail + ")"
@@ -315,18 +313,6 @@ func hasAuthMethod(methods []acp.Object, id string) bool {
 		}
 	}
 	return false
-}
-
-// exitedOnItsOwn reports whether a call failed because the harness exited, not because it answered with an error.
-// The connection reports both as a request error, so it is the process that tells: one that exited closed its
-// stdout first, and is reaped shortly after.
-func (c *agentConn) exitedOnItsOwn() bool {
-	select {
-	case <-c.process.Done():
-		return true
-	case <-time.After(500 * time.Millisecond):
-		return false
-	}
 }
 
 // watch marks the connection failed when the harness exits and fails its running turns.
@@ -492,14 +478,11 @@ type logWriter struct {
 
 // Tail is the last few loader errors written, joined with "; ", including a last line without a newline.
 func (w *logWriter) Tail() string {
-	if w == nil {
-		return ""
-	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	lines := w.tail
 	if last, ok := loaderError(string(w.buf)); ok {
-		lines = append(slices.Clone(lines), last)
+		lines = append(lines, last)
 	}
 	return strings.Join(lines, "; ")
 }
@@ -513,8 +496,9 @@ func (w *logWriter) keep(line string) {
 	}
 }
 
-// loaderError returns line, made safe for an error message, if it is a dynamic loader error: valid UTF-8 (proto
-// strings must be), printable, and cut to stderrTailLen on a character boundary.
+// loaderError returns line, made safe for an error message, if it is a dynamic loader error: printable, valid
+// UTF-8 (proto strings must be; strings.Map turns invalid bytes into U+FFFD), and cut to stderrTailLen on a
+// character boundary.
 func loaderError(line string) (string, bool) {
 	if !containsAny(line, loaderErrors...) {
 		return "", false
@@ -524,7 +508,7 @@ func loaderError(line string) (string, bool) {
 			return r
 		}
 		return -1
-	}, strings.ToValidUTF8(line, "\uFFFD"))
+	}, line)
 	line = strings.TrimSpace(line)
 	if len(line) > stderrTailLen {
 		cut := stderrTailLen

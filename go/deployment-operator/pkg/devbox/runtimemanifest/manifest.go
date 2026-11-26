@@ -26,6 +26,11 @@ const (
 	Daemon = "daemon"
 	// BinDir is the installed runtime's directory of commands, relative to it.
 	BinDir = "bin"
+
+	// dirHashLen is how much of a component's hash names its installed directory.
+	dirHashLen = 16
+	// selectionHashLen is how many bytes of the agent selection's sha256 an install ID carries.
+	selectionHashLen = 6
 )
 
 // Manifest is manifest.json.
@@ -105,72 +110,83 @@ func (m *Manifest) Validate() error {
 	if m.Contract != Contract {
 		return fmt.Errorf("unsupported runtime manifest contract %q", m.Contract)
 	}
-	if _, ok := m.Components[Daemon]; !ok {
-		return fmt.Errorf("no %s component", Daemon)
+	if err := m.known(Daemon); err != nil {
+		return err
 	}
-	known := func(name string) error {
-		if _, ok := m.Components[name]; !ok {
-			return fmt.Errorf("unknown component %q", name)
-		}
-		return nil
-	}
+	// The bin directory holds one command per name.
 	commands := map[string]string{}
 	for name, c := range m.Components {
-		if !validName(name) {
-			return fmt.Errorf("invalid component name %q", name)
+		if err := m.validateComponent(name, c, commands); err != nil {
+			return fmt.Errorf("component %s: %w", name, err)
 		}
-		if len(c.Hash) != sha256.Size*2 || strings.Trim(c.Hash, "0123456789abcdef") != "" {
-			return fmt.Errorf("component %s: invalid hash %q", name, c.Hash)
-		}
-		for _, r := range c.Requires {
-			if err := known(r); err != nil {
-				return fmt.Errorf("component %s: %w", name, err)
-			}
-		}
-		for bin, b := range c.Bin {
-			if !validName(bin) || !validPath(b.Path) {
-				return fmt.Errorf("component %s: invalid command %q (%q)", name, bin, b.Path)
-			}
-			// The bin directory holds one command per name.
-			if other, ok := commands[bin]; ok && !c.Private {
-				return fmt.Errorf("components %s and %s both provide the command %s", other, name, bin)
-			}
-			if !c.Private {
-				commands[bin] = name
-			}
-			if b.Interpreter != "" {
-				if _, _, ok := m.Interpreter(c, b); !ok {
-					return fmt.Errorf("component %s: command %s runs with %q, which no required component provides", name, bin, b.Interpreter)
-				}
-			}
-		}
-	}
-	tool := func(t Tool) error {
-		if err := known(t.Component); err != nil {
-			return err
-		}
-		if _, ok := m.Components[t.Component].Bin[t.Command]; !ok {
-			return fmt.Errorf("component %s has no command %q", t.Component, t.Command)
-		}
-		return nil
 	}
 	for name, a := range m.Agents {
-		if err := tool(a.Tool); err != nil {
+		if err := m.validateTool(a.Tool); err != nil {
 			return fmt.Errorf("agent %s: %w", name, err)
 		}
-		if err := tool(a.ACP); err != nil {
+		if err := m.validateTool(a.ACP); err != nil {
 			return fmt.Errorf("agent %s: acp: %w", name, err)
 		}
 		for _, c := range a.Components {
-			if err := known(c); err != nil {
+			if err := m.known(c); err != nil {
 				return fmt.Errorf("agent %s: %w", name, err)
 			}
 		}
 	}
 	if m.PlaywrightMCP != nil {
-		if err := tool(*m.PlaywrightMCP); err != nil {
+		if err := m.validateTool(*m.PlaywrightMCP); err != nil {
 			return fmt.Errorf("playwrightMcp: %w", err)
 		}
+	}
+	return nil
+}
+
+// validateComponent checks one component, recording its public commands in commands.
+func (m *Manifest) validateComponent(name string, c Component, commands map[string]string) error {
+	if !validName(name) {
+		return fmt.Errorf("invalid name")
+	}
+	if len(c.Hash) != sha256.Size*2 || strings.Trim(c.Hash, "0123456789abcdef") != "" {
+		return fmt.Errorf("invalid hash %q", c.Hash)
+	}
+	for _, r := range c.Requires {
+		if err := m.known(r); err != nil {
+			return err
+		}
+	}
+	for bin, b := range c.Bin {
+		if !validName(bin) || !validPath(b.Path) {
+			return fmt.Errorf("invalid command %q (%q)", bin, b.Path)
+		}
+		if b.Interpreter != "" {
+			if _, _, ok := m.Interpreter(c, b); !ok {
+				return fmt.Errorf("command %s runs with %q, which no required component provides", bin, b.Interpreter)
+			}
+		}
+		if c.Private {
+			continue
+		}
+		if other, ok := commands[bin]; ok {
+			return fmt.Errorf("%s also provides the command %s", other, bin)
+		}
+		commands[bin] = name
+	}
+	return nil
+}
+
+func (m *Manifest) validateTool(t Tool) error {
+	if err := m.known(t.Component); err != nil {
+		return err
+	}
+	if _, ok := m.Components[t.Component].Bin[t.Command]; !ok {
+		return fmt.Errorf("component %s has no command %q", t.Component, t.Command)
+	}
+	return nil
+}
+
+func (m *Manifest) known(name string) error {
+	if _, ok := m.Components[name]; !ok {
+		return fmt.Errorf("unknown component %q", name)
 	}
 	return nil
 }
@@ -225,7 +241,7 @@ func (m *Manifest) Select(agents []string, browser bool) (components, missing []
 // Installed is the manifest of an installed runtime: only its components, each with its directory, and only
 // the agents (and Playwright MCP) whose components are all there.
 func (m *Manifest) Installed(components []string, dir func(name string) string) *Manifest {
-	out := &Manifest{Contract: m.Contract, Components: map[string]Component{}}
+	out := &Manifest{Contract: m.Contract, Components: map[string]Component{}, Agents: map[string]Agent{}}
 	for _, name := range components {
 		c := m.Components[name]
 		c.Dir = dir(name)
@@ -241,9 +257,6 @@ func (m *Manifest) Installed(components []string, dir func(name string) string) 
 	}
 	for name, a := range m.Agents {
 		if has(append([]string{a.Component, a.ACP.Component}, a.Components...)...) {
-			if out.Agents == nil {
-				out.Agents = map[string]Agent{}
-			}
 			out.Agents[name] = a
 		}
 	}
@@ -255,7 +268,7 @@ func (m *Manifest) Installed(components []string, dir func(name string) string) 
 
 // DirName is the directory a component is installed into, under the install root's components directory.
 func DirName(name string, c Component) string {
-	return name + "-" + c.Hash[:16]
+	return name + "-" + c.Hash[:dirHashLen]
 }
 
 // Expand replaces ${bin} and ${component:<name>} in an agent's env value, for a runtime installed in dir.
@@ -289,7 +302,12 @@ func HashDir(dir string) (string, error) {
 		if err != nil {
 			return err
 		}
-		sum, err := fileSum(path)
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		sum, err := FileSum(f)
 		if err != nil {
 			return err
 		}
@@ -302,14 +320,10 @@ func HashDir(dir string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func fileSum(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
+// FileSum is the hex sha256 of r's content.
+func FileSum(r io.Reader) (string, error) {
 	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
+	if _, err := io.Copy(h, r); err != nil {
 		return "", err
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
@@ -334,7 +348,7 @@ func InstallID(digest string, agents []string, browser bool) string {
 	sorted := slices.Clone(agents)
 	slices.Sort(sorted)
 	sum := sha256.Sum256(fmt.Appendf(nil, "agents=%s\nbrowser=%t\n", strings.Join(slices.Compact(sorted), ","), browser))
-	return digest + "+" + hex.EncodeToString(sum[:6])
+	return digest + "+" + hex.EncodeToString(sum[:selectionHashLen])
 }
 
 // InstallDirName is the directory an install ID's runtime is installed into, under the install root

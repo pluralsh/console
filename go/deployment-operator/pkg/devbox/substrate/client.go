@@ -13,6 +13,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"google.golang.org/grpc"
@@ -142,6 +143,21 @@ func (t tokenFileCredentials) GetRequestMetadata(_ context.Context, _ ...string)
 
 func (t tokenFileCredentials) RequireTransportSecurity() bool {
 	return true
+}
+
+// workerLossCrashes are Substrate's fixed actor crash messages for losing the worker or node, which are no fault
+// of the template the actor ran.
+var workerLossCrashes = []string{
+	"worker pod went away while hosting the actor",
+	"worker restarted while hosting the actor",
+	"assigned worker is draining",
+	"assigned worker no longer satisfies the actor's placement constraints",
+	"node holding the actor's latest snapshot no longer exists",
+}
+
+// LostWorker reports whether an actor crash message says the actor lost its worker or node.
+func LostWorker(crash string) bool {
+	return slices.ContainsFunc(workerLossCrashes, func(msg string) bool { return strings.Contains(crash, msg) })
 }
 
 func IsNotFound(err error) bool {

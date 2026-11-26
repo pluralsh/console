@@ -252,13 +252,10 @@ func (r *DevboxRunnerReconciler) reconcileImage(ctx context.Context, runner *v1a
 
 	runner.Status.ResolvedImage = &resolved.Reference
 	utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxImageContractConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "image meets devbox contract v1")
-	// The image's own daemon is no longer what runs, so the condition that compared it with the operator is gone.
-	meta.RemoveStatusCondition(&runner.Status.Conditions, devboxImageOutdatedCondition)
+	// Operators that ran the daemon baked into spec.image compared it with their own in this condition.
+	meta.RemoveStatusCondition(&runner.Status.Conditions, "ImageOutdated")
 	return nextPoll, nil
 }
-
-// devboxImageOutdatedCondition was set by operators that ran the daemon baked into spec.image.
-const devboxImageOutdatedCondition = "ImageOutdated"
 
 // reconcileRuntime resolves the runtime image, the plural-runtime sidecar that delivers devbox-daemon, to a
 // digest. Its reference follows the operator's version, so an operator upgrade is what changes it; it is also
@@ -431,14 +428,6 @@ func servingRuntime(runner *v1alpha1.DevboxRunner) (image, daemonVersion *string
 	return nil, nil
 }
 
-// consoleUpdateMode is the runner's instance update policy as console names it.
-func consoleUpdateMode(runner *v1alpha1.DevboxRunner) console.DevboxUpdateMode {
-	if runner.InstanceUpdateMode() == v1alpha1.DevboxInstanceUpdateManual {
-		return console.DevboxUpdateModeManual
-	}
-	return console.DevboxUpdateModeOnResume
-}
-
 // servingImage is the image of the serving revision, which may lag status.resolvedImage while a new one builds.
 func (r *DevboxRunnerReconciler) servingImage(runner *v1alpha1.DevboxRunner) *string {
 	if runner.Status.TemplateRevision != nil {
@@ -482,14 +471,15 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 
 	runtime, daemonVersion := servingRuntime(runner)
 	attrs := console.DevboxAttributes{
-		Name:                runner.ConsoleName(),
-		Image:               &image,
-		ResolvedImage:       r.servingImage(runner),
-		TemplateRevision:    runner.Status.TemplateName,
-		Revision:            runner.Status.TemplateRevision,
-		RuntimeImage:        runtime,
-		DaemonVersion:       daemonVersion,
-		UpdateMode:          lo.ToPtr(consoleUpdateMode(runner)),
+		Name:             runner.ConsoleName(),
+		Image:            &image,
+		ResolvedImage:    r.servingImage(runner),
+		TemplateRevision: runner.Status.TemplateName,
+		Revision:         runner.Status.TemplateRevision,
+		RuntimeImage:     runtime,
+		DaemonVersion:    daemonVersion,
+		UpdateMode: lo.ToPtr(lo.Ternary(runner.InstanceUpdateMode() == v1alpha1.DevboxInstanceUpdateManual,
+			console.DevboxUpdateModeManual, console.DevboxUpdateModeOnResume)),
 		Resources:           lo.ToPtr(string(resourcesJSON)),
 		AllowedRepositories: lo.ToSlicePtr(runner.Spec.AllowedRepositories),
 		Browser:             lo.ToPtr(runner.Spec.Browser != nil && runner.Spec.Browser.Enabled),

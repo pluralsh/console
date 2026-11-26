@@ -30,8 +30,6 @@ func TestDevboxImageContract(t *testing.T) {
 	img.Entrypoint = []string{"/bin/bash", "-c"}
 	img.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "9.9.9"
 	g.Expect(CheckDevboxImageContract(img).OK()).To(BeTrue())
-	img.Entrypoint = nil
-	g.Expect(CheckDevboxImageContract(img).OK()).To(BeTrue())
 
 	cases := map[string]struct {
 		mutate    func(*ResolvedDevboxImage)

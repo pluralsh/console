@@ -2,12 +2,12 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -25,6 +25,10 @@ const (
 	// componentsDir holds the installed components, shared by the installs that use them.
 	componentsDir = "components"
 	tmpSuffix     = ".tmp"
+
+	dirPerm  os.FileMode = 0o755
+	execPerm os.FileMode = 0o755
+	filePerm os.FileMode = 0o644
 )
 
 // result describes what install did, for the log line.
@@ -79,7 +83,7 @@ func install(src, dst, digest string, agents []string, browser bool) (result, er
 	}
 	res.Components, res.Missing = m.Select(agents, browser)
 
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dst), dirPerm); err != nil {
 		return res, err
 	}
 	home, err := os.OpenRoot(filepath.Dir(dst))
@@ -88,89 +92,113 @@ func install(src, dst, digest string, agents []string, browser bool) (result, er
 	}
 	defer home.Close()
 	base := filepath.Base(dst)
-	at := func(elem ...string) string { return filepath.Join(append([]string{base}, elem...)...) }
-	final, marker, compRoot := at(name), at(readyMarker), at(componentsDir)
-
+	in := &installer{home: home, src: src, m: m, marker: filepath.Join(base, readyMarker)}
+	compRoot := filepath.Join(base, componentsDir)
 	for _, dir := range []string{base, compRoot} {
 		if err := ensureDir(home, dir); err != nil {
 			return res, err
 		}
 	}
 
-	withdrawn := false
-	withdraw := func() error {
-		if withdrawn {
-			return nil
-		}
-		withdrawn = true
-		if err := home.Remove(marker); err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return fmt.Errorf("withdrawing the ready marker: %w", err)
-		}
-		return nil
-	}
-
 	dirs := map[string]string{}
 	for _, c := range res.Components {
 		dirs[c] = runtimemanifest.DirName(c, m.Components[c])
-		from, to := filepath.Join(src, componentsDir, c), filepath.Join(compRoot, dirs[c])
-		same, err := treesMatch(home, from, to, c == runtimemanifest.Daemon)
+	}
+	if res.Copied, res.Bytes, err = in.installComponents(compRoot, res.Components, dirs); err != nil {
+		return res, err
+	}
+	changed, err := in.publishRuntime(filepath.Join(base, name), runtimeFiles(m, res.Components, dirs))
+	if err != nil {
+		return res, err
+	}
+	if len(res.Copied) > 0 || changed {
+		res.Action = "installed"
+	}
+
+	res.Removed = prune(home, base, name, readyMarker, componentsDir)
+	for _, r := range prune(home, compRoot, slices.Collect(maps.Values(dirs))...) {
+		res.Removed = append(res.Removed, filepath.Join(componentsDir, r))
+	}
+	return res, in.publishMarker(id)
+}
+
+// installer changes one install root in the home. The ready marker is withdrawn before anything the devbox
+// container may be running is replaced, and published again last.
+type installer struct {
+	home      *os.Root
+	src       string
+	m         *runtimemanifest.Manifest
+	marker    string
+	withdrawn bool
+}
+
+func (in *installer) withdraw() error {
+	if in.withdrawn {
+		return nil
+	}
+	in.withdrawn = true
+	if err := in.home.Remove(in.marker); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("withdrawing the ready marker: %w", err)
+	}
+	return nil
+}
+
+// installComponents copies each component that doesn't match its directory under root (dirs) from the payload.
+func (in *installer) installComponents(root string, components []string, dirs map[string]string) (copied []string, size int64, err error) {
+	for _, c := range components {
+		from, to := filepath.Join(in.src, componentsDir, c), filepath.Join(root, dirs[c])
+		same, err := treesMatch(in.home, from, to, c == runtimemanifest.Daemon)
 		if err != nil {
-			return res, fmt.Errorf("reading the %s component: %w", c, err)
+			return copied, size, fmt.Errorf("reading the %s component: %w", c, err)
 		}
 		if same {
 			continue
 		}
-		if err := withdraw(); err != nil {
-			return res, err
+		if err := in.withdraw(); err != nil {
+			return copied, size, err
 		}
-		n, err := replaceDir(home, to, func(tmp string) (int64, error) { return copyTree(home, from, tmp) })
-		res.Bytes += n
+		n, err := replaceDir(in.home, to, func(tmp string) (int64, error) { return copyTree(in.home, from, tmp) })
+		size += n
 		if err != nil {
-			return res, fmt.Errorf("installing the %s component: %w", c, err)
+			return copied, size, fmt.Errorf("installing the %s component: %w", c, err)
 		}
-		res.Copied = append(res.Copied, c)
+		copied = append(copied, c)
 	}
+	return copied, size, nil
+}
 
-	want, err := runtimeFiles(m, res.Components, dirs)
-	if err != nil {
-		return res, err
+// publishRuntime makes dir hold exactly files, and reports whether it had to change it.
+func (in *installer) publishRuntime(dir string, files map[string]runtimeFile) (bool, error) {
+	if runtimeMatches(in.home, dir, files) {
+		return false, nil
 	}
-	same := runtimeMatches(home, final, want)
-	if !same {
-		if err := withdraw(); err != nil {
-			return res, err
-		}
-		if _, err := replaceDir(home, final, func(tmp string) (int64, error) { return 0, writeRuntime(home, tmp, want) }); err != nil {
-			return res, fmt.Errorf("publishing the runtime: %w", err)
-		}
+	if err := in.withdraw(); err != nil {
+		return false, err
 	}
-	if len(res.Copied) > 0 || !same {
-		res.Action = "installed"
+	if _, err := replaceDir(in.home, dir, func(tmp string) (int64, error) { return 0, writeRuntime(in.home, tmp, files) }); err != nil {
+		return false, fmt.Errorf("publishing the runtime: %w", err)
 	}
+	return true, nil
+}
 
-	res.Removed = append(res.Removed, prune(home, base, name, readyMarker, componentsDir)...)
-	keep := make([]string, 0, len(dirs))
-	for _, d := range dirs {
-		keep = append(keep, d)
+// publishMarker makes the ready marker name id, renamed into place so the devbox container never reads a partial
+// marker.
+func (in *installer) publishMarker(id string) error {
+	content := []byte(id + "\n")
+	if cur, _ := in.home.ReadFile(in.marker); bytes.Equal(cur, content) {
+		return nil
 	}
-	for _, r := range prune(home, compRoot, keep...) {
-		res.Removed = append(res.Removed, filepath.Join(componentsDir, r))
+	tmp := in.marker + tmpSuffix
+	if err := in.home.RemoveAll(tmp); err != nil {
+		return fmt.Errorf("clearing %s: %w", tmp, err)
 	}
-
-	if cur, _ := home.ReadFile(marker); strings.TrimSpace(string(cur)) != id {
-		// Renamed into place, so the devbox container never reads a partial marker.
-		tmp := marker + tmpSuffix
-		if err := home.RemoveAll(tmp); err != nil {
-			return res, fmt.Errorf("clearing %s: %w", tmp, err)
-		}
-		if err := writeFile(home, tmp, []byte(id+"\n"), 0o644); err != nil {
-			return res, fmt.Errorf("writing the ready marker: %w", err)
-		}
-		if err := home.Rename(tmp, marker); err != nil {
-			return res, fmt.Errorf("publishing the ready marker: %w", err)
-		}
+	if err := writeFile(in.home, tmp, content, filePerm); err != nil {
+		return fmt.Errorf("writing the ready marker: %w", err)
 	}
-	return res, nil
+	if err := in.home.Rename(tmp, in.marker); err != nil {
+		return fmt.Errorf("publishing the ready marker: %w", err)
+	}
+	return nil
 }
 
 // ensureDir makes name a directory, replacing anything else there (a file or a link).
@@ -180,7 +208,7 @@ func ensureDir(home *os.Root, name string) error {
 			return fmt.Errorf("removing %s, which is not a directory: %w", name, err)
 		}
 	}
-	if err := home.Mkdir(name, 0o755); err != nil && !errors.Is(err, fs.ErrExist) {
+	if err := home.Mkdir(name, dirPerm); err != nil && !errors.Is(err, fs.ErrExist) {
 		return fmt.Errorf("creating %s: %w", name, err)
 	}
 	return nil
@@ -192,7 +220,7 @@ func replaceDir(home *os.Root, name string, fill func(tmp string) (int64, error)
 	if err := home.RemoveAll(tmp); err != nil {
 		return 0, fmt.Errorf("clearing %s: %w", tmp, err)
 	}
-	if err := home.Mkdir(tmp, 0o755); err != nil {
+	if err := home.Mkdir(tmp, dirPerm); err != nil {
 		return 0, err
 	}
 	n, err := fill(tmp)
@@ -231,13 +259,10 @@ type runtimeFile struct {
 }
 
 // runtimeFiles is what an installed runtime's directory holds, keyed by path relative to it.
-func runtimeFiles(m *runtimemanifest.Manifest, components []string, dirs map[string]string) (map[string]runtimeFile, error) {
+func runtimeFiles(m *runtimemanifest.Manifest, components []string, dirs map[string]string) map[string]runtimeFile {
 	fromRuntime := func(c string) string { return path.Join("..", componentsDir, dirs[c]) }
-	installed := m.Installed(components, fromRuntime)
-	data, err := json.MarshalIndent(installed, "", "  ")
-	if err != nil {
-		return nil, err
-	}
+	// A Manifest always marshals.
+	data, _ := json.MarshalIndent(m.Installed(components, fromRuntime), "", "  ")
 	files := map[string]runtimeFile{runtimemanifest.FileName: {Data: append(data, '\n')}}
 	for _, c := range components {
 		comp := m.Components[c]
@@ -256,7 +281,7 @@ func runtimeFiles(m *runtimemanifest.Manifest, components []string, dirs map[str
 			files[name] = runtimeFile{Data: launcher(path.Join("..", fromRuntime(ic), ib.Path), target)}
 		}
 	}
-	return files, nil
+	return files
 }
 
 // launcher is a script command: POSIX sh, which every environment image has, that runs the script with the
@@ -289,29 +314,29 @@ func runtimeMatches(home *os.Root, dir string, want map[string]runtimeFile) bool
 		return false
 	}
 	for rel, f := range want {
-		name := filepath.Join(dir, rel)
-		info, err := home.Lstat(name)
-		if err != nil {
-			return false
-		}
-		if f.Link != "" {
-			if target, err := home.Readlink(name); err != nil || target != f.Link {
-				return false
-			}
-			continue
-		}
-		if !info.Mode().IsRegular() || info.Mode().Perm() != runtimeFileMode(rel) {
-			return false
-		}
-		if data, err := home.ReadFile(name); err != nil || !bytes.Equal(data, f.Data) {
+		if !f.matches(home, filepath.Join(dir, rel), runtimeFileMode(rel)) {
 			return false
 		}
 	}
 	return true
 }
 
+// matches reports whether name is this file: the same link, or a regular file with mode and the same content.
+func (f runtimeFile) matches(home *os.Root, name string, mode os.FileMode) bool {
+	if f.Link != "" {
+		target, err := home.Readlink(name)
+		return err == nil && target == f.Link
+	}
+	info, err := home.Lstat(name)
+	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm() != mode {
+		return false
+	}
+	data, err := home.ReadFile(name)
+	return err == nil && bytes.Equal(data, f.Data)
+}
+
 func writeRuntime(home *os.Root, dir string, files map[string]runtimeFile) error {
-	if err := home.Mkdir(filepath.Join(dir, runtimemanifest.BinDir), 0o755); err != nil {
+	if err := home.Mkdir(filepath.Join(dir, runtimemanifest.BinDir), dirPerm); err != nil {
 		return err
 	}
 	for rel, f := range files {
@@ -331,9 +356,9 @@ func writeRuntime(home *os.Root, dir string, files map[string]runtimeFile) error
 
 func runtimeFileMode(rel string) os.FileMode {
 	if path.Dir(rel) == runtimemanifest.BinDir {
-		return 0o755
+		return execPerm
 	}
-	return 0o644
+	return filePerm
 }
 
 // writeFile creates name, which must not exist.
@@ -384,7 +409,7 @@ func copyTree(home *os.Root, src, dst string) (int64, error) {
 		}
 		target := filepath.Join(dst, rel)
 		if d.IsDir() {
-			return home.Mkdir(target, 0o755)
+			return home.Mkdir(target, dirPerm)
 		}
 		if !d.Type().IsRegular() {
 			return fmt.Errorf("%s is not a regular file", p)
@@ -442,9 +467,9 @@ func copyFile(home *os.Root, from, to string, mode os.FileMode) (int64, error) {
 
 func fileMode(info fs.FileInfo) os.FileMode {
 	if info.Mode()&0o111 != 0 {
-		return 0o755
+		return execPerm
 	}
-	return 0o644
+	return filePerm
 }
 
 // treesMatch reports whether every directory and file under src (in this image) is under dst (in the home): as
@@ -486,21 +511,17 @@ func treesMatch(home *os.Root, src, dst string, content bool) (bool, error) {
 				return err
 			}
 			got, err := fileSum(home.Open(target))
-			equal = err == nil && bytes.Equal(want, got)
+			equal = err == nil && want == got
 		}
 		return nil
 	})
 	return equal, err
 }
 
-func fileSum(f *os.File, err error) ([]byte, error) {
+func fileSum(f *os.File, err error) (string, error) {
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer f.Close()
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return nil, err
-	}
-	return h.Sum(nil), nil
+	return runtimemanifest.FileSum(f)
 }

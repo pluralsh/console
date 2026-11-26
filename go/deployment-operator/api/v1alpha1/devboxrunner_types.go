@@ -83,16 +83,6 @@ const (
 	DevboxImageUpdatePoll DevboxImageUpdateMode = "poll"
 )
 
-// DevboxRuntimeFlavor names what the runtime image delivers next to the environment image.
-// +kubebuilder:validation:Enum=core
-type DevboxRuntimeFlavor string
-
-const (
-	// DevboxRuntimeCore is devbox-daemon with the coding agents, their ACP adapters and Playwright MCP; the
-	// browser and the tools come from the environment image.
-	DevboxRuntimeCore DevboxRuntimeFlavor = "core"
-)
-
 // DevboxInstanceUpdateMode controls how existing instances move to a new template revision.
 // +kubebuilder:validation:Enum=onResume;manual
 type DevboxInstanceUpdateMode string
@@ -316,11 +306,6 @@ type DevboxSubstrate struct {
 // settings), so every operator upgrade delivers its daemon and agents to every runner. Each instance gets the
 // agents of spec.agents (and Playwright MCP with the browser enabled) installed into its home.
 type DevboxRuntime struct {
-	// Flavor of the runtime. Only core (devbox-daemon, the coding agents and their ACP adapters) exists.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=core
-	Flavor *DevboxRuntimeFlavor `json:"flavor,omitempty"`
-
 	// Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with
 	// it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then
 	// execs the daemon. Defaults to /bin/sh.
@@ -1190,7 +1175,7 @@ func (in *DevboxRunner) InstanceUpdateMode() DevboxInstanceUpdateMode {
 
 // RuntimeShell is spec.runtime.shell, /bin/sh when unset.
 func (in *DevboxRunner) RuntimeShell() string {
-	if r := in.Spec.Runtime; r != nil && r.Shell != nil && *r.Shell != "" {
+	if r := in.Spec.Runtime; r != nil && r.Shell != nil {
 		return *r.Shell
 	}
 	return DevboxDefaultShell

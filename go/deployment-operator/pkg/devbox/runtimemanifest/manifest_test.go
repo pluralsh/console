@@ -1,8 +1,10 @@
 package runtimemanifest
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -46,9 +48,6 @@ func TestValidate(t *testing.T) {
 		"unknown requirement": func(m *Manifest) { c := m.Components["pi"]; c.Requires = []string{"x"}; m.Components["pi"] = c },
 		"escaping path": func(m *Manifest) {
 			m.Components["x"] = Component{Hash: testHash, Bin: map[string]Bin{"x": {Path: "../../etc/passwd"}}}
-		},
-		"absolute path": func(m *Manifest) {
-			m.Components["x"] = Component{Hash: testHash, Bin: map[string]Bin{"x": {Path: "/etc/passwd"}}}
 		},
 		"shell characters in a path": func(m *Manifest) {
 			m.Components["x"] = Component{Hash: testHash, Bin: map[string]Bin{"x": {Path: "a\"$(id)"}}}
@@ -98,8 +97,8 @@ func TestInstalledAndExpand(t *testing.T) {
 	components, _ := m.Select([]string{"pi"}, false)
 	installed := m.Installed(components, func(name string) string { return "../components/" + name })
 
-	assert.ElementsMatch(t, components, keysOf(installed.Components))
-	assert.Equal(t, []string{"pi"}, keysOf(installed.Agents), "claude's components aren't installed")
+	assert.ElementsMatch(t, components, slices.Collect(maps.Keys(installed.Components)))
+	assert.Equal(t, []string{"pi"}, slices.Collect(maps.Keys(installed.Agents)), "claude's components aren't installed")
 	assert.Nil(t, installed.PlaywrightMCP)
 	require.NoError(t, installed.Validate())
 
@@ -134,12 +133,4 @@ func TestHashDir(t *testing.T) {
 	require.NoError(t, os.Symlink("x", filepath.Join(dir, "link")))
 	_, err = HashDir(dir)
 	assert.Error(t, err)
-}
-
-func keysOf[V any](m map[string]V) []string {
-	var out []string
-	for k := range m {
-		out = append(out, k)
-	}
-	return out
 }

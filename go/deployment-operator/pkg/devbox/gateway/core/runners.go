@@ -54,11 +54,9 @@ type Runner struct {
 }
 
 type RunnerRevision struct {
-	Template      string
-	GoldenTag     string
-	ImageDigest   string
-	DaemonVersion string
-	Home          Home
+	Template  string
+	GoldenTag string
+	Home      Home
 }
 
 // Home is a revision's home volume: a durable dir in the instance's snapshots (Storage Snapshot), or an external
@@ -287,13 +285,7 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 	}
 	for _, rev := range st.Revisions {
 		home := homeOf(rev)
-		r.Revisions[rev.Revision] = RunnerRevision{
-			Template:      rev.Name,
-			GoldenTag:     deref(rev.GoldenTag),
-			ImageDigest:   digestOf(rev.Image),
-			DaemonVersion: deref(rev.DaemonVersion),
-			Home:          home,
-		}
+		r.Revisions[rev.Revision] = RunnerRevision{Template: rev.Name, GoldenTag: deref(rev.GoldenTag), Home: home}
 		if rev.Revision == r.Revision {
 			r.GoldenTag = deref(rev.GoldenTag)
 			r.DaemonVersion = deref(rev.DaemonVersion)

@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 	"path/filepath"
 	goruntime "runtime"
@@ -40,7 +41,7 @@ func runtimeDir(t *testing.T) (cfg Config) {
 	loader := filepath.Join(root, "sysroot", glibcLoaders[goruntime.GOARCH])
 	require.NoError(t, os.MkdirAll(filepath.Dir(loader), 0o755))
 	require.NoError(t, os.WriteFile(loader, nil, 0o755))
-	return Config{ImageInfo: image, RuntimeDir: dir, LoaderRoot: filepath.Join(root, "sysroot")}
+	return Config{ImageInfo: image, RuntimeDir: dir, LoaderRoot: filepath.Join(root, "sysroot"), Log: slog.New(slog.DiscardHandler)}
 }
 
 func TestLoadImageUsesTheRuntime(t *testing.T) {

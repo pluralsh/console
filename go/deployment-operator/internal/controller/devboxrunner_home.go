@@ -62,16 +62,12 @@ func (r *DevboxRunnerReconciler) checkHomeStorageClass(ctx context.Context, runn
 	return nil
 }
 
-// legacyHomeStorageClassName is the StorageClass revisions from before the runner-wide class had of their own.
-func legacyHomeStorageClassName(atespace, template string) string {
-	return "devbox-home." + atespace + "." + template
-}
-
-// deleteLegacyHomeStorageClass removes a collected older revision's own StorageClass.
+// deleteLegacyHomeStorageClass removes the StorageClass of its own that a collected revision from before the
+// runner-wide class had.
 // TODO: delete collected revisions' seeds too (legacy <atespace>.<template> and golden.<template uid>); they stay in
 // JuiceFS or the ZeroFS bucket until then, and a ZeroFS seed is a full copy of the golden home.
 func (r *DevboxRunnerReconciler) deleteLegacyHomeStorageClass(ctx context.Context, atespace, template string) error {
-	sc := &storagev1.StorageClass{ObjectMeta: metav1.ObjectMeta{Name: legacyHomeStorageClassName(atespace, template)}}
+	sc := &storagev1.StorageClass{ObjectMeta: metav1.ObjectMeta{Name: "devbox-home." + atespace + "." + template}}
 	if err := r.Delete(ctx, sc); client.IgnoreNotFound(err) != nil {
 		return fmt.Errorf("deleting StorageClass %s: %w", sc.Name, err)
 	}

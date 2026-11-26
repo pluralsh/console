@@ -64,28 +64,9 @@ func build(specPath, installedPath, components string, versions map[string]strin
 	m := s.Manifest
 	m.Components = map[string]runtimemanifest.Component{}
 	for name, sc := range s.Components {
-		c := sc.Component
-		switch {
-		case sc.Package != "":
-			if c.Version = installed[name]; c.Version == "" {
-				return nil, fmt.Errorf("component %s: %s was not installed", name, sc.Package)
-			}
-		case versions[c.Version] != "":
-			c.Version = versions[c.Version]
-		default:
-			return nil, fmt.Errorf("component %s: no version for %q", name, c.Version)
-		}
-		if c.Hash, err = runtimemanifest.HashDir(filepath.Join(components, name)); err != nil {
+		c, err := sc.build(filepath.Join(components, name), installed[name], versions)
+		if err != nil {
 			return nil, fmt.Errorf("component %s: %w", name, err)
-		}
-		for bin, b := range c.Bin {
-			info, err := os.Stat(filepath.Join(components, name, b.Path))
-			if err != nil {
-				return nil, fmt.Errorf("component %s: command %s: %w", name, bin, err)
-			}
-			if b.Interpreter == "" && info.Mode()&0o111 == 0 {
-				return nil, fmt.Errorf("component %s: command %s (%s) is not executable", name, bin, b.Path)
-			}
 		}
 		m.Components[name] = c
 	}
@@ -104,6 +85,36 @@ func build(specPath, installedPath, components string, versions map[string]strin
 	return &m, nil
 }
 
+// build fills in the version and hash of the component built into dir. installed is the version assemble.sh
+// installed of its package.
+func (sc specComponent) build(dir, installed string, versions map[string]string) (runtimemanifest.Component, error) {
+	c := sc.Component
+	switch {
+	case sc.Package != "":
+		if c.Version = installed; c.Version == "" {
+			return c, fmt.Errorf("%s was not installed", sc.Package)
+		}
+	case versions[c.Version] != "":
+		c.Version = versions[c.Version]
+	default:
+		return c, fmt.Errorf("no version for %q", c.Version)
+	}
+	var err error
+	if c.Hash, err = runtimemanifest.HashDir(dir); err != nil {
+		return c, err
+	}
+	for bin, b := range c.Bin {
+		info, err := os.Stat(filepath.Join(dir, b.Path))
+		if err != nil {
+			return c, fmt.Errorf("command %s: %w", bin, err)
+		}
+		if b.Interpreter == "" && info.Mode()&0o111 == 0 {
+			return c, fmt.Errorf("command %s (%s) is not executable", bin, b.Path)
+		}
+	}
+	return c, nil
+}
+
 // readVersions reads assemble.sh's "<component> <version>" lines.
 func readVersions(path string) (map[string]string, error) {
 	data, err := os.ReadFile(path)
@@ -112,7 +123,7 @@ func readVersions(path string) (map[string]string, error) {
 	}
 	out := map[string]string{}
 	for _, line := range strings.Split(strings.TrimSpace(string(data)), "\n") {
-		name, version, ok := strings.Cut(strings.TrimSpace(line), " ")
+		name, version, ok := strings.Cut(line, " ")
 		if !ok || name == "" || version == "" {
 			return nil, fmt.Errorf("%s: invalid line %q", path, line)
 		}

@@ -66,6 +66,13 @@ func (r *Record) rebaseState() devboxv1.RebaseState {
 	return devboxv1.RebaseState(devboxv1.RebaseState_value[r.RebaseState])
 }
 
+// failRebase records that the move to revision failed.
+func (r *Record) failRebase(revision int64, message string) {
+	r.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
+	r.RebaseMessage = message
+	r.RebaseRevision = revision
+}
+
 // ActorID is "<atespace>/<actor>".
 func (r *Record) ActorID() string { return r.Atespace + "/" + r.Actor }
 

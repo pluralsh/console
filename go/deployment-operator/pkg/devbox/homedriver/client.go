@@ -51,6 +51,18 @@ func (c *Client) SeedVolume(ctx context.Context, volumeID, seedID string, capaci
 	return err
 }
 
+// SaveSeed clones a suspended actor's home into the seed seedID (the JuiceFS driver's CSI snapshot). Taking a seed
+// that exists again is a no-op.
+func (c *Client) SaveSeed(ctx context.Context, seedID, volumeID string) error {
+	_, err := c.controller.CreateSnapshot(ctx, &csi.CreateSnapshotRequest{Name: seedID, SourceVolumeId: volumeID})
+	return err
+}
+
+func (c *Client) DeleteSeed(ctx context.Context, seedID string) error {
+	_, err := c.controller.DeleteSnapshot(ctx, &csi.DeleteSnapshotRequest{SnapshotId: seedID})
+	return err
+}
+
 // DeleteVolume removes a volume SeedVolume created that Substrate didn't take.
 func (c *Client) DeleteVolume(ctx context.Context, volumeID string) error {
 	_, err := c.controller.DeleteVolume(ctx, &csi.DeleteVolumeRequest{VolumeId: volumeID})

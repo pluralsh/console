@@ -382,17 +382,9 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 		AIProxyHost: aiHost,
 	}
 	p.mu.Unlock()
-	seeded := false
 	defer func() {
 		cctx, ccancel := context.WithTimeout(context.WithoutCancel(ctx), cleanupTimeout)
 		defer ccancel()
-		if seeded {
-			if a, err := p.deps.Actors.GetActor(cctx, ref); err == nil {
-				if err := homes.Release(cctx, driver, a); err != nil {
-					p.deps.Log.Info("could not delete the probe actor's seeded home", "actor", ref.String(), "error", err.Error())
-				}
-			}
-		}
 		if err := p.deps.Actors.DeleteActor(cctx, ref); err != nil {
 			p.deps.Log.Info("could not delete the probe actor", "actor", ref.String(), "error", err.Error())
 		}
@@ -410,28 +402,27 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	if err != nil {
 		return nil, fmt.Errorf("creating probe actor %s: %w", ref, err)
 	}
+	start := func() error {
+		if err := p.deps.Actors.ApplyEgressPolicy(ctx, ref, rules); err != nil {
+			return fmt.Errorf("applying the probe egress policy: %w", err)
+		}
+		if err := p.deps.Actors.Resume(ctx, ref); err != nil {
+			return fmt.Errorf("resuming probe actor %s: %w", ref, err)
+		}
+		if _, err := p.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING); err != nil {
+			return fmt.Errorf("waiting for probe actor %s: %w", ref, err)
+		}
+		return nil
+	}
 	if req.HomeSeed != "" {
-		if err := homes.Seed(ctx, driver, actor, req.HomeSeed, req.HomeBytes); errors.Is(err, homes.ErrSeedMissing) {
-			return nil, permanentError{err}
-		} else if err != nil {
-			return nil, err
-		}
-		seeded = true
+		err = homes.Start(ctx, driver, p.deps.Actors, actor, req.HomeSeed, req.HomeBytes, start)
+	} else {
+		err = start()
 	}
-	if err := p.deps.Actors.ApplyEgressPolicy(ctx, ref, rules); err != nil {
-		return nil, fmt.Errorf("applying the probe egress policy: %w", err)
-	}
-	if err := p.deps.Actors.Resume(ctx, ref); err != nil {
-		return nil, fmt.Errorf("resuming probe actor %s: %w", ref, err)
-	}
-	running, err := p.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING)
-	if req.HomeSeed != "" && running != nil {
-		if err := homes.Verify(ctx, driver, running); err != nil {
-			return nil, permanentError{err}
-		}
-	}
-	if err != nil {
-		return nil, fmt.Errorf("waiting for probe actor %s: %w", ref, err)
+	if errors.Is(err, homes.ErrSeedMissing) || errors.Is(err, homes.ErrVolumeNaming) {
+		return nil, permanentError{err}
+	} else if err != nil {
+		return nil, err
 	}
 	daemon := p.deps.Daemons.Daemon(ref.String())
 	if err := waitServing(ctx, daemon); err != nil {

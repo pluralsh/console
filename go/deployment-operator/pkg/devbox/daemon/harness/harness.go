@@ -79,10 +79,10 @@ func (i *ImageInfo) MergeRuntime(dir string, m *runtimemanifest.Manifest) {
 		if a.ACP.Component != a.Component {
 			agent.ACP.Version = m.Components[a.ACP.Component].Version
 		}
+		if len(a.Env) > 0 {
+			agent.Env = make(map[string]string, len(a.Env))
+		}
 		for k, v := range a.Env {
-			if agent.Env == nil {
-				agent.Env = map[string]string{}
-			}
 			agent.Env[k] = m.Expand(dir, v)
 		}
 		i.Agents[name] = agent

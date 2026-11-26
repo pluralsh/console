@@ -168,7 +168,6 @@ func runtimeImage(daemonVersion string) imageConfig {
 		c.Labels = map[string]string{
 			v1alpha1.DevboxRuntimeContractLabel:    v1alpha1.DevboxRuntimeContractV1,
 			v1alpha1.DevboxImageDaemonVersionLabel: daemonVersion,
-			v1alpha1.DevboxImageFlavorLabel:        "core",
 		}
 		c.Entrypoint = []string{"/devbox-runtime-installer"}
 		c.User = ""
@@ -937,6 +936,80 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(shared.GetLabels()).NotTo(HaveKey("devboxes.plural.sh/runner.elastic"))
 	})
 
+	t.Run("delete drains running instances, waits for snapshots, then cleans up", func(t *testing.T) {
+		g := NewWithT(t)
+		runner := env.get(t, "platform")
+		atespace := *runner.Status.Atespace
+		consoleID := *runner.Status.ID
+		env.substrate.addActor(atespace, "busy", "platform-r2", ateapi.ActorState_ACTOR_STATE_RUNNING)
+		g.Expect(env.client.Delete(ctx, runner)).To(Succeed())
+
+		runner = env.reconcile(t, "platform", 1)
+		draining := condition(runner, v1alpha1.DevboxDrainingConditionType)
+		g.Expect(draining.Reason).To(Equal(string(v1alpha1.DevboxInstancesRunningReason)))
+		g.Expect(draining.Message).To(ContainSubstring("1 running instances"))
+		g.Expect(*env.console.lastHeartbeat().Status).To(Equal(console.DevboxStatusDegraded))
+		g.Expect(env.console.deleted).To(BeEmpty())
+
+		env.substrate.addActor(atespace, "busy", "platform-r2", ateapi.ActorState_ACTOR_STATE_SUSPENDED)
+		env.console.snapshotsRemain = true
+		runner = env.reconcile(t, "platform", 1)
+		g.Expect(condition(runner, v1alpha1.DevboxDrainingConditionType).Reason).To(Equal(string(v1alpha1.DevboxSnapshotsRemainReason)))
+		g.Expect(env.substrate.hasAtespace(atespace)).To(BeTrue(), "nothing is deleted while snapshots remain")
+
+		env.console.snapshotsRemain = false
+		_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "platform"}})
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(env.console.deleted).To(ContainElement(consoleID))
+		g.Expect(env.substrate.hasAtespace(atespace)).To(BeFalse())
+		g.Expect(env.substrate.actors[atespace]).To(BeEmpty())
+		g.Expect(env.substrate.templates[atespace]).To(BeEmpty())
+		g.Expect(apierrors.IsNotFound(env.client.Get(ctx, client.ObjectKey{Name: "platform"}, &v1alpha1.DevboxRunner{}))).To(BeTrue())
+		mirror := &corev1.Secret{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: v1alpha1.DevboxRunnerEnvSecret, Namespace: devboxTestNamespace}, mirror)).To(Succeed())
+		g.Expect(mirror.Data).NotTo(HaveKey("platform"), "a deleted runner's secret env is dropped")
+
+		pool := &unstructured.Unstructured{}
+		pool.SetGroupVersionKind(workerPoolGVK)
+		err = env.client.Get(ctx, client.ObjectKey{Name: "devbox-platform", Namespace: devboxTestNamespace}, pool)
+		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
+		gateway := &appsv1.Deployment{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, gateway)).
+			To(Succeed(), "other runners still need the gateway")
+		g.Expect(lo.Map(gateway.GetOwnerReferences(), func(ref metav1.OwnerReference, _ int) string { return ref.Name })).
+			To(ContainElements("custom", "scheduled", "elastic"), "every runner sharing the gateway owns it")
+		for name, obj := range map[string]client.Object{
+			devboxGatewayName:       &corev1.ServiceAccount{},
+			devboxGatewaySecretName: &corev1.Secret{},
+			devboxEgressAuthzName:   &corev1.Service{},
+		} {
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: name, Namespace: devboxTestNamespace}, obj)).To(Succeed())
+			g.Expect(obj.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())), "%T %s has the gateway's owners", obj, name)
+		}
+		policy := &networkingv1.NetworkPolicy{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, policy)).To(Succeed())
+		g.Expect(policy.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())))
+	})
+
+	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
+		g := NewWithT(t)
+		for _, name := range []string{"custom", "scheduled", "elastic", "rebuild"} {
+			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
+			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
+			g.Expect(err).NotTo(HaveOccurred())
+		}
+		err := env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, &appsv1.Deployment{})
+		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
+		err = env.client.Get(ctx, client.ObjectKey{Name: devboxEgressAuthzName, Namespace: devboxTestNamespace}, &corev1.Service{})
+		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
+	})
+}
+
+// The runtime sidecar's image, resolved apart from the environment image.
+func TestDevboxRunnerRuntime(t *testing.T) {
+	env := startDevboxEnv(t)
+	ctx := context.Background()
+
 	t.Run("the daemon baked into the environment image is ignored", func(t *testing.T) {
 		g := NewWithT(t)
 		env.push(t, "custom:old", func(c *v1.Config) {
@@ -1027,61 +1100,12 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.Status.WorkerPool).NotTo(BeNil(), "the worker pool is reconciled without a runtime")
 		g.Expect(runner.Status.ID).NotTo(BeNil(), "and so is the console registration")
 	})
+}
 
-	t.Run("delete drains running instances, waits for snapshots, then cleans up", func(t *testing.T) {
-		g := NewWithT(t)
-		runner := env.get(t, "platform")
-		atespace := *runner.Status.Atespace
-		consoleID := *runner.Status.ID
-		env.substrate.addActor(atespace, "busy", "platform-r2", ateapi.ActorState_ACTOR_STATE_RUNNING)
-		g.Expect(env.client.Delete(ctx, runner)).To(Succeed())
-
-		runner = env.reconcile(t, "platform", 1)
-		draining := condition(runner, v1alpha1.DevboxDrainingConditionType)
-		g.Expect(draining.Reason).To(Equal(string(v1alpha1.DevboxInstancesRunningReason)))
-		g.Expect(draining.Message).To(ContainSubstring("1 running instances"))
-		g.Expect(*env.console.lastHeartbeat().Status).To(Equal(console.DevboxStatusDegraded))
-		g.Expect(env.console.deleted).To(BeEmpty())
-
-		env.substrate.addActor(atespace, "busy", "platform-r2", ateapi.ActorState_ACTOR_STATE_SUSPENDED)
-		env.console.snapshotsRemain = true
-		runner = env.reconcile(t, "platform", 1)
-		g.Expect(condition(runner, v1alpha1.DevboxDrainingConditionType).Reason).To(Equal(string(v1alpha1.DevboxSnapshotsRemainReason)))
-		g.Expect(env.substrate.hasAtespace(atespace)).To(BeTrue(), "nothing is deleted while snapshots remain")
-
-		env.console.snapshotsRemain = false
-		_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "platform"}})
-		g.Expect(err).NotTo(HaveOccurred())
-		g.Expect(env.console.deleted).To(ContainElement(consoleID))
-		g.Expect(env.substrate.hasAtespace(atespace)).To(BeFalse())
-		g.Expect(env.substrate.actors[atespace]).To(BeEmpty())
-		g.Expect(env.substrate.templates[atespace]).To(BeEmpty())
-		g.Expect(apierrors.IsNotFound(env.client.Get(ctx, client.ObjectKey{Name: "platform"}, &v1alpha1.DevboxRunner{}))).To(BeTrue())
-		mirror := &corev1.Secret{}
-		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: v1alpha1.DevboxRunnerEnvSecret, Namespace: devboxTestNamespace}, mirror)).To(Succeed())
-		g.Expect(mirror.Data).NotTo(HaveKey("platform"), "a deleted runner's secret env is dropped")
-
-		pool := &unstructured.Unstructured{}
-		pool.SetGroupVersionKind(workerPoolGVK)
-		err = env.client.Get(ctx, client.ObjectKey{Name: "devbox-platform", Namespace: devboxTestNamespace}, pool)
-		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
-		gateway := &appsv1.Deployment{}
-		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, gateway)).
-			To(Succeed(), "other runners still need the gateway")
-		g.Expect(lo.Map(gateway.GetOwnerReferences(), func(ref metav1.OwnerReference, _ int) string { return ref.Name })).
-			To(ContainElements("custom", "old", "scheduled", "elastic"), "every runner sharing the gateway owns it")
-		for name, obj := range map[string]client.Object{
-			devboxGatewayName:       &corev1.ServiceAccount{},
-			devboxGatewaySecretName: &corev1.Secret{},
-			devboxEgressAuthzName:   &corev1.Service{},
-		} {
-			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: name, Namespace: devboxTestNamespace}, obj)).To(Succeed())
-			g.Expect(obj.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())), "%T %s has the gateway's owners", obj, name)
-		}
-		policy := &networkingv1.NetworkPolicy{}
-		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, policy)).To(Succeed())
-		g.Expect(policy.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())))
-	})
+// External homes: every revision names the runner's StorageClass.
+func TestDevboxRunnerHomes(t *testing.T) {
+	env := startDevboxEnv(t)
+	ctx := context.Background()
 
 	t.Run("a JuiceFS home names the runner's StorageClass in every revision", func(t *testing.T) {
 		g := NewWithT(t)
@@ -1207,19 +1231,6 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(condition(runner, v1alpha1.DevboxTemplateReadyConditionType).Message).
 			To(ContainSubstring("StorageClass devbox-juicefs is provisioned by " + juicefs.DriverName + ", not " + zerofs.DriverName))
 		g.Expect(runner.Status.Revisions).To(BeEmpty())
-	})
-
-	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
-		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "daemon", "no-runtime", "scheduled", "elastic", "rebuild", "juicefs", "zerofs", "mismatch"} {
-			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
-			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
-			g.Expect(err).NotTo(HaveOccurred())
-		}
-		err := env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, &appsv1.Deployment{})
-		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
-		err = env.client.Get(ctx, client.ObjectKey{Name: devboxEgressAuthzName, Namespace: devboxTestNamespace}, &corev1.Service{})
-		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
 	})
 }
 

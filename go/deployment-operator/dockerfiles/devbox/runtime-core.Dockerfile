@@ -138,7 +138,6 @@ COPY --from=payload /payload /payload
 
 LABEL sh.plural.devbox/runtime-contract="v1" \
       sh.plural.devbox/daemon-version="${VERSION}" \
-      sh.plural.devbox/flavor="core" \
       sh.plural.devbox/src-hash="${SRC_HASH}"
 
 # Root, to write into a home volume owned by the environment image's user. The operator grants only the
