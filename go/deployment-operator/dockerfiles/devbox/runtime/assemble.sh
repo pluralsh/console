@@ -18,7 +18,7 @@
 # manifest changes, and instances copy it again.
 #
 # The native agents (claude, codex, opencode) keep only their binary, the ACP adapters are bundled into one file
-# each, and the tools that can't be bundled keep their pruned node_modules. Nothing may be a symlink: the
+# each, pi keeps its own bundle, and the tools that can't be bundled keep their pruned node_modules. Nothing may be a symlink: the
 # installer copies regular files only.
 set -eu
 
@@ -97,6 +97,19 @@ prune() {
   rm -f "$1/package.json" "$1/package-lock.json"
 }
 
+# keep <component> <package>...: keeps only these packages of the pruned install, for a tool that ships its own
+# bundle and loads only a few packages at runtime.
+keep() {
+  c=$1
+  shift
+  component "$c"
+  prune "$work/$c"
+  for p in "$@"; do
+    mkdir -p "$out/$c/node_modules/$(dirname "$p")"
+    mv "$work/$c/node_modules/$p" "$out/$c/node_modules/$p"
+  done
+}
+
 # bundle <component> <entry> [patch]: bundles an ESM CLI and its dependencies into <out>/<component>/index.mjs,
 # after running the patch (a script in $patches, given the entry file) on it.
 bundle() {
@@ -140,8 +153,16 @@ bundle codex-acp @agentclientprotocol/codex-acp/dist/index.js codex-acp-unsandbo
 bundle pi-acp pi-acp/dist/index.js
 
 tree gemini
-tree pi
+# pi ships its own bundle (dist/bundle) and loads only jiti (for TypeScript extensions, the daemon's subagent one
+# among them) and photon-node (images) at runtime, so the rest of its dependency tree (every AI provider's SDK, about
+# 16k files) stays out, and so does the unbundled dist it exports for use as a library.
+keep pi @earendil-works/pi-coding-agent jiti @silvia-odwyer/photon-node
+find "$out/pi/node_modules/@earendil-works/pi-coding-agent/dist" -mindepth 1 -maxdepth 1 ! -name bundle -exec rm -rf {} +
 tree pi-mcp-adapter
+# The adapter only runs recheck's pure-JS checkSync, never its native or Java backends, and pi gives the extensions it
+# loads its own copies of its packages and typebox.
+rm -rf "$out/pi-mcp-adapter/node_modules/recheck-jar" "$out/pi-mcp-adapter/node_modules/recheck-linux-$cpu" \
+  "$out/pi-mcp-adapter/node_modules/typebox" "$out/pi-mcp-adapter/node_modules/@earendil-works"
 tree playwright-mcp
 
 links=$(find "$out" -type l)

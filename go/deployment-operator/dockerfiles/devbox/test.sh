@@ -239,14 +239,27 @@ step_runtime() {
   echo "${out}" | sed 's/^/  /'
 
   # Everything a runner selects is copied into each of its instances' home volume and snapshots: budget what a
-  # runner with every agent and the browser installs (the installer's count, whatever Docker's image store reports).
+  # runner with every agent and Playwright MCP (--browser; Chromium is the environment image's) installs (the
+  # installer's count, whatever Docker's image store reports).
   docker volume rm -f "${volume}" >/dev/null && docker volume create "${volume}" >/dev/null
   size="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} -v "${volume}:/mnt/home" "${runtime_image}" \
     --digest "${digest}" --agents claude,codex,gemini,opencode,pi --browser --stay=false 2>&1 |
     sed -n 's/.*"bytes":\([0-9]*\).*/\1/p')"
   [ -n "${size}" ] || { echo "the full install did not report its size"; return 1; }
   [ "${size}" -lt $((1536 * 1024 * 1024)) ] || { echo "every agent installs ${size} bytes, over the 1.5GiB budget"; return 1; }
-  echo "every agent and the browser install $((size / 1024 / 1024)) MiB"
+  echo "every agent and Playwright MCP install $((size / 1024 / 1024)) MiB"
+  # pi runs from its own bundle, and pi-mcp-adapter without the packages pi provides: the extensions the daemon loads
+  # (the subagent one and the adapter) must still load.
+  out="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} --user 1000:1000 -e HOME=/tmp -v "${volume}:/home/dev" \
+    "${RUNTIME_ENV_IMAGE:-debian:trixie-20261104-slim}" sh -c \
+    'c=/home/dev/.plural-runtime/components
+     sub=$(find "$c" -path "*/examples/extensions/subagent/index.ts" | head -1)
+     mcp=$(find "$c" -path "*/node_modules/pi-mcp-adapter/index.ts" | head -1)
+     [ -n "${sub}" ] && [ -n "${mcp}" ] && /home/dev/.plural-runtime/sha256-*/bin/pi -ne -e "${sub}" -e "${mcp}" --mode rpc </dev/null 2>&1' || true)"
+  if ! echo "${out}" | grep -q "pi-mcp-adapter" || echo "${out}" | grep -q "Failed to load extension\|No such file"; then
+    echo "pi can't load its subagent extension and pi-mcp-adapter: ${out}"; return 1
+  fi
+  echo "pi loads its subagent extension and pi-mcp-adapter"
   docker volume rm -f "${volume}" >/dev/null
   trap cleanup EXIT
 }
