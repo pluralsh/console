@@ -41,6 +41,10 @@ defmodule Console.Schema.DevboxUpdateCampaign do
     from(c in query, where: c.devbox_id == ^devbox_id)
   end
 
+  def with_share_lock(query \\ __MODULE__) do
+    from(c in query, lock: "FOR SHARE")
+  end
+
   def active(query \\ __MODULE__) do
     from(c in query, where: c.status in ^@active)
   end

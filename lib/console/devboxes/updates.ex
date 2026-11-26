@@ -26,6 +26,8 @@ defmodule Console.Devboxes.Updates do
   @retry_after 10 * 60
   # what withdrawing a claim that was never tried restores
   @unclaimed ~w(rebase_state rebase_error rebase_attempts)a
+  # how long a campaign's request may hold its share of the campaign's lock: longer than a Control call takes
+  @send_timeout :timer.seconds(45)
 
   @doc """
   Updates one instance now, for its owner or anyone who can manage it.  A running instance restarts.
@@ -289,15 +291,25 @@ defmodule Console.Devboxes.Updates do
   # The claim counts the attempt, so an instance the gateway keeps refusing doesn't hold the campaign open.  Only
   # an instance past its forced deadline is restarted while in use; the gateway checks that the others still
   # aren't when the update starts.
+  # Each request holds a share of the campaign's lock while it checks the campaign and asks the gateway, so a
+  # cancellation waits for the request being sent and every later one sees it.
   defp update(pending, %DevboxInstance{} = inst, %DevboxUpdateCampaign{id: id} = campaign, now) do
-    reason = if campaign.force, do: "forced update #{id}", else: "update #{id}"
-    with true <- DevboxUpdateCampaign.active?(Repo.get!(DevboxUpdateCampaign, id)) || :cancelled,
-         {:ok, _} <- send_request(pending, inst, %{reason: reason, only_if_idle: not forced?(inst, campaign, now)}) do
-      :ok
-    else
+    opts = %{reason: if(campaign.force, do: "forced update #{id}", else: "update #{id}"), only_if_idle: not forced?(inst, campaign, now)}
+
+    start_transaction()
+    |> add_operation(:active, fn _ ->
+      case DevboxUpdateCampaign.with_share_lock() |> Repo.get!(id) |> DevboxUpdateCampaign.active?() do
+        true -> {:ok, true}
+        false -> {:error, :cancelled}
+      end
+    end)
+    |> add_operation(:sent, fn _ -> {:ok, send_request(pending, inst, opts)} end)
+    |> execute(extract: :sent, timeout: @send_timeout)
+    |> case do
+      {:ok, {:ok, _}} -> :ok
       # cancelled since the step claimed it
-      :cancelled -> withdraw(pending, inst, @unclaimed)
-      err -> Logger.warning("could not request the update of devbox instance #{inst.id}: #{inspect(err)}")
+      {:error, :cancelled} -> withdraw(pending, inst, @unclaimed)
+      {_, err} -> Logger.warning("could not request the update of devbox instance #{inst.id}: #{inspect(err)}")
     end
   end
 
