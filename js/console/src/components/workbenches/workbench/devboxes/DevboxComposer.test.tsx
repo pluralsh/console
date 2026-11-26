@@ -300,6 +300,93 @@ describe('DevboxComposer file mentions', () => {
   })
 })
 
+describe('DevboxComposer drafts', () => {
+  it('restores the prompt and attachments after the composer unmounts', () => {
+    const key = 'thread-draft'
+    const notes = new File(['x'], 'notes.md', { type: 'text/plain' })
+    const first = render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    const prompt = screen.getByLabelText('Prompt')
+    type(prompt, 'finish the game')
+    fireEvent.paste(prompt, { clipboardData: { files: [notes] } })
+    first.unmount()
+
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    expect(valueOf(screen.getByLabelText('Prompt'))).toBe('finish the game')
+    expect(screen.getByText('notes.md')).toBeTruthy()
+  })
+
+  it('does not restore a draft into a different session', () => {
+    const first = render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey="thread-a"
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    type(screen.getByLabelText('Prompt'), 'only for a')
+    first.unmount()
+
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey="thread-b"
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    expect(valueOf(screen.getByLabelText('Prompt'))).toBe('')
+  })
+
+  it('forgets the draft once the prompt is sent', () => {
+    const key = 'thread-sent'
+    const onSubmit = vi.fn()
+    const first = render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={onSubmit}
+        />
+      </ThemeProvider>
+    )
+    const prompt = screen.getByLabelText('Prompt')
+    type(prompt, 'ship it')
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    expect(onSubmit).toHaveBeenCalledWith('ship it', [])
+    first.unmount()
+
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    expect(valueOf(screen.getByLabelText('Prompt'))).toBe('')
+  })
+})
+
 describe('DevboxComposer attachments', () => {
   const file = (name: string, size = 4, type = 'text/plain') => {
     const f = new File(['x'], name, { type })

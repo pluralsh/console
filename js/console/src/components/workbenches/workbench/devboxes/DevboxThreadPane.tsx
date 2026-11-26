@@ -305,6 +305,7 @@ export function DevboxThreadPane({
             running={thread.foregroundState === DevboxForegroundState.Running}
           />
           <DevboxComposer
+            draftKey={thread.id}
             commands={commands}
             configOptions={thread.configOptions}
             autonomyPolicy={instance.devbox?.autonomy}

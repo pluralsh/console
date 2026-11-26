@@ -1,8 +1,12 @@
 import type RFB from '@novnc/novnc/lib/rfb'
 import {
   Button,
+  CaretLeftIcon,
   Chip,
+  CloseIcon,
+  ExpandIcon,
   Flex,
+  IconFrame,
   Input,
   ReloadIcon,
   Switch,
@@ -20,45 +24,65 @@ import {
 } from './devboxWorkspaceApi'
 
 type VncState = 'connecting' | 'connected' | 'disconnected'
+type RfbClient = RFB & { focus?: (options?: FocusOptions) => void }
 
-export function DevboxBrowserTab({
+export function DevboxBrowserView({
   api,
   live,
   browserEnabled,
+  onClose,
 }: {
   api: DevboxWorkspaceApi
   live: boolean
   browserEnabled: boolean
+  onClose: () => void
 }) {
-  if (!api.openStream)
-    return (
-      <DevboxUnavailable
-        title="Browser unavailable"
-        message="Console doesn't serve devbox streams yet (openDevboxStream)."
-      />
-    )
-  if (!live)
-    return (
-      <DevboxUnavailable
-        title="Instance isn't running"
-        message="Resume the instance to view its browser."
-      />
-    )
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      height="100%"
-    >
-      {browserEnabled ? (
-        <DevboxVnc openStream={api.openStream} />
+    <ViewSC>
+      {!api.openStream ? (
+        <>
+          <BackButton onClose={onClose} />
+          <DevboxUnavailable
+            title="Browser unavailable"
+            message="Console doesn't serve devbox streams yet (openDevboxStream)."
+          />
+        </>
+      ) : !live ? (
+        <>
+          <BackButton onClose={onClose} />
+          <DevboxUnavailable
+            title="Instance isn't running"
+            message="Resume the instance to view its browser."
+          />
+        </>
+      ) : browserEnabled ? (
+        <DevboxVnc
+          openStream={api.openStream}
+          onClose={onClose}
+        />
       ) : (
-        <CaptionP $color="text-xlight">
-          This box doesn't run a browser. Enable it in the box's spec to watch
-          the agent browse.
-        </CaptionP>
+        <>
+          <BackButton onClose={onClose} />
+          <CaptionP $color="text-xlight">
+            This box doesn't run a browser. Enable it in the box's spec to watch
+            the agent browse.
+          </CaptionP>
+        </>
       )}
-    </Flex>
+    </ViewSC>
+  )
+}
+
+function BackButton({ onClose }: { onClose: () => void }) {
+  return (
+    <Button
+      small
+      secondary
+      startIcon={<CaretLeftIcon />}
+      onClick={onClose}
+    >
+      Back to session
+    </Button>
   )
 }
 
@@ -66,7 +90,7 @@ async function connectVnc(
   target: HTMLElement,
   openStream: NonNullable<DevboxWorkspaceApi['openStream']>,
   onState: (state: VncState) => void
-): Promise<RFB> {
+): Promise<RfbClient> {
   const [{ default: RFBClient }, ticket] = await Promise.all([
     import('@novnc/novnc/lib/rfb'),
     openStream({ kind: 'vnc' }),
@@ -74,10 +98,11 @@ async function connectVnc(
   const protocols = ticketSubprotocols(ticket)
   const rfb = new RFBClient(target, devboxStreamSocketUrl(ticket), {
     wsProtocols: protocols.length ? protocols : ['binary'],
-  })
+  }) as RfbClient
+  // the session is 1280x800; scale it into the column and the full screen
   rfb.scaleViewport = true
   rfb.resizeSession = false
-  rfb.viewOnly = true
+  rfb.viewOnly = false
   rfb.addEventListener('connect', () => onState('connected'))
   rfb.addEventListener('disconnect', () => onState('disconnected'))
   return rfb
@@ -85,13 +110,16 @@ async function connectVnc(
 
 function DevboxVnc({
   openStream,
+  onClose,
 }: {
   openStream: NonNullable<DevboxWorkspaceApi['openStream']>
+  onClose: () => void
 }) {
   const targetRef = useRef<HTMLDivElement>(null)
-  const rfbRef = useRef<Nullable<RFB>>(null)
+  const rfbRef = useRef<Nullable<RfbClient>>(null)
   const [state, setState] = useState<VncState>('connecting')
-  const [control, setControl] = useState(false)
+  const [control, setControl] = useState(true)
+  const [fullscreen, setFullscreen] = useState(false)
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
@@ -119,20 +147,41 @@ function DevboxVnc({
     if (rfbRef.current) rfbRef.current.viewOnly = !control
   }, [control, state])
 
+  useEffect(() => {
+    const onChange = () =>
+      setFullscreen(document.fullscreenElement === targetRef.current)
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
+  const toggleFullscreen = () => {
+    const target = targetRef.current
+    if (!target) return
+    if (document.fullscreenElement === target) {
+      document.exitFullscreen?.()
+      return
+    }
+    void target.requestFullscreen?.()?.then(() => rfbRef.current?.focus?.())
+  }
+
   return (
     <Flex
       direction="column"
       gap="small"
       flex={1}
+      height="100%"
+      minHeight={0}
     >
       <Flex
         justify="space-between"
         align="center"
+        gap="small"
       >
         <Flex
           gap="small"
           align="center"
         >
+          <BackButton onClose={onClose} />
           <Chip
             size="small"
             severity={state === 'connected' ? 'success' : 'warning'}
@@ -146,20 +195,32 @@ function DevboxVnc({
             Take control
           </Switch>
         </Flex>
-        <DevboxOpenInBrowser openStream={openStream} />
-        {state === 'disconnected' && (
-          <Button
-            small
-            tertiary
-            startIcon={<ReloadIcon />}
-            onClick={() => {
-              setState('connecting')
-              setAttempt((a) => a + 1)
-            }}
-          >
-            Reconnect
-          </Button>
-        )}
+        <Flex
+          gap="small"
+          align="center"
+        >
+          <DevboxOpenInBrowser openStream={openStream} />
+          {state === 'disconnected' && (
+            <Button
+              small
+              tertiary
+              startIcon={<ReloadIcon />}
+              onClick={() => {
+                setState('connecting')
+                setAttempt((a) => a + 1)
+              }}
+            >
+              Reconnect
+            </Button>
+          )}
+          <IconFrame
+            clickable
+            textValue={fullscreen ? 'Exit fullscreen' : 'View fullscreen'}
+            icon={fullscreen ? <CloseIcon /> : <ExpandIcon />}
+            tooltip={fullscreen ? 'Exit fullscreen' : 'View fullscreen'}
+            onClick={toggleFullscreen}
+          />
+        </Flex>
       </Flex>
       <VncSC ref={targetRef} />
     </Flex>
@@ -212,11 +273,27 @@ function DevboxOpenInBrowser({
   )
 }
 
+const ViewSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+  padding: theme.spacing.medium,
+}))
+
 const VncSC = styled.div(({ theme }) => ({
   flex: 1,
-  minHeight: 400,
+  minHeight: 0,
   overflow: 'hidden',
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.default,
   backgroundColor: theme.colors['fill-zero'],
+  '&:fullscreen': {
+    width: '100%',
+    height: '100%',
+    border: 'none',
+    borderRadius: 0,
+  },
 }))
