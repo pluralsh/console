@@ -40,6 +40,7 @@ import { selectedThread } from './devboxThreads'
 import { useSubscriptionRecovery } from 'components/hooks/useSubscriptionRecovery'
 import { useDevboxPresence } from './useDevboxPresence'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
+import { useResumeOnOpen } from './useResumeOnOpen'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 
 export function DevboxInstanceView({
@@ -93,6 +94,15 @@ export function DevboxInstanceView({
     skip: !instanceId,
     onData: ({ client, data: { data } }) => {
       const payload = data?.devboxInstanceIndexDelta?.payload
+      const foregroundState = payload?.foregroundState
+      if (foregroundState)
+        client.cache.modify({
+          id: client.cache.identify({
+            __typename: 'DevboxInstance',
+            id: instanceId,
+          }),
+          fields: { foregroundState: () => foregroundState },
+        })
       mergePendingInteractions(
         client.cache,
         instanceId,
@@ -129,17 +139,15 @@ export function DevboxInstanceView({
   const api = useDevboxWorkspaceApi(instanceId)
   useDevboxPresence(instanceId, live)
 
-  // opening a suspended instance resumes it
   const [resume, resumeState] = useResumeDevboxInstanceMutation({
     onError: (e) => popToast({ content: e.message, severity: 'danger' }),
   })
-  const autoResumed = useRef<string | null>(null)
   const suspended = instance?.status === DevboxInstanceStatus.Suspended
-  useEffect(() => {
-    if (!suspended || autoResumed.current === instanceId) return
-    autoResumed.current = instanceId
-    resume({ variables: { id: instanceId } })
-  }, [instanceId, resume, suspended])
+  useResumeOnOpen({
+    instanceId,
+    status: loading ? undefined : instance?.status,
+    resume: () => resume({ variables: { id: instanceId } }),
+  })
   const resuming = resumeState.loading || (!!resumeState.data && suspended)
   useStatusFallback(query, {
     settling:

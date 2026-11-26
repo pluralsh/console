@@ -227,9 +227,7 @@ export function useDevboxFileSearch(
 // lists the directory being completed afresh each time it comes up, showing
 // its last listing meanwhile
 export function useDevboxDirectory(
-  listFiles: Nullable<
-    (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
-  >,
+  listFiles: Nullable<(path: string) => Promise<DevboxFileEntry[]>>,
   dir: Nullable<string>
 ): { entries: DevboxFileEntry[]; loading: boolean; error: boolean } {
   const [listings, setListings] = useState<Record<string, Listing>>({})
@@ -237,7 +235,7 @@ export function useDevboxDirectory(
 
   useEffect(() => {
     if (!listFiles || !key) return
-    listFiles(key, { brief: true }).then(
+    listFiles(key).then(
       (entries) => setListings((cur) => settled(cur, key, { entries })),
       () =>
         setListings((cur) => settled(cur, key, { entries: [], error: true }))

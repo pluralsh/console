@@ -34,7 +34,6 @@ const (
 
 	configFile = "config.toml"
 	deviceFile = "device"
-	cacheDir   = "cache"
 	// stoppedFile marks a volume whose writer flushed and exited cleanly when the plugin shut down.
 	stoppedFile = "stopped"
 	// writerOOMScoreAdj has the kernel kill nearly anything else on the node before a writer: a killed writer
@@ -58,12 +57,15 @@ type Manager struct {
 	Storage        Storage
 	// ObjectStoreOptions are object_store settings for every writer, such as allow_http for an in-cluster endpoint.
 	ObjectStoreOptions map[string]string
-	// StateRoot holds each volume's config, cache and attached device, on the node's disk.
+	// StateRoot holds each volume's config and attached device, and the caches, on the node's disk.
 	StateRoot string
 	// SocketDir holds each writer's sockets and the device-creation mount. It must not propagate to the host,
 	// and its paths must fit a Unix socket address.
 	SocketDir string
 	Cache     CacheConfig
+	// ParkedCacheBytes bounds the disk the caches of volumes no longer staged here may hold, so a home staged
+	// here again starts with what it read last time. The least recently unstaged go first; 0 keeps none.
+	ParkedCacheBytes int64
 	// MountOptions are the ext4 mount's data options. Unstage trims free blocks, so discard isn't needed.
 	MountOptions string
 	Mountinfo    string
@@ -76,6 +78,8 @@ type Manager struct {
 	attach sync.Mutex
 	// writerExits counts writers that exited without being stopped.
 	writerExits atomic.Int64
+	// caches serializes evicting parked caches with a stage claiming its cache.
+	caches sync.Mutex
 }
 
 type process struct {
@@ -205,7 +209,7 @@ func (m *Manager) closeVolume(ctx context.Context, id string) error {
 			return os.RemoveAll(m.socketDir(id))
 		}
 		if exists(filepath.Join(m.stateDir(id), stoppedFile)) {
-			return errors.Join(os.RemoveAll(m.stateDir(id)), os.RemoveAll(m.socketDir(id)))
+			return errors.Join(m.removeState(id), os.RemoveAll(m.socketDir(id)))
 		}
 		// The writer died, or an earlier stop failed: reopen the database and close it cleanly. Whatever the dead
 		// writer hadn't flushed is lost, but the next node opens what it did.
@@ -227,7 +231,7 @@ func (m *Manager) closeVolume(ctx context.Context, id string) error {
 	if err := m.stopWriter(id, p); err != nil {
 		return err
 	}
-	return errors.Join(os.RemoveAll(m.stateDir(id)), os.RemoveAll(m.socketDir(id)))
+	return errors.Join(m.removeState(id), os.RemoveAll(m.socketDir(id)))
 }
 
 // flush makes the writer persist everything it acknowledged to object storage.
@@ -279,17 +283,18 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 	if err := os.RemoveAll(sock); err != nil {
 		return s, err
 	}
-	for _, dir := range []string{filepath.Join(state, cacheDir), sock} {
-		if err := os.MkdirAll(dir, 0o700); err != nil {
-			return s, err
-		}
+	if err := m.claimCache(id); err != nil {
+		return s, err
+	}
+	if err := os.MkdirAll(sock, 0o700); err != nil {
+		return s, err
 	}
 	if err := os.Remove(filepath.Join(state, stoppedFile)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return s, err
 	}
 	cfg := writerConfig{
 		StorageURL: m.Storage.VolumeURL(id),
-		CacheDir:   filepath.Join(state, cacheDir),
+		CacheDir:   m.cacheDir(id),
 		Cache:      m.Cache,
 		NBDSocket:  s.nbd,
 		NinePSock:  s.ninep,
@@ -538,6 +543,7 @@ func (m *Manager) DetachStale(ctx context.Context, root string) error {
 		})
 	}
 	wg.Wait()
+	m.evictCaches()
 	return errors.Join(errs...)
 }
 

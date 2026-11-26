@@ -74,6 +74,7 @@ type options struct {
 	nbdsMax        int
 	cacheDiskGB    float64
 	cacheMemoryGB  float64
+	parkedCacheGB  float64
 	mountOptions   string
 }
 
@@ -103,6 +104,7 @@ func main() {
 	flag.IntVar(&o.nbdsMax, "nbds-max", 128, "node: the NBD devices to ask for when loading the nbd module, 0 to leave it alone")
 	flag.Float64Var(&o.cacheDiskGB, "cache-disk-gb", 10, "node: each writer's disk cache")
 	flag.Float64Var(&o.cacheMemoryGB, "cache-memory-gb", 0.25, "node: each writer's memory cache")
+	flag.Float64Var(&o.parkedCacheGB, "parked-cache-gb", 20, "node: the disk the caches of volumes no longer staged here may hold in all, so a home staged here again starts warm; 0 keeps none")
 	flag.StringVar(&o.mountOptions, "mount-options", "", "node: the ext4 mount's data options")
 	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
@@ -219,6 +221,7 @@ func runNode(ctx context.Context, o *options, storage zerofs.Storage, log logr.L
 		StateRoot:          o.stateRoot,
 		SocketDir:          o.socketDir,
 		Cache:              zerofs.CacheConfig{DiskGB: o.cacheDiskGB, MemoryGB: o.cacheMemoryGB},
+		ParkedCacheBytes:   int64(o.parkedCacheGB * (1 << 30)),
 		MountOptions:       o.mountOptions,
 		Mountinfo:          o.mountinfo,
 		SysBlock:           "/sys/block",

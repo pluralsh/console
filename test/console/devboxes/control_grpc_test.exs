@@ -194,9 +194,11 @@ defmodule Console.Devboxes.Control.GrpcTest do
 
     test "a connection closed under the call is an interruption" do
       internal = GRPC.Status.internal()
-      for msg <- ["stream_error: :closed", "stream_error: {:closed, :einval}", ~s(stream_error: {:goaway, :no_error, ~c"The connection is going away."})] do
+      for msg <- ["stream_error: :closed", "stream_error: {:closed, :einval}", ~s(stream_error: {:goaway, :no_error, ~c"The connection is going away."}),
+                  ~s(stream_error: {:stream_error, :cancel, :"Stream reset by server."}), "stream_error: {:stream_error, :refused_stream, :x}"] do
         assert Grpc.result({:error, %GRPC.RPCError{status: internal, message: msg}}) == {:error, :interrupted}
       end
+      assert Grpc.result({:error, %GRPC.RPCError{status: GRPC.Status.unavailable(), message: "connection_error: :closed"}}) == {:error, :interrupted}
       assert Grpc.result({:error, %GRPC.RPCError{status: internal, message: "stream_error: {:stream_error, :internal_error}"}}) ==
         {:error, "stream_error: {:stream_error, :internal_error}"}
       assert {:error, %{extensions: %{code: "CONNECTION_INTERRUPTED"}}} = Console.Devboxes.Error.control({:error, :interrupted})

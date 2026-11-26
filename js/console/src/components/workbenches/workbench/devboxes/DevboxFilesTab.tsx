@@ -285,7 +285,6 @@ const TreeSC = styled.div(({ theme }) => ({
 
 const EntryNameSC = styled.div({
   display: 'flex',
-  marginLeft: '0.375rem',
   alignItems: 'center',
   flex: 1,
   minWidth: 0,

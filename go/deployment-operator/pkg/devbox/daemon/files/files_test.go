@@ -94,6 +94,29 @@ func TestMultiRepoChanges(t *testing.T) {
 	}
 }
 
+func TestListingTheHomeSkipsCheckoutStatus(t *testing.T) {
+	t.Setenv("GIT_CONFIG_GLOBAL", "/dev/null")
+	home := t.TempDir()
+	api := gittest.Repo(t, filepath.Join(home, "api"), map[string]string{"README.md": "one\n"})
+	gittest.Write(t, api, map[string]string{"README.md": "two\n"})
+	s := &Service{Home: home, Checkouts: checkouts{api}}
+
+	si := &statusIndex{ctx: context.Background(), cache: map[string]map[string]string{}}
+	root := &devboxv1.FileEntry{Path: api}
+	si.annotate(s, root)
+	if root.GetRepository() != "api" || len(si.cache) != 0 {
+		t.Fatalf("checkout entry %v; ran git status in %v", root, si.cache)
+	}
+
+	resp, err := s.List(context.Background(), &devboxv1.ListFilesRequest{Path: "~/api"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.GetEntries()) != 1 || resp.GetEntries()[0].GetGitStatus() != " M" {
+		t.Fatalf("entries in the checkout %v", resp.GetEntries())
+	}
+}
+
 func sum(b []byte) string {
 	h := sha256.Sum256(b)
 	return hex.EncodeToString(h[:])

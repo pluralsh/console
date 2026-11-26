@@ -390,11 +390,16 @@ zerofs:
   controller:
     resources: {}
   node:
-    # -- Each staged home's config and cache, on the node's data disk. Removed when the home is unstaged.
+    # -- Each staged home's config, removed when the home is unstaged, and every home's cache, on the node's data
+    # disk.
     stateDir: /var/lib/ate/zerofs
     # -- Each home's writer caches this much on disk and in memory. Both are per staged home, not per node.
     cacheDiskGB: 10
     cacheMemoryGB: 0.25
+    # -- The disk, in GB, that the caches of homes no longer staged on the node may hold in all, so a home that
+    # resumes there starts with what it read before rather than from the bucket. The least recently suspended
+    # go first; 0 keeps none. Counted as allocated blocks: a cache is sparse, often a third of its size.
+    parkedCacheGB: 20
     # -- NBD devices to ask for when the plugin loads the nbd module: the most homes one node can stage.
     nbdsMax: 128
     # -- nbd-client flags for every device.

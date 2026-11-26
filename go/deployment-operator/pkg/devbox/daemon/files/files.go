@@ -146,6 +146,10 @@ func (si *statusIndex) annotate(s *Service, e *devboxv1.FileEntry) {
 		return
 	}
 	e.Repository = filepath.Base(repo)
+	// a checkout has no status of its own, and listing the home would otherwise run git status in every one
+	if repo == e.GetPath() {
+		return
+	}
 	st, ok := si.cache[repo]
 	if !ok {
 		st = map[string]string{}

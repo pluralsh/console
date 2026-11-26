@@ -96,6 +96,11 @@ type Detector struct {
 	// SettledOffset settles in-flight entities and returns the log offset through which everything is settled.
 	SettledOffset func() uint64
 
+	// evalMu keeps evaluations, and so their events, in order. Emitting appends to the event log, which blocks
+	// while the home is hung, so it happens under evalMu only: mu must stay free for State, which heartbeats
+	// read to report that very failure.
+	evalMu sync.Mutex
+
 	mu           sync.Mutex
 	policy       Policy
 	leases       []*devboxv1.Lease
@@ -183,6 +188,8 @@ func (d *Detector) State() *devboxv1.IdleState {
 
 // Evaluate runs one evaluation and emits events. It's called on a ticker (and directly by tests).
 func (d *Detector) Evaluate() *devboxv1.IdleState {
+	d.evalMu.Lock()
+	defer d.evalMu.Unlock()
 	now := d.clock.Now()
 	var agent []*devboxv1.BusyReason
 	if d.src.Agent != nil {
@@ -205,7 +212,6 @@ func (d *Detector) Evaluate() *devboxv1.IdleState {
 	}
 
 	d.mu.Lock()
-	defer d.mu.Unlock()
 	p := d.policy
 	var reasons []*devboxv1.BusyReason
 	reasons = append(reasons, agent...)
@@ -237,11 +243,10 @@ func (d *Detector) Evaluate() *devboxv1.IdleState {
 		st.SuspendAt = timestamppb.New(d.idleSince.Add(p.GracePeriod))
 	}
 	d.state = st
+	changed := false
 	if key := stateKey(st); key != d.lastKey {
 		d.lastKey = key
-		if d.emit != nil {
-			d.emit.IdleState(proto.Clone(st).(*devboxv1.IdleState))
-		}
+		changed = true
 	}
 
 	var req *devboxv1.SuspendRequested
@@ -256,14 +261,20 @@ func (d *Detector) Evaluate() *devboxv1.IdleState {
 			req.IdleSince = timestamppb.New(d.idleSince)
 		}
 	}
-	if req != nil && d.emit != nil {
-		settle := d.SettledOffset
-		d.mu.Unlock()
+	settle := d.SettledOffset
+	d.mu.Unlock()
+
+	if d.emit == nil {
+		return proto.Clone(st).(*devboxv1.IdleState)
+	}
+	if changed {
+		d.emit.IdleState(proto.Clone(st).(*devboxv1.IdleState))
+	}
+	if req != nil {
 		if settle != nil {
 			req.SettledOffset = settle()
 		}
 		d.emit.SuspendRequested(req)
-		d.mu.Lock()
 	}
 	return proto.Clone(st).(*devboxv1.IdleState)
 }

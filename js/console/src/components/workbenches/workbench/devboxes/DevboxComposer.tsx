@@ -182,9 +182,7 @@ export function DevboxComposer({
   // instead of onSetConfigOption
   switchModels?: Nullable<string[]>
   // completes `@path` mentions against the instance's files
-  listFiles?: Nullable<
-    (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
-  >
+  listFiles?: Nullable<(path: string) => Promise<DevboxFileEntry[]>>
   // searches beneath the directory being completed once a name is typed;
   // without it, names are matched against the directory's listing
   searchFiles?: Nullable<

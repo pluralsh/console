@@ -189,7 +189,7 @@ describe('DevboxComposer file mentions', () => {
 
     fireEvent.keyDown(prompt, { key: 'Enter' })
     expect(valueOf(prompt)).toBe('look at @src/')
-    expect(listFiles).toHaveBeenLastCalledWith('src', { brief: true })
+    expect(listFiles).toHaveBeenLastCalledWith('src')
 
     await screen.findByText('main.go')
     fireEvent.keyDown(prompt, { key: 'ArrowDown' })

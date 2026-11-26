@@ -20,15 +20,19 @@ describe('cachedFiles', () => {
       repository: null,
       gitStatus: null,
     }
+    const variables: Record<string, unknown>[] = []
     const client = new ApolloClient({
       cache: new InMemoryCache(),
-      link: new ApolloLink(() =>
-        Observable.of({ data: { devboxFiles: [entry] } })
-      ),
+      link: new ApolloLink((op) => {
+        variables.push(op.variables)
+        return Observable.of({ data: { devboxFiles: [entry] } })
+      }),
     })
     const api = createWorkspaceApi(client, 'i1')
     expect(api.cachedFiles?.('~')).toBeNull()
     await api.listFiles?.('~')
+    // the tree only shows names and types, which the instance lists from memory
+    expect(variables).toEqual([{ instanceId: 'i1', path: null, brief: true }])
     expect(api.cachedFiles?.('~')?.map((e) => e.name)).toEqual(['a.ts'])
     expect(api.cachedFiles?.('/home/dev/src')).toBeNull()
   })
