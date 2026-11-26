@@ -10,6 +10,7 @@ import {
   DevboxThreadStage,
   DevboxThreadStatus,
 } from 'generated/graphql'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export type DevboxThreadAction =
@@ -97,11 +98,15 @@ export function threadState(
 const FILE_MENTION_TAG =
   /<plrl-devbox-file\s+path="([^"]*)"\s*(?:\/>|><\/plrl-devbox-file>)/g
 
-// prompt text with file mention tags shown as @name
+// prompt text with file mention tags shown as @name, and the other chips
+// (picked elements) as their labels
 export const promptPreview = (text: string) =>
-  text.replace(
-    FILE_MENTION_TAG,
-    (_, path: string) => `@${path.replace(/\/$/, '').split('/').pop() || path}`
+  prettifyPrompt(
+    text.replace(
+      FILE_MENTION_TAG,
+      (_, path: string) =>
+        `@${path.replace(/\/$/, '').split('/').pop() || path}`
+    )
   )
 
 export const threadTitle = (

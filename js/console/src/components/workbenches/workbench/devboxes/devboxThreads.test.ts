@@ -25,6 +25,16 @@ describe('threadTitle', () => {
       })
     ).toBe('explain the readme in @README.md and @src')
   })
+
+  it('shows picked elements by their label', () => {
+    expect(
+      threadTitle({
+        id: 't',
+        title:
+          'make <plrl-devbox-element url="http://localhost:3000/" selector="#save" tag="button" text="Save"></plrl-devbox-element> blue',
+      })
+    ).toBe('make @<button> Save blue')
+  })
 })
 
 const thread = (

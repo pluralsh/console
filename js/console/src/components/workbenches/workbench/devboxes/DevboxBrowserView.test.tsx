@@ -3,6 +3,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ThemeProvider } from 'styled-components'
 
+import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
+import { act } from 'react'
 import { DevboxBrowserView, rfbConstructor } from './DevboxBrowserTab'
 import { DevboxWorkspaceApi } from './devboxWorkspaceApi'
 
@@ -41,6 +43,9 @@ vi.mock('@novnc/novnc/lib/rfb', () => ({
 
 const voxl = vi.hoisted(() => ({
   urls: [] as { url: string; protocols: string[] }[],
+  canPick: true,
+  picks: [] as boolean[],
+  onPick: null as Nullable<(result: unknown) => void>,
 }))
 
 vi.mock('./voxlClient', () => ({
@@ -49,13 +54,30 @@ vi.mock('./voxlClient', () => ({
     _target: HTMLElement,
     url: string,
     protocols: string[],
-    { onConnect }: { onConnect: () => void }
+    {
+      onConnect,
+      onPick,
+    }: {
+      onConnect: (f: { pick: boolean }) => void
+      onPick: (result: unknown) => void
+    }
   ) => {
     voxl.urls.push({ url, protocols })
-    onConnect()
-    return { disconnect() {}, focus() {} }
+    voxl.onPick = onPick
+    onConnect({ pick: voxl.canPick })
+    return {
+      disconnect() {},
+      focus() {},
+      pick: (on: boolean) => voxl.picks.push(on),
+    }
   },
 }))
+
+const voxlTicket = {
+  url: 'https://console.example.com/ext/devbox/streams/s1',
+  token: 'tok',
+  subprotocols: ['voxl'],
+}
 
 const openStream = vi.fn(
   async (): Promise<{
@@ -71,6 +93,7 @@ const openStream = vi.fn(
 const api = { openStream } as unknown as DevboxWorkspaceApi
 
 const onMove = vi.fn()
+const onPick = vi.fn()
 
 function renderView({
   view = api,
@@ -83,12 +106,15 @@ function renderView({
 } = {}) {
   return render(
     <ThemeProvider theme={styledThemeDark}>
-      <DevboxBrowserView
-        api={view}
-        live={live}
-        placement={placement}
-        onMove={onMove}
-      />
+      <SimpleToastProvider>
+        <DevboxBrowserView
+          api={view}
+          live={live}
+          placement={placement}
+          onMove={onMove}
+          onPick={onPick}
+        />
+      </SimpleToastProvider>
     </ThemeProvider>
   )
 }
@@ -100,8 +126,11 @@ describe('DevboxBrowserView', () => {
     rfb.instances = []
     rfb.connects = true
     voxl.urls = []
+    voxl.canPick = true
+    voxl.picks = []
     openStream.mockClear()
     onMove.mockClear()
+    onPick.mockClear()
     requestFullscreen.mockClear()
     HTMLElement.prototype.requestFullscreen = requestFullscreen
   })
@@ -135,6 +164,55 @@ describe('DevboxBrowserView', () => {
     await waitFor(() =>
       expect(screen.queryByText(/Starting the box's browser/)).toBeNull()
     )
+  })
+
+  it('picks an element in the page for the prompt', async () => {
+    openStream.mockResolvedValueOnce(voxlTicket)
+    renderView()
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Select an element' })
+    )
+    expect(voxl.picks).toEqual([true])
+    expect(screen.getByText(/Click an element to add it/)).toBeTruthy()
+
+    const element = {
+      url: 'http://localhost:3000/',
+      selector: 'button[data-testid="save"]',
+      tag: 'button',
+      text: 'Save',
+    }
+    act(() => voxl.onPick?.({ element }))
+    expect(onPick).toHaveBeenCalledWith(element)
+    expect(screen.queryByText(/Click an element to add it/)).toBeNull()
+    expect(
+      screen.getByRole('button', { name: 'Select an element' })
+    ).toBeTruthy()
+  })
+
+  it('stops picking when asked, and says when a pick fails', async () => {
+    openStream.mockResolvedValueOnce(voxlTicket)
+    renderView()
+    const select = await screen.findByRole('button', {
+      name: 'Select an element',
+    })
+    fireEvent.click(select)
+    fireEvent.click(screen.getByRole('button', { name: 'Stop selecting' }))
+    expect(voxl.picks).toEqual([true, false])
+    act(() => voxl.onPick?.({ cancelled: true }))
+    expect(onPick).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Select an element' }))
+    act(() => voxl.onPick?.({ error: 'the browser has no open tab' }))
+    expect(await screen.findByText(/the browser has no open tab/)).toBeTruthy()
+    expect(onPick).not.toHaveBeenCalled()
+  })
+
+  it('offers no picking where the box streams over VNC', async () => {
+    renderView()
+    await waitFor(() => expect(rfb.instances).toHaveLength(1))
+    expect(
+      screen.queryByRole('button', { name: 'Select an element' })
+    ).toBeNull()
   })
 
   it('says why the browser could not be reached, and reconnects', async () => {

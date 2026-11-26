@@ -42,6 +42,7 @@ import { useDevboxPresence } from './useDevboxPresence'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 import { useResumeOnOpen } from './useResumeOnOpen'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
+import { addToPrompt } from './devboxPromptInserts'
 
 export function DevboxInstanceView({
   instanceId,
@@ -255,6 +256,11 @@ export function DevboxInstanceView({
             live={live}
             placement="main"
             onMove={browserToPanel}
+            onPick={(element) => {
+              // back beside the conversation, where the prompt takes the element
+              addToPrompt(instance.id, element)
+              browserToPanel()
+            }}
           />
         ) : live && change ? (
           <DevboxChangesViewer

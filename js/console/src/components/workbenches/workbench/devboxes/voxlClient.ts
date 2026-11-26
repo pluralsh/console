@@ -2,18 +2,33 @@
 // display as H.264 over one WebSocket: binary messages start with a type byte,
 // text messages are JSON from the server and short comma-separated commands from
 // the viewer. Adapted from voxl's web client (web/src), keeping video, cursor,
-// pointer, keyboard and clipboard text; audio, files, touch and resizing are off
-// on the box.
+// pointer, keyboard, clipboard text and dynamic resolution; audio, files and
+// touch are off on the box.
 
 export const VOXL_SUBPROTOCOL = 'voxl'
 
 const BIN_VIDEO = 0x01
 const BIN_CURSOR = 0x03
 const VIDEO_HEADER_BYTES = 16
+const RESIZE_DEBOUNCE_MS = 250
 
 type Stripe = [y: number, h: number]
 type ServerMessage =
-  | { t: 'hello'; w: number; h: number; stripes?: Stripe[] }
+  | {
+      t: 'hello'
+      w: number
+      h: number
+      stripes?: Stripe[]
+      resize?: { scale: number }
+      // the daemon picks elements on this stream
+      pick?: boolean
+    }
+  | {
+      t: 'pick'
+      element?: VoxlPickedElement
+      error?: string
+      cancelled?: boolean
+    }
   | { t: 'ping'; s: number }
   | { t: 'clip'; d: string }
   | { t: 'close' }
@@ -29,10 +44,32 @@ const cmd = {
   video: (on: boolean) => `v,${on ? 1 : 0}`,
   audio: (on: boolean) => `au,${on ? 1 : 0}`,
   keyframe: 'kf',
+  resize: (w: number, h: number) => `sz,${w},${h}`,
+  pick: (on: boolean) => `pk,${on ? 1 : 0}`,
   pong: (sent: number) => `po,${sent}`,
 }
 
-export type VoxlClient = { disconnect: () => void; focus: () => void }
+// an element picked in the box's browser (the daemon's inspect mode)
+export type VoxlPickedElement = {
+  url: string
+  title?: string
+  selector: string
+  tag: string
+  text?: string
+  html?: string
+}
+
+export type VoxlPickResult =
+  | { element: VoxlPickedElement }
+  | { error: string }
+  | { cancelled: true }
+
+export type VoxlClient = {
+  disconnect: () => void
+  focus: () => void
+  // starts or stops picking an element; the result comes to onPick
+  pick: (on: boolean) => void
+}
 
 export function webCodecsSupported() {
   return typeof window !== 'undefined' && 'VideoDecoder' in window
@@ -45,7 +82,12 @@ export function connectVoxl(
   {
     onConnect,
     onDisconnect,
-  }: { onConnect: () => void; onDisconnect: () => void }
+    onPick,
+  }: {
+    onConnect: (features: { pick: boolean }) => void
+    onDisconnect: () => void
+    onPick?: (result: VoxlPickResult) => void
+  }
 ): VoxlClient {
   if (!webCodecsSupported())
     throw new Error("this browser can't decode the box's video (WebCodecs)")
@@ -86,6 +128,7 @@ export function connectVoxl(
   let ctx: CanvasRenderingContext2D | null = null
   let closed = false
   let wantVideo = !document.hidden
+  let picking = false
   // the clipboard text last exchanged, so a paste isn't echoed back
   let lastClip: Nullable<string> = null
 
@@ -108,7 +151,27 @@ export function connectVoxl(
     surface.style.height = `${desk.h * scale}px`
     cursor.apply()
   }
-  const observer = new ResizeObserver(layout)
+  // Dynamic resolution: the box's screen follows this view, so pages lay out at
+  // its size instead of being letterboxed. 0 until a hello says it's on.
+  let resizeScale = 0
+  let lastSize = ''
+  let resizeTimer: ReturnType<typeof setTimeout> | undefined
+  const requestSize = () => {
+    const { width, height } = target.getBoundingClientRect()
+    if (!resizeScale || !width || !height) return
+    const size = cmd.resize(
+      Math.round(width * resizeScale),
+      Math.round(height * resizeScale)
+    )
+    if (size === lastSize) return
+    lastSize = size
+    send(size)
+  }
+  const observer = new ResizeObserver(() => {
+    layout()
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(requestSize, RESIZE_DEBOUNCE_MS)
+  })
   observer.observe(target)
 
   ws.onopen = () => {
@@ -145,6 +208,16 @@ export function connectVoxl(
         lastClip = m.d
         void navigator.clipboard?.writeText(m.d).catch(() => {})
         break
+      case 'pick':
+        picking = false
+        onPick?.(
+          m.element
+            ? { element: m.element }
+            : m.error
+              ? { error: m.error }
+              : { cancelled: true }
+        )
+        break
       case 'hello': {
         const first = !desk.w
         desk.w = m.w
@@ -156,7 +229,12 @@ export function connectVoxl(
         ctx = canvas.getContext('2d', { alpha: false, desynchronized: true })
         video.build(m.stripes?.length ? m.stripes : [[0, m.h]])
         layout()
-        if (first) onConnect()
+        resizeScale = m.resize?.scale ?? 0
+        if (first) {
+          lastSize = ''
+          requestSize()
+          onConnect({ pick: !!m.pick })
+        }
         break
       }
     }
@@ -265,6 +343,12 @@ export function connectVoxl(
   }
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.isComposing) return
+    // Escape leaves inspect mode instead of reaching the page
+    if (picking && e.key === 'Escape') {
+      e.preventDefault()
+      setPicking(false)
+      return
+    }
     const ks = keysymOf(e, isMac)
     if (!ks) return
     const accel = isMac ? e.metaKey : e.ctrlKey
@@ -314,6 +398,13 @@ export function connectVoxl(
     kbd.value = ''
   }
 
+  const setPicking = (on: boolean) => {
+    if (!desk.w || on === picking) return
+    picking = on
+    send(cmd.pick(on))
+    if (on) kbd.focus({ preventScroll: true })
+  }
+
   const onVisibility = () => {
     wantVideo = !document.hidden
     if (wantVideo) video.reset()
@@ -342,6 +433,7 @@ export function connectVoxl(
       closed = true
       releaseAll()
       clearTimeout(pendingPaste?.timer)
+      clearTimeout(resizeTimer)
       document.removeEventListener('visibilitychange', onVisibility)
       observer.disconnect()
       ws.close()
@@ -349,6 +441,7 @@ export function connectVoxl(
       surface.remove()
     },
     focus: () => kbd.focus({ preventScroll: true }),
+    pick: setPicking,
   }
 }
 

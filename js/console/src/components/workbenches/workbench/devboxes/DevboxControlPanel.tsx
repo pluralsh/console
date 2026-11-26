@@ -59,6 +59,7 @@ import { pullRequestsStatus, useDevboxPullRequests } from './devboxPullRequests'
 import { DevboxPullRequestsTab } from './DevboxPullRequestsTab'
 import { DevboxTerminalTab } from './DevboxTerminalTab'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
+import { addToPrompt } from './devboxPromptInserts'
 
 const SIDE_PANEL_TYPE: SidePanel = 'devbox'
 const OPEN_KEY = 'plural-devbox-panel-open'
@@ -406,6 +407,9 @@ export function DevboxPanelContent() {
                 live={live}
                 placement="panel"
                 onMove={browserToMain}
+                onPick={(element) =>
+                  instanceId && addToPrompt(instanceId, element)
+                }
               />
             ))}
         </PanelBodySC>

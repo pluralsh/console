@@ -115,14 +115,59 @@ describe('connectVoxl', () => {
   const connect = () => {
     const onConnect = vi.fn()
     const onDisconnect = vi.fn()
+    const onPick = vi.fn()
     const client = connectVoxl(target, 'wss://console/streams/s1', ['voxl'], {
       onConnect,
       onDisconnect,
+      onPick,
     })
     const ws = FakeSocket.instances[0]
     ws.open()
-    return { client, ws, onConnect, onDisconnect }
+    return { client, ws, onConnect, onDisconnect, onPick }
   }
+
+  it('says whether the box can pick elements', () => {
+    const plain = connect()
+    plain.ws.message(JSON.stringify({ t: 'hello', w: 1280, h: 800 }))
+    expect(plain.onConnect).toHaveBeenCalledWith({ pick: false })
+    plain.client.disconnect()
+    FakeSocket.instances = []
+    const picker = connect()
+    picker.ws.message(
+      JSON.stringify({ t: 'hello', w: 1280, h: 800, pick: true })
+    )
+    expect(picker.onConnect).toHaveBeenCalledWith({ pick: true })
+  })
+
+  it('picks an element and hands it on', () => {
+    const { client, ws, onPick } = connect()
+    ws.message(JSON.stringify({ t: 'hello', w: 1280, h: 800, pick: true }))
+    client.pick(true)
+    expect(ws.sent).toContain('pk,1')
+    const element = { url: 'http://localhost:3000/', selector: '#save' }
+    ws.message(JSON.stringify({ t: 'pick', element }))
+    expect(onPick).toHaveBeenCalledWith({ element })
+    ws.message(JSON.stringify({ t: 'pick', error: 'no open tab' }))
+    expect(onPick).toHaveBeenLastCalledWith({ error: 'no open tab' })
+  })
+
+  it('leaves picking on Escape instead of sending it to the page', () => {
+    const { client, ws, onPick } = connect()
+    ws.message(JSON.stringify({ t: 'hello', w: 1280, h: 800, pick: true }))
+    client.pick(true)
+    const kbd = target.querySelector('textarea')!
+    kbd.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape' })
+    )
+    expect(ws.sent).toContain('pk,0')
+    expect(ws.sent).not.toContain('k,65307,1')
+    ws.message(JSON.stringify({ t: 'pick', cancelled: true }))
+    expect(onPick).toHaveBeenCalledWith({ cancelled: true })
+    kbd.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape' })
+    )
+    expect(ws.sent).toContain('k,65307,1')
+  })
 
   it('connects with the ticket, says hello, and answers pings', () => {
     const { ws, onConnect } = connect()
@@ -135,6 +180,24 @@ describe('connectVoxl', () => {
     expect((target.firstChild as HTMLElement).style.width).toBe('640px')
     ws.message(JSON.stringify({ t: 'ping', s: 42 }))
     expect(ws.sent).toContain('po,42')
+  })
+
+  it('asks for a screen the size of the view when the box resizes', () => {
+    const { ws } = connect()
+    ws.message(
+      JSON.stringify({ t: 'hello', w: 2560, h: 1600, resize: { scale: 1 } })
+    )
+    expect(ws.sent).toContain('sz,640,400')
+    ws.message(
+      JSON.stringify({ t: 'hello', w: 640, h: 400, resize: { scale: 1 } })
+    )
+    expect(ws.sent.filter((s) => s.startsWith('sz,'))).toEqual(['sz,640,400'])
+  })
+
+  it("doesn't ask for a size when the box can't resize", () => {
+    const { ws } = connect()
+    ws.message(JSON.stringify({ t: 'hello', w: 1280, h: 800 }))
+    expect(ws.sent.some((s) => s.startsWith('sz,'))).toBe(false)
   })
 
   it('decodes frames and acks them once painted', () => {

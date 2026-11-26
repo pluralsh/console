@@ -284,6 +284,10 @@ func (b *Browser) start(width, height int32, url string) error {
 		b.log.Warn("browser didn't start", "err", err)
 		return err
 	}
+	if b.voxl {
+		// voxl shrinks the screen to each viewer's window and Chromium follows (ServeStream)
+		width, height = maxScreenWidth, maxScreenHeight
+	}
 	deadline := time.Now().Add(startTimeout)
 	display := strings.TrimPrefix(b.opts.Display, ":")
 	sock := filepath.Join("/tmp/.X11-unix", "X"+display)
@@ -310,10 +314,11 @@ func (b *Browser) start(width, height int32, url string) error {
 	_ = os.Remove(filepath.Join(profile, "SingletonLock"))
 	args := make([]string, 0, 14+len(b.opts.ExtraFlags))
 	// The box's sandbox (gVisor) is the isolation boundary, and Chromium's own sandbox can't start inside it.
+	// The window is a pixel past the screen, which Chromium would otherwise fall a pixel short of (fitWindows).
 	args = append(args, b.opts.Chromium, "--no-sandbox",
 		"--no-first-run", "--no-default-browser-check", "--disable-dev-shm-usage", "--disable-background-networking",
 		"--remote-debugging-address=127.0.0.1", "--remote-debugging-port="+strconv.Itoa(b.internalCDPPort()),
-		"--user-data-dir="+profile, fmt.Sprintf("--window-size=%d,%d", width, height), "--window-position=0,0", "--start-maximized",
+		"--user-data-dir="+profile, fmt.Sprintf("--window-size=%d,%d", width+1, height+1), "--window-position=0,0", "--start-maximized",
 	)
 	args = append(args, b.opts.ExtraFlags...)
 	if url == "" {
@@ -351,7 +356,10 @@ func (b *Browser) spawnStreamer() (started, error) {
 	}
 	return b.spawnEnv("voxl", []string{"VOXL_PASSWORD=" + b.voxlPassword}, b.opts.Voxl,
 		"--addr=127.0.0.1", "--port="+strconv.Itoa(b.opts.VoxlPort), "--max-kbps="+strconv.Itoa(voxlMaxKbps),
-		"--audio-enabled=false", "--microphone-enabled=false", "--file-transfers=none")
+		"--audio-enabled=false", "--microphone-enabled=false", "--file-transfers=none",
+		// one screen pixel per CSS pixel of the viewer: pages lay out at the viewer's size without
+		// doubling the stream on HiDPI displays
+		"--enable-resize", "--resize-scale=1")
 }
 
 // watch tears the stack down when one of its processes dies.

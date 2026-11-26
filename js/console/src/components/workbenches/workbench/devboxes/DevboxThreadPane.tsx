@@ -7,6 +7,7 @@ import {
   ReturnIcon,
 } from '@pluralsh/design-system'
 import { DevboxFileOpenContext } from 'components/ai/chatbot/DevboxFileChip'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -28,7 +29,7 @@ import {
   usePromptDevboxThreadMutation,
   useSetDevboxThreadConfigOptionMutation,
 } from 'generated/graphql'
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_DEVBOX_POSITION_QUERY_PARAM,
@@ -203,12 +204,27 @@ export function DevboxThreadPane({
     thread.status === DevboxThreadStatus.Closed ||
     thread.status === DevboxThreadStatus.Deleted
   const subagent = thread.kind === DevboxThreadKind.Subagent
-  const { listFiles, searchFiles } = useDevboxWorkspaceApi(
+  const { listFiles, searchFiles, openStream } = useDevboxWorkspaceApi(
     live ? instance.id : null
   )
 
   const sessionError = sessionId ? timeline.errors[sessionId] : undefined
-  const { openFile } = useDevboxPanel()
+  const { openFile, isOpen, tab, browserToMain } = useDevboxPanel()
+  const { featureFlags } = use(FeatureFlagContext)
+  // a vnc ticket with a url opens it in the box's browser, which is then shown
+  // where it already is, or in the main view
+  const openUrl =
+    featureFlags.DevboxBrowser && instance.devbox?.browser && openStream
+      ? (url: string) => {
+          openStream({ kind: 'vnc', url }).catch((e) =>
+            popToast({
+              content: `Couldn't open ${url}: ${(e as Error).message}`,
+              severity: 'danger',
+            })
+          )
+          if (!(isOpen && tab === 'browser')) browserToMain()
+        }
+      : undefined
 
   return (
     <PaneSC>
@@ -230,7 +246,7 @@ export function DevboxThreadPane({
         </Flex>
       )}
       <DevboxFileOpenContext
-        value={live ? { openFile, cwd: thread.cwd } : null}
+        value={live ? { openFile, cwd: thread.cwd, openUrl } : null}
       >
         <ScrollSC ref={scrollRef}>
           <ContentSC ref={contentRef}>
@@ -306,6 +322,7 @@ export function DevboxThreadPane({
           />
           <DevboxComposer
             draftKey={thread.id}
+            insertsFor={live ? instance.id : null}
             commands={commands}
             configOptions={thread.configOptions}
             autonomyPolicy={instance.devbox?.autonomy}

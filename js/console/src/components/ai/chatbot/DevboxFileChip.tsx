@@ -1,5 +1,6 @@
 import { FolderIcon, Tooltip } from '@pluralsh/design-system'
 import { FileTypeIcon } from 'components/utils/fileTree'
+import { SelectElementIcon } from 'components/utils/icons/SelectElementIcon'
 import { InlineA } from 'components/utils/typography/Text'
 import escape from 'lodash/escape'
 import { createContext, ReactNode, useContext } from 'react'
@@ -7,16 +8,22 @@ import type { ExtraProps } from 'react-markdown'
 import styled from 'styled-components'
 import { ChipBody } from './input/autocomplete/PlrlChipMdRenderers'
 
-// devbox prompts reference workspace paths with
-// <plrl-devbox-file path="/home/plural/repo/main.go"></plrl-devbox-file>; a trailing `/` marks a directory
-export const DEVBOX_FILE_TAG = 'plrl-devbox-file'
-export const DEVBOX_FILE_ATTRIBUTES = ['path']
+import { DEVBOX_ELEMENT_TAG, DEVBOX_FILE_TAG, devboxChip } from './devboxChips'
+
+export {
+  DEVBOX_ELEMENT_ATTRIBUTES,
+  DEVBOX_ELEMENT_TAG,
+  DEVBOX_FILE_ATTRIBUTES,
+  DEVBOX_FILE_TAG,
+} from './devboxChips'
 
 // opens a path in the devbox files panel, unset outside a devbox transcript;
-// `cwd` is the agent's working directory, which its relative links resolve against
+// `cwd` is the agent's working directory, which its relative links resolve against.
+// `openUrl` opens a url in the box's browser, set when the box runs one.
 export type DevboxFileOpener = {
   openFile: (path: string) => void
   cwd?: Nullable<string>
+  openUrl?: (url: string) => void
 }
 
 export const DevboxFileOpenContext =
@@ -60,17 +67,49 @@ export function devboxLinkPath(
   return `/${parts.join('/')}${directory ? '/' : ''}`
 }
 
-// a markdown link that opens workspace paths in the devbox files panel
+const LOOPBACK_HOST =
+  /^(localhost|[^/]+\.localhost|127(\.\d{1,3}){3}|0\.0\.0\.0|\[::1?\])$/i
+
+// the url to open in the box's browser for a link to a server on the box's own
+// loopback, or null for any other link. 0.0.0.0 is a bind address Chromium
+// refuses to navigate to, so it's opened as localhost.
+export function devboxLocalUrl(href: Nullable<string>): Nullable<string> {
+  if (!href) return null
+  let url: URL
+  try {
+    url = new URL(href)
+  } catch {
+    return null
+  }
+  if (!/^https?:$/.test(url.protocol) || !LOOPBACK_HOST.test(url.hostname))
+    return null
+  if (url.hostname === '0.0.0.0' || url.hostname === '[::]')
+    url.hostname = 'localhost'
+  return url.toString()
+}
+
+// a markdown link that opens workspace paths in the devbox files panel, and
+// the box's own servers in its browser
 export function DevboxMarkdownLink({
   href,
   children,
 }: { href?: string; children?: ReactNode } & ExtraProps) {
   const opener = useContext(DevboxFileOpenContext)
-  const path = opener && devboxLinkPath(href, opener.cwd)
+  const local = opener?.openUrl && devboxLocalUrl(href)
+  const path = !local && opener && devboxLinkPath(href, opener.cwd)
 
   return (
     <InlineA
       href={href}
+      {...(local && {
+        title: "Open in the box's browser",
+        target: undefined,
+        onClick: (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          opener?.openUrl?.(local)
+        },
+      })}
       {...(path && {
         title: path,
         target: undefined,
@@ -154,10 +193,56 @@ function DevboxCommandChip({
   )
 }
 
+// an element picked in the box's browser; opens its page there when it can
+function DevboxElementChip({
+  url,
+  selector,
+  tag,
+  text,
+}: {
+  url?: string
+  selector?: string
+  tag?: string
+  text?: string
+  children?: ReactNode
+} & ExtraProps) {
+  const openUrl = useContext(DevboxFileOpenContext)?.openUrl
+  const chip = devboxChip(DEVBOX_ELEMENT_TAG, { url, selector, tag, text })
+  if (!chip) return null
+  const local = openUrl && devboxLocalUrl(url)
+  const body = (
+    <ChipBody icon={<SelectElementIcon size={12} />}>{chip.label}</ChipBody>
+  )
+
+  return (
+    <Tooltip
+      label={<TooltipLinesSC>{chip.title}</TooltipLinesSC>}
+      placement="top"
+    >
+      {local ? (
+        <ChipButtonSC
+          type="button"
+          onClick={() => openUrl(local)}
+        >
+          {body}
+        </ChipButtonSC>
+      ) : (
+        <span>{body}</span>
+      )}
+    </Tooltip>
+  )
+}
+
 export const devboxFileChipComponents = {
   [DEVBOX_FILE_TAG]: DevboxFileChip,
+  [DEVBOX_ELEMENT_TAG]: DevboxElementChip,
   [DEVBOX_COMMAND_TAG]: DevboxCommandChip,
 }
+
+const TooltipLinesSC = styled.span({
+  whiteSpace: 'pre-line',
+  wordBreak: 'break-all',
+})
 
 const CommandSC = styled.span(({ theme }) => ({
   fontFamily: theme.fontFamilies.mono,

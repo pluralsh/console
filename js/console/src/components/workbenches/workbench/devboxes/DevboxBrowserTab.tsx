@@ -9,6 +9,8 @@ import {
   ShrinkIcon,
   Spinner,
 } from '@pluralsh/design-system'
+import { SelectElementIcon } from 'components/utils/icons/SelectElementIcon'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
@@ -18,14 +20,24 @@ import {
   DevboxWorkspaceApi,
   ticketSubprotocols,
 } from './devboxWorkspaceApi'
-import { connectVoxl, VOXL_SUBPROTOCOL } from './voxlClient'
+import {
+  connectVoxl,
+  VOXL_SUBPROTOCOL,
+  VoxlPickedElement,
+  VoxlPickResult,
+} from './voxlClient'
 
 type VncState =
   | { kind: 'connecting' }
-  | { kind: 'connected' }
+  // pick: the stream can pick elements in the page (voxl boxes)
+  | { kind: 'connected'; pick?: boolean }
   | { kind: 'disconnected'; error?: string }
 type RfbClient = RFB & { focus?: (options?: FocusOptions) => void }
-type BrowserClient = { disconnect: () => void; focus: () => void }
+type BrowserClient = {
+  disconnect: () => void
+  focus: () => void
+  pick?: (on: boolean) => void
+}
 
 export type DevboxBrowserPlacement = 'panel' | 'main'
 
@@ -35,11 +47,14 @@ export function DevboxBrowserView({
   live,
   placement,
   onMove,
+  onPick,
 }: {
   api: DevboxWorkspaceApi
   live: boolean
   placement: DevboxBrowserPlacement
   onMove: () => void
+  // an element picked in the page, for the prompt
+  onPick?: (element: VoxlPickedElement) => void
 }) {
   return (
     <ViewSC $placement={placement}>
@@ -58,6 +73,7 @@ export function DevboxBrowserView({
           openStream={api.openStream}
           placement={placement}
           onMove={onMove}
+          onPick={onPick}
         />
       )}
     </ViewSC>
@@ -69,14 +85,16 @@ export function DevboxBrowserView({
 async function connectBrowser(
   target: HTMLElement,
   openStream: NonNullable<DevboxWorkspaceApi['openStream']>,
-  onState: (state: VncState) => void
+  onState: (state: VncState) => void,
+  onPick: (result: VoxlPickResult) => void
 ): Promise<BrowserClient> {
   const ticket = await openStream({ kind: 'vnc' })
   const protocols = ticketSubprotocols(ticket)
   if (protocols.includes(VOXL_SUBPROTOCOL))
     return connectVoxl(target, devboxStreamSocketUrl(ticket), protocols, {
-      onConnect: () => onState({ kind: 'connected' }),
+      onConnect: ({ pick }) => onState({ kind: 'connected', pick }),
       onDisconnect: () => onState({ kind: 'disconnected' }),
+      onPick,
     })
   // lib/rfb is CommonJS, and the production build hands its whole exports
   // object back as the default
@@ -110,10 +128,12 @@ function DevboxVnc({
   openStream,
   placement,
   onMove,
+  onPick,
 }: {
   openStream: NonNullable<DevboxWorkspaceApi['openStream']>
   placement: DevboxBrowserPlacement
   onMove: () => void
+  onPick?: (element: VoxlPickedElement) => void
 }) {
   const frameRef = useRef<HTMLDivElement>(null)
   const targetRef = useRef<HTMLDivElement>(null)
@@ -121,14 +141,36 @@ function DevboxVnc({
   const [state, setState] = useState<VncState>({ kind: 'connecting' })
   const [fullscreen, setFullscreen] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const [picking, setPicking] = useState(false)
+  const { popToast } = useSimpleToast()
+  const picked = useRef({ onPick, popToast })
+  useEffect(() => {
+    picked.current = { onPick, popToast }
+  })
 
   useEffect(() => {
     let disposed = false
     const target = targetRef.current
     if (target)
-      connectBrowser(target, openStream, (s) => {
-        if (!disposed) setState(s)
-      })
+      connectBrowser(
+        target,
+        openStream,
+        (s) => {
+          if (disposed) return
+          setState(s)
+          if (s.kind !== 'connected') setPicking(false)
+        },
+        (result) => {
+          if (disposed) return
+          setPicking(false)
+          if ('element' in result) picked.current.onPick?.(result.element)
+          else if ('error' in result)
+            picked.current.popToast({
+              content: `Couldn't pick the element: ${result.error}`,
+              severity: 'danger',
+            })
+        }
+      )
         .then((client) => {
           if (disposed) client.disconnect()
           else clientRef.current = client
@@ -161,10 +203,33 @@ function DevboxVnc({
     void frame.requestFullscreen?.()?.then(() => clientRef.current?.focus())
   }
   const fullscreenLabel = fullscreen ? 'Exit fullscreen' : 'View fullscreen'
+  const canPick =
+    !!onPick && state.kind === 'connected' && !!state.pick && !fullscreen
+  const togglePicking = () => {
+    const client = clientRef.current
+    if (!client?.pick) return
+    client.pick(!picking)
+    setPicking(!picking)
+    client.focus()
+  }
 
   return (
     <>
       <ToolbarSC>
+        {canPick && (
+          <IconFrame
+            clickable
+            selected={picking}
+            textValue={picking ? 'Stop selecting' : 'Select an element'}
+            icon={<SelectElementIcon />}
+            tooltip={
+              picking
+                ? 'Stop selecting (Esc)'
+                : 'Select an element to add to your prompt'
+            }
+            onClick={togglePicking}
+          />
+        )}
         {placement === 'main' ? (
           <Button
             small
@@ -197,6 +262,13 @@ function DevboxVnc({
         $placement={placement}
       >
         <VncSC ref={targetRef} />
+        {picking && (
+          <PickHintSC>
+            <CaptionP $color="text">
+              Click an element to add it to your prompt · Esc to cancel
+            </CaptionP>
+          </PickHintSC>
+        )}
         {fullscreen && (
           <FullscreenActionsSC>
             <IconFrame
@@ -294,6 +366,21 @@ const VncSC = styled.div({
   minWidth: 0,
   overflow: 'hidden',
 })
+
+// sits above the page without taking the pointer, which the page needs to pick
+const PickHintSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing.small,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.small}`,
+  borderRadius: theme.borderRadiuses.medium,
+  border: theme.borders['outline-focused'],
+  backgroundColor: theme.colors['fill-one'],
+  boxShadow: theme.boxShadows.moderate,
+  pointerEvents: 'none',
+  whiteSpace: 'nowrap',
+}))
 
 const FullscreenActionsSC = styled.div(({ theme }) => ({
   position: 'absolute',

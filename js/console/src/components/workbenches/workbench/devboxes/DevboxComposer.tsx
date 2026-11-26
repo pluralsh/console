@@ -17,6 +17,7 @@ import {
   DevboxCommandFragment,
   DevboxConfigOptionFragment,
 } from 'generated/graphql'
+import { insertChipAtRange } from 'components/utils/contentEditableChips'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
@@ -38,6 +39,7 @@ import {
 import {
   caretOffset,
   directoryToken,
+  elementMentionChip,
   fileMentionChip,
   getMentionQuery,
   matchFiles,
@@ -81,6 +83,7 @@ export function composerOptions(
 }
 import { DevboxSuggestion, DevboxSuggestionMenu } from './DevboxSuggestionMenu'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
+import { usePromptInserts } from './devboxPromptInserts'
 
 const MAX_SUGGESTIONS = 50
 
@@ -165,6 +168,7 @@ export function DevboxComposer({
   autoFocus = false,
   // keeps the unsent prompt when this composer unmounts and mounts again
   draftKey,
+  insertsFor,
   toolbar,
   onSubmit,
   onCancel,
@@ -194,6 +198,8 @@ export function DevboxComposer({
   allowEmpty?: boolean
   autoFocus?: boolean
   draftKey?: string
+  // takes the elements picked in this instance's browser into the prompt
+  insertsFor?: Nullable<string>
   // extra controls beside the attach button
   toolbar?: ReactNode
   // resolving to false (a failed send) keeps the draft
@@ -227,6 +233,31 @@ export function DevboxComposer({
   useEffect(() => {
     if (autoFocus) ref.current?.focus()
   }, [autoFocus])
+
+  // a picked element goes at the caret, or the end when the prompt isn't being edited
+  usePromptInserts(insertsFor, (element) => {
+    const node = ref.current
+    if (!node || disabled) return
+    const sel = document.getSelection()
+    const editing = sel?.rangeCount && node.contains(sel.anchorNode)
+    const range = editing
+      ? sel.getRangeAt(0).cloneRange()
+      : document.createRange()
+    if (!editing) {
+      range.selectNodeContents(node)
+      range.collapse(false)
+    }
+    const before = document.createRange()
+    before.setStart(node, 0)
+    before.setEnd(range.startContainer, range.startOffset)
+    if (/[^\s\u200b]$/.test(before.toString())) {
+      range.insertNode(document.createTextNode(' '))
+      range.collapse(false)
+    }
+    node.focus()
+    insertChipAtRange(node, elementMentionChip(element), range)
+    node.dispatchEvent(new InputEvent('input', { bubbles: true }))
+  })
 
   useEffect(() => {
     const onSelectionChange = () => {
@@ -460,6 +491,7 @@ export function DevboxComposer({
         disabled={disabled}
         placeholder={placeholder}
         initialValue={text}
+        deserializePlrlInitialValue
         setValue={update}
         onKeyDown={onKeyDown}
         onPasteFiles={addFiles}
