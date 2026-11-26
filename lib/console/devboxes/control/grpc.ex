@@ -142,10 +142,13 @@ defmodule Console.Devboxes.Control.Grpc do
       resume_if_suspended: true
     }
 
-    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :create_thread, req, @thread_timeout),
-         session_id = session && Proto.to_map(session.session_id),
-         :ok <- first_prompt(inst, %{thread | acp_session_id: session_id}, opts) do
-      {:ok, %{session_id: session_id}}
+    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :create_thread, req, @thread_timeout) do
+      session_id = session && Proto.to_map(session.session_id)
+      case first_prompt(inst, %{thread | acp_session_id: session_id}, opts) do
+        :ok -> {:ok, %{session_id: session_id}}
+        # the session exists either way, so the thread must keep it
+        err -> {:ok, %{session_id: session_id, prompt_error: err}}
+      end
     end
   end
 

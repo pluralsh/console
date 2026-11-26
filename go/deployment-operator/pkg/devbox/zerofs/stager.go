@@ -641,9 +641,16 @@ func (o Owner) apply(root string) error {
 
 // removeEmptyLostFound removes the root-only lost+found mkfs.ext4 leaves at the root of the filesystem, which is
 // the home itself. ext4 doesn't need it; e2fsck recreates it if it has orphans to place, and then it isn't empty
-// and stays.
+// and stays. Anything else by that name is the user's and is left alone.
 func removeEmptyLostFound(root string) error {
-	err := os.Remove(filepath.Join(root, "lost+found"))
+	path := filepath.Join(root, "lost+found")
+	if fi, err := os.Lstat(path); err != nil || !fi.IsDir() {
+		if err == nil || errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	err := os.Remove(path)
 	if err == nil || errors.Is(err, fs.ErrNotExist) || errors.Is(err, syscall.ENOTEMPTY) || errors.Is(err, syscall.EEXIST) {
 		return nil
 	}

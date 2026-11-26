@@ -165,9 +165,9 @@ defmodule Console.Devboxes.Ingest do
   defp status_reason(%{error: %{message: msg}}) when is_binary(msg) and byte_size(msg) > 0, do: msg
   defp status_reason(%{message: msg}) when is_binary(msg) and byte_size(msg) > 0, do: msg
   defp status_reason(%{suspend_reason: reason}) when not is_nil(reason) do
-    case enum(reason, "suspend_reason_") do
+    case enum_name(reason, "suspend_reason_") do
       nil -> nil
-      r -> "suspended: #{String.replace(to_string(r), "_", " ")}"
+      r -> "suspended: #{String.replace(r, "_", " ")}"
     end
   end
   defp status_reason(_), do: nil
@@ -924,7 +924,8 @@ defmodule Console.Devboxes.Ingest do
   defp blank(""), do: nil
   defp blank(v), do: v
 
-  defp title(v) when is_binary(v) and v != "", do: String.slice(v, 0, 255)
+  # varchar(255) counts codepoints, which can outnumber the graphemes String.slice counts
+  defp title(v) when is_binary(v) and v != "", do: v |> String.codepoints() |> Enum.take(255) |> Enum.join()
   defp title(_), do: nil
 
   defp drop_nils(map), do: Map.reject(map, fn {_, v} -> is_nil(v) end)

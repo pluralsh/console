@@ -173,4 +173,18 @@ func TestRemoveEmptyLostFound(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(lostFound, "#12")); err != nil {
 		t.Fatalf("a lost+found holding orphans was removed: %v", err)
 	}
+
+	// A user's own file by that name is kept, even when empty.
+	if err := os.RemoveAll(lostFound); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(lostFound, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := removeEmptyLostFound(root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(lostFound); err != nil {
+		t.Fatalf("a user's lost+found file was removed: %v", err)
+	}
 }

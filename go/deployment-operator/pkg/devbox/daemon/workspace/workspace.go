@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -715,18 +716,24 @@ func (m *Manager) Worktrees(threadID string, repos []string) (string, error) {
 	if err := os.MkdirAll(base, 0o755); err != nil {
 		return "", err
 	}
+	// a repeated name would race two `git worktree add`s for the same destination
+	names := make([]string, 0, len(repos))
 	created := make([]string, 0, len(repos))
 	for _, name := range repos {
+		if slices.Contains(names, name) {
+			continue
+		}
 		if strings.ContainsAny(name, "/\\") || !gitutil.IsRepo(filepath.Join(m.opts.Home, name)) {
 			return "", derr.New(codes.InvalidArgument, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, "no checkout ~/"+name, nil)
 		}
+		names = append(names, name)
 		created = append(created, filepath.Join(base, name))
 	}
 	branch := WorktreeBranch(threadID)
 	ctx := context.Background()
 	var g errgroup.Group
 	g.SetLimit(worktreeParallelism)
-	for i, name := range repos {
+	for i, name := range names {
 		src, dst := filepath.Join(m.opts.Home, name), created[i]
 		if gitutil.IsRepo(dst) {
 			continue

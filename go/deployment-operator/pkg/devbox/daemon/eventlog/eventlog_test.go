@@ -135,6 +135,38 @@ func TestResetKeepsOffsetsMonotonic(t *testing.T) {
 	}
 }
 
+func TestHeadDoesNotWaitForDiskWork(t *testing.T) {
+	dir := t.TempDir()
+	l, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 2 {
+		_, _ = l.Append(cond("x"))
+	}
+	l.Close()
+	if l, err = Open(dir); err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	if l.Head() != 2 {
+		t.Fatalf("recovered head %d", l.Head())
+	}
+
+	l.mu.Lock() // a Sync or Append stuck in fsync on a hung home
+	got := make(chan uint64, 1)
+	go func() { got <- l.Head() }()
+	select {
+	case h := <-got:
+		if h != 2 {
+			t.Fatalf("head %d", h)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Head waited for the log lock")
+	}
+	l.mu.Unlock()
+}
+
 func TestDeltaOffsetStamped(t *testing.T) {
 	l, err := Open(t.TempDir())
 	if err != nil {

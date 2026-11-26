@@ -78,13 +78,24 @@ defmodule Console.Devboxes.Threads do
   # transaction timeout, so the thread is committed first and dropped again if the gateway refuses it.
   defp start_thread({:ok, %{thread: thread} = res}, control) do
     case Error.control_ok(control.(res)) do
+      {:ok, %{prompt_error: err} = result} ->
+        with {:ok, _} <- attach_session(thread, result),
+          do: Error.control_ok(err)
       {:ok, result} -> attach_session(thread, result)
       err ->
-        update_thread(thread, %{status: :deleted})
+        drop_unstarted(thread)
         err
     end
   end
   defp start_thread(err, _), do: err
+
+  # Ingest may already have attached the session while the gateway was answering (a timeout isn't a refusal),
+  # and a thread with a session must survive.
+  defp drop_unstarted(%DevboxInstanceSession{id: id}) do
+    DevboxInstanceSession.with_ids([id])
+    |> DevboxInstanceSession.without_session()
+    |> Repo.update_all(set: [status: :deleted, updated_at: DateTime.utc_now()])
+  end
 
   defp attach_session(thread, %{session_id: id}) when is_binary(id) and byte_size(id) > 0 do
     thread

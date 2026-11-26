@@ -67,6 +67,31 @@ defmodule Console.Devboxes.ThreadsTest do
 
       [%{status: :deleted}] = Console.Repo.all(DevboxInstanceSession.for_instance(inst.id))
     end
+
+    test "a thread ingest already attached survives a failed gateway call" do
+      inst = owned_instance()
+      expect(Control.Test, :create_thread, fn _, thread, _ ->
+        thread
+        |> DevboxInstanceSession.changeset(%{acp_session_id: "sess-ingested"})
+        |> Console.Repo.update!()
+        {:error, :timeout}
+      end)
+
+      {:error, _} = Threads.create_thread(%{}, inst.id, inst.user)
+
+      [%{status: :active, acp_session_id: "sess-ingested"}] = Console.Repo.all(DevboxInstanceSession.for_instance(inst.id))
+    end
+
+    test "a failed first prompt keeps the created session" do
+      inst = owned_instance()
+      expect(Control.Test, :create_thread, fn _, _, _ ->
+        {:ok, %{session_id: "sess-abc", prompt_error: {:error, :not_connected}}}
+      end)
+
+      {:error, %{extensions: %{code: "CLUSTER_OFFLINE"}}} = Threads.create_thread(%{prompt: "hi"}, inst.id, inst.user)
+
+      [%{status: :active, acp_session_id: "sess-abc"}] = Console.Repo.all(DevboxInstanceSession.for_instance(inst.id))
+    end
   end
 
   describe "thread lifecycle" do

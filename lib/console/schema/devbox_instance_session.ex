@@ -185,6 +185,14 @@ defmodule Console.Schema.DevboxInstanceSession do
     from(s in query, where: s.acp_session_id == ^id)
   end
 
+  def with_ids(query \\ __MODULE__, ids) do
+    from(s in query, where: s.id in ^ids)
+  end
+
+  def without_session(query \\ __MODULE__) do
+    from(s in query, where: is_nil(s.acp_session_id))
+  end
+
   def orphans_of(query \\ __MODULE__, parent_acp_session_id) do
     from(s in query, where: is_nil(s.parent_id) and s.parent_acp_session_id == ^parent_acp_session_id)
   end

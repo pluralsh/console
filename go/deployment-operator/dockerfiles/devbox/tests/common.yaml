@@ -175,10 +175,10 @@ commandTests:
     expectedOutput:
       - "(?m)^SSL_CERT_FILE=/var/lib/devbox/trust/ca-bundle.pem$"
       - "(?m)^NODE_EXTRA_CA_CERTS=/var/lib/devbox/trust/ca-bundle.pem$"
-  - name: trust bundle is writable and resolves to system CAs by default
+  - name: trust bundle is writable and holds the system CAs by default
     command: sh
-    args: ["-c", "test -w /var/lib/devbox/trust && test -s /var/lib/devbox/trust/ca-bundle.pem && readlink /var/lib/devbox/trust/ca-bundle.pem"]
-    expectedOutput: ["(?m)^/etc/ssl/certs/ca-certificates.crt$"]
+    args: ["-c", "test -w /var/lib/devbox/trust && test -s /var/lib/devbox/trust/ca-bundle.pem && cmp -s /var/lib/devbox/trust/ca-bundle.pem /var/lib/devbox/trust/system-ca.pem && echo same"]
+    expectedOutput: ["(?m)^same$"]
   - name: run dirs writable by dev
     command: sh
     args: ["-c", "touch /run/plural/identity/.t /run/plural/agent-auth/.t && echo ok"]

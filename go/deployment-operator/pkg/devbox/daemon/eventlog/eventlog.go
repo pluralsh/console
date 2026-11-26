@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -63,6 +64,8 @@ type Log struct {
 	segments []*segment
 	active   *os.File
 	head     uint64
+	// headSnap mirrors head so Head never waits behind a write or fsync holding mu on a hung disk.
+	headSnap atomic.Uint64
 	acked    uint64
 	notify   chan struct{}
 	closed   bool
@@ -120,6 +123,7 @@ func Open(dir string, opts ...Option) (*Log, error) {
 	if err := l.openActive(); err != nil {
 		return nil, err
 	}
+	l.headSnap.Store(l.head)
 	return l, nil
 }
 
@@ -204,6 +208,7 @@ func (l *Log) Append(ev *devboxv1.DaemonEvent) (uint64, error) {
 	s.size += int64(len(rec))
 	s.last = offset
 	l.head = offset
+	l.headSnap.Store(offset)
 	l.dirty = true
 	if s.size >= l.segmentBytes {
 		if err := l.openActive(); err != nil {
@@ -217,9 +222,7 @@ func (l *Log) Append(ev *devboxv1.DaemonEvent) (uint64, error) {
 
 // Head is the latest offset written.
 func (l *Log) Head() uint64 {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	return l.head
+	return l.headSnap.Load()
 }
 
 // Acked is the latest offset the gateway acknowledged.

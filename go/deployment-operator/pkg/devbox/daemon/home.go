@@ -88,6 +88,28 @@ func (h *homeCheck) setLocked(err string) (string, bool) {
 func (d *Daemon) homeLoop(ctx context.Context) {
 	t := d.cfg.Clock.NewTicker(homeCheckInterval)
 	defer t.Stop()
+	// Conditions go through the event log, which blocks when the home hangs; heartbeats carry the error
+	// regardless, so only the latest condition is kept and the probe loop never waits on it.
+	pending := make(chan string, 1)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg := <-pending:
+				d.homeChanged(msg)
+			}
+		}
+	}()
+	report := func(msg string) {
+		for {
+			select {
+			case pending <- msg:
+				return
+			case <-pending:
+			}
+		}
+	}
 	done := make(chan error, 1)
 	for {
 		select {
@@ -95,12 +117,12 @@ func (d *Daemon) homeLoop(ctx context.Context) {
 			return
 		case err := <-done:
 			if msg, changed := d.home.finish(err); changed {
-				d.homeChanged(msg)
+				report(msg)
 			}
 		case <-t.C():
 			run, msg, changed := d.home.begin(d.cfg.Clock.Now())
 			if changed {
-				d.homeChanged(msg)
+				report(msg)
 			}
 			if run {
 				go func() { done <- probeHome(d.cfg.StateDir) }()
