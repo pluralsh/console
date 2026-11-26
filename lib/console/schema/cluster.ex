@@ -20,6 +20,7 @@ defmodule Console.Schema.Cluster do
     UpgradeInsight,
     AiInsight,
     ClusterInsightComponent,
+    Workbench,
     CloudAddon,
     OperationalLayout,
     DeprecatedCustomResource,
@@ -90,6 +91,29 @@ defmodule Console.Schema.Cluster do
     end
   end
 
+  defmodule Remediation do
+    use Console.Schema.Base
+    alias Console.Schema.{ClusterInsightComponent, User, WorkbenchJob}
+
+    embedded_schema do
+      field :min_priority, ClusterInsightComponent.Priority, default: :high
+      field :window,       :integer, default: 21_600
+      field :max_jobs,     :integer, default: 3
+
+      belongs_to :user, User
+
+      embeds_one :modes, WorkbenchJob.Modes, on_replace: :update
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(min_priority window max_jobs user_id)a)
+      |> cast_embed(:modes)
+      |> validate_number(:window, greater_than: 0)
+      |> validate_number(:max_jobs, greater_than: 0)
+    end
+  end
+
   schema "clusters" do
     field :handle,          :string
     field :name,            :string
@@ -102,6 +126,7 @@ defmodule Console.Schema.Cluster do
     field :health_score,    :integer
     field :ping_interval,   :integer
     field :disable_ai,      :boolean, default: false
+    field :allow_agents,    :boolean
 
     field :version,         :string
     field :current_version, :string
@@ -129,6 +154,8 @@ defmodule Console.Schema.Cluster do
     field :gs_instance,     :map, virtual: true
     field :ignore_limit,    :boolean, default: false, virtual: true
 
+    embeds_one :remediation, Remediation, on_replace: :update
+
     embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
       boolean_fields [:deprecations, :compatibilities, :incompatibilities, :kubelet_skew]
     end
@@ -146,6 +173,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :insight,         AiInsight, on_replace: :update
     belongs_to :current_upgrade, ClusterUpgrade
     belongs_to :parent_cluster, __MODULE__
+    belongs_to :remediation_workbench, Workbench
 
     has_one :operational_layout, OperationalLayout, on_replace: :update
 
@@ -290,7 +318,8 @@ defmodule Console.Schema.Cluster do
     )
   end
 
-  def for_user(query \\ __MODULE__, %User{} = user) do
+  def for_user(query \\ __MODULE__, user)
+  def for_user(query, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       sub = Service.for_user(user)
       from(c in query,
@@ -305,6 +334,7 @@ defmodule Console.Schema.Cluster do
       )
     end)
   end
+  def for_user(query, _), do: from(c in query, where: false)
 
   def for_provider(query \\ __MODULE__, provider_id) do
     from(c in query, where: c.provider_id == ^provider_id)
@@ -467,6 +497,22 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  @doc """
+  Whether a cluster may run agent workloads (`AgentRuntime`s and `DevboxRunner`s): granted by the cluster's own
+  `allow_agents` or its project's.  An unset cluster setting defaults to true only for the management cluster.
+  """
+  def allow_agents(query \\ __MODULE__, id) do
+    from(c in query,
+      left_join: p in assoc(c, :project),
+      where: c.id == ^id,
+      select: coalesce(c.allow_agents, coalesce(c.self, false)) or coalesce(p.allow_agents, false)
+    )
+  end
+
+  @spec allow_agents?(t) :: boolean
+  def allow_agents?(%__MODULE__{allow_agents: allow}) when is_boolean(allow), do: allow
+  def allow_agents?(%__MODULE__{self: self}), do: !!self
+
   def installable(query \\ __MODULE__) do
     from(c in query, where: (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
   end
@@ -492,7 +538,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id ai_poll_at disable_ai distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
+  @valid ~w(provider_id ai_poll_at disable_ai allow_agents remediation_workbench_id distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -503,6 +549,7 @@ defmodule Console.Schema.Cluster do
     |> cast_embed(:kubeconfig)
     |> cast_embed(:resource)
     |> cast_embed(:cloud_settings)
+    |> cast_embed(:remediation)
     |> cast_embed(:upgrade_plan, with: &upgrade_plan_cs/2)
     |> cast_assoc(:node_pools)
     |> cast_assoc(:read_bindings)
@@ -514,6 +561,7 @@ defmodule Console.Schema.Cluster do
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
+    |> foreign_key_constraint(:remediation_workbench_id)
     |> foreign_key_constraint(:id, name: :global_services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
     |> foreign_key_constraint(:id, name: :services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "cannot delete due to stacks referencing this cluster")

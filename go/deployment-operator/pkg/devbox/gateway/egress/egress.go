@@ -85,12 +85,6 @@ type ActorResolver interface {
 // ErrUnknownActor reports that an actor isn't a devbox instance this gateway manages.
 var ErrUnknownActor = errors.New("actor is not a devbox instance")
 
-// PullRequestOwner optionally tells the devbox MCP which box a PR belongs to, for PRs this replica didn't create or
-// observe (for example after a restart). It returns "" when console doesn't know the PR.
-type PullRequestOwner interface {
-	DevboxForPullRequest(ctx context.Context, url string) (boxID string, err error)
-}
-
 // BranchDiffs sizes a pull request's branch in the instance's checkout (the core, through the daemon).
 type BranchDiffs interface {
 	GetBranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error)
@@ -102,8 +96,6 @@ type Deps struct {
 	Actors ActorResolver
 	Logger logr.Logger
 
-	// PullRequests is optional; see PullRequestOwner.
-	PullRequests PullRequestOwner
 	// Diffs is optional; without it devbox PRs carry no line counts or commit SHAs.
 	Diffs BranchDiffs
 }

@@ -82,3 +82,36 @@ This YAML is largely self-documenting. We are:
 * and we're executing in the `terraform/gke-cluster` folder
 
 You can also bind files and environment variables into the environment, although it is still best practice to use IRSA, GKE workload identity or similar mechanisms for issuing cloud credentials.
+
+# Terragrunt parent folders
+
+A Terragrunt stack normally runs the single unit in `git.folder`. Repositories with many nested `terragrunt.hcl` files can instead point that folder at the parent and set `configuration.terragrunt.runAll`. One stack then plans every unit under the folder. Units outside the folder are left alone, including dependencies that are only read for their outputs.
+
+```yaml
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-live
+  namespace: stacks
+spec:
+  name: terragrunt-live
+  type: TERRAGRUNT
+  approval: true
+  manageState: false
+  repositoryRef:
+    name: fleet
+    namespace: fleets
+  clusterRef:
+    name: mgmt
+    namespace: infra
+  git:
+    ref: main
+    folder: live
+  configuration:
+    terragrunt:
+      runAll: true
+```
+
+`git.folder` is the parent directory. It does not need its own `terragrunt.hcl`. `manageState` stays false because each unit keeps the backend declared in its own configuration. Plural managed state is one backend for the whole stack, so it cannot be combined with `runAll`.
+
+On each run, Terragrunt plans every unit under `live`. When every plan is empty, apply is skipped. When some units have changes, only those units are applied. The same switch is available in the stack Configuration tab as "Run all units".

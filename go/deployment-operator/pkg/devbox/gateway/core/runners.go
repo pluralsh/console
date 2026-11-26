@@ -64,7 +64,6 @@ type RunnerRevision struct {
 // Home is a revision's home volume: a durable dir in the instance's snapshots (Storage Snapshot), or an external
 // volume of a StorageClass.
 type Home struct {
-	// Storage is empty for Snapshot.
 	Storage v1alpha1.DevboxHomeStorage
 	// Class and Bytes are an external home's StorageClass and capacity. Class is empty for revisions from before
 	// the runner-wide class, which had a class of their own.
@@ -74,23 +73,13 @@ type Home struct {
 	Seed string
 }
 
-// External reports whether the home is a volume of its own rather than part of the instance's snapshots.
-func (h Home) External() bool { return h.storage() != v1alpha1.DevboxHomeSnapshot }
-
-func (h Home) storage() v1alpha1.DevboxHomeStorage {
-	if h.Storage == "" {
-		return v1alpha1.DevboxHomeSnapshot
-	}
-	return h.Storage
-}
-
 // sameVolume reports whether Substrate sees the two homes as the same template volume, which it requires to move
 // an actor between templates.
 func (h Home) sameVolume(o Home) bool {
-	if h.storage() != o.storage() {
-		return false
+	if !h.Storage.External() && !o.Storage.External() {
+		return true
 	}
-	return !h.External() || (h.Class != "" && h.Class == o.Class && h.Bytes == o.Bytes)
+	return h.Storage == o.Storage && h.Class != "" && h.Class == o.Class && h.Bytes == o.Bytes
 }
 
 // revisionTarget is a revision an instance can be moved to.

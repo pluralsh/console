@@ -20,6 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors/actorstest"
@@ -247,14 +248,14 @@ func TestProberAppliesAIProxyOnlyPolicy(t *testing.T) {
 	}
 }
 
-func TestProberStartsJuiceFSHomesFromTheTemplatesGoldenTag(t *testing.T) {
+func TestProberStartsExternalHomesFromTheTemplatesGoldenTag(t *testing.T) {
 	objs := requestObjects(t, nil)
 	cm := objs[0].(*corev1.ConfigMap)
 	var req probe.Request
 	if err := json.Unmarshal([]byte(cm.Data[probe.RequestKey]), &req); err != nil {
 		t.Fatal(err)
 	}
-	req.JuiceFSHome, req.HomeSeed, req.HomeBytes = true, "golden.tmpl-uid", 20<<30
+	req.ExternalHome, req.HomeSeed, req.HomeStorage, req.HomeBytes = true, "golden.tmpl-uid", string(v1alpha1.DevboxHomeJuiceFS), 20<<30
 	raw, _ := json.Marshal(req)
 	cm.Data[probe.RequestKey] = string(raw)
 
@@ -263,7 +264,7 @@ func TestProberStartsJuiceFSHomesFromTheTemplatesGoldenTag(t *testing.T) {
 	f.prober.deps.Actors = recordSpec{Actors: f.prober.deps.Actors, got: &spec}
 	// The first seeding finds the JuiceFS controller unavailable, which is retried.
 	seeded := &seededHomes{fail: status.Error(codes.Unavailable, "connection refused")}
-	f.prober.deps.Homes = seeded
+	f.prober.deps.Homes = map[v1alpha1.DevboxHomeStorage]homes.Driver{v1alpha1.DevboxHomeJuiceFS: seeded}
 	f.substrate.ExternalHomes = true
 	f.run(t)
 	if cm := f.waitState(t); cm.Annotations[probe.StateAnnotation] != probe.StateDone {

@@ -235,6 +235,7 @@ fragment StackConfigurationFragment on StackConfiguration {
         parallelism
         refresh
         approveEmpty
+        runAll
     }
     pulumi {
         parallel

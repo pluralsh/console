@@ -195,19 +195,19 @@ commandTests:
   - name: claude
     command: claude
     args: ["--version"]
-    expectedOutput: ["2\\.1\\.236"]
+    expectedOutput: ["2\\.1\\.332"]
   - name: claude-agent-acp
     command: claude-agent-acp
     args: ["--version"]
-    expectedOutput: ["0\\.75\\.1"]
+    expectedOutput: ["0\\.112\\.0"]
   - name: codex
     command: codex
     args: ["--version"]
-    expectedOutput: ["0\\.153\\.4"]
+    expectedOutput: ["0\\.172\\.0"]
   - name: codex-acp
     command: codex-acp
     args: ["--version"]
-    expectedOutput: ["1\\.10\\.0"]
+    expectedOutput: ["2\\.12\\.0"]
   - name: codex-acp modes leave sandboxing to the box
     command: sh
     args: ["-c", "grep -c 'type: \"dangerFullAccess\"' /usr/local/lib/node_modules/@agentclientprotocol/codex-acp/dist/index.js; grep -c 'type: \"workspaceWrite\",' /usr/local/lib/node_modules/@agentclientprotocol/codex-acp/dist/index.js || true"]
@@ -219,23 +219,23 @@ commandTests:
   - name: opencode
     command: opencode
     args: ["--version"]
-    expectedOutput: ["1\\.18\\.23"]
+    expectedOutput: ["1\\.19\\.6"]
   - name: gemini
     command: gemini
     args: ["--version"]
-    expectedOutput: ["0\\.44\\.1"]
+    expectedOutput: ["0\\.71\\.1"]
   - name: pi
     command: pi
     args: ["--version"]
-    expectedOutput: ["0\\.84\\.1"]
+    expectedOutput: ["1\\.6\\.1"]
   - name: pi-acp (a stdio server with no --version output)
     command: jq
     args: ["-r", ".version", "/usr/local/lib/node_modules/pi-acp/package.json"]
-    expectedOutput: ["(?m)^0\\.0\\.33$"]
+    expectedOutput: ["(?m)^0\\.0\\.35$"]
   - name: playwright-mcp
     command: playwright-mcp
     args: ["--version"]
-    expectedOutput: ["0\\.0\\.85"]
+    expectedOutput: ["0\\.0\\.86"]
   - name: harness launchers use the image's Node, not mise shims
     command: sh
     args: ["-c", "head -q -n1 /usr/local/bin/claude-agent-acp /usr/local/bin/codex-acp /usr/local/bin/gemini /usr/local/bin/pi /usr/local/bin/pi-acp /usr/local/bin/playwright-mcp"]

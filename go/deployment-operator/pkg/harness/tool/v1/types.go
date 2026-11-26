@@ -46,6 +46,13 @@ type Tool interface {
 	HasChanges() (bool, error)
 }
 
+// ApplyArgumentPreparer updates apply arguments after the plan step has
+// written its output. Terragrunt parent-folder runs use it to select units
+// whose plans contain changes.
+type ApplyArgumentPreparer interface {
+	ApplyArgs(args []string) ([]string, error)
+}
+
 // DefaultTool implements [Tool] interface.
 type DefaultTool struct {
 	// Scanner is a security scanner. See [securityv1.Scanner] for more information.

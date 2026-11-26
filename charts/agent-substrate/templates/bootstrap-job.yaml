@@ -17,10 +17,16 @@
 {{- $crds = append $crds "databases.postgresql.cnpg.io" -}}
 {{- end -}}
 {{- end -}}
-{{- $csiDriverConfig := and .Values.juicefs.enabled (not (include "substrate.csiDriverConfigCRDServed" .)) -}}
-{{- if $csiDriverConfig -}}
+{{- if not (include "substrate.csiDriverConfigCRDServed" .) -}}
+{{- if .Values.juicefs.enabled -}}
 {{- $deferred = append $deferred (include "substrate.juicefs.csiDriverConfig" . | fromYaml) -}}
+{{- end -}}
+{{- if .Values.zerofs.enabled -}}
+{{- $deferred = append $deferred (include "substrate.zerofs.csiDriverConfig" . | fromYaml) -}}
+{{- end -}}
+{{- if or .Values.juicefs.enabled .Values.zerofs.enabled -}}
 {{- $crds = append $crds "csidriverconfigs.ate.dev" -}}
+{{- end -}}
 {{- end -}}
 {{- if $deferred }}
 {{- $adopt := include "substrate.adoptionMetadata" . | fromYaml -}}

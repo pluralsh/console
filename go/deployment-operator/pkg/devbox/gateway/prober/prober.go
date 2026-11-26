@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
@@ -84,9 +85,9 @@ type Deps struct {
 	Actors      Actors
 	Daemons     Daemons
 	Credentials Credentials
-	// Homes seeds probe actors' JuiceFS homes (juicefs.Client); revisions with a home seed can't be probed
-	// without it.
-	Homes homes.Driver
+	// Homes seed probe actors' external homes by storage (homedriver.Client); a revision with a home seed can't be
+	// probed without its storage's.
+	Homes map[v1alpha1.DevboxHomeStorage]homes.Driver
 	Log   logr.Logger
 	Now   func() time.Time
 }
@@ -349,8 +350,9 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	if creds == nil {
 		return nil, errors.New("egress isn't running yet")
 	}
-	if req.HomeSeed != "" && p.deps.Homes == nil {
-		return nil, permanentError{errors.New("the gateway has no JuiceFS controller address (DEVBOX_JUICEFS_ADDRESS) to seed the probe's home")}
+	driver := p.deps.Homes[v1alpha1.DevboxHomeStorage(req.HomeStorage)]
+	if req.HomeSeed != "" && driver == nil {
+		return nil, permanentError{fmt.Errorf("the gateway has no %s controller address to seed the probe's home", req.HomeStorage)}
 	}
 	ref := actors.Ref{Atespace: req.Atespace, Name: name}
 	instanceID := InstanceID(name)
@@ -386,7 +388,7 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 		defer ccancel()
 		if seeded {
 			if a, err := p.deps.Actors.GetActor(cctx, ref); err == nil {
-				if err := homes.Release(cctx, p.deps.Homes, a); err != nil {
+				if err := homes.Release(cctx, driver, a); err != nil {
 					p.deps.Log.Info("could not delete the probe actor's seeded home", "actor", ref.String(), "error", err.Error())
 				}
 			}
@@ -401,7 +403,7 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	}()
 
 	actorSpec := actors.Spec{Ref: ref, Template: req.ActorTemplate, SourceTag: req.GoldenTag}
-	if req.JuiceFSHome {
+	if req.ExternalHome {
 		actorSpec.SourceTag, actorSpec.Preview = "", true
 	}
 	actor, err := p.deps.Actors.CreateActor(ctx, actorSpec)
@@ -409,7 +411,7 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 		return nil, fmt.Errorf("creating probe actor %s: %w", ref, err)
 	}
 	if req.HomeSeed != "" {
-		if err := homes.Seed(ctx, p.deps.Homes, actor, req.HomeSeed, req.HomeBytes); errors.Is(err, homes.ErrSeedMissing) {
+		if err := homes.Seed(ctx, driver, actor, req.HomeSeed, req.HomeBytes); errors.Is(err, homes.ErrSeedMissing) {
 			return nil, permanentError{err}
 		} else if err != nil {
 			return nil, err
@@ -424,7 +426,7 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	}
 	running, err := p.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING)
 	if req.HomeSeed != "" && running != nil {
-		if err := homes.Verify(ctx, p.deps.Homes, running); err != nil {
+		if err := homes.Verify(ctx, driver, running); err != nil {
 			return nil, permanentError{err}
 		}
 	}

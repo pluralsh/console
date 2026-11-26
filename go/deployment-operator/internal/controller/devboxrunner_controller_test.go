@@ -48,6 +48,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zerofs"
 )
 
 const (
@@ -141,6 +142,7 @@ func startDevboxEnv(t *testing.T) *devboxEnv {
 			HeartbeatInterval:   time.Minute,
 		},
 		Console:   env.console,
+		Agents:    staticAgentsGate(true),
 		Substrate: env.substrate,
 		Images:    &RegistryImageResolver{Client: c, SecretNamespace: devboxTestNamespace},
 		Probe:     &ConfigMapProbeClient{Client: c, Reader: c, Namespace: devboxTestNamespace, Tokens: env.console},
@@ -1122,7 +1124,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(gatewayEnv()).NotTo(ContainElement(HaveField("Name", "DEVBOX_JUICEFS_ADDRESS")), "no JuiceFS controller, no seeds")
 		g.Expect(env.client.Create(ctx, &corev1.Service{
 			ObjectMeta: metav1.ObjectMeta{Name: devboxJuiceFSService, Namespace: "ate-system"},
-			Spec:       corev1.ServiceSpec{Ports: []corev1.ServicePort{{Name: "grpc", Port: devboxJuiceFSPort}}},
+			Spec:       corev1.ServiceSpec{Ports: []corev1.ServicePort{{Name: "grpc", Port: devboxHomeDriverPort}}},
 		})).To(Succeed())
 		runner = env.reconcile(t, "juicefs", 1)
 		g.Expect(runner.Status.Revisions).To(HaveLen(1), "the per-revision class doesn't change the template hash")
@@ -1159,9 +1161,57 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.RevisionByNumber(2).Phase).To(Equal(v1alpha1.DevboxRevisionFailed), "a second miss fails")
 	})
 
+	t.Run("a ZeroFS home names the runner's StorageClass in every revision", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "zerofs", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeZeroFS), Size: lo.ToPtr(resource.MustParse("20Gi"))}
+		})
+		env.reconcile(t, "zerofs", 1)
+		_, _ = env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "zerofs"}})
+		runner := env.get(t, "zerofs")
+		g.Expect(condition(runner, v1alpha1.DevboxTemplateReadyConditionType).Message).
+			To(ContainSubstring("StorageClass devbox-zerofs for ZeroFS homes doesn't exist; enable zerofs in the agent-substrate chart"))
+		g.Expect(runner.Status.Revisions).To(BeEmpty())
+
+		g.Expect(env.client.Create(ctx, &storagev1.StorageClass{
+			ObjectMeta:  metav1.ObjectMeta{Name: v1alpha1.DevboxDefaultZeroFSStorageClass},
+			Provisioner: zerofs.DriverName,
+			Parameters:  map[string]string{"csi.storage.k8s.io/fstype": "ext4"},
+		})).To(Succeed())
+		runner = env.reconcile(t, "zerofs", 1)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1))
+		rev := runner.Status.Revisions[0]
+		g.Expect(rev.HomeStorage).To(HaveValue(Equal(v1alpha1.DevboxHomeZeroFS)))
+		g.Expect(rev.HomeStorageClass).To(HaveValue(Equal(v1alpha1.DevboxDefaultZeroFSStorageClass)))
+		atespace := *runner.Status.Atespace
+
+		tmpl := env.substrate.template(atespace, rev.Name)
+		home, _ := lo.Find(tmpl.Volumes, func(v *ateapi.Volume) bool { return v.Name == devboxHomeVolume })
+		g.Expect(home.GetDurableDir()).To(BeNil())
+		g.Expect(home.GetExternal().GetTemplate().GetCapacityBytes()).To(Equal(int64(20 << 30)))
+		g.Expect(home.GetExternal().GetTemplate().GetStorageClassName()).To(Equal(v1alpha1.DevboxDefaultZeroFSStorageClass))
+		g.Expect(env.substrate.previews[rev.Name]).To(BeTrue())
+		g.Expect(rev.HomeSeed).To(HaveValue(Equal("golden." + tmpl.GetMetadata().GetUid())))
+	})
+
+	t.Run("a home StorageClass from the wrong driver is rejected", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "mismatch", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeZeroFS), StorageClassName: lo.ToPtr(v1alpha1.DevboxDefaultJuiceFSStorageClass)}
+		})
+		env.reconcile(t, "mismatch", 1)
+		_, _ = env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "mismatch"}})
+		runner := env.get(t, "mismatch")
+		g.Expect(condition(runner, v1alpha1.DevboxTemplateReadyConditionType).Message).
+			To(ContainSubstring("StorageClass devbox-juicefs is provisioned by " + juicefs.DriverName + ", not " + zerofs.DriverName))
+		g.Expect(runner.Status.Revisions).To(BeEmpty())
+	})
+
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "daemon", "no-runtime", "scheduled", "elastic", "rebuild", "juicefs"} {
+		for _, name := range []string{"custom", "old", "daemon", "no-runtime", "scheduled", "elastic", "rebuild", "juicefs", "zerofs", "mismatch"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())
@@ -1171,6 +1221,26 @@ func TestDevboxRunnerController(t *testing.T) {
 		err = env.client.Get(ctx, client.ObjectKey{Name: devboxEgressAuthzName, Namespace: devboxTestNamespace}, &corev1.Service{})
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
 	})
+}
+
+func TestDevboxRunnerAgentsNotAllowed(t *testing.T) {
+	g := NewWithT(t)
+	env := startDevboxEnv(t)
+	env.r.Agents = staticAgentsGate(false)
+	env.push(t, "devbox:v1")
+	env.newRunner(t, "blocked", "devbox:v1")
+
+	runner := env.reconcile(t, "blocked", 2)
+	for _, ct := range []v1alpha1.ConditionType{v1alpha1.ReadyConditionType, v1alpha1.SynchronizedConditionType} {
+		cond := condition(runner, ct)
+		g.Expect(cond).NotTo(BeNil())
+		g.Expect(cond.Status).To(Equal(metav1.ConditionFalse))
+		g.Expect(cond.Reason).To(Equal(AgentsNotAllowedReason.String()))
+		g.Expect(cond.Message).To(Equal(AgentsNotAllowedMessage))
+	}
+	g.Expect(runner.Status.ID).To(BeNil())
+	g.Expect(env.console.upserts).To(BeEmpty())
+	g.Expect(runner.Status.Atespace).To(BeNil())
 }
 
 func TestDevboxSubstrateInstallCheck(t *testing.T) {

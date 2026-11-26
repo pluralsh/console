@@ -10,19 +10,22 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/samber/lo"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/homedriver"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
@@ -30,9 +33,10 @@ import (
 
 // TestDevboxJuiceFSHomesOnSubstrate checks instance updates of JuiceFS homes (external volumes) against a real
 // Substrate with the agent-substrate chart's JuiceFS: two revisions whose templates name the runner's one
-// StorageClass, golden homes claimed for their revision's seed, and new homes seeded from it. It makes the JuiceFS
-// controller calls the gateway's homes.Claimer and homes.Seed make, which it can't import (the gateway's actors
-// package imports this one through egress), so it also pins the Substrate behaviour they rely on.
+// StorageClass, golden homes claimed for their revision's seed, and new homes seeded from it, through the client
+// the gateway uses (homedriver.Client). It finds the golden actor and its home as the gateway's homes.Claimer does,
+// which it can't import (the gateway's actors package imports this one through egress), so it also pins the
+// Substrate behaviour they rely on.
 //
 //   - each revision's golden boot installs the runtime into its home, which is captured into the revision's seed
 //   - a new instance on either revision starts from the golden tag on a home cloned from its revision's seed
@@ -78,11 +82,12 @@ func TestDevboxJuiceFSHomesOnSubstrate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	driver, err := juicefs.Dial(cfg["E2E_JUICEFS_ADDRESS"], jfsTLS)
+	jfsConn, err := grpc.NewClient(cfg["E2E_JUICEFS_ADDRESS"], grpc.WithTransportCredentials(credentials.NewTLS(jfsTLS)))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer driver.Close()
+	defer jfsConn.Close()
+	driver := homedriver.NewClient(jfsConn)
 
 	base, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
 	defer cancel()
@@ -122,29 +127,55 @@ func TestDevboxJuiceFSHomesOnSubstrate(t *testing.T) {
 		}
 		return ""
 	}
-	t.Run("golden boots capture each revision's home", func(t *testing.T) {
-		for _, name := range []string{"rev-a", "rev-b"} {
-			start := time.Now()
-			// homes.Claimer: the golden actor is named after the template UID, and its home exists once it's resumed.
-			claimed := ""
-			for claimed == "" && time.Since(start) < 5*time.Minute {
-				if golden, err := e.c.GetActor(ctx, &ateapi.GetActorRequest{Actor: e.ref(uids[name])}); err == nil && home(golden) != "" {
-					if err := driver.ClaimSeed(ctx, home(golden), seeds[name]); err != nil {
-						t.Fatalf("claiming the golden home of %s: %v", name, err)
-					}
-					claimed = home(golden)
+	// homes.Claimer, polling every building revision: the golden actor is named after the template UID, and its home
+	// exists once Substrate resumed it.
+	var mu sync.Mutex
+	claimed, claimErrs := map[string]string{}, map[string]error{}
+	claimCtx, stopClaims := context.WithCancel(ctx)
+	go func() {
+		for claimCtx.Err() == nil {
+			for name, uid := range uids {
+				mu.Lock()
+				done := claimed[name] != ""
+				mu.Unlock()
+				if done {
+					continue
 				}
-				time.Sleep(time.Second)
+				golden, err := e.c.GetActor(claimCtx, &ateapi.GetActorRequest{Actor: e.ref(uid)})
+				if err != nil || home(golden) == "" {
+					continue
+				}
+				err = driver.ClaimSeed(claimCtx, home(golden), seeds[name])
+				mu.Lock()
+				if err == nil {
+					claimed[name] = home(golden)
+				} else if status.Code(err) != codes.NotFound {
+					claimErrs[name] = err
+				}
+				mu.Unlock()
 			}
-			if claimed == "" {
-				t.Fatalf("template %s's golden actor %s never got a home", name, uids[name])
-			}
-			t.Logf("golden home %s claimed for %s after %s", claimed, seeds[name], time.Since(start).Round(time.Second))
+			time.Sleep(time.Second)
+		}
+	}()
+
+	t.Run("golden boots capture each revision's home", func(t *testing.T) {
+		start := time.Now()
+		for _, name := range []string{"rev-a", "rev-b"} {
 			tag, msg := e.golden(name)
 			if tag == "" {
 				t.Fatalf("template %s has no golden snapshot: %s", name, msg)
 			}
 			t.Logf("template %s: golden tag %s (%s)", name, tag, time.Since(start).Round(time.Second))
+		}
+		stopClaims()
+		mu.Lock()
+		defer mu.Unlock()
+		for _, name := range []string{"rev-a", "rev-b"} {
+			if claimed[name] == "" {
+				t.Errorf("template %s's golden home was never claimed: %v", name, claimErrs[name])
+				continue
+			}
+			t.Logf("template %s: golden home %s claimed for %s", name, claimed[name], seeds[name])
 		}
 	})
 

@@ -44,6 +44,19 @@ func TestDevboxHomeVolumeSource(t *testing.T) {
 		g.Expect(vol.External.GetTemplate().GetStorageClassName()).To(Equal("fast-homes"))
 	})
 
+	t.Run("a ZeroFS home is an external volume on the devbox-zerofs class", func(t *testing.T) {
+		g := NewWithT(t)
+		runner := &v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{Home: &v1alpha1.DevboxHome{
+			Storage: lo.ToPtr(v1alpha1.DevboxHomeZeroFS),
+			Size:    lo.ToPtr(resource.MustParse("20Gi")),
+		}}}
+		vol := devboxHomeVolumeSource(runner)
+		g.Expect(vol.DurableDir).To(BeNil())
+		g.Expect(vol.External.GetTemplate().GetCapacityBytes()).To(Equal(20 * gib))
+		g.Expect(vol.External.GetTemplate().GetStorageClassName()).To(Equal(v1alpha1.DevboxDefaultZeroFSStorageClass))
+		g.Expect(devboxTemplateNeedsPreview(&ateapi.ActorTemplate{Volumes: []*ateapi.Volume{vol}})).To(BeTrue())
+	})
+
 	t.Run("a durable dir home needs no preview", func(t *testing.T) {
 		g := NewWithT(t)
 		g.Expect(devboxTemplateNeedsPreview(&ateapi.ActorTemplate{Volumes: []*ateapi.Volume{devboxHomeVolumeSource(&v1alpha1.DevboxRunner{})}})).To(BeFalse())
@@ -59,4 +72,18 @@ func TestDevboxInstanceCapacityWithJuiceFSHomes(t *testing.T) {
 	// The disk only holds snapshots, 160Gi over 8Gi, so CPU binds first instead of disk at 5.
 	g.Expect(c.PerWorker).To(Equal(int64(8)))
 	g.Expect(c.LimitedBy).To(Equal(devboxLimitedByCPU))
+}
+
+func TestDevboxInstanceCapacityWithZeroFSHomes(t *testing.T) {
+	g := NewWithT(t)
+	durable := capacityRunner("16", "64Gi", lo.ToPtr("200Gi"))
+	want, err := devboxInstanceCapacity(durable, v1alpha1.DevboxSandboxGVisor)
+	g.Expect(err).NotTo(HaveOccurred())
+
+	runner := capacityRunner("16", "64Gi", lo.ToPtr("200Gi"))
+	runner.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeZeroFS)}
+	c, err := devboxInstanceCapacity(runner, v1alpha1.DevboxSandboxGVisor)
+	g.Expect(err).NotTo(HaveOccurred())
+	// The ZeroFS writer caches each home on node disk, so homes still count against it.
+	g.Expect(c).To(Equal(want))
 }

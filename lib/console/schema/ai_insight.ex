@@ -9,7 +9,8 @@ defmodule Console.Schema.AiInsight do
     StackState,
     ServiceComponent,
     AiInsightEvidence,
-    ClusterInsightComponent
+    ClusterInsightComponent,
+    WorkbenchJob
   }
 
   schema "ai_insights" do
@@ -17,6 +18,11 @@ defmodule Console.Schema.AiInsight do
     field :text,    :string
     field :summary, :string
     field :force,   :boolean
+
+    field :remediated_sha, :string
+    field :remediated_at,  :utc_datetime_usec
+
+    belongs_to :remediation_job, WorkbenchJob
 
     embeds_many :error, Error, on_replace: :delete do
       field :source,  :string
@@ -91,6 +97,12 @@ defmodule Console.Schema.AiInsight do
     |> cast(attrs, ~w(sha summary text force)a)
     |> cast_embed(:error, with: &error_changeset/2)
     |> cast_assoc(:evidence)
+  end
+
+  def remediated_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(remediated_sha remediated_at remediation_job_id)a)
+    |> foreign_key_constraint(:remediation_job_id)
   end
 
   defp error_changeset(model, attrs) do

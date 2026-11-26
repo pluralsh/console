@@ -1,8 +1,8 @@
 ARG NODE_IMAGE_TAG=24
 ARG NODE_IMAGE=node:${NODE_IMAGE_TAG}-slim
-ARG AGENT_VERSION=0.84.1
-ARG ACP_VERSION=0.0.33
-ARG MCP_ADAPTER_VERSION=2.21.2
+ARG AGENT_VERSION=1.6.1
+ARG ACP_VERSION=0.0.35
+ARG MCP_ADAPTER_VERSION=7.0.1
 
 ARG AGENT_HARNESS_BASE_IMAGE_TAG=latest
 ARG AGENT_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/agent-harness-base
@@ -31,7 +31,7 @@ COPY --from=node /opt/pi-mcp-adapter /opt/pi-mcp-adapter
 ENV NODE_PATH=/usr/local/lib/node_modules
 
 USER root
-RUN ln -s ../lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/local/bin/pi && \
+RUN ln -s ../lib/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js /usr/local/bin/pi && \
     ln -s ../lib/node_modules/pi-acp/dist/index.js /usr/local/bin/pi-acp && \
     chown -R 65532:65532 /usr/local/bin/node /usr/local/bin/pi /usr/local/bin/pi-acp /usr/local/lib/node_modules /opt/pi-mcp-adapter
 USER 65532:65532

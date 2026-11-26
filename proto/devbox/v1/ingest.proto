@@ -51,6 +51,10 @@ service Ingest {
   // DevboxPullRequest creates a PR on behalf of the devbox MCP's create_pull_request tool (Dispatcher.pr), with
   // instance and thread attribution.
   rpc DevboxPullRequest(DevboxPullRequestRequest) returns (DevboxPullRequestResponse);
+  // ListDevboxPullRequests reads back the PRs console attributes to an instance's devbox, however they were opened
+  // (the devbox MCP, the Create PR button, or observed at egress), for the MCP's list_pull_requests tool and its PR
+  // ownership checks.
+  rpc ListDevboxPullRequests(ListDevboxPullRequestsRequest) returns (ListDevboxPullRequestsResponse);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -340,4 +344,31 @@ message DevboxPullRequestResponse {
   string pull_request_id = 1;
   string url = 2;
   int64 number = 3;
+}
+
+message ListDevboxPullRequestsRequest {
+  string instance_id = 1;
+  // When set, returns only the PR with this URL, and only if it belongs to the instance's devbox (from any of its
+  // instances). Otherwise returns the PRs of the instance itself.
+  string url = 2;
+}
+
+message ListDevboxPullRequestsResponse {
+  repeated DevboxPullRequestRecord pull_requests = 1;
+}
+
+message DevboxPullRequestRecord {
+  string pull_request_id = 1;
+  string url = 2;
+  int64 number = 3;
+  string title = 4;
+  // open, merged or closed.
+  string status = 5;
+  // mcp, devbox (the Create PR button) or egress.
+  string source = 6;
+  string devbox_id = 7;
+  string instance_id = 8;
+  // The console thread it was opened from, if any.
+  string thread_id = 9;
+  google.protobuf.Timestamp created_at = 10;
 }

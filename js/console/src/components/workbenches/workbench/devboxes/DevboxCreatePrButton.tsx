@@ -38,7 +38,7 @@ export function DevboxCreatePrButton({
   instanceId: string
   threadId?: Nullable<string>
   agentsRunning: boolean
-  onCreated: () => void
+  onCreated: (url: Nullable<string>) => void
 }) {
   const { popToast } = useSimpleToast()
   const { groups } = useDevboxChanges(instanceId, true, { poll: true })
@@ -54,23 +54,8 @@ export function DevboxCreatePrButton({
       const job = data.data?.devboxPullRequestJobDelta?.payload
       if (!job) return
       track(job)
-      if (job.status === DevboxPullRequestJobStatus.Succeeded) {
-        onCreated()
-        popToast({
-          content: job.url ? (
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Opened {job.title || 'the pull request'}
-            </a>
-          ) : (
-            `Opened ${job.title || 'the pull request'}`
-          ),
-          severity: 'success',
-        })
-      }
+      if (job.status === DevboxPullRequestJobStatus.Succeeded)
+        onCreated(job.url)
       if (job.status === DevboxPullRequestJobStatus.Failed)
         popToast({
           content: job.error || "Couldn't create the pull request",

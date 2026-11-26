@@ -526,6 +526,7 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 			Parallelism:  overrides.Terragrunt.Parallelism,
 			Refresh:      overrides.Terragrunt.Refresh,
 			ApproveEmpty: overrides.Terragrunt.ApproveEmpty,
+			RunAll:       overrides.Terragrunt.RunAll,
 		}
 	}
 
@@ -569,6 +570,7 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Parallelism:  conf.Terragrunt.Parallelism,
 			Refresh:      conf.Terragrunt.Refresh,
 			ApproveEmpty: conf.Terragrunt.ApproveEmpty,
+			RunAll:       conf.Terragrunt.RunAll,
 		}
 	}
 

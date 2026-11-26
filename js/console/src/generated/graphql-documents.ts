@@ -1575,6 +1575,33 @@ export const ClusterUpgradePlanFragmentDoc = /*#__PURE__*/ gql`
   kubeletSkew
 }
     ` as unknown as DocumentNode<Types.ClusterUpgradePlanFragment, unknown>;
+export const WorkbenchJobModesFieldsFragmentDoc = /*#__PURE__*/ gql`
+    fragment WorkbenchJobModesFields on WorkbenchJobModes {
+  plan
+  verification
+  model {
+    provider
+    model
+  }
+  coding {
+    approval
+    babysit
+    review
+  }
+  budget {
+    cost
+    tokens
+  }
+  kubernetes {
+    update
+    delete
+    exec
+    drain
+    excludeNamespaces
+    requireNamespaces
+  }
+}
+    ` as unknown as DocumentNode<Types.WorkbenchJobModesFieldsFragment, unknown>;
 export const ClustersRowFragmentDoc = /*#__PURE__*/ gql`
     fragment ClustersRow on Cluster {
   currentVersion
@@ -1628,9 +1655,26 @@ export const ClustersRowFragmentDoc = /*#__PURE__*/ gql`
     extendedFrom
   }
   disableAi
+  allowAgents
+  remediation {
+    minPriority
+    window
+    maxJobs
+    user {
+      id
+    }
+    modes {
+      ...WorkbenchJobModesFields
+    }
+  }
+  remediationWorkbench {
+    id
+    name
+  }
 }
     ${ClusterUpgradePlanFragmentDoc}
-${AiInsightSummaryFragmentDoc}` as unknown as DocumentNode<Types.ClustersRowFragment, unknown>;
+${AiInsightSummaryFragmentDoc}
+${WorkbenchJobModesFieldsFragmentDoc}` as unknown as DocumentNode<Types.ClustersRowFragment, unknown>;
 export const ApiDeprecationFragmentDoc = /*#__PURE__*/ gql`
     fragment ApiDeprecation on ApiDeprecation {
   availableIn
@@ -5719,6 +5763,7 @@ export const StackFragmentDoc = /*#__PURE__*/ gql`
     terragrunt {
       parallelism
       refresh
+      runAll
     }
     pulumi {
       parallel
@@ -5802,6 +5847,7 @@ export const StackConfigurationFragmentDoc = /*#__PURE__*/ gql`
   terragrunt {
     parallelism
     refresh
+    runAll
   }
   pulumi {
     parallel
@@ -6306,33 +6352,6 @@ export const WorkbenchTinyFragmentDoc = /*#__PURE__*/ gql`
 }
     ${WorkbenchToolTinyFragmentDoc}
 ${WorkbenchWebhookTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchTinyFragment, unknown>;
-export const WorkbenchJobModesFieldsFragmentDoc = /*#__PURE__*/ gql`
-    fragment WorkbenchJobModesFields on WorkbenchJobModes {
-  plan
-  verification
-  model {
-    provider
-    model
-  }
-  coding {
-    approval
-    babysit
-    review
-  }
-  budget {
-    cost
-    tokens
-  }
-  kubernetes {
-    update
-    delete
-    exec
-    drain
-    excludeNamespaces
-    requireNamespaces
-  }
-}
-    ` as unknown as DocumentNode<Types.WorkbenchJobModesFieldsFragment, unknown>;
 export const WorkbenchToolConfigurationFieldsFragmentDoc = /*#__PURE__*/ gql`
     fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
   http {
@@ -12396,6 +12415,24 @@ export const WorkbenchesDocument = /*#__PURE__*/ gql`
 }
     ${PageInfoFragmentDoc}
 ${WorkbenchTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchesQuery, Types.WorkbenchesQueryVariables>;
+export const WorkbenchSelectorOptionsDocument = /*#__PURE__*/ gql`
+    query WorkbenchSelectorOptions($first: Int, $after: String, $q: String, $currentWorkbenchId: ID, $hasCurrentWorkbench: Boolean! = false) {
+  workbenches(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchTiny
+      }
+    }
+  }
+  workbench(id: $currentWorkbenchId) @include(if: $hasCurrentWorkbench) {
+    ...WorkbenchTiny
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchSelectorOptionsQuery, Types.WorkbenchSelectorOptionsQueryVariables>;
 export const WorkbenchDashboardDocument = /*#__PURE__*/ gql`
     query WorkbenchDashboard {
   workbenchAggregates {

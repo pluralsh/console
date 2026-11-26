@@ -40,7 +40,9 @@ type AgentRuntimeSpec struct {
 	// +kubebuilder:validation:Required
 	Type console.AgentRuntimeType `json:"type"`
 
-	// Bindings define the creation permissions for this agent runtime.
+	// Bindings define who can create agent runs on this runtime. Omit them to leave the runtime's bindings
+	// unchanged in console (eg managed by an AgentRuntimePolicy), or set an empty create list to clear them.
+	// Only applied on clusters configured to allow agent workloads.
 	// +kubebuilder:validation:Optional
 	Bindings *AgentRuntimeBindings `json:"bindings,omitempty"`
 
@@ -996,7 +998,7 @@ type GeminiConfigRaw struct {
 }
 
 type AgentRuntimeBindings struct {
-	// Create bindings control who can generate new agent runtimes.
+	// Create bindings control who can create agent runs on this runtime.
 	// +kubebuilder:validation:Optional
 	Create []Binding `json:"create,omitempty"`
 }

@@ -143,6 +143,7 @@ var _ = Describe("AgentRuntime Controller", func() {
 				Client:        newAgentRunFakeClient(),
 				Ctx:           context.Background(),
 				ConsoleClient: consoleClient,
+				Agents:        staticAgentsGate(true),
 			}
 
 			err := reconciler.createRunFromID(runID)
@@ -165,9 +166,21 @@ var _ = Describe("AgentRuntime Controller", func() {
 				Client:        newAgentRunFakeClient(existing),
 				Ctx:           context.Background(),
 				ConsoleClient: mocks.NewClientMock(GinkgoT()),
+				Agents:        staticAgentsGate(true),
 			}
 
 			Expect(reconciler.createRunFromID(runID)).To(Succeed())
+		})
+
+		It("does not create runs when the cluster doesn't allow agents", func() {
+			reconciler := &AgentRuntimeReconciler{
+				Client:        newAgentRunFakeClient(),
+				Ctx:           context.Background(),
+				ConsoleClient: mocks.NewClientMock(GinkgoT()),
+				Agents:        staticAgentsGate(false),
+			}
+
+			Expect(reconciler.createRunFromID("run-123")).To(MatchError(AgentsNotAllowedMessage))
 		})
 	})
 })

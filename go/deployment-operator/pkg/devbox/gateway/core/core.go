@@ -18,6 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
@@ -40,6 +41,12 @@ type Egress interface {
 type CredentialService interface {
 	VerifyActorJWT(ctx context.Context, raw string) (*egress.Caller, error)
 	InstanceCredential(ctx context.Context, instanceID string, sel *devboxv1.CredentialSelector) (*devboxv1.InstanceCredential, error)
+}
+
+// Seeds saves the JuiceFS homes of snapshotted instances (juicefs.Client).
+type Seeds interface {
+	SaveSeed(ctx context.Context, seedID, volumeID string) error
+	DeleteSeed(ctx context.Context, seedID string) error
 }
 
 // Config tunes the core. Zero values take the defaults below.
@@ -122,9 +129,11 @@ type Deps struct {
 	Egress Egress
 	// Credentials is optional; SandboxCredentials needs it.
 	Credentials CredentialService
-	// Homes is the JuiceFS home driver (juicefs.Client). Optional: without it instances of runners with JuiceFS
-	// homes can't start, and snapshots of JuiceFS homes keep no copy of the home.
-	Homes homes.Driver
+	// Seeds is optional; without it snapshots of JuiceFS homes keep no copy of the home.
+	Seeds Seeds
+	// Homes are the drivers that seed external homes from their revision's golden home, by storage
+	// (homedriver.Client); instances of a runner whose storage has none can't start.
+	Homes map[v1alpha1.DevboxHomeStorage]homes.Driver
 	Log   logr.Logger
 	Now   func() time.Time
 }

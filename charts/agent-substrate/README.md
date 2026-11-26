@@ -262,7 +262,7 @@ End to end on a cluster (e.g. `hack/kind-up.sh`), in this order:
 
 ### JuiceFS homes
 
-`juicefs.enabled: true` (opt-in, needs `juicefs.image.tag` or `.digest`) adds a JuiceFS filesystem a
+`juicefs.enabled: true` (opt-in; `juicefs.image.tag` is pinned to the chart's deployment-operator release) adds a JuiceFS filesystem a
 DevboxRunner can keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`,
 capped at `spec.home.size`, default `spec.resources.disk`). It reuses the chart's Postgres and
 bucket:
@@ -281,15 +281,48 @@ bucket:
   `juicefs mount` with its cache under `juicefs.node.cacheDir`. The chart turns on Substrate's
   `ExternalVolumes` preview gate.
 
-For each template revision, the operator creates a StorageClass `devbox-home.<atespace>.<template>`
-that copies this one and adds a `seed` parameter. The first home provisioned from it belongs to the
-revision's golden boot. When Substrate deletes the golden actor after tagging it, the driver clones
-that home into the seed, and every later instance of the revision starts from a clone of it, with
-the bootstrap script's clones and builds already there. Snapshots also save the home as a seed, but
-starting from a snapshot fails with `UNSUPPORTED` until Substrate can restore tags of templates
-with external volumes.
+Every template revision of a runner names this StorageClass (or the runner's
+`spec.home.storageClassName`), so an instance's home volume stays the same when it moves to a newer
+revision. While a revision's golden boot runs, the devbox-gateway claims the golden actor's home
+for the revision's seed (`golden.<template uid>`, a CreateVolume with the `claimSeed` parameter).
+When Substrate deletes the golden actor after tagging it, the driver clones that home into the seed.
+The gateway creates every later instance's home as a clone of it (a CreateVolume whose content
+source is the seed) before the instance's first resume, with the bootstrap script's clones and
+builds already there. Snapshots also save the home as a seed, but starting from a snapshot fails
+with `UNSUPPORTED` until Substrate can restore tags of templates with external volumes. Revisions
+from older operators have a StorageClass of their own, `devbox-home.<atespace>.<template>`, with a
+`seed` parameter, which the operator deletes with the revision.
 
-The operator needs `get`, `create` and `delete` on `storageclasses.storage.k8s.io` for these.
+The operator needs `get` and `delete` on `storageclasses.storage.k8s.io`.
+
+### ZeroFS homes
+
+`zerofs.enabled: true` (opt-in; `zerofs.image.tag` is pinned to the chart's deployment-operator release) adds a second home driver,
+`zerofs.devbox.plural.sh` (StorageClass `zerofs.storageClassName`), with no metadata database. Each
+home is its own [ZeroFS](https://www.zerofs.net) filesystem under
+`<zerofs.prefix>/homes/<volume>/` in the snapshot bucket (or `zerofs.storageUrl`), encrypted with
+the password in `devbox-zerofs-encryption`. The secrets hook generates that secret once, or you can
+supply your own with `zerofs.encryption.existingSecret`. Losing the password loses every home.
+
+- **The controller** (`devbox-zerofs-controller`, unprivileged) passes a home's size and owner to
+  the node and deletes the home's objects when Substrate deletes the volume. Only ate-api-server and,
+  with `devboxes.enabled`, the devbox-gateway can call it.
+- **The node plugin** (`devbox-zerofs-node`) is a privileged DaemonSet that runs only where atelet
+  runs: it defaults to atelet's `nodeSelector`, `tolerations` and `affinity`, so nodes without
+  devboxes pay nothing for it. Atelet reaches it through the plugin socket on its own node. Staging a
+  home starts a `zerofs run` writer for it, with its own cache under `zerofs.node.stateDir`. The
+  plugin attaches the home's block device to a free `/dev/nbdN`, formats it as ext4 the first time,
+  and mounts it at atelet's staging path. Publishing bind-mounts that into the actor. Unstaging
+  unmounts the home, disconnects the device and stops the writer, which flushes to the bucket, so
+  the home can be staged on any other node. `updateStrategy` is `OnDelete`, because restarting the
+  plugin ends every home on the node.
+
+A DevboxRunner uses it with `spec.home.storage: ZeroFS`. Its revisions share the runner's StorageClass
+and the gateway claims and seeds homes as with [JuiceFS](#juicefs-homes). When Substrate deletes the
+golden actor, the controller copies its objects to `<zerofs.prefix>/seeds/<seed>/`, and every later
+home of the revision starts from a server-side copy of that prefix. Snapshots don't save the home,
+and starting from a snapshot fails with `UNSUPPORTED`. Homes still count against
+`spec.resources.disk`, because each writer's cache sits on node disk.
 
 ## Values
 
@@ -328,6 +361,7 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 | `objectStore.s3.*`, `objectStore.azureBlob.*` | | backend settings |
 | `rustfs.*` | disabled | embedded RustFS |
 | `juicefs.*` | disabled | [JuiceFS homes](#juicefs-homes): image, `name`, `storageClassName`, `bucket`, `postgres`, `home.{uid,gid,mode}`, controller and node `mountFlags`/`resources` |
+| `zerofs.*` | disabled | [ZeroFS homes](#zerofs-homes): image, `storageClassName`, `storageUrl`/`prefix`, `encryption.existingSecret`, `home.{uid,gid,mode}`, node cache sizes, `nbdClientFlags`, `objectStoreOptions` and scheduling |
 | `secretsHook.{opensslImage,kubectlImage,caValidityDays}` | `alpine/openssl:3.5.9`, `alpine/kubectl:1.37.2`, 365 | secrets hook |
 | `bootstrapJob.image` | `alpine/kubectl:1.37.2` | first-install bootstrap Job |
 | `cloudnative-pg.enabled` | `true` | bundle the CNPG operator |

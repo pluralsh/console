@@ -38,6 +38,7 @@ const (
 	Ingest_UpdateAgentCredential_FullMethodName  = "/devbox.v1.Ingest/UpdateAgentCredential"
 	Ingest_ReportPullRequest_FullMethodName      = "/devbox.v1.Ingest/ReportPullRequest"
 	Ingest_DevboxPullRequest_FullMethodName      = "/devbox.v1.Ingest/DevboxPullRequest"
+	Ingest_ListDevboxPullRequests_FullMethodName = "/devbox.v1.Ingest/ListDevboxPullRequests"
 )
 
 // IngestClient is the client API for Ingest service.
@@ -72,6 +73,10 @@ type IngestClient interface {
 	// DevboxPullRequest creates a PR on behalf of the devbox MCP's create_pull_request tool (Dispatcher.pr), with
 	// instance and thread attribution.
 	DevboxPullRequest(ctx context.Context, in *DevboxPullRequestRequest, opts ...grpc.CallOption) (*DevboxPullRequestResponse, error)
+	// ListDevboxPullRequests reads back the PRs console attributes to an instance's devbox, however they were opened
+	// (the devbox MCP, the Create PR button, or observed at egress), for the MCP's list_pull_requests tool and its PR
+	// ownership checks.
+	ListDevboxPullRequests(ctx context.Context, in *ListDevboxPullRequestsRequest, opts ...grpc.CallOption) (*ListDevboxPullRequestsResponse, error)
 }
 
 type ingestClient struct {
@@ -182,6 +187,16 @@ func (c *ingestClient) DevboxPullRequest(ctx context.Context, in *DevboxPullRequ
 	return out, nil
 }
 
+func (c *ingestClient) ListDevboxPullRequests(ctx context.Context, in *ListDevboxPullRequestsRequest, opts ...grpc.CallOption) (*ListDevboxPullRequestsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDevboxPullRequestsResponse)
+	err := c.cc.Invoke(ctx, Ingest_ListDevboxPullRequests_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IngestServer is the server API for Ingest service.
 // All implementations must embed UnimplementedIngestServer
 // for forward compatibility.
@@ -214,6 +229,10 @@ type IngestServer interface {
 	// DevboxPullRequest creates a PR on behalf of the devbox MCP's create_pull_request tool (Dispatcher.pr), with
 	// instance and thread attribution.
 	DevboxPullRequest(context.Context, *DevboxPullRequestRequest) (*DevboxPullRequestResponse, error)
+	// ListDevboxPullRequests reads back the PRs console attributes to an instance's devbox, however they were opened
+	// (the devbox MCP, the Create PR button, or observed at egress), for the MCP's list_pull_requests tool and its PR
+	// ownership checks.
+	ListDevboxPullRequests(context.Context, *ListDevboxPullRequestsRequest) (*ListDevboxPullRequestsResponse, error)
 	mustEmbedUnimplementedIngestServer()
 }
 
@@ -253,6 +272,9 @@ func (UnimplementedIngestServer) ReportPullRequest(context.Context, *ReportPullR
 }
 func (UnimplementedIngestServer) DevboxPullRequest(context.Context, *DevboxPullRequestRequest) (*DevboxPullRequestResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DevboxPullRequest not implemented")
+}
+func (UnimplementedIngestServer) ListDevboxPullRequests(context.Context, *ListDevboxPullRequestsRequest) (*ListDevboxPullRequestsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDevboxPullRequests not implemented")
 }
 func (UnimplementedIngestServer) mustEmbedUnimplementedIngestServer() {}
 func (UnimplementedIngestServer) testEmbeddedByValue()                {}
@@ -455,6 +477,24 @@ func _Ingest_DevboxPullRequest_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Ingest_ListDevboxPullRequests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDevboxPullRequestsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IngestServer).ListDevboxPullRequests(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Ingest_ListDevboxPullRequests_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IngestServer).ListDevboxPullRequests(ctx, req.(*ListDevboxPullRequestsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Ingest_ServiceDesc is the grpc.ServiceDesc for Ingest service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -501,6 +541,10 @@ var Ingest_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DevboxPullRequest",
 			Handler:    _Ingest_DevboxPullRequest_Handler,
+		},
+		{
+			MethodName: "ListDevboxPullRequests",
+			Handler:    _Ingest_ListDevboxPullRequests_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

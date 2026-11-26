@@ -16,6 +16,10 @@ func (in *PlanArgsModifier) Args(args []string) []string {
 		return args
 	}
 
+	if in.runAll {
+		args = insertBeforeSubcommand(args, "--out-dir", in.outDir, "--json-out-dir", in.jsonOutDir)
+	}
+
 	if in.parallelism != nil {
 		args = append(args, fmt.Sprintf("-parallelism=%d", *in.parallelism))
 	}
@@ -24,17 +28,34 @@ func (in *PlanArgsModifier) Args(args []string) []string {
 		args = append(args, fmt.Sprintf("-refresh=%t", *in.refresh))
 	}
 
+	if in.runAll {
+		return forwardCommand(args)
+	}
+
 	return append(args, fmt.Sprintf("-out=%s", in.planFileName))
 }
 
 func (in *Terragrunt) NewPlanArgsModifier(planFileName string) v1.Modifier {
-	return &PlanArgsModifier{planFileName: planFileName, parallelism: in.parallelism, refresh: in.refresh}
+	return &PlanArgsModifier{
+		planFileName: planFileName,
+		parallelism:  in.parallelism,
+		refresh:      in.refresh,
+		runAll:       in.runAll,
+		outDir:       in.outDir,
+		jsonOutDir:   in.jsonOutDir,
+	}
 }
 
 // Args implements [v1.ArgsModifier] type.
 func (in *ApplyArgsModifier) Args(args []string) []string {
 	if !lo.Contains(args, "apply") {
 		return args
+	}
+
+	// Filters are added after the plan writes JSON. Building them here would
+	// see an empty directory and apply every unit.
+	if in.runAll {
+		return insertBeforeSubcommand(args, "--out-dir", in.outDir)
 	}
 
 	if !helpers.Exists(path.Join(in.dir, in.planFileName)) || lo.Contains(args, in.planFileName) {
@@ -49,5 +70,63 @@ func (in *ApplyArgsModifier) Args(args []string) []string {
 }
 
 func (in *Terragrunt) NewApplyArgsModifier(dir, planFileName string) v1.Modifier {
-	return &ApplyArgsModifier{planFileName: planFileName, dir: dir, parallelism: in.parallelism, refresh: in.refresh}
+	return &ApplyArgsModifier{
+		planFileName: planFileName,
+		dir:          dir,
+		parallelism:  in.parallelism,
+		refresh:      in.refresh,
+		runAll:       in.runAll,
+		outDir:       in.outDir,
+		jsonOutDir:   in.jsonOutDir,
+	}
+}
+
+// insertBeforeSubcommand places terragrunt flags immediately before plan, apply, or destroy.
+func insertBeforeSubcommand(args []string, flags ...string) []string {
+	if len(flags) == 0 {
+		return args
+	}
+
+	for i, arg := range args {
+		if arg == "plan" || arg == "apply" || arg == "destroy" {
+			out := make([]string, 0, len(args)+len(flags))
+			out = append(out, args[:i]...)
+			out = append(out, flags...)
+			out = append(out, args[i:]...)
+			return out
+		}
+	}
+
+	return append(args, flags...)
+}
+
+// forwardCommand puts "--" immediately before plan, apply, or destroy.
+// Terragrunt flags stay in front of it, and OpenTofu flags stay behind the command.
+func forwardCommand(args []string) []string {
+	index := -1
+	for i, arg := range args {
+		if arg == "plan" || arg == "apply" || arg == "destroy" {
+			index = i
+			break
+		}
+	}
+	if index < 0 {
+		return args
+	}
+
+	head := make([]string, 0, len(args)+1)
+	for _, arg := range args[:index] {
+		if arg != "--" {
+			head = append(head, arg)
+		}
+	}
+	tail := make([]string, 0, len(args)-index)
+	tail = append(tail, args[index])
+	for _, arg := range args[index+1:] {
+		if arg != "--" {
+			tail = append(tail, arg)
+		}
+	}
+
+	return append(append(head, "--"), tail...)
 }

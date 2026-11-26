@@ -434,7 +434,7 @@ func (s *DevboxRunnerSpec) HasGoldenBootWork() bool {
 }
 
 // DevboxHomeStorage is where an instance's /home/dev lives.
-// +kubebuilder:validation:Enum=Snapshot;JuiceFS
+// +kubebuilder:validation:Enum=Snapshot;JuiceFS;ZeroFS
 type DevboxHomeStorage string
 
 const (
@@ -443,17 +443,23 @@ const (
 	// DevboxHomeJuiceFS keeps the home in the agent-substrate chart's JuiceFS filesystem (juicefs.enabled), mounted
 	// wherever the instance runs, so snapshots carry only memory and moving node doesn't copy the home.
 	DevboxHomeJuiceFS DevboxHomeStorage = "JuiceFS"
+	// DevboxHomeZeroFS keeps each home in its own ZeroFS filesystem in object storage, from the agent-substrate
+	// chart's ZeroFS driver (zerofs.enabled): an ext4 block device that follows the instance from node to node, with
+	// no metadata database. Snapshots carry only memory.
+	DevboxHomeZeroFS DevboxHomeStorage = "ZeroFS"
 
 	// DevboxDefaultJuiceFSStorageClass is the agent-substrate chart's juicefs.storageClassName default.
 	DevboxDefaultJuiceFSStorageClass = "devbox-juicefs"
+	// DevboxDefaultZeroFSStorageClass is the agent-substrate chart's zerofs.storageClassName default.
+	DevboxDefaultZeroFSStorageClass = "devbox-zerofs"
 )
 
 // DevboxHome selects how instances store /home/dev.
 //
-// With JuiceFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and mise
-// installed is there from the start, and every snapshot also saves the home as a JuiceFS clone. Starting an
-// instance from a snapshot isn't supported yet: Substrate can't restore a tag of a template with external
-// volumes.
+// With JuiceFS or ZeroFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and
+// mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
+// ZeroFS snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for either:
+// Substrate can't restore a tag of a template with external volumes.
 type DevboxHome struct {
 	// Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
 	// home.
@@ -461,11 +467,13 @@ type DevboxHome struct {
 	// +kubebuilder:default=Snapshot
 	Storage *DevboxHomeStorage `json:"storage,omitempty"`
 
-	// Size is the most a JuiceFS home may hold, enforced as a JuiceFS quota. Defaults to spec.resources.disk.
+	// Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.
+	// Defaults to spec.resources.disk.
 	// +kubebuilder:validation:Optional
 	Size *resource.Quantity `json:"size,omitempty"`
 
-	// StorageClassName is the JuiceFS StorageClass. Defaults to the agent-substrate chart's devbox-juicefs.
+	// StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's
+	// devbox-juicefs or devbox-zerofs.
 	// +kubebuilder:validation:Optional
 	StorageClassName *string `json:"storageClassName,omitempty"`
 }
@@ -476,6 +484,11 @@ func (s *DevboxRunnerSpec) HomeStorage() DevboxHomeStorage {
 		return DevboxHomeSnapshot
 	}
 	return *s.Home.Storage
+}
+
+// External reports whether homes are volumes outside the instance's snapshots, served by a CSI driver.
+func (s DevboxHomeStorage) External() bool {
+	return s == DevboxHomeJuiceFS || s == DevboxHomeZeroFS
 }
 
 // HomeSize is the most an instance's home may hold.
@@ -489,10 +502,13 @@ func (s *DevboxRunnerSpec) HomeSize() resource.Quantity {
 	return resource.MustParse("20Gi")
 }
 
-// HomeStorageClass is the StorageClass of a JuiceFS home.
+// HomeStorageClass is the StorageClass of a JuiceFS or ZeroFS home.
 func (s *DevboxRunnerSpec) HomeStorageClass() string {
 	if s.Home != nil && s.Home.StorageClassName != nil && *s.Home.StorageClassName != "" {
 		return *s.Home.StorageClassName
+	}
+	if s.HomeStorage() == DevboxHomeZeroFS {
+		return DevboxDefaultZeroFSStorageClass
 	}
 	return DevboxDefaultJuiceFSStorageClass
 }

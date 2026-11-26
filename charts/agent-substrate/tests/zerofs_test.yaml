@@ -1,0 +1,314 @@
+suite: zerofs homes
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  objectStore.snapshotLocation: s3://ate-snapshots/substrate/
+  objectStore.s3.region: us-east-2
+  zerofs.enabled: true
+  zerofs.image.tag: "1.2.3"
+tests:
+  - it: renders nothing unless enabled
+    template: templates/zerofs.yaml
+    set:
+      zerofs.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: keeps homes in the snapshot bucket and lets ate-api-server and the devbox-gateway call the controller
+    template: templates/zerofs.yaml
+    documentSelector:
+      path: metadata.name
+      value: devbox-zerofs-controller
+      kind: Deployment
+    set:
+      devboxes.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --storage-url=s3://ate-snapshots/devbox-homes-zerofs
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --default-capacity=107374182400
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --allowed-clients=spiffe://cluster.local/ns/ate-system/sa/ate-api-server,spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: AWS_REGION
+            value: us-east-2
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.privileged
+
+  - it: uses gs:// and azure:// on the other clouds
+    template: templates/zerofs.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    set:
+      objectStore.backend: gcs
+      objectStore.snapshotLocation: gs://ate-snapshots/substrate/
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --storage-url=gs://ate-snapshots/devbox-homes-zerofs
+
+  - it: allows plain HTTP to RustFS
+    template: templates/zerofs.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    set:
+      objectStore.snapshotLocation: ""
+      rustfs.enabled: true
+      zerofs.node.objectStoreOptions:
+        region: us-east-1
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --storage-url=s3://ate-snapshots/devbox-homes-zerofs
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --object-store-option=allow_http=true
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --object-store-option=region=us-east-1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: AWS_ENDPOINT_URL
+            value: http://rustfs.ate-system.svc:9000
+
+  - it: runs the node plugin only where atelet runs
+    template: templates/zerofs.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    set:
+      atelet.nodeSelector:
+        plural.sh/devbox-pool: devbox
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value:
+            plural.sh/devbox-pool: devbox
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: ate.dev/sandboxClass
+            operator: Exists
+            effect: NoSchedule
+      - equal:
+          path: spec.updateStrategy.type
+          value: OnDelete
+
+  - it: lets the node plugin pick its own placement
+    template: templates/zerofs.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    set:
+      atelet.nodeSelector:
+        plural.sh/devbox-pool: devbox
+      zerofs.node.nodeSelector:
+        plural.sh/devbox-pool: big
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value:
+            plural.sh/devbox-pool: big
+
+  - it: gives the node plugin the host's block devices, kernel modules and plugin socket
+    template: templates/zerofs.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: ate-base
+            mountPath: /var/lib/ate
+            mountPropagation: Bidirectional
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: plugin-dir
+            hostPath:
+              path: /var/lib/kubelet/plugins/zerofs.devbox.plural.sh
+              type: DirectoryOrCreate
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: dev
+            hostPath:
+              path: /dev
+              type: Directory
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --nbd-client-flag=-connections
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ZEROFS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: devbox-zerofs-encryption
+                key: password
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --object-store-option=allow_http=true
+
+  - it: reads an existing encryption secret and skips generating one
+    set:
+      zerofs.encryption.existingSecret.name: homes-key
+      zerofs.encryption.existingSecret.key: k
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ZEROFS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: homes-key
+                key: k
+        template: templates/zerofs.yaml
+        documentSelector:
+          path: kind
+          value: DaemonSet
+      - notContains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: ZEROFS_SECRET
+            value: homes-key
+        template: templates/secrets-hook.yaml
+        documentSelector:
+          path: kind
+          value: Job
+
+  - it: generates the encryption password in the secrets hook
+    template: templates/secrets-hook.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: ZEROFS_SECRET
+            value: devbox-zerofs-encryption
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ZEROFS_SECRET
+            value: devbox-zerofs-encryption
+
+  - it: points Substrate at the controller over mTLS
+    template: templates/zerofs.yaml
+    capabilities:
+      apiVersions:
+        - ate.dev/v1/CSIDriverConfig
+    documentSelector:
+      path: kind
+      value: CSIDriverConfig
+    asserts:
+      - equal:
+          path: spec
+          value:
+            driverName: zerofs.devbox.plural.sh
+            controllerEndpoint: tcp://devbox-zerofs.ate-system.svc:9820
+            tls:
+              enabled: true
+              usePodIdentity: true
+              serverName: devbox-zerofs.ate-system.svc
+
+  - it: defers the CSIDriverConfig to the bootstrap Job on first install
+    template: templates/bootstrap-job.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    asserts:
+      - exists:
+          path: data["02-csidriverconfig-zerofs.devbox.plural.sh.yaml"]
+
+  - it: turns on the ExternalVolumes preview gate
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --preview=ExternalVolumes
+
+  - it: lets the plugins reach RustFS and only ate-api-server reach the controller
+    template: templates/networkpolicies.yaml
+    set:
+      rustfs.enabled: true
+    asserts:
+      - contains:
+          path: spec.ingress[0].from[0].podSelector.matchExpressions[0].values
+          content: devbox-zerofs-node
+        documentSelector:
+          path: metadata.name
+          value: rustfs
+      - equal:
+          path: spec.ingress[0].from
+          value:
+            - podSelector:
+                matchLabels:
+                  app: ate-api-server
+        documentSelector:
+          path: metadata.name
+          value: devbox-zerofs-controller
+
+  - it: lets the devbox-gateway reach the controller to seed homes
+    template: templates/networkpolicies.yaml
+    set:
+      devboxes.enabled: true
+    documentSelector:
+      path: metadata.name
+      value: devbox-zerofs-controller
+    asserts:
+      - contains:
+          path: spec.ingress[0].from
+          content:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: plrl-deploy-operator
+
+  - it: needs an image
+    template: templates/validate.yaml
+    set:
+      zerofs.image.tag: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: zerofs.image.tag
+
+  - it: refuses a storage URL ZeroFS can't open
+    template: templates/validate.yaml
+    set:
+      zerofs.storageUrl: https://example.com/homes
+    asserts:
+      - failedTemplate:
+          errorPattern: zerofs.storageUrl
+
+  - it: refuses sharing a StorageClass with JuiceFS
+    template: templates/validate.yaml
+    set:
+      juicefs.enabled: true
+      juicefs.image.tag: "1.2.3"
+      zerofs.storageClassName: devbox-juicefs
+    asserts:
+      - failedTemplate:
+          errorPattern: storageClassName

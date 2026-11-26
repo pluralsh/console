@@ -164,10 +164,9 @@ _Appears in:_
 
 
 
-AgentRuntimePolicy centrally defines who can create agent runs on an AgentRuntime.
-Bindings must be managed from the management cluster: if a target cluster could set
-its own bindings, cluster operators could grant themselves clone/PR access against
-any repository reachable by the runtime's SCM credentials.
+AgentRuntimePolicy centrally defines who can create agent runs on an AgentRuntime from the management cluster.
+Runtimes can also set their own bindings on the AgentRuntime itself, since only clusters an admin has configured
+to allow agent workloads can register runtimes; leave those unset when this policy manages them.
 
 
 
@@ -6040,6 +6039,7 @@ _Appears in:_
 | `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
 | `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
 | `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
+| `runAll` _boolean_ | RunAll runs terragrunt across every unit under the stack folder.<br />Units whose plans are empty are not applied. |  | Optional: \{\} <br /> |
 
 
 #### Tools

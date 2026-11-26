@@ -52,9 +52,11 @@ const (
 	gatewayServiceDNSMount   = "/run/servicedns.podcert.ate.dev"
 	gatewayServiceDNSCAMount = "/run/servicedns-ca.podcert.ate.dev"
 
-	// devboxJuiceFSService is the agent-substrate chart's JuiceFS CSI controller.
+	// devboxJuiceFSService and devboxZeroFSService are the agent-substrate chart's CSI controllers of external
+	// homes, both on devboxHomeDriverPort.
 	devboxJuiceFSService = "devbox-juicefs"
-	devboxJuiceFSPort    = 9820
+	devboxZeroFSService  = "devbox-zerofs"
+	devboxHomeDriverPort = 9820
 )
 
 func devboxGatewayLabels() map[string]string {
@@ -232,15 +234,20 @@ func (r *DevboxRunnerReconciler) gatewayEnv(ctx context.Context) ([]corev1.EnvVa
 		{Name: "DEVBOX_GATEWAY_HOST", Value: r.gatewayHost(devboxGatewayName)},
 		{Name: "DEVBOX_EGRESS_AUTHZ_HOST", Value: r.gatewayHost(devboxEgressAuthzName)},
 	}
-	// Only set once the agent-substrate chart installs JuiceFS: with an address, deleting any snapshot first deletes
-	// its JuiceFS seed, and fails while the controller is unreachable.
-	juicefs := &corev1.Service{}
-	err := r.Get(ctx, client.ObjectKey{Name: devboxJuiceFSService, Namespace: r.Config.SubstrateNamespace}, juicefs)
-	switch {
-	case err == nil:
-		env = append(env, corev1.EnvVar{Name: "DEVBOX_JUICEFS_ADDRESS", Value: fmt.Sprintf("%s.%s.svc:%d", devboxJuiceFSService, r.Config.SubstrateNamespace, devboxJuiceFSPort)})
-	case !apierrors.IsNotFound(err):
-		return nil, fmt.Errorf("checking for the JuiceFS controller: %w", err)
+	// Only set once the agent-substrate chart installs the driver: with an address, the gateway seeds new homes
+	// through it, and with JuiceFS's, deleting any snapshot first deletes its JuiceFS seed, and fails while the
+	// controller is unreachable.
+	for _, driver := range []struct{ service, envVar string }{
+		{devboxJuiceFSService, "DEVBOX_JUICEFS_ADDRESS"},
+		{devboxZeroFSService, "DEVBOX_ZEROFS_ADDRESS"},
+	} {
+		err := r.Get(ctx, client.ObjectKey{Name: driver.service, Namespace: r.Config.SubstrateNamespace}, &corev1.Service{})
+		switch {
+		case err == nil:
+			env = append(env, corev1.EnvVar{Name: driver.envVar, Value: fmt.Sprintf("%s.%s.svc:%d", driver.service, r.Config.SubstrateNamespace, devboxHomeDriverPort)})
+		case !apierrors.IsNotFound(err):
+			return nil, fmt.Errorf("checking for the %s controller: %w", driver.service, err)
+		}
 	}
 	return env, nil
 }

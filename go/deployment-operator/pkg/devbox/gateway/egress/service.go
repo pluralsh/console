@@ -94,7 +94,6 @@ func New(cfg Config, deps Deps) (*Service, error) {
 			ingest:   deps.Ingest,
 			creds:    s.creds,
 			prs:      s.prs,
-			owner:    deps.PullRequests,
 			diffs:    deps.Diffs,
 			scmOpts:  opts,
 			log:      log.WithName("mcp"),

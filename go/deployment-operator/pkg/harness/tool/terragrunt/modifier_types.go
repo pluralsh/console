@@ -16,6 +16,15 @@ type PlanArgsModifier struct {
 
 	// refresh
 	refresh *bool
+
+	// runAll adds terragrunt run --all plan output flags instead of -out.
+	runAll bool
+
+	// outDir is the terragrunt --out-dir for a runAll plan.
+	outDir string
+
+	// jsonOutDir is the terragrunt --json-out-dir for a runAll plan.
+	jsonOutDir string
 }
 
 // ApplyArgsModifier implements [v1.ArgsModifier] interface.
@@ -33,4 +42,13 @@ type ApplyArgsModifier struct {
 
 	// refresh
 	refresh *bool
+
+	// runAll reuses the saved plan directory. Changed units are selected later.
+	runAll bool
+
+	// outDir is the terragrunt --out-dir for a runAll apply.
+	outDir string
+
+	// jsonOutDir is where runAll plan JSON is read to find changed units.
+	jsonOutDir string
 }

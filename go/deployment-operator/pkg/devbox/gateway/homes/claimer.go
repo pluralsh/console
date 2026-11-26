@@ -21,13 +21,13 @@ type Actors interface {
 	GetActor(ctx context.Context, ref actors.Ref) (*ateapi.Actor, error)
 }
 
-// Claimer claims the JuiceFS home of every building revision's golden actor for the revision's seed. Claims are
+// Claimer claims the external home of every building revision's golden actor for the revision's seed. Claims are
 // idempotent, so several gateways may run it.
 type Claimer struct {
 	Client client.Reader
 	Actors Actors
-	// Driver is the JuiceFS home driver.
-	Driver   Driver
+	// Drivers are the home drivers by storage; revisions of a storage without one are skipped.
+	Drivers  map[v1alpha1.DevboxHomeStorage]Driver
 	Interval time.Duration
 	Log      logr.Logger
 
@@ -72,11 +72,11 @@ func (c *Claimer) Pass(ctx context.Context) error {
 		}
 		for _, rev := range runner.Status.Revisions {
 			seed := lo.FromPtr(rev.HomeSeed)
-			if rev.Phase != v1alpha1.DevboxRevisionBuilding || seed == "" || c.claimed[seed] ||
-				lo.FromPtr(rev.HomeStorage) != v1alpha1.DevboxHomeJuiceFS {
+			driver := c.Drivers[lo.FromPtr(rev.HomeStorage)]
+			if rev.Phase != v1alpha1.DevboxRevisionBuilding || seed == "" || c.claimed[seed] || driver == nil {
 				continue
 			}
-			if err := c.claim(ctx, atespace, rev.Name, seed); err != nil {
+			if err := c.claim(ctx, driver, atespace, rev.Name, seed); err != nil {
 				errs = append(errs, err)
 			}
 		}
@@ -85,7 +85,7 @@ func (c *Claimer) Pass(ctx context.Context) error {
 }
 
 // claim finds the golden actor of a template and claims its home once Substrate created it.
-func (c *Claimer) claim(ctx context.Context, atespace, template, seed string) error {
+func (c *Claimer) claim(ctx context.Context, driver Driver, atespace, template, seed string) error {
 	tmpl, err := c.Actors.GetActorTemplate(ctx, actors.Ref{Atespace: atespace, Name: template})
 	if substrate.IsNotFound(err) {
 		return nil
@@ -108,7 +108,7 @@ func (c *Claimer) claim(ctx context.Context, atespace, template, seed string) er
 		return nil
 	}
 	// NotFound: Substrate listed the home before creating it, or deleted it already.
-	if err := c.Driver.ClaimSeed(ctx, volume, seed); substrate.IsNotFound(err) {
+	if err := driver.ClaimSeed(ctx, volume, seed); substrate.IsNotFound(err) {
 		return nil
 	} else if err != nil {
 		return err

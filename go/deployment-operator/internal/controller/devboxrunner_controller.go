@@ -53,6 +53,7 @@ type DevboxRunnerReconciler struct {
 	Scheme           *runtime.Scheme
 	Config           DevboxConfig
 	Console          DevboxConsoleClient
+	Agents           AgentsGate
 	Substrate        SubstrateClients
 	Images           DevboxImageResolver
 	Probe            DevboxProbeClient
@@ -98,6 +99,16 @@ func (r *DevboxRunnerReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		// the finalizer must be saved before the substrate space or console devbox exist, or deleting the runner
 		// mid-reconcile orphans them; finalizer-only patches don't pass GenerationChangedPredicate, so requeue
 		return ctrl.Result{RequeueAfter: time.Second}, nil
+	}
+
+	enabled, err := r.Agents.AgentsEnabled(ctx)
+	if err != nil {
+		utils.MarkCondition(runner.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if !enabled {
+		markAgentsNotAllowed(runner.SetCondition)
+		return jitterRequeue(requeueAgentsNotAllowed, jitter), nil
 	}
 
 	if err := r.reconcileGateway(ctx, runner); err != nil {

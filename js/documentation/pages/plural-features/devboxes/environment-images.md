@@ -12,7 +12,7 @@ A devbox instance runs two images side by side:
 
 When an instance starts, the runtime installs the daemon and the agents listed in the runner's `spec.agents` into the instance's home volume, and the environment image runs them from there. Your image therefore doesn't need to ship any agent, and agent updates don't require rebuilding it.
 
-Only the runner's own agents are installed, because everything installed lands in every instance's home and snapshots, and counts against a JuiceFS home's quota (`spec.home.size`). As a rough guide on amd64, Claude Code and Codex take about 320 MB each, OpenCode 180 MB, pi 180 MB, Gemini CLI 100 MB, and the Node.js they share 120 MB. The daemon adds about 20 MB, and Playwright MCP about 20 MB with the browser enabled.
+Only the runner's own agents are installed, because everything installed lands in every instance's home and snapshots, and counts against a JuiceFS or ZeroFS home's size (`spec.home.size`). As a rough guide on amd64, Claude Code and Codex take about 320 MB each, OpenCode 180 MB, pi 180 MB, Gemini CLI 100 MB, and the Node.js they share 120 MB. The daemon adds about 20 MB, and Playwright MCP about 20 MB with the browser enabled.
 
 
 ## Requirements

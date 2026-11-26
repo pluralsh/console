@@ -29,13 +29,11 @@ import (
 // Volume is the template volume mounted at /home/dev.
 const Volume = "home"
 
-// Driver is a home driver's CSI controller (juicefs.Client).
+// Driver is a home driver's CSI controller (homedriver.Client).
 type Driver interface {
 	ClaimSeed(ctx context.Context, volumeID, seedID string) error
 	SeedVolume(ctx context.Context, volumeID, seedID string, capacityBytes int64) error
 	DeleteVolume(ctx context.Context, volumeID string) error
-	SaveSeed(ctx context.Context, seedID, volumeID string) error
-	DeleteSeed(ctx context.Context, seedID string) error
 }
 
 // VolumeID is the ID Substrate gives an actor's home when it creates it: substrate-<actor uid>-<volume>

@@ -79,6 +79,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :parallelism,   :integer, description: "equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation"
     field :refresh,       :boolean, description: "equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+    field :run_all,       :boolean, description: "whether to run terragrunt across every unit under the stack folder"
   end
 
   input_object :pulumi_configuration_attributes do
@@ -429,6 +430,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :parallelism,   :integer, description: "equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation"
     field :refresh,       :boolean, description: "equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+    field :run_all,       :boolean, description: "whether to run terragrunt across every unit under the stack folder"
   end
 
   object :pulumi_configuration do

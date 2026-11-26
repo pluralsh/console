@@ -24,7 +24,7 @@ defmodule Console.DevboxesTest do
 
   describe "#upsert_devbox/3" do
     test "a cluster can create and update its devbox by name" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
 
       {:ok, devbox} = Devboxes.upsert_devbox(@catalog, cluster)
 
@@ -39,7 +39,7 @@ defmodule Console.DevboxesTest do
     end
 
     test "it resolves scm connections by name" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       conn = insert(:scm_connection)
 
       {:ok, devbox} = Devboxes.upsert_devbox(Map.put(@catalog, :scm_connections, [conn.name]), cluster)
@@ -51,7 +51,7 @@ defmodule Console.DevboxesTest do
     end
 
     test "it resolves create bindings by email and group name, keeping them stable across upserts" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       user = insert(:user)
       group = insert(:group)
       bindings = [%{user_email: user.email}, %{group_name: group.name}, %{user_email: "nobody@example.com"}]
@@ -69,7 +69,7 @@ defmodule Console.DevboxesTest do
     end
 
     test "it stores the runner's autonomy policy, defaulting to auto" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
 
       {:ok, devbox} = Devboxes.upsert_devbox(@catalog, cluster)
       assert Devbox.autonomy(devbox) == %{default: :auto, max: :auto}
@@ -87,6 +87,11 @@ defmodule Console.DevboxesTest do
       agents = Enum.map(@catalog.agents, &Map.put(&1, :default, false))
 
       {:error, _} = Devboxes.upsert_devbox(%{@catalog | agents: agents}, cluster)
+    end
+
+    test "clusters not configured for agents cannot register devboxes" do
+      {:error, msg} = Devboxes.upsert_devbox(@catalog, insert(:cluster))
+      assert msg == "this cluster has not been configured to support agent workloads"
     end
 
     test "a cluster cannot modify another cluster's devbox" do

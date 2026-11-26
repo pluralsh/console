@@ -214,7 +214,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `create` _[Binding](#binding) array_ | Create bindings control who can generate new agent runtimes. |  | Optional: \{\} <br /> |
+| `create` _[Binding](#binding) array_ | Create bindings control who can create agent runs on this runtime. |  | Optional: \{\} <br /> |
 
 
 #### AgentRuntimeConfig
@@ -272,7 +272,7 @@ _Appears in:_
 | `default` _boolean_ | Default indicates whether this is the default agent runtime for coding agents. |  | Optional: \{\} <br /> |
 | `targetNamespace` _string_ |  |  | Required: \{\} <br /> |
 | `type` _[AgentRuntimeType](#agentruntimetype)_ | Type specifies the agent runtime to use for executing the stack.<br />One of CLAUDE, OPENCODE, GEMINI, CODEX, PI, CUSTOM. |  | Enum: [CLAUDE OPENCODE GEMINI CODEX PI CUSTOM] <br />Required: \{\} <br /> |
-| `bindings` _[AgentRuntimeBindings](#agentruntimebindings)_ | Bindings define the creation permissions for this agent runtime. |  | Optional: \{\} <br /> |
+| `bindings` _[AgentRuntimeBindings](#agentruntimebindings)_ | Bindings define who can create agent runs on this runtime. Omit them to leave the runtime's bindings<br />unchanged in console (eg managed by an AgentRuntimePolicy), or set an empty create list to clear them.<br />Only applied on clusters configured to allow agent workloads. |  | Optional: \{\} <br /> |
 | `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template defines the pod template for this agent runtime. |  |  |
 | `config` _[AgentRuntimeConfig](#agentruntimeconfig)_ | Config contains typed configuration depending on the chosen runtime type. |  | Optional: \{\} <br /> |
 | `aiProxy` _boolean_ | AiProxy routes LLM requests through the Console AI proxy (/ext/ai) using the deploy token,<br />which the in-pod mcpserver sidecar adds, so provider API keys in spec.config are optional.<br />Set the model on the runtime-specific config block (for example spec.config.codex.model).<br />The proxy expects models in provider/name format (for example openai/gpt-5.4,<br />anthropic/claude-sonnet-4-5, vertex/gemini-2.5-pro). Values that already include a "/"<br />are passed through unchanged.<br />When only a bare model id is given, the harness may prefix it by runtime type:<br />  - CLAUDE: anthropic/\{model\} (for example claude-sonnet-4-5 -> anthropic/claude-sonnet-4-5)<br />  - CODEX, OPENCODE: openai/\{model\} (for example gpt-5.4 -> openai/gpt-5.4)<br />  - GEMINI: vertex/\{model\}<br />  - CUSTOM: no automatic prefix; use provider/name explicitly |  |  |
@@ -956,10 +956,10 @@ _Appears in:_
 
 DevboxHome selects how instances store /home/dev.
 
-With JuiceFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and mise
-installed is there from the start, and every snapshot also saves the home as a JuiceFS clone. Starting an
-instance from a snapshot isn't supported yet: Substrate can't restore a tag of a template with external
-volumes.
+With JuiceFS or ZeroFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and
+mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
+ZeroFS snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for either:
+Substrate can't restore a tag of a template with external volumes.
 
 
 
@@ -968,9 +968,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS] <br />Optional: \{\} <br /> |
-| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS home may hold, enforced as a JuiceFS quota. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
-| `storageClassName` _string_ | StorageClassName is the JuiceFS StorageClass. Defaults to the agent-substrate chart's devbox-juicefs. |  | Optional: \{\} <br /> |
+| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS ZeroFS] <br />Optional: \{\} <br /> |
+| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.<br />Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
+| `storageClassName` _string_ | StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's<br />devbox-juicefs or devbox-zerofs. |  | Optional: \{\} <br /> |
 
 
 #### DevboxHomeStorage
@@ -980,7 +980,7 @@ _Underlying type:_ _string_
 DevboxHomeStorage is where an instance's /home/dev lives.
 
 _Validation:_
-- Enum: [Snapshot JuiceFS]
+- Enum: [Snapshot JuiceFS ZeroFS]
 
 _Appears in:_
 - [DevboxHome](#devboxhome)
@@ -990,6 +990,7 @@ _Appears in:_
 | --- | --- |
 | `Snapshot` | DevboxHomeSnapshot keeps the home on the instance's node and carries it in every snapshot.<br /> |
 | `JuiceFS` | DevboxHomeJuiceFS keeps the home in the agent-substrate chart's JuiceFS filesystem (juicefs.enabled), mounted<br />wherever the instance runs, so snapshots carry only memory and moving node doesn't copy the home.<br /> |
+| `ZeroFS` | DevboxHomeZeroFS keeps each home in its own ZeroFS filesystem in object storage, from the agent-substrate<br />chart's ZeroFS driver (zerofs.enabled): an ext4 block device that follows the instance from node to node, with<br />no metadata database. Snapshots carry only memory.<br /> |
 
 
 #### DevboxIdlePolicy
@@ -1186,7 +1187,7 @@ _Appears in:_
 | `daemonVersion` _string_ | DaemonVersion is the devbox-daemon version of Runtime. |  | Optional: \{\} <br /> |
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
-| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS] <br />Optional: \{\} <br /> |
+| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS ZeroFS] <br />Optional: \{\} <br /> |
 | `homeStorageClass` _string_ | HomeStorageClass is the StorageClass of an external home, the runner's for every revision, so instances<br />can move between revisions that keep the same class and size. Unset on revisions from before that, which<br />each had their own class. |  | Optional: \{\} <br /> |
 | `homeSize` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | HomeSize is the capacity of an external home. |  | Optional: \{\} <br /> |
 | `homeSeed` _string_ | HomeSeed is the seed the golden boot's external home is captured into, which new instances' homes are cloned<br />from. |  | Optional: \{\} <br /> |

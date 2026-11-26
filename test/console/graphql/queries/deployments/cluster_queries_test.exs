@@ -141,6 +141,40 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert found["id"] == cluster.id
     end
 
+    test "it hides a remediation workbench the reader cannot access" do
+      user = insert(:user)
+      workbench = insert(:workbench, system_prompt: "secret prompt")
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], remediation_workbench: workbench)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            remediationWorkbench { id systemPrompt configuration { infrastructure { selfService } } }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["remediationWorkbench"] == nil
+    end
+
+    test "it returns a remediation workbench the reader can access" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project, system_prompt: "visible prompt")
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], remediation_workbench: workbench)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            remediationWorkbench { id systemPrompt }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["remediationWorkbench"]["id"] == workbench.id
+      assert found["remediationWorkbench"]["systemPrompt"] == "visible prompt"
+    end
+
     test "it can fetch extended support info from a cluster" do
       cluster = insert(:cluster, distro: :eks, current_version: "1.28")
 
@@ -947,6 +981,26 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       assert found["id"] == cluster.id
       assert found["supportedAddons"] == addons
+    end
+
+    test "it resolves whether agents are enabled from the cluster and its project" do
+      for {cluster, allow, enabled} <- [
+        {insert(:cluster), false, false},
+        {insert(:cluster, self: true), true, true},
+        {insert(:cluster, project: insert(:project, allow_agents: true)), false, true}
+      ] do
+        {:ok, %{data: %{"myCluster" => found}}} = run_query("""
+          query {
+            myCluster {
+              allowAgents
+              agentsEnabled
+            }
+          }
+        """, %{}, %{cluster: cluster})
+
+        assert found["allowAgents"] == allow
+        assert found["agentsEnabled"] == enabled
+      end
     end
   end
 

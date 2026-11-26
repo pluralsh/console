@@ -20,25 +20,25 @@ ARG DAEMON_SOURCE=build
 # stay in this image for one more release, for operators older than the runtime's
 # agents (PROD-5487), and can then go.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
-ARG CLAUDE_VERSION=2.1.236
+ARG CLAUDE_VERSION=2.1.332
 # renovate: datasource=npm depName=@agentclientprotocol/claude-agent-acp
-ARG CLAUDE_ACP_VERSION=0.75.1
+ARG CLAUDE_ACP_VERSION=0.112.0
 # renovate: datasource=npm depName=@openai/codex
-ARG CODEX_VERSION=0.153.4
+ARG CODEX_VERSION=0.172.0
 # renovate: datasource=npm depName=@agentclientprotocol/codex-acp
-ARG CODEX_ACP_VERSION=1.10.0
+ARG CODEX_ACP_VERSION=2.12.0
 # renovate: datasource=npm depName=opencode-ai
-ARG OPENCODE_VERSION=1.18.23
+ARG OPENCODE_VERSION=1.19.6
 # renovate: datasource=npm depName=@google/gemini-cli
-ARG GEMINI_VERSION=0.44.1
+ARG GEMINI_VERSION=0.71.1
 # renovate: datasource=npm depName=@earendil-works/pi-coding-agent
-ARG PI_VERSION=0.84.1
+ARG PI_VERSION=1.6.1
 # renovate: datasource=npm depName=pi-acp
-ARG PI_ACP_VERSION=0.0.33
+ARG PI_ACP_VERSION=0.0.35
 # renovate: datasource=npm depName=pi-mcp-adapter
-ARG PI_MCP_ADAPTER_VERSION=2.21.2
+ARG PI_MCP_ADAPTER_VERSION=7.0.1
 # renovate: datasource=npm depName=@playwright/mcp
-ARG PLAYWRIGHT_MCP_VERSION=0.0.85
+ARG PLAYWRIGHT_MCP_VERSION=0.0.86
 
 # ---------------------------------------------------------------------------
 # devbox-daemon

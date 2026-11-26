@@ -88,7 +88,7 @@ func TestClaimerClaimsTheGoldenActorsHome(t *testing.T) {
 	driver := &claims{got: map[string]string{}}
 	c := &Claimer{
 		Client: fake.NewClientBuilder().WithScheme(scheme).WithObjects(runner, snapshotHome).Build(),
-		Actors: fa, Driver: driver, Log: logr.Discard(),
+		Actors: fa, Drivers: map[v1alpha1.DevboxHomeStorage]Driver{v1alpha1.DevboxHomeJuiceFS: driver}, Log: logr.Discard(),
 	}
 	if err := c.Pass(context.Background()); err != nil {
 		t.Fatal(err)

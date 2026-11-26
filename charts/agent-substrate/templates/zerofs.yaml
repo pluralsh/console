@@ -1,0 +1,254 @@
+{{- if .Values.zerofs.enabled }}
+{{- $ns := include "substrate.namespace" . -}}
+{{- $z := .Values.zerofs -}}
+{{- $driver := include "substrate.zerofs.driverName" . -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: devbox-zerofs
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+  {{- with $z.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+# Created before the controller's pods: the servicedns signer only issues a
+# serving certificate to a pod some Service selects.
+apiVersion: v1
+kind: Service
+metadata:
+  name: devbox-zerofs
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: devbox-zerofs-controller
+  ports:
+    - name: grpc
+      port: 9820
+      targetPort: grpc
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $z.storageClassName }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+provisioner: {{ $driver }}
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  uid: {{ $z.home.uid | toString | quote }}
+  gid: {{ $z.home.gid | toString | quote }}
+  mode: {{ $z.home.mode | toString | quote }}
+---
+# The controller only answers CreateVolume and deletes a home's objects on
+# DeleteVolume, so it needs no privileges.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devbox-zerofs-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: devbox-zerofs-controller
+  template:
+    metadata:
+      labels:
+        app: devbox-zerofs-controller
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: devbox-zerofs
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          image: {{ include "substrate.zerofs.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --mode=controller
+            - --storage-url={{ include "substrate.zerofs.storageUrl" . }}
+            - --default-capacity={{ mul $z.defaultCapacityGiB 1073741824 }}
+            - --allowed-clients={{ include "substrate.zerofs.allowedClients" . }}
+          env:
+            {{- include "substrate.zerofs.storageEnv" . | nindent 12 }}
+          ports:
+            - name: grpc
+              containerPort: 9820
+            - name: healthz
+              containerPort: 9821
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            periodSeconds: 5
+          {{- with $z.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            {{- if eq .Values.objectStore.backend "azureBlob" }}
+            - name: azure-identity-token
+              mountPath: /var/run/secrets/azure/tokens
+              readOnly: true
+            {{- end }}
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+              readOnly: true
+            - name: podidentity-ca
+              mountPath: /run/podidentity.podcert.ate.dev
+              readOnly: true
+      volumes:
+        {{- include "substrate.azureTokenVolume" . | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns" "signer" "servicedns") | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity-ca" "signer" "podidentity" "caOnly" true) | nindent 8 }}
+---
+# One per devbox node, scheduled like atelet so no other node pays for it.
+# Every home staged on the node is a writer process, NBD device and ext4 mount
+# owned by this pod.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: devbox-zerofs-node
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: devbox-zerofs-node
+  # A restart ends every home the plugin serves on the node, so roll by hand.
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        app: devbox-zerofs-node
+    spec:
+      serviceAccountName: devbox-zerofs
+      priorityClassName: {{ $z.node.priorityClassName }}
+      # Long enough for every writer to flush to object storage on SIGTERM.
+      terminationGracePeriodSeconds: {{ $z.node.terminationGracePeriodSeconds }}
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- with $z.node.nodeSelector | default .Values.atelet.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $z.node.tolerations | default .Values.atelet.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $z.node.affinity | default .Values.atelet.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: node
+          image: {{ include "substrate.zerofs.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --mode=node
+            - --storage-url={{ include "substrate.zerofs.storageUrl" . }}
+            - --endpoint=/csi/csi.sock
+            - --target-root=/var/lib/ate
+            - --state-root={{ $z.node.stateDir }}
+            - --socket-dir=/run/zerofs
+            - --cache-disk-gb={{ $z.node.cacheDiskGB }}
+            - --cache-memory-gb={{ $z.node.cacheMemoryGB }}
+            - --nbds-max={{ $z.node.nbdsMax }}
+            - --mount-options={{ $z.node.mountOptions }}
+            {{- range $z.node.nbdClientFlags }}
+            - --nbd-client-flag={{ . }}
+            {{- end }}
+            {{- include "substrate.zerofs.objectStoreOptions" . | nindent 12 }}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: ZEROFS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "substrate.zerofs.passwordSecret" . }}
+                  key: {{ include "substrate.zerofs.passwordKey" . }}
+            {{- include "substrate.zerofs.storageEnv" . | nindent 12 }}
+          ports:
+            - name: healthz
+              containerPort: 9821
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            periodSeconds: 5
+          {{- with $z.node.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # Loads nbd, attaches NBD devices and mounts ext4 and FUSE.
+          securityContext:
+            privileged: true
+          volumeMounts:
+            {{- if eq .Values.objectStore.backend "azureBlob" }}
+            - name: azure-identity-token
+              mountPath: /var/run/secrets/azure/tokens
+              readOnly: true
+            {{- end }}
+            - name: ate-base
+              mountPath: /var/lib/ate
+              mountPropagation: Bidirectional
+            - name: plugin-dir
+              mountPath: /csi
+            # The host's /dev, where NBD devices appear once the module loads.
+            - name: dev
+              mountPath: /dev
+            - name: modules
+              mountPath: /lib/modules
+              readOnly: true
+            - name: sockets
+              mountPath: /run/zerofs
+      volumes:
+        {{- include "substrate.azureTokenVolume" . | nindent 8 }}
+        - name: ate-base
+          hostPath:
+            path: /var/lib/ate
+            type: DirectoryOrCreate
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/{{ $driver }}
+            type: DirectoryOrCreate
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: modules
+          hostPath:
+            path: /lib/modules
+            type: Directory
+        - name: sockets
+          emptyDir:
+            medium: Memory
+{{- if include "substrate.csiDriverConfigCRDServed" . }}
+---
+{{ include "substrate.zerofs.csiDriverConfig" . }}
+{{- end }}
+{{- end }}

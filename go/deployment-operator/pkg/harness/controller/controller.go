@@ -134,6 +134,8 @@ func (in *stackRunController) toExecutable(ctx context.Context, step *gqlclient.
 	}
 
 	// base executable options
+	var command exec.Executable
+	preStart := in.preExecHook(ctx, step)
 	options := in.execOptions
 	options = append(
 		options,
@@ -142,12 +144,49 @@ func (in *stackRunController) toExecutable(ctx context.Context, step *gqlclient.
 		exec.WithArgs(args),
 		exec.WithID(step.ID),
 		exec.WithOutputSinks(append(toolWriters, consoleWriter)...),
-		exec.WithHook(v1.LifecyclePreStart, in.preExecHook(ctx, step)),
+		exec.WithHook(v1.LifecyclePreStart, func() error {
+			if err := preStart(); err != nil {
+				return err
+			}
+			// Plan output exists only after the plan step. Apply filters have
+			// to be attached here, immediately before the process starts.
+			return in.prepareRunAllApply(step, command)
+		}),
 		exec.WithHook(v1.LifecyclePostStart, in.postExecHook(step)),
 		exec.WithOutputAnalyzer([]exec.OutputAnalyzerHeuristic{exec.NewKeywordDetector()}, exec.StderrCheckForProvider(in.stackRun.Type)),
 	)
 
-	return exec.NewExecutable(step.Cmd, options...)
+	command = exec.NewExecutable(step.Cmd, options...)
+	return command
+}
+
+// prepareRunAllApply limits a parent-folder apply to units whose plans changed.
+// Missing plan JSON fails the run instead of applying every unit.
+func (in *stackRunController) prepareRunAllApply(step *gqlclient.RunStepFragment, command exec.Executable) error {
+	if step == nil || step.Stage != gqlclient.StepStageApply || in.stackRun == nil || !in.stackRun.RunAll {
+		return nil
+	}
+
+	preparer, ok := in.tool.(toolv1.ApplyArgumentPreparer)
+	if !ok {
+		return fmt.Errorf("could not determine changed terragrunt units")
+	}
+
+	setter, ok := command.(interface {
+		Args() []string
+		SetArgs([]string)
+	})
+	if !ok || setter == nil {
+		return fmt.Errorf("could not update terragrunt apply arguments")
+	}
+
+	args, err := preparer.ApplyArgs(setter.Args())
+	if err != nil {
+		return err
+	}
+
+	setter.SetArgs(args)
+	return nil
 }
 
 func (in *stackRunController) completeStackRun(status gqlclient.StackStatus, stackRunErr error) error {

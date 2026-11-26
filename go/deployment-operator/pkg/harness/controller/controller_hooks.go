@@ -41,6 +41,10 @@ func (in *stackRunController) preStart() error {
 		return fmt.Errorf("could not prepare tool: %w", err)
 	}
 
+	if in.stackRun.ManageState && in.stackRun.RunAll {
+		return fmt.Errorf("cannot manage state when terragrunt runAll is enabled")
+	}
+
 	if in.stackRun.ManageState {
 		err := in.tool.ConfigureStateBackend("harness", in.consoleToken, in.stackRun.StateUrls)
 		if err != nil {
@@ -281,12 +285,18 @@ func (in *stackRunController) afterPlan() error {
 	// Run tool plan
 	state, err := in.tool.Plan()
 	if err != nil {
+		if in.stackRun.RunAll {
+			return fmt.Errorf("could not prepare plan: %w", err)
+		}
 		klog.ErrorS(err, "could not prepare plan")
 	}
 
 	// Run security scan if enabled
 	violations, err := in.tool.Scan()
 	if err != nil {
+		if in.stackRun.RunAll {
+			return fmt.Errorf("could not run security scan: %w", err)
+		}
 		klog.ErrorS(err, "could not run security scan")
 	}
 
@@ -306,14 +316,19 @@ func (in *stackRunController) afterPlan() error {
 		return fmt.Errorf("security scanner error: max severity violation exceeded")
 	}
 
-	klog.V(log.LogLevelInfo).InfoS("checking approve empty status", "approveEmpty", lo.FromPtr(in.stackRun.ApproveEmpty))
-	if !lo.FromPtr(in.stackRun.ApproveEmpty) {
+	klog.V(log.LogLevelInfo).InfoS("checking approve empty status", "approveEmpty", lo.FromPtr(in.stackRun.ApproveEmpty), "runAll", in.stackRun.RunAll)
+	if !lo.FromPtr(in.stackRun.ApproveEmpty) && !in.stackRun.RunAll {
 		return nil
 	}
 
-	// Check if plan has any changes
+	// Check if plan has any changes. A parent-folder terragrunt run skips apply
+	// when every unit is a no-op, even if approveEmpty is unset.
 	hasChanges, err := in.tool.HasChanges()
 	if err != nil {
+		if in.stackRun.RunAll {
+			return fmt.Errorf("could not check for plan changes: %w", err)
+		}
+
 		klog.ErrorS(err, "could not check for plan changes")
 		// Continue on error - we don't want to fail the run if change detection fails
 	} else if !hasChanges {

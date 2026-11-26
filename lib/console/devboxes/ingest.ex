@@ -15,7 +15,7 @@ defmodule Console.Devboxes.Ingest do
   alias Console.Prom.Tokens
   alias Console.Devboxes.{Acp, AgentCredentials, Credentials}
   alias Console.Deployments.Pr.Dispatcher
-  alias Console.Deployments.Workbenches
+  alias Console.Deployments.{Clusters, Workbenches}
   alias Console.Schema.{
     Cluster,
     Devbox,
@@ -642,7 +642,8 @@ defmodule Console.Devboxes.Ingest do
   """
   @spec get_instance_credentials(binary, [map], Cluster.t) :: {:ok, [Credentials.credential]} | error
   def get_instance_credentials(instance_id, selectors, %Cluster{} = cluster) do
-    with {:ok, _} <- owned(instance_id, cluster) do
+    with {:ok, _} <- owned(instance_id, cluster),
+         :ok <- Clusters.agents_allowed(cluster) do
       Devboxes.get_instance!(instance_id)
       |> Credentials.instance_credentials(Enum.map(selectors, &selector/1))
     end
@@ -654,7 +655,8 @@ defmodule Console.Devboxes.Ingest do
   @spec get_devbox_credentials(binary, [map], Cluster.t) :: {:ok, [Credentials.credential]} | error
   def get_devbox_credentials(devbox_id, selectors, %Cluster{id: cluster_id}) do
     with {:ok, id} <- Ecto.UUID.cast(devbox_id) |> ok_or(:not_found),
-         %Devbox{cluster_id: ^cluster_id} = devbox <- Devboxes.get_devbox(id) do
+         %Devbox{cluster_id: ^cluster_id} = devbox <- Devboxes.get_devbox(id),
+         :ok <- Clusters.agents_allowed(cluster_id) do
       Credentials.devbox_credentials(devbox, Enum.map(selectors, &selector/1))
     else
       %Devbox{} -> {:error, "clusters can only get credentials of their own devboxes"}
@@ -711,6 +713,29 @@ defmodule Console.Devboxes.Ingest do
     else
       %{} -> {:error, "pull request attributes require a repository, title, head and base branch"}
       err -> err
+    end
+  end
+
+  @doc """
+  `Ingest.ListDevboxPullRequests`: the pull requests of an instance, or with a `url`, that pull request if it belongs
+  to the instance's devbox, however it was opened.
+  """
+  @spec list_devbox_pull_requests(binary, binary | nil, Cluster.t) :: {:ok, [PullRequest.t]} | error
+  def list_devbox_pull_requests(instance_id, url, %Cluster{} = cluster) do
+    with {:ok, _} <- owned(instance_id, cluster) do
+      inst = Devboxes.get_instance!(instance_id)
+      case blank(url) do
+        nil ->
+          PullRequest.for_devbox_instance(inst.id)
+          |> PullRequest.ordered(asc: :inserted_at)
+          |> Repo.all()
+        url ->
+          case Repo.get_by(PullRequest, url: url, devbox_id: inst.devbox_id) do
+            %PullRequest{} = pr -> [pr]
+            nil -> []
+          end
+      end
+      |> ok()
     end
   end
 
