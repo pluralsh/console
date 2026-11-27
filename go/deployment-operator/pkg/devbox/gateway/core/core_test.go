@@ -306,8 +306,8 @@ func TestRunningBoxesPickUpAllowlistEdits(t *testing.T) {
 	}
 
 	h.allow("oidc.plural.sh")
-	h.g.backstops(context.Background())
 	h.eventually("the edited allowlist applied", func() bool {
+		h.g.backstops(context.Background()) // skips the box while another operation holds it, as the loop's next pass would retry
 		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
 	})
 }
@@ -318,8 +318,8 @@ func TestAllowlistEditsSurviveARunnerRefreshWithoutEgress(t *testing.T) {
 
 	h.allow("oidc.plural.sh")
 	h.g.refreshRunner(context.Background(), inst) // as a wake does before Initialize
-	h.g.backstops(context.Background())
 	h.eventually("the edited allowlist applied", func() bool {
+		h.g.backstops(context.Background()) // skips the box while another operation holds it, as the loop's next pass would retry
 		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
 	})
 }
@@ -350,8 +350,8 @@ func TestAdoptedBoxesPickUpAllowlistEditsMadeBeforeTheRestart(t *testing.T) {
 		t.Fatal("the host is allowed before the new gateway re-applied egress")
 	}
 
-	g2.backstops(context.Background())
 	h.eventually("the edited allowlist applied", func() bool {
+		g2.backstops(context.Background()) // adoption may still hold the box's operation lock
 		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
 	})
 }

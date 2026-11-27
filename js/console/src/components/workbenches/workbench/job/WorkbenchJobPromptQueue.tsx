@@ -1,5 +1,6 @@
-import { Card, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { ComposerShelfSC } from 'components/workbenches/common/ComposerShelf'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -90,7 +91,7 @@ export function WorkbenchJobPromptQueue({
   const nextDeferredLabel = formatNextDeferredLabel(nextDeferredAt)
 
   return (
-    <QueueCardSC>
+    <ComposerShelfSC>
       {deleteError && (
         <QueueErrorSC>
           <GqlError error={deleteError} />
@@ -156,7 +157,7 @@ export function WorkbenchJobPromptQueue({
           )}
         </QueueBodySC>
       </SimpleAccordion>
-    </QueueCardSC>
+    </ComposerShelfSC>
   )
 }
 
@@ -221,19 +222,6 @@ export function queuedPromptsFromJob(
       .filter(isNonNullable) ?? []
   )
 }
-
-const QueueCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  border: theme.borders['fill-three'],
-  borderBottomLeftRadius: 0,
-  borderBottomRightRadius: 0,
-  borderBottom: 'none',
-  // Pull down 1px so this border meets the chat input border without a double line.
-  marginBottom: '-1px',
-  padding: `${theme.spacing.xsmall} 0 ${theme.spacing.small}`,
-}))
 
 const QueueErrorSC = styled.div(({ theme }) => ({
   padding: `0 ${theme.spacing.medium}`,

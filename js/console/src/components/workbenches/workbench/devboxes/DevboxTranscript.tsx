@@ -309,7 +309,7 @@ export function DevboxEntityView({
                   Thought{' '}
                   <Body2P
                     as="span"
-                    $color="text-xlight"
+                    $color="text-input-disabled"
                   >
                     {thoughtDuration(entity)}
                   </Body2P>

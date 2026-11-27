@@ -1,7 +1,6 @@
 import {
   ArrowUpIcon,
   Button,
-  Card,
   Flex,
   IconFrame,
   Input,
@@ -9,6 +8,7 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { ComposerShelfSC } from 'components/workbenches/common/ComposerShelf'
 import { GqlError } from 'components/utils/Alert'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
@@ -52,7 +52,7 @@ export function DevboxQueuedPrompts({
     )
 
   return (
-    <QueueCardSC>
+    <ComposerShelfSC>
       {error && (
         <QueueErrorSC>
           <GqlError error={error} />
@@ -111,7 +111,7 @@ export function DevboxQueuedPrompts({
           )}
         </QueueBodySC>
       </SimpleAccordion>
-    </QueueCardSC>
+    </ComposerShelfSC>
   )
 }
 
@@ -239,19 +239,6 @@ function QueueItemEditor({
     </EditorSC>
   )
 }
-
-const QueueCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  border: theme.borders['fill-three'],
-  borderBottomLeftRadius: 0,
-  borderBottomRightRadius: 0,
-  borderBottom: 'none',
-  // Pull down 1px so this border meets the chat input border without a double line.
-  marginBottom: '-1px',
-  padding: `${theme.spacing.xsmall} 0 ${theme.spacing.small}`,
-}))
 
 const QueueErrorSC = styled.div(({ theme }) => ({
   padding: `0 ${theme.spacing.medium}`,

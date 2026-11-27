@@ -539,15 +539,19 @@ const ComposerStackSC = styled.div({
   flexDirection: 'column',
 })
 
+// Runs on through the pane's gap so text scrolls right up to the composer instead of vanishing above it; the
+// content's bottom padding keeps that gap under the last entry.
 const ScrollSC = styled.div(({ theme }) => ({
   flex: 1,
   minHeight: 0,
   overflowY: 'auto',
   paddingRight: theme.spacing.small,
+  marginBottom: `-${theme.spacing.medium}`,
 }))
 
 const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  paddingBottom: theme.spacing.medium,
 }))

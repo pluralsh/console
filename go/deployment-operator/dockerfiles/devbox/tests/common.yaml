@@ -69,6 +69,10 @@ fileExistenceTests:
   - name: skel .bashrc
     path: /etc/devbox/skel/.bashrc
     shouldExist: true
+  # Chromium runs with --no-sandbox (gVisor is the boundary); this hides the infobar warning about it.
+  - name: chromium policy
+    path: /etc/chromium/policies/managed/devbox.json
+    shouldExist: true
   - name: skel .zshrc
     path: /etc/devbox/skel/.zshrc
     shouldExist: true
