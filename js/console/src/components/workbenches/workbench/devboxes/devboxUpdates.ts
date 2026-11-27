@@ -139,17 +139,16 @@ export function campaignSummary(
   now: Date
 ): string {
   const { outdated = 0, updated = 0, failed = 0 } = c.progress ?? {}
-  const counts = [
-    `${updated} updated`,
-    failed ? `${failed} failed` : null,
-    `${outdated} still outdated`,
-  ]
+  // what the campaign did; how many of the box's instances are outdated only matters while it runs, since
+  // later revisions make instances outdated again
+  const done = [`${updated} updated`, failed ? `${failed} failed` : null]
     .filter(Boolean)
     .join(', ')
+  const counts = `${done}, ${outdated} still outdated`
   if (c.status === DevboxUpdateCampaignStatus.Cancelled)
-    return `Cancelled: ${counts}`
+    return `Cancelled: ${done}`
   if (c.status === DevboxUpdateCampaignStatus.Completed)
-    return `Finished: ${counts}`
+    return `Finished: ${done}`
   if (c.startsAt && dayjs(c.startsAt).isAfter(now))
     return `Starts ${formatDateTime(c.startsAt)}`
   if (c.force && c.deadlineAt && dayjs(c.deadlineAt).isAfter(now))

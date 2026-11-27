@@ -283,11 +283,11 @@ function ForceUpdateModal({
       >
         {error && <GqlError error={error} />}
         <span>
-          This restarts all {outdated} outdated{' '}
-          {outdated === 1 ? 'instance' : 'instances'} of this box, including the
-          ones in use. Their users are warned first and can restart sooner.
-          Suspended and idle instances are updated right away. {UPDATE_KEEPS}{' '}
-          {UPDATE_LOSES}
+          This updates all {outdated} outdated{' '}
+          {outdated === 1 ? 'instance' : 'instances'} of this box. Idle ones
+          restart right away, and suspended ones start on the new version when
+          they are next resumed. Instances in use restart too: their users are
+          warned first and can restart sooner. {UPDATE_KEEPS} {UPDATE_LOSES}
         </span>
         <FormField
           label="Reason"

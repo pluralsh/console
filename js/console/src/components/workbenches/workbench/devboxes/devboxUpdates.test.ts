@@ -168,7 +168,7 @@ describe('campaigns', () => {
         },
         now
       )
-    ).toBe('Finished: 5 updated, 1 failed, 1 still outdated')
+    ).toBe('Finished: 5 updated, 1 failed')
   })
 
   it('shows the deadline of a forced campaign', () => {
