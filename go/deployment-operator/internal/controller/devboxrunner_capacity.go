@@ -85,6 +85,9 @@ func devboxInstanceCapacity(runner *v1alpha1.DevboxRunner, class v1alpha1.Devbox
 		// The home lives in object storage. Its node cache is bounded by JuiceFS, which stops caching before the
 		// disk fills, so it takes no budget.
 		disk = 0
+	case v1alpha1.DevboxHomeBlock:
+		// The home is its own cloud disk, attached to the node, so it takes none of the node's.
+		disk = 0
 	case v1alpha1.DevboxHomeZeroFS:
 		// A ZeroFS home's writer caches on the node's disk a share of the home's size (the node plugin's
 		// --cache-disk-percent), so budgeting the whole home covers it.

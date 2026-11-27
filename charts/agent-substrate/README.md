@@ -328,6 +328,53 @@ home, and starting from a snapshot fails with `UNSUPPORTED`. CreateVolume with a
 fails with `UNIMPLEMENTED`. Homes still count against `spec.resources.disk`, because each writer's
 cache sits on node disk.
 
+### Block homes
+
+`block.enabled: true` (opt-in; `block.image.tag` is pinned to the chart's deployment-operator release)
+adds a third home driver, `block.devbox.plural.sh` (StorageClass `block.storageClassName`): one disk
+per home, formatted ext4 and mounted by the node's kernel, with no userspace server or object store in
+the data path. The disks come from the CSI driver for disks the cluster already runs, the provider:
+`block.provider` (e.g. `ebs.csi.aws.com` or `pd.csi.storage.gke.io`), or by default the provisioner of
+the cluster's default StorageClass. The chart installs no provider and needs no cloud credentials: the
+provider's own install creates, attaches, formats, grows and snapshots the disks, driven through
+Kubernetes objects. The cluster must also serve VolumeSnapshots (the external-snapshotter CRDs and
+snapshot controller). `block.parameters` go to the provider for every disk, e.g. `type`, `iops`,
+`throughput` or `volumeInitializationRate`.
+
+- **The controller** (`devbox-block-controller`) records each home when Substrate creates it and
+  creates its disk on the first attach, as a PersistentVolumeClaim in the release namespace on a
+  StorageClass of the provider it creates, for the node Substrate picked. Substrate creates volumes
+  before it picks a worker, so the node isn't known any earlier. Each attach runs an anchor pod on the
+  node that mounts the claim, so the kubelet and the provider attach and mount the disk as for any pod.
+  An attach returns once the disk's VolumeAttachment is attached, and the node plugin waits for the
+  kubelet's mount; detaching deletes the anchor and waits for the disk's VolumeAttachment to go. An attach to a node in
+  another zone moves the disk there through a VolumeSnapshot. Disks grow, through their claims, to the
+  largest size any revision of their DevboxRunner asks for. The controller checks the provider when it
+  starts and every few minutes (its CSIDriver, the snapshot API and a VolumeSnapshotClass for it,
+  which it creates when there is none) and reports the result on its StorageClass, where the operator
+  reads it before a DevboxRunner uses block homes. Only ate-api-server can call it.
+- **The node plugin** (`devbox-block-node`) runs only where atelet runs. It bind-mounts the anchor's
+  mount of each disk to atelet's staging path, and gives a freshly formatted home to `block.home`'s
+  owner. It's privileged, to mount, and needs no Kubernetes API access. Restarting it doesn't end any
+  home, since the kernel owns the mounts, so it rolls normally.
+
+Anchor pods run one per running box, with `block.anchor.priorityClassName`, and count against each
+node's pod limit. Their defaults pass the restricted Pod Security Standard and the policies admission
+engines commonly ship (requests and limits, probes, non-root, a read-only root filesystem, no
+capabilities or host namespaces, their own token-less ServiceAccount). `block.anchor.podLabels`,
+`podAnnotations`, `resources`, `tolerations` and `hostNetwork` change them, and `block.anchor.overrides`
+merges any other part of the pod; the controller reads them from the `devbox-block-anchor-template`
+ConfigMap and restarts when they change. The controller and node pods take `podLabels`,
+`podAnnotations` and `resources` too, and have probes and CPU and memory limits; the node plugin is
+privileged, so admission policies need an exception for it as for ZeroFS's and JuiceFS's. A DevboxRunner uses block homes with `spec.home.storage: Block`,
+and the operator runs one WorkerPool per zone, in the zones of the nodes its workers select (or
+`spec.workerPool.zones`, to choose them); the gateway keeps each box in its home's zone, moving a box whose
+zone was dropped. Each template revision
+gets a seeded StorageClass as with [JuiceFS](#juicefs-homes). The first home from it is the golden
+boot's; when Substrate deletes it, the controller snapshots its disk, and every later home of the
+revision is created from that snapshot, in any zone. Snapshots of seeds no StorageClass names any more
+are deleted.
+
 ## Values
 
 Every value is documented in [`values.yaml`](values.yaml) and typed in

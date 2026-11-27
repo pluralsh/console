@@ -170,6 +170,27 @@
 {{- end -}}
 {{- end -}}
 
+{{- /* Block storage devbox homes */ -}}
+{{- $b := .Values.block -}}
+{{- if $b.enabled -}}
+{{- if not (or $b.image.digest $b.image.tag) -}}
+{{- fail "block.image.tag (or digest) is required" -}}
+{{- end -}}
+{{- if lt (int $b.defaultCapacityGiB) 1 -}}
+{{- fail "block.defaultCapacityGiB must be at least 1" -}}
+{{- end -}}
+{{- range $k, $_ := $b.parameters -}}
+{{- if has $k (list "uid" "gid" "mode" "seed" "group" "size") -}}
+{{- fail (printf "block.parameters.%s is set by the chart or the operator; use block.home for the owner" $k) -}}
+{{- end -}}
+{{- end -}}
+{{- range $other := list .Values.zerofs .Values.juicefs -}}
+{{- if and $other.enabled (eq $b.storageClassName $other.storageClassName) -}}
+{{- fail "block.storageClassName must differ from the zerofs and juicefs StorageClasses" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- if .Values.sandboxConfigs.microvm.enabled -}}
 {{- if not (and .Values.sandboxConfigs.microvm.assetScheme .Values.sandboxConfigs.microvm.assetBucket) -}}
 {{- fail "sandboxConfigs.microvm needs assetScheme (s3, gs or https) and assetBucket, where the microVM assets are staged" -}}

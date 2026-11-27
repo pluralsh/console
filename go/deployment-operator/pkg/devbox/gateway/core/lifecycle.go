@@ -160,6 +160,13 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 		// Substrate refuses an explicit tag for templates with external volumes; the default is the golden tag.
 		spec.SourceTag, spec.Preview = "", true
 	}
+	if runner.HomeStorage.Zonal() && len(runner.Zones) > 0 {
+		zone, err := g.instanceZone(ctx, inst, runner)
+		if err != nil {
+			return err
+		}
+		spec.Zone = zone
+	}
 	if _, err := g.deps.Actors.CreateActor(ctx, spec); err != nil {
 		return fmt.Errorf("creating actor %s: %w", ref, err)
 	}
@@ -541,6 +548,10 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.In
 	if err := g.refreshEgress(ctx, inst); err != nil {
 		g.log.Error(err, "refreshing egress policy before resume", "instance", inst.ID)
 	}
+	g.refreshRunner(ctx, inst)
+	if err := g.repin(ctx, inst); err != nil {
+		g.log.Error(err, "moving instance out of a dropped zone; resuming in its old zone", "instance", inst.ID)
+	}
 	if err := g.wake(ctx, inst); err != nil {
 		if errors.Is(err, actors.ErrCrashed) {
 			_ = g.deps.Actors.Revert(ctx, inst.ref())
@@ -668,7 +679,7 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 }
 
 // saveHomeSeed copies a JuiceFS home, which isn't in the tag, into the snapshot's seed while the actor is still
-// suspended, so the copy matches the tag. Seeds are JuiceFS seeds, so a ZeroFS home isn't saved.
+// suspended, so the copy matches the tag. Seeds are JuiceFS seeds, so a ZeroFS or Block home isn't saved.
 func (g *Gateway) saveHomeSeed(ctx context.Context, inst *Instance, ref, tag actors.Ref) error {
 	if g.deps.Seeds == nil {
 		return nil
@@ -677,7 +688,7 @@ func (g *Gateway) saveHomeSeed(ctx context.Context, inst *Instance, ref, tag act
 	if err != nil {
 		return fmt.Errorf("finding the home storage of %s: %w", ref, err)
 	}
-	if storage == v1alpha1.DevboxHomeZeroFS {
+	if storage == v1alpha1.DevboxHomeZeroFS || storage == v1alpha1.DevboxHomeBlock {
 		return nil
 	}
 	a, err := g.deps.Actors.GetActor(ctx, ref)

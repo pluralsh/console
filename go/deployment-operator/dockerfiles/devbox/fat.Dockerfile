@@ -273,9 +273,11 @@ RUN set -eux; \
 # networks, and /usr/local/bin/podman-compose runs every compose service on the
 # box's network with service names resolving to 127.0.0.1. Traffic leaves
 # through the box's egress policy.
-# Images, containers and volumes live on the box's root filesystem, not the home: a ZeroFS home turns every fsync
-# into an object-storage flush, which databases in compose stacks issue per commit. Snapshots still carry them
-# across suspends, but a new image starts them empty.
+# Images, containers and volumes live on the box's root filesystem by default, not the home: a ZeroFS home turns
+# every fsync into an object-storage flush, which databases in compose stacks issue per commit. Every snapshot
+# carries the root filesystem, so they also grow each suspend and resume, and a new image starts them empty.
+# With a Block home the operator points CONTAINERS_STORAGE_CONF at storage.home.conf, which keeps them on the
+# home's cloud disk instead: snapshots stay small and they survive new images.
 # hadolint ignore=DL3008
 RUN set -eux; \
     apt-get update; \
@@ -294,6 +296,8 @@ RUN set -eux; \
       'graphroot = "/var/lib/containers/storage"' \
       'rootless_storage_path = "/var/lib/devbox-containers/storage"' \
       > /etc/containers/storage.conf; \
+    sed 's|^rootless_storage_path = .*|rootless_storage_path = "/home/dev/.local/share/containers/storage"|' \
+      /etc/containers/storage.conf > /etc/containers/storage.home.conf; \
     install -d -o 1000 -g 1000 -m 0700 /var/lib/devbox-containers; \
     mkdir -p /etc/containers/containers.conf.d; \
     printf '%s\n' \

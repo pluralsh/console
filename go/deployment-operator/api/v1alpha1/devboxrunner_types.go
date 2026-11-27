@@ -385,7 +385,7 @@ func (s *DevboxRunnerSpec) HasGoldenBootWork() bool {
 }
 
 // DevboxHomeStorage is where an instance's /home/dev lives.
-// +kubebuilder:validation:Enum=Snapshot;JuiceFS;ZeroFS
+// +kubebuilder:validation:Enum=Snapshot;JuiceFS;ZeroFS;Block
 type DevboxHomeStorage string
 
 const (
@@ -398,19 +398,26 @@ const (
 	// chart's ZeroFS driver (zerofs.enabled): an ext4 block device that follows the instance from node to node, with
 	// no metadata database. Snapshots carry only memory.
 	DevboxHomeZeroFS DevboxHomeStorage = "ZeroFS"
+	// DevboxHomeBlock keeps each home on its own cloud disk, from the agent-substrate chart's block driver
+	// (block.enabled), formatted ext4 and mounted by the node's kernel. A disk lives in one zone, so each instance
+	// stays in its home's zone, and the runner runs a WorkerPool per zone (see spec.workerPool.zones). Snapshots
+	// carry only memory.
+	DevboxHomeBlock DevboxHomeStorage = "Block"
 
 	// DevboxDefaultJuiceFSStorageClass is the agent-substrate chart's juicefs.storageClassName default.
 	DevboxDefaultJuiceFSStorageClass = "devbox-juicefs"
 	// DevboxDefaultZeroFSStorageClass is the agent-substrate chart's zerofs.storageClassName default.
 	DevboxDefaultZeroFSStorageClass = "devbox-zerofs"
+	// DevboxDefaultBlockStorageClass is the agent-substrate chart's block.storageClassName default.
+	DevboxDefaultBlockStorageClass = "devbox-block"
 )
 
 // DevboxHome selects how instances store /home/dev.
 //
-// With JuiceFS or ZeroFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and
-// mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
-// ZeroFS snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for either:
-// Substrate can't restore a tag of a template with external volumes.
+// With JuiceFS, ZeroFS or Block, an instance's home is seeded from the golden boot's, so what the bootstrap script
+// and mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
+// ZeroFS and Block snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for any
+// of them: Substrate can't restore a tag of a template with external volumes.
 type DevboxHome struct {
 	// Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
 	// home.
@@ -418,13 +425,13 @@ type DevboxHome struct {
 	// +kubebuilder:default=Snapshot
 	Storage *DevboxHomeStorage `json:"storage,omitempty"`
 
-	// Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.
-	// Defaults to spec.resources.disk.
+	// Size is the most a JuiceFS, ZeroFS or Block home may hold: a JuiceFS quota, the size of the ZeroFS block
+	// device, or the size of the cloud disk. Defaults to spec.resources.disk.
 	// +kubebuilder:validation:Optional
 	Size *resource.Quantity `json:"size,omitempty"`
 
-	// StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's
-	// devbox-juicefs or devbox-zerofs.
+	// StorageClassName is the JuiceFS, ZeroFS or Block StorageClass. Defaults to the agent-substrate chart's
+	// devbox-juicefs, devbox-zerofs or devbox-block.
 	// +kubebuilder:validation:Optional
 	StorageClassName *string `json:"storageClassName,omitempty"`
 }
@@ -439,7 +446,12 @@ func (s *DevboxRunnerSpec) HomeStorage() DevboxHomeStorage {
 
 // External reports whether homes are volumes outside the instance's snapshots, served by a CSI driver.
 func (s DevboxHomeStorage) External() bool {
-	return s == DevboxHomeJuiceFS || s == DevboxHomeZeroFS
+	return s == DevboxHomeJuiceFS || s == DevboxHomeZeroFS || s == DevboxHomeBlock
+}
+
+// Zonal reports whether homes live in one zone, so each instance must stay in its home's zone.
+func (s DevboxHomeStorage) Zonal() bool {
+	return s == DevboxHomeBlock
 }
 
 // HomeSize is the most an instance's home may hold.
@@ -453,15 +465,35 @@ func (s *DevboxRunnerSpec) HomeSize() resource.Quantity {
 	return resource.MustParse("20Gi")
 }
 
-// HomeStorageClass is the StorageClass of a JuiceFS or ZeroFS home.
+// HomeStorageClass is the StorageClass of a JuiceFS, ZeroFS or Block home.
 func (s *DevboxRunnerSpec) HomeStorageClass() string {
 	if s.Home != nil && s.Home.StorageClassName != nil && *s.Home.StorageClassName != "" {
 		return *s.Home.StorageClassName
 	}
-	if s.HomeStorage() == DevboxHomeZeroFS {
+	switch s.HomeStorage() {
+	case DevboxHomeZeroFS:
 		return DevboxDefaultZeroFSStorageClass
+	case DevboxHomeBlock:
+		return DevboxDefaultBlockStorageClass
 	}
 	return DevboxDefaultJuiceFSStorageClass
+}
+
+// WorkerZones are the zones spec.workerPool.zones lists.
+func (s *DevboxRunnerSpec) WorkerZones() []string {
+	if s.WorkerPool == nil {
+		return nil
+	}
+	return s.WorkerPool.Zones
+}
+
+// Zones are the zones the runner runs one WorkerPool in and places new instances in, empty for a single pool:
+// status.zones once the operator has set it, else spec.workerPool.zones.
+func (r *DevboxRunner) Zones() []string {
+	if len(r.Status.Zones) > 0 {
+		return r.Status.Zones
+	}
+	return r.Spec.WorkerZones()
 }
 
 // DevboxWorkerPool is the Substrate WorkerPool the operator runs for the runner. Each worker is expected to have a
@@ -514,6 +546,18 @@ type DevboxWorkerPool struct {
 	// +listMapKey=name
 	// +listMapKey=namespace
 	AdditionalPools []DevboxWorkerPoolRef `json:"additionalPools,omitempty"`
+
+	// Zones runs one WorkerPool per zone instead of one pool, each pinned to its zone's nodes with
+	// topology.kubernetes.io/zone. Block homes run that way without it too, in the zones of the nodes matching
+	// NodeSelector (or of every node, before any matches): a home's disk lives in one zone, and the gateway keeps
+	// each instance in its home's zone, packing new instances into the zone that already holds the most. Set it
+	// to choose the zones instead. Replicas and Autoscaling are totals across the zones: the minimum and the spare
+	// instance slots go only to zones holding homes, not to every zone.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=6
+	// +listType=set
+	// +kubebuilder:validation:items:Pattern=`^[a-z0-9]([-a-z0-9]{0,30}[a-z0-9])?$`
+	Zones []string `json:"zones,omitempty"`
 
 	// MaxInstances caps concurrently running instances in console. Unset means unlimited.
 	// +kubebuilder:validation:Optional
@@ -629,6 +673,34 @@ type DevboxCapacityStatus struct {
 
 	// +kubebuilder:validation:Optional
 	LastScaleTime *metav1.Time `json:"lastScaleTime,omitempty"`
+
+	// Zones breaks the autoscaler's view down by zone when the runner runs a pool per zone; the fields above are
+	// totals.
+	// +kubebuilder:validation:Optional
+	// +listType=map
+	// +listMapKey=zone
+	Zones []DevboxZoneCapacity `json:"zones,omitempty"`
+}
+
+// DevboxZoneCapacity is one zone's WorkerPool as the autoscaler sees it.
+type DevboxZoneCapacity struct {
+	Zone string `json:"zone"`
+	// Workers are the zone's schedulable workers, DesiredWorkers the autoscaler's target for them.
+	Workers        int32 `json:"workers"`
+	DesiredWorkers int32 `json:"desiredWorkers"`
+	// Homes are the instances whose home lives in the zone, RunningInstances those running there, and
+	// WaitingInstances those waiting for a worker there.
+	Homes            int32 `json:"homes"`
+	RunningInstances int32 `json:"runningInstances"`
+	// +kubebuilder:validation:Optional
+	WaitingInstances int32 `json:"waitingInstances,omitempty"`
+}
+
+// DevboxWorkerPoolZone is the WorkerPool of one zone.
+type DevboxWorkerPoolZone struct {
+	Zone string `json:"zone"`
+	// WorkerPool is the pool's namespace/name.
+	WorkerPool string `json:"workerPool"`
 }
 
 type DevboxHTTPAllowlistEntry struct {
@@ -998,9 +1070,21 @@ type DevboxRunnerStatus struct {
 	// +kubebuilder:validation:Optional
 	Atespace *string `json:"atespace,omitempty"`
 
-	// WorkerPool is the namespaced name of the Substrate WorkerPool.
+	// WorkerPool is the namespaced name of the Substrate WorkerPool, unset when the runner runs a pool per zone.
 	// +kubebuilder:validation:Optional
 	WorkerPool *string `json:"workerPool,omitempty"`
+
+	// Zones are the zones the runner runs a WorkerPool in and places new instances in: spec.workerPool.zones, or
+	// for Block homes without them, the zones the operator found the runner's nodes in.
+	// +kubebuilder:validation:Optional
+	Zones []string `json:"zones,omitempty"`
+
+	// WorkerPoolZones are the runner's WorkerPools when it runs one per zone, including pools of zones dropped
+	// from Zones that still hold instances' homes.
+	// +kubebuilder:validation:Optional
+	// +listType=map
+	// +listMapKey=zone
+	WorkerPoolZones []DevboxWorkerPoolZone `json:"workerPoolZones,omitempty"`
 
 	// AdditionalWorkerPools are the namespace/name of the AdditionalPools carrying the runner's worker selector.
 	// +kubebuilder:validation:Optional

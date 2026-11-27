@@ -13,6 +13,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -703,7 +704,9 @@ func (r *DevboxRunnerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1alpha1.DevboxRunner{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Watches(&appsv1.Deployment{}, handler.EnqueueRequestsFromMapFunc(r.allRunners), builder.WithPredicates(predicate.NewPredicateFuncs(func(obj client.Object) bool {
 			return obj.GetLabels()[devboxGatewayManagedLabel] == stringTrue
-		})))
+		}))).
+		// Nodes coming, going or relabelled can change the zones Block runners find; status heartbeats can't.
+		Watches(&corev1.Node{}, handler.EnqueueRequestsFromMapFunc(r.zoneChangedRunners), builder.WithPredicates(predicate.LabelChangedPredicate{}))
 
 	if r.WatchWorkerPools {
 		pool := &unstructured.Unstructured{}

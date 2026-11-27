@@ -24,7 +24,10 @@
 {{- if .Values.zerofs.enabled -}}
 {{- $deferred = append $deferred (include "substrate.zerofs.csiDriverConfig" . | fromYaml) -}}
 {{- end -}}
-{{- if or .Values.juicefs.enabled .Values.zerofs.enabled -}}
+{{- if .Values.block.enabled -}}
+{{- $deferred = append $deferred (include "substrate.block.csiDriverConfig" . | fromYaml) -}}
+{{- end -}}
+{{- if or .Values.juicefs.enabled .Values.zerofs.enabled .Values.block.enabled -}}
 {{- $crds = append $crds "csidriverconfigs.ate.dev" -}}
 {{- end -}}
 {{- end -}}

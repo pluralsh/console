@@ -1,0 +1,276 @@
+suite: block homes
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  objectStore.snapshotLocation: s3://ate-snapshots/substrate/
+  objectStore.s3.region: us-east-2
+  block.enabled: true
+  block.image.tag: "1.2.3"
+tests:
+  - it: renders nothing unless enabled
+    template: templates/block.yaml
+    set:
+      block.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: runs only the controller, which drives the installed provider and lets only ate-api-server call it
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      image.pullSecrets: [regcred, {name: other}]
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/pluralsh/devbox-block:1.2.3
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - --mode=controller
+            - --storage-class=devbox-block
+            - --default-capacity=21474836480
+            - --allowed-clients=spiffe://cluster.local/ns/ate-system/sa/ate-api-server
+            - --anchor-image=ghcr.io/pluralsh/devbox-block:1.2.3
+            - --anchor-template=/etc/devbox-block/anchor.yaml
+
+  - it: gives the driver's pods probes, requests and limits, and their own labels and annotations
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      block.controller.podLabels.team: platform
+      block.controller.podAnnotations.owner: infra
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /livez
+      - exists:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+      - exists:
+          path: spec.template.spec.containers[0].resources.limits.memory
+      - equal:
+          path: spec.template.metadata.labels.team
+          value: platform
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: devbox-block
+      - equal:
+          path: spec.template.metadata.annotations.owner
+          value: infra
+      - exists:
+          path: spec.template.metadata.annotations["checksum/anchor-template"]
+
+  - it: merges the anchor values into the template the controller applies to anchor pods
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      image.pullSecrets: [regcred, {name: other}]
+      block.anchor.podLabels.team: platform
+      block.anchor.podAnnotations.owner: infra
+      block.anchor.hostNetwork: true
+      block.anchor.resources.limits.cpu: 100m
+      block.anchor.overrides.spec.securityContext.fsGroup: 65532
+    asserts:
+      - equal:
+          path: data["anchor.yaml"]
+          value: |
+            metadata:
+              annotations:
+                owner: infra
+              labels:
+                app.kubernetes.io/instance: ate
+                team: platform
+            spec:
+              containers:
+              - name: anchor
+                resources:
+                  limits:
+                    cpu: 100m
+              hostNetwork: true
+              imagePullSecrets:
+              - name: regcred
+              - name: other
+              priorityClassName: system-node-critical
+              securityContext:
+                fsGroup: 65532
+              serviceAccountName: devbox-block-anchor
+
+  - it: gives anchors a ServiceAccount without a token
+    template: templates/block.yaml
+    documentSelector:
+      path: metadata.name
+      value: devbox-block-anchor
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: automountServiceAccountToken
+          value: false
+
+  - it: names the provider when one is set
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      block.provider: pd.csi.storage.gke.io
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider=pd.csi.storage.gke.io
+
+  - it: lets the controller manage disks, anchors and snapshots in its namespace
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [""]
+            resources: [pods]
+            verbs: [get, create, delete]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [snapshot.storage.k8s.io]
+            resources: [volumesnapshots]
+            verbs: [get, create, delete]
+
+  - it: patches only its own StorageClass
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [storage.k8s.io]
+            resources: [storageclasses]
+            resourceNames: [devbox-block]
+            verbs: [patch]
+
+  - it: serves atelet on the driver's plugin socket and bind-mounts homes back to the host
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: plugin-dir
+            hostPath:
+              path: /var/lib/kubelet/plugins/block.devbox.plural.sh
+              type: DirectoryOrCreate
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: ate-base
+            mountPath: /var/lib/ate
+            mountPropagation: Bidirectional
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: kubelet
+            mountPath: /var/lib/kubelet
+            mountPropagation: HostToContainer
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --kubelet-root=/var/lib/kubelet
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.privileged
+          value: true
+      - equal:
+          path: spec.template.spec.automountServiceAccountToken
+          value: false
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /livez
+      - exists:
+          path: spec.template.spec.containers[0].resources.limits.memory
+
+  - it: passes the disk parameters through the StorageClass
+    template: templates/block.yaml
+    documentSelector:
+      path: kind
+      value: StorageClass
+    set:
+      block.parameters:
+        type: gp3
+        volumeInitializationRate: 300
+    asserts:
+      - equal:
+          path: provisioner
+          value: block.devbox.plural.sh
+      - equal:
+          path: parameters
+          value:
+            uid: "1000"
+            gid: "1000"
+            mode: "0755"
+            type: gp3
+            volumeInitializationRate: "300"
+
+  - it: defers the CSIDriverConfig to the bootstrap Job on first install
+    template: templates/bootstrap-job.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    asserts:
+      - exists:
+          path: data["02-csidriverconfig-block.devbox.plural.sh.yaml"]
+
+  - it: lets only ate-api-server reach the controller
+    template: templates/networkpolicies.yaml
+    documentSelector:
+      path: metadata.name
+      value: devbox-block-controller
+    asserts:
+      - equal:
+          path: spec.ingress[0].from[0].podSelector.matchLabels.app
+          value: ate-api-server
+
+  - it: turns on the ExternalVolumes preview gate
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      previewGates: [PerTemplateSnapshotLocation]
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --preview=PerTemplateSnapshotLocation,ExternalVolumes
+
+  - it: refuses parameters the driver owns
+    template: templates/validate.yaml
+    set:
+      block.parameters:
+        group: x
+    asserts:
+      - failedTemplate:
+          errorPattern: block.parameters.group is set by the chart or the operator

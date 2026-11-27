@@ -26,6 +26,8 @@ type Record struct {
 	Template         string `json:"template,omitempty"`
 	TemplateRevision int64  `json:"templateRevision,omitempty"`
 	ImageDigest      string `json:"imageDigest,omitempty"`
+	// Zone is the zone the actor is pinned to, where its home lives.
+	Zone string `json:"zone,omitempty"`
 
 	Status          string    `json:"status"`
 	SuspendReason   string    `json:"suspendReason,omitempty"`

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	goruntime "runtime"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -43,10 +44,12 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/block"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zerofs"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zones"
 )
 
 const (
@@ -886,6 +889,101 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(shared.GetLabels()).NotTo(HaveKey("devboxes.plural.sh/runner.elastic"))
 	})
 
+	t.Run("block homes run a pool per zone sized by the zones holding homes", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		g.Expect(env.client.Create(ctx, &storagev1.StorageClass{
+			ObjectMeta: metav1.ObjectMeta{Name: v1alpha1.DevboxDefaultBlockStorageClass, Annotations: map[string]string{
+				block.AnnotationProvider: "ebs.csi.aws.com", block.AnnotationPreflight: block.PreflightOK,
+			}},
+			Provisioner: block.DriverName,
+			Parameters:  map[string]string{"type": "gp3"},
+		})).To(Succeed())
+		env.newRunner(t, "zoned", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeBlock)}
+			r.Spec.WorkerPool = &v1alpha1.DevboxWorkerPool{
+				Zones: []string{"zone-a", "zone-b", "zone-c"},
+				Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
+					corev1.ResourceCPU: resource.MustParse("8"), corev1.ResourceMemory: resource.MustParse("32Gi"),
+				}},
+				Autoscaling: &v1alpha1.DevboxWorkerAutoscaling{MaxReplicas: 6},
+			}
+		})
+		runner := env.reconcile(t, "zoned", 2)
+		atespace := *runner.Status.Atespace
+		var classes storagev1.StorageClassList
+		g.Expect(env.client.List(ctx, &classes, client.MatchingLabels{v1alpha1.DevboxRunnerNameLabel: "zoned"})).To(Succeed())
+		g.Expect(classes.Items).To(HaveLen(1))
+		g.Expect(classes.Items[0].Parameters).To(HaveKeyWithValue(block.ParamGroup, atespace))
+		homeSize := runner.Spec.HomeSize()
+		g.Expect(classes.Items[0].Parameters).To(HaveKeyWithValue(block.ParamSize, strconv.FormatInt(homeSize.Value(), 10)),
+			"each revision's class asks for the home size, which its disks grow to")
+		g.Expect(classes.Items[0].Parameters).To(HaveKeyWithValue("type", "gp3"))
+		g.Expect(runner.Status.WorkerPool).To(BeNil())
+		g.Expect(runner.Status.WorkerPoolZones).To(HaveLen(3))
+
+		replicas := func(zone string) int64 {
+			pool := &unstructured.Unstructured{}
+			pool.SetGroupVersionKind(workerPoolGVK)
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: "devbox-zoned-" + zone, Namespace: devboxTestNamespace}, pool)).To(Succeed())
+			n, _, _ := unstructured.NestedInt64(pool.Object, "spec", "replicas")
+			return n
+		}
+		pool := &unstructured.Unstructured{}
+		pool.SetGroupVersionKind(workerPoolGVK)
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: "devbox-zoned-zone-b", Namespace: devboxTestNamespace}, pool)).To(Succeed())
+		g.Expect(pool.GetLabels()).To(HaveKeyWithValue(zones.Label, "zone-b"))
+		g.Expect(pool.GetLabels()).To(HaveKeyWithValue("devboxes.plural.sh/runner.zoned", "true"))
+		selector, _, _ := unstructured.NestedStringMap(pool.Object, "spec", "template", "nodeSelector")
+		g.Expect(selector).To(Equal(map[string]string{zones.NodeLabel: "zone-b"}))
+		g.Expect([]int64{replicas("zone-a"), replicas("zone-b"), replicas("zone-c")}).To(Equal([]int64{1, 0, 0}),
+			"with no homes yet the minimum and spare go to the first zone, not to every zone")
+
+		pin := func(name, zone string) {
+			env.substrate.mu.Lock()
+			defer env.substrate.mu.Unlock()
+			if env.substrate.actors[atespace] == nil {
+				env.substrate.actors[atespace] = map[string]*ateapi.Actor{}
+			}
+			env.substrate.actors[atespace][name] = &ateapi.Actor{
+				Metadata:       &ateapi.ResourceMetadata{Atespace: atespace, Name: name},
+				WorkerSelector: zones.Selector(zone),
+				Status:         &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDED},
+			}
+		}
+		pin("box-1", "zone-b")
+		pin("box-2", "zone-b")
+		pin("box-3", "zone-c")
+		runner = env.reconcile(t, "zoned", 1)
+		g.Expect([]int64{replicas("zone-a"), replicas("zone-b"), replicas("zone-c")}).To(Equal([]int64{0, 1, 0}),
+			"the minimum and spare follow the zone holding the most homes")
+
+		demand := &zones.Demand{Client: env.client, Namespace: devboxTestNamespace}
+		g.Expect(demand.Want(ctx, atespace, "box-3", "zone-c")).To(Succeed())
+		runner = env.reconcile(t, "zoned", 1)
+		g.Expect(replicas("zone-c")).To(Equal(int64(1)), "an instance waiting for a worker grows its zone")
+		zoneC, _ := lo.Find(runner.Status.Capacity.Zones, func(z v1alpha1.DevboxZoneCapacity) bool { return z.Zone == "zone-c" })
+		g.Expect(zoneC).To(Equal(v1alpha1.DevboxZoneCapacity{Zone: "zone-c", DesiredWorkers: 1, Homes: 1, WaitingInstances: 1}))
+		g.Expect(demand.Done(ctx, atespace, "box-3")).To(Succeed())
+
+		runner = env.get(t, "zoned")
+		runner.Spec.WorkerPool.Zones = []string{"zone-a", "zone-b"}
+		g.Expect(env.client.Update(ctx, runner)).To(Succeed())
+		runner = env.reconcile(t, "zoned", 1)
+		g.Expect(runner.Status.WorkerPoolZones).To(ContainElement(v1alpha1.DevboxWorkerPoolZone{Zone: "zone-c", WorkerPool: devboxTestNamespace + "/devbox-zoned-zone-c"}),
+			"a dropped zone keeps its pool while it holds a home")
+
+		env.substrate.mu.Lock()
+		delete(env.substrate.actors[atespace], "box-3")
+		env.substrate.mu.Unlock()
+		runner = env.reconcile(t, "zoned", 1)
+		g.Expect(runner.Status.WorkerPoolZones).To(HaveLen(2))
+		gone := &unstructured.Unstructured{}
+		gone.SetGroupVersionKind(workerPoolGVK)
+		err := env.client.Get(ctx, client.ObjectKey{Name: "devbox-zoned-zone-c", Namespace: devboxTestNamespace}, gone)
+		g.Expect(apierrors.IsNotFound(err) || gone.GetDeletionTimestamp() != nil).To(BeTrue(), "and loses it once it holds none")
+	})
+
 	t.Run("an old daemon is flagged outdated, a newer one fails the contract", func(t *testing.T) {
 		g := NewWithT(t)
 		env.push(t, "custom:old", func(c *v1.Config) { c.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "0.9.3" })
@@ -1069,7 +1167,7 @@ func TestDevboxRunnerController(t *testing.T) {
 
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild", "juicefs", "zerofs", "mismatch"} {
+		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild", "juicefs", "zerofs", "mismatch", "zoned"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())

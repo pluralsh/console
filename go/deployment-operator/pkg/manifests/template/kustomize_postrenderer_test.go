@@ -34,13 +34,7 @@ var _ = Describe("Kustomize postrenderer", Ordered, func() {
 		Handler: r,
 	}
 	BeforeAll(func() {
-		// Initializing the server in a goroutine so that
-		// it won't block the graceful shutdown handling below
-		go func() {
-			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				Expect(err).NotTo(HaveOccurred())
-			}
-		}()
+		serve(srv)
 	})
 
 	AfterAll(func() {

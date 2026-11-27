@@ -823,6 +823,7 @@ _Appears in:_
 | `additionalFreeInstances` _integer_ | AdditionalFreeInstances are the instance slots free on AdditionalPools. |  | Optional: \{\} <br /> |
 | `desiredWorkers` _integer_ | DesiredWorkers is the autoscaler's target for the managed pool. |  | Optional: \{\} <br /> |
 | `lastScaleTime` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
+| `zones` _[DevboxZoneCapacity](#devboxzonecapacity) array_ | Zones breaks the autoscaler's view down by zone when the runner runs a pool per zone; the fields above are<br />totals. |  | Optional: \{\} <br /> |
 
 
 #### DevboxCloudIdentity
@@ -956,10 +957,10 @@ _Appears in:_
 
 DevboxHome selects how instances store /home/dev.
 
-With JuiceFS or ZeroFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and
-mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
-ZeroFS snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for either:
-Substrate can't restore a tag of a template with external volumes.
+With JuiceFS, ZeroFS or Block, an instance's home is seeded from the golden boot's, so what the bootstrap script
+and mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
+ZeroFS and Block snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for any
+of them: Substrate can't restore a tag of a template with external volumes.
 
 
 
@@ -968,9 +969,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS ZeroFS] <br />Optional: \{\} <br /> |
-| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.<br />Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
-| `storageClassName` _string_ | StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's<br />devbox-juicefs or devbox-zerofs. |  | Optional: \{\} <br /> |
+| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS ZeroFS Block] <br />Optional: \{\} <br /> |
+| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS, ZeroFS or Block home may hold: a JuiceFS quota, the size of the ZeroFS block<br />device, or the size of the cloud disk. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
+| `storageClassName` _string_ | StorageClassName is the JuiceFS, ZeroFS or Block StorageClass. Defaults to the agent-substrate chart's<br />devbox-juicefs, devbox-zerofs or devbox-block. |  | Optional: \{\} <br /> |
 
 
 #### DevboxHomeStorage
@@ -980,7 +981,7 @@ _Underlying type:_ _string_
 DevboxHomeStorage is where an instance's /home/dev lives.
 
 _Validation:_
-- Enum: [Snapshot JuiceFS ZeroFS]
+- Enum: [Snapshot JuiceFS ZeroFS Block]
 
 _Appears in:_
 - [DevboxHome](#devboxhome)
@@ -991,6 +992,7 @@ _Appears in:_
 | `Snapshot` | DevboxHomeSnapshot keeps the home on the instance's node and carries it in every snapshot.<br /> |
 | `JuiceFS` | DevboxHomeJuiceFS keeps the home in the agent-substrate chart's JuiceFS filesystem (juicefs.enabled), mounted<br />wherever the instance runs, so snapshots carry only memory and moving node doesn't copy the home.<br /> |
 | `ZeroFS` | DevboxHomeZeroFS keeps each home in its own ZeroFS filesystem in object storage, from the agent-substrate<br />chart's ZeroFS driver (zerofs.enabled): an ext4 block device that follows the instance from node to node, with<br />no metadata database. Snapshots carry only memory.<br /> |
+| `Block` | DevboxHomeBlock keeps each home on its own cloud disk, from the agent-substrate chart's block driver<br />(block.enabled), formatted ext4 and mounted by the node's kernel. A disk lives in one zone, so each instance<br />stays in its home's zone, and the runner runs a WorkerPool per zone (see spec.workerPool.zones). Snapshots<br />carry only memory.<br /> |
 
 
 #### DevboxIdlePolicy
@@ -1173,7 +1175,7 @@ _Appears in:_
 | `image` _string_ |  |  |  |
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
-| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS ZeroFS] <br />Optional: \{\} <br /> |
+| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS ZeroFS Block] <br />Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
 | `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
 
@@ -1375,6 +1377,7 @@ _Appears in:_
 | `diskReservePercent` _integer_ | DiskReservePercent of DiskSize is kept for the image cache and snapshot staging rather than budgeted to<br />instances. | 20 | Maximum: 90 <br />Minimum: 0 <br />Optional: \{\} <br /> |
 | `suspendedSnapshotsPerInstance` _integer_ | SuspendedSnapshotsPerInstance is how many suspended instances' snapshots each instance slot budgets disk<br />for. A suspended instance frees its slot at once, but its snapshot stays on the node until Substrate<br />detaches it (30 minutes by default), so heavy suspend and resume churn stacks snapshots on a full worker. | 1 | Maximum: 10 <br />Minimum: 0 <br />Optional: \{\} <br /> |
 | `additionalPools` _[DevboxWorkerPoolRef](#devboxworkerpoolref) array_ | AdditionalPools are existing Substrate WorkerPools this runner's instances may also run on. The operator<br />labels each with the runner's worker selector and removes the label when the pool leaves this list. They<br />should run the same sandbox class as the runner, and their free capacity counts toward SpareInstances. |  | Optional: \{\} <br /> |
+| `zones` _string array_ | Zones runs one WorkerPool per zone instead of one pool, each pinned to its zone's nodes with<br />topology.kubernetes.io/zone. Block homes run that way without it too, in the zones of the nodes matching<br />NodeSelector (or of every node, before any matches): a home's disk lives in one zone, and the gateway keeps<br />each instance in its home's zone, packing new instances into the zone that already holds the most. Set it<br />to choose the zones instead. Replicas and Autoscaling are totals across the zones: the minimum and the spare<br />instance slots go only to zones holding homes, not to every zone. |  | MaxItems: 6 <br />Optional: \{\} <br />items:Pattern: ^[a-z0-9]([-a-z0-9]\{0,30\}[a-z0-9])?$ <br /> |
 | `maxInstances` _integer_ | MaxInstances caps concurrently running instances in console. Unset means unlimited. |  | Minimum: 1 <br />Optional: \{\} <br /> |
 | `sandboxClass` _[DevboxSandboxClass](#devboxsandboxclass)_ | SandboxClass is the isolation technology. Immutable once the WorkerPool exists. | gvisor | Enum: [gvisor microvm] <br />Optional: \{\} <br /> |
 | `sandboxConfig` _string_ | SandboxConfig names a Substrate sandbox class ConfigMap (WorkerPool sandboxClasses[].configRef). |  | Optional: \{\} <br /> |
@@ -1402,6 +1405,44 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
 | `namespace` _string_ | Namespace defaults to the namespace the operator runs devbox WorkerPools in. |  | Optional: \{\} <br /> |
+
+
+#### DevboxWorkerPoolZone
+
+
+
+DevboxWorkerPoolZone is the WorkerPool of one zone.
+
+
+
+_Appears in:_
+- [DevboxRunnerStatus](#devboxrunnerstatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `zone` _string_ |  |  |  |
+| `workerPool` _string_ | WorkerPool is the pool's namespace/name. |  |  |
+
+
+#### DevboxZoneCapacity
+
+
+
+DevboxZoneCapacity is one zone's WorkerPool as the autoscaler sees it.
+
+
+
+_Appears in:_
+- [DevboxCapacityStatus](#devboxcapacitystatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `zone` _string_ |  |  |  |
+| `workers` _integer_ | Workers are the zone's schedulable workers, DesiredWorkers the autoscaler's target for them. |  |  |
+| `desiredWorkers` _integer_ |  |  |  |
+| `homes` _integer_ | Homes are the instances whose home lives in the zone, RunningInstances those running there, and<br />WaitingInstances those waiting for a worker there. |  |  |
+| `runningInstances` _integer_ |  |  |  |
+| `waitingInstances` _integer_ |  |  | Optional: \{\} <br /> |
 
 
 #### ExaConnection

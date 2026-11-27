@@ -23,6 +23,7 @@ edit() {
 edit "$chart/values.yaml" "
   .zerofs.image.tag = \"$version\" |
   .juicefs.image.tag = \"$version\" |
+  .block.image.tag = \"$version\" |
   .assetStaging.image = \"ghcr.io/pluralsh/deployment-operator:$version\"
 "
 
@@ -33,6 +34,7 @@ sed -i.bak "s/^version: .*/version: $major.$minor.$((patch + 1))/" "$chart/Chart
 for check in \
   "$(yq '.zerofs.image.tag' "$chart/values.yaml")" \
   "$(yq '.juicefs.image.tag' "$chart/values.yaml")" \
+  "$(yq '.block.image.tag' "$chart/values.yaml")" \
   "$(yq '.assetStaging.image' "$chart/values.yaml" | sed 's/.*://')"; do
   if [[ $check != "$version" ]]; then
     echo "bump.sh: an image wasn't pinned to $version" >&2

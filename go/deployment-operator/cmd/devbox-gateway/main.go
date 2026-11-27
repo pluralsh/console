@@ -45,6 +45,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zones"
 )
 
 // version is set with -ldflags "-X main.version=...".
@@ -285,6 +286,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	if err != nil {
 		return err
 	}
+	ate.WithDemand(&zones.Demand{Client: kube, Namespace: o.podNamespace})
 
 	if o.mcpTLS {
 		// atenet-egress re-originates https rules with TLS verified against public CAs, which the servicedns

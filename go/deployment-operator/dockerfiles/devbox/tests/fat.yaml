@@ -208,6 +208,10 @@ commandTests:
     command: cat
     args: ["/etc/containers/storage.conf"]
     expectedOutput: ['driver = "vfs"', 'rootless_storage_path = "/var/lib/devbox-containers/storage"']
+  - name: Block homes keep rootless podman storage on the home with vfs
+    command: cat
+    args: ["/etc/containers/storage.home.conf"]
+    expectedOutput: ['driver = "vfs"', 'runroot = "/run/containers/storage"', 'rootless_storage_path = "/home/dev/\.local/share/containers/storage"']
   - name: dev owns the container storage directory
     command: stat
     args: ["-c", "%u:%g %a", "/var/lib/devbox-containers"]

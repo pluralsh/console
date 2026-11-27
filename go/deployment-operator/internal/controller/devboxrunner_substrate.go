@@ -30,6 +30,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zones"
 )
 
 // WorkerPools are managed as unstructured objects so the operator doesn't depend on go.ate.dev/substrate.
@@ -168,64 +169,106 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 			class, r.Config.SubstrateNamespace, ateControllerName, class)
 	}
 
-	sandboxClass := map[string]any{"name": string(class)}
-	if wp.SandboxConfig != nil && *wp.SandboxConfig != "" {
-		sandboxClass["configRef"] = map[string]any{"name": *wp.SandboxConfig}
+	if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, r.Config.WorkerPoolNamespace); err != nil {
+		return fmt.Errorf("ensuring spawned CA configmap for worker pool namespace: %w", err)
 	}
 
+	pools, err := r.devboxPoolTargets(ctx, api, runner)
+	if err != nil {
+		return err
+	}
+
+	var autoscaleErr error
+	if wp.Autoscaling != nil {
+		autoscaleErr = r.autoscaleWorkerPools(ctx, api, runner, pools, class, capacity)
+	} else {
+		setFixedReplicas(pools.targets, int64(lo.FromPtrOr(wp.Replicas, 1)))
+	}
+
+	var ready, replicas int64
+	var notReady []string
+	for _, t := range pools.targets {
+		if err := r.applyWorkerPool(ctx, runner, t, class, image); err != nil {
+			return err
+		}
+		ready, replicas = ready+t.ready, replicas+t.replicas
+		if t.replicas > 0 && t.ready == 0 {
+			notReady = append(notReady, t.pool.GetName())
+		}
+	}
+	runner.Status.WorkerPool = pools.single
+	runner.Status.Zones = pools.zones
+	runner.Status.WorkerPoolZones = pools.zoneStatus()
+
+	if err := errors.Join(autoscaleErr, additionalErr, pools.cleanupErr); err != nil {
+		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.ErrorConditionReason, err.Error())
+		return nil
+	}
+	if replicas > 0 && ready == 0 {
+		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxPendingReason,
+			fmt.Sprintf("WorkerPool %s has no ready workers yet", strings.Join(notReady, ", ")))
+	} else {
+		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason,
+			fmt.Sprintf("%d/%d workers ready", ready, replicas))
+	}
+	return nil
+}
+
+// devboxWorkerPoolTemplate is the worker pod template of the runner's pool in zone, or of its single pool when
+// zone is "".
+func devboxWorkerPoolTemplate(runner *v1alpha1.DevboxRunner, zone string) (map[string]any, error) {
+	wp := lo.FromPtr(runner.Spec.WorkerPool)
 	template := map[string]any{
 		"labels":      stringMapToAny(devboxSelectorLabels(runner)),
 		"annotations": stringMapToAny(lo.Assign(workerPodAnnotations, wp.PodAnnotations)),
 	}
-	if len(wp.NodeSelector) > 0 {
-		template["nodeSelector"] = stringMapToAny(wp.NodeSelector)
+	nodeSelector := lo.Assign(wp.NodeSelector)
+	if zone != "" {
+		nodeSelector[zones.NodeLabel] = zone
+	}
+	if len(nodeSelector) > 0 {
+		template["nodeSelector"] = stringMapToAny(nodeSelector)
 	}
 	if wp.NodeAffinity != nil {
 		affinity, err := toUnstructured(wp.NodeAffinity)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		template["nodeAffinity"] = affinity
 	}
 	if len(wp.Tolerations) > 0 {
 		tolerations, err := toUnstructured(wp.Tolerations)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		template["tolerations"] = tolerations
 	}
 	if wp.Resources != nil {
 		resources, err := toUnstructured(wp.Resources)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		template["resources"] = resources
 	}
 	if wp.PriorityClassName != nil {
 		template["priorityClassName"] = *wp.PriorityClassName
 	}
+	return template, nil
+}
 
-	if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, r.Config.WorkerPoolNamespace); err != nil {
-		return fmt.Errorf("ensuring spawned CA configmap for worker pool namespace: %w", err)
+// applyWorkerPool creates or updates the target's WorkerPool with its planned replicas.
+func (r *DevboxRunnerReconciler) applyWorkerPool(ctx context.Context, runner *v1alpha1.DevboxRunner, t *devboxPoolTarget, class v1alpha1.DevboxSandboxClass, image string) error {
+	wp := lo.FromPtr(runner.Spec.WorkerPool)
+	sandboxClass := map[string]any{"name": string(class)}
+	if wp.SandboxConfig != nil && *wp.SandboxConfig != "" {
+		sandboxClass["configRef"] = map[string]any{"name": *wp.SandboxConfig}
+	}
+	template, err := devboxWorkerPoolTemplate(runner, t.zone)
+	if err != nil {
+		return err
 	}
 
-	pool := &unstructured.Unstructured{}
-	pool.SetGroupVersionKind(workerPoolGVK)
-	if err := r.Get(ctx, client.ObjectKey{Name: devboxWorkerPoolName(runner), Namespace: r.Config.WorkerPoolNamespace}, pool); err != nil && !apierrors.IsNotFound(err) {
-		return fmt.Errorf("getting WorkerPool: %w", err)
-	}
-	pool.SetGroupVersionKind(workerPoolGVK)
-	pool.SetName(devboxWorkerPoolName(runner))
-	pool.SetNamespace(r.Config.WorkerPoolNamespace)
-	// Read before CreateOrPatch, which strips status from an unstructured object it doesn't patch.
-	ready, _, _ := unstructured.NestedInt64(pool.Object, "status", "readyReplicas")
-
-	replicas := int64(lo.FromPtrOr(wp.Replicas, 1))
-	var autoscaleErr error
-	if wp.Autoscaling != nil {
-		replicas, autoscaleErr = r.autoscaleWorkerPool(ctx, api, runner, pool, class, capacity)
-	}
-
+	pool := t.pool
 	_, err = controllerutil.CreateOrPatch(ctx, r.Client, pool, func() error {
 		labels := pool.GetLabels()
 		if labels == nil {
@@ -237,13 +280,16 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 		for k, v := range devboxWorkerSelector(runner) {
 			labels[k] = v
 		}
+		if t.zone != "" {
+			labels[zones.Label] = t.zone
+		}
 		pool.SetLabels(labels)
 		if err := controllerutil.SetOwnerReference(runner, pool, r.Scheme); err != nil {
 			return err
 		}
 
 		spec := map[string]any{
-			"replicas":       replicas,
+			"replicas":       t.replicas,
 			"workerImage":    image,
 			"sandboxClasses": []any{sandboxClass},
 			"template":       template,
@@ -251,20 +297,7 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 		return unstructured.SetNestedMap(pool.Object, spec, "spec")
 	})
 	if err != nil {
-		return fmt.Errorf("reconciling WorkerPool: %w", err)
-	}
-
-	runner.Status.WorkerPool = lo.ToPtr(r.Config.WorkerPoolNamespace + "/" + pool.GetName())
-	if err := errors.Join(autoscaleErr, additionalErr); err != nil {
-		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.ErrorConditionReason, err.Error())
-		return nil
-	}
-	if replicas > 0 && ready == 0 {
-		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxPendingReason,
-			fmt.Sprintf("WorkerPool %s has no ready workers yet", pool.GetName()))
-	} else {
-		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason,
-			fmt.Sprintf("%d/%d workers ready", ready, replicas))
+		return fmt.Errorf("reconciling WorkerPool %s: %w", pool.GetName(), err)
 	}
 	return nil
 }
@@ -369,12 +402,33 @@ func (r *DevboxRunnerReconciler) deleteWorkerPool(ctx context.Context, runner *v
 	if err := r.releaseAdditionalPools(ctx, runner); err != nil {
 		return err
 	}
+	names := []string{devboxWorkerPoolName(runner)}
+	for _, zone := range runner.Zones() {
+		names = append(names, devboxZonalPoolName(runner, zone))
+	}
+	for _, p := range runner.Status.WorkerPoolZones {
+		_, name, _ := strings.Cut(p.WorkerPool, "/")
+		names = append(names, name)
+	}
+	for _, name := range lo.Uniq(names) {
+		if err := r.deletePool(ctx, name); err != nil {
+			return err
+		}
+	}
+	runner.Status.Zones, runner.Status.WorkerPoolZones = nil, nil
+	if atespace := lo.FromPtr(runner.Status.Atespace); atespace != "" {
+		return r.zoneDemand().Delete(ctx, atespace)
+	}
+	return nil
+}
+
+func (r *DevboxRunnerReconciler) deletePool(ctx context.Context, name string) error {
 	pool := &unstructured.Unstructured{}
 	pool.SetGroupVersionKind(workerPoolGVK)
-	pool.SetName(devboxWorkerPoolName(runner))
+	pool.SetName(name)
 	pool.SetNamespace(r.Config.WorkerPoolNamespace)
 	if err := r.Delete(ctx, pool); err != nil && !apierrors.IsNotFound(err) && !isNoKindMatch(err) {
-		return err
+		return fmt.Errorf("deleting WorkerPool %s: %w", name, err)
 	}
 	return nil
 }
@@ -463,7 +517,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 		Containers: []*ateapi.Container{{
 			Name:  devboxContainerName,
 			Image: image,
-			Env:   append([]*ateapi.EnvVar{{Name: guest.EnvVar, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
+			Env:   append(devboxSystemEnv(runner, string(guestJSON)), devboxPlainEnv(runner)...),
 			WakeupProbe: &ateapi.WakeupProbe{
 				HttpGet:        &ateapi.HttpGetAction{Path: "/readyz", Port: devboxReadyzPort},
 				TimeoutSeconds: int32(readyz / time.Second),
@@ -526,6 +580,24 @@ func validateDevboxRepositories(runner *v1alpha1.DevboxRunner) error {
 // devboxHomeVolumeSource is /home/dev: a durable dir carried in the instance's snapshots, or a JuiceFS or ZeroFS
 // volume of the home's size. An external home names the runner's StorageClass here, which keys the template
 // hash; ensureHomeStorageClass swaps in the revision's own class once the template is named.
+// devboxContainerStorageConf is the devbox images' Podman storage config that keeps images, containers and volumes
+// on the home rather than the root filesystem every snapshot carries.
+const devboxContainerStorageConf = "/etc/containers/storage.home.conf"
+
+// devboxSystemEnv is the env the operator sets on a box. Substrate passes duplicate names through and processes
+// take the first, so names spec.env sets are left out. Only a Block home takes container storage: ZeroFS and JuiceFS
+// make fsyncs object-storage round trips, and a Snapshot home is snapshotted with the root filesystem anyway.
+func devboxSystemEnv(runner *v1alpha1.DevboxRunner, guestJSON string) []*ateapi.EnvVar {
+	env := []*ateapi.EnvVar{{Name: guest.EnvVar, Value: guestJSON}}
+	userSet := func(name string) bool {
+		return lo.ContainsBy(runner.Spec.Env, func(e v1alpha1.DevboxEnvVar) bool { return e.Name == name })
+	}
+	if runner.Spec.HomeStorage() == v1alpha1.DevboxHomeBlock && !userSet("CONTAINERS_STORAGE_CONF") {
+		env = append(env, &ateapi.EnvVar{Name: "CONTAINERS_STORAGE_CONF", Value: devboxContainerStorageConf})
+	}
+	return env
+}
+
 func devboxHomeVolumeSource(runner *v1alpha1.DevboxRunner) *ateapi.Volume {
 	if !runner.Spec.HomeStorage().External() {
 		return &ateapi.Volume{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}}

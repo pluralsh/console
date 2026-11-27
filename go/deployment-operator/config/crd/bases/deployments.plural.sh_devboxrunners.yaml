@@ -353,8 +353,8 @@ spec:
                     - type: integer
                     - type: string
                     description: |-
-                      Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.
-                      Defaults to spec.resources.disk.
+                      Size is the most a JuiceFS, ZeroFS or Block home may hold: a JuiceFS quota, the size of the ZeroFS block
+                      device, or the size of the cloud disk. Defaults to spec.resources.disk.
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   storage:
@@ -366,11 +366,12 @@ spec:
                     - Snapshot
                     - JuiceFS
                     - ZeroFS
+                    - Block
                     type: string
                   storageClassName:
                     description: |-
-                      StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's
-                      devbox-juicefs or devbox-zerofs.
+                      StorageClassName is the JuiceFS, ZeroFS or Block StorageClass. Defaults to the agent-substrate chart's
+                      devbox-juicefs, devbox-zerofs or devbox-block.
                     type: string
                 type: object
               httpAllowlist:
@@ -1138,6 +1139,20 @@ spec:
                     description: WorkerImage overrides the Substrate worker image
                       configured on the operator for the sandbox class.
                     type: string
+                  zones:
+                    description: |-
+                      Zones runs one WorkerPool per zone instead of one pool, each pinned to its zone's nodes with
+                      topology.kubernetes.io/zone. Block homes run that way without it too, in the zones of the nodes matching
+                      NodeSelector (or of every node, before any matches): a home's disk lives in one zone, and the gateway keeps
+                      each instance in its home's zone, packing new instances into the zone that already holds the most. Set it
+                      to choose the zones instead. Replicas and Autoscaling are totals across the zones: the minimum and the spare
+                      instance slots go only to zones holding homes, not to every zone.
+                    items:
+                      pattern: ^[a-z0-9]([-a-z0-9]{0,30}[a-z0-9])?$
+                      type: string
+                    maxItems: 6
+                    type: array
+                    x-kubernetes-list-type: set
                 type: object
                 x-kubernetes-validations:
                 - message: autoscaling.minReplicas must not exceed maxReplicas
@@ -1246,6 +1261,47 @@ spec:
                       DrainingWorkers those being removed.
                     format: int32
                     type: integer
+                  zones:
+                    description: |-
+                      Zones breaks the autoscaler's view down by zone when the runner runs a pool per zone; the fields above are
+                      totals.
+                    items:
+                      description: DevboxZoneCapacity is one zone's WorkerPool as
+                        the autoscaler sees it.
+                      properties:
+                        desiredWorkers:
+                          format: int32
+                          type: integer
+                        homes:
+                          description: |-
+                            Homes are the instances whose home lives in the zone, RunningInstances those running there, and
+                            WaitingInstances those waiting for a worker there.
+                          format: int32
+                          type: integer
+                        runningInstances:
+                          format: int32
+                          type: integer
+                        waitingInstances:
+                          format: int32
+                          type: integer
+                        workers:
+                          description: Workers are the zone's schedulable workers,
+                            DesiredWorkers the autoscaler's target for them.
+                          format: int32
+                          type: integer
+                        zone:
+                          type: string
+                      required:
+                      - desiredWorkers
+                      - homes
+                      - runningInstances
+                      - workers
+                      - zone
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - zone
+                    x-kubernetes-list-type: map
                 required:
                 - instancesPerWorker
                 type: object
@@ -1352,6 +1408,7 @@ spec:
                       - Snapshot
                       - JuiceFS
                       - ZeroFS
+                      - Block
                       type: string
                     image:
                       type: string
@@ -1387,8 +1444,36 @@ spec:
                 format: int64
                 type: integer
               workerPool:
-                description: WorkerPool is the namespaced name of the Substrate WorkerPool.
+                description: WorkerPool is the namespaced name of the Substrate WorkerPool,
+                  unset when the runner runs a pool per zone.
                 type: string
+              workerPoolZones:
+                description: |-
+                  WorkerPoolZones are the runner's WorkerPools when it runs one per zone, including pools of zones dropped
+                  from Zones that still hold instances' homes.
+                items:
+                  description: DevboxWorkerPoolZone is the WorkerPool of one zone.
+                  properties:
+                    workerPool:
+                      description: WorkerPool is the pool's namespace/name.
+                      type: string
+                    zone:
+                      type: string
+                  required:
+                  - workerPool
+                  - zone
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - zone
+                x-kubernetes-list-type: map
+              zones:
+                description: |-
+                  Zones are the zones the runner runs a WorkerPool in and places new instances in: spec.workerPool.zones, or
+                  for Block homes without them, the zones the operator found the runner's nodes in.
+                items:
+                  type: string
+                type: array
             type: object
         type: object
     served: true

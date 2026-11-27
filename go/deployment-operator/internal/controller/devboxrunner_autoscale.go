@@ -152,67 +152,134 @@ func scaleUpWorkers(desired, schedulable, retained int64, maxReplicas int32) int
 	return max(schedulable, min(desired, int64(maxReplicas)-retained))
 }
 
-// autoscaleWorkerPool returns the replicas for the managed WorkerPool. Scaling up is immediate. Scaling down
+// autoscaleWorkerPools sets the replicas of the runner's WorkerPools. Scaling up is immediate. Scaling down
 // waits ScaleDownDelay after the last scaling event, and only ever removes workers that host no instance and whose
 // node holds no snapshot that is yet to be uploaded (once the worker goes, the node autoscaler may remove it): it
 // drains them in Substrate so nothing new lands on them, re-checks they are still empty, and gives their pods
-// the lowest deletion cost before lowering replicas so the ReplicaSet removes exactly those pods.
-func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, pool *unstructured.Unstructured, class v1alpha1.DevboxSandboxClass, capacity devboxCapacity) (int64, error) {
+// the lowest deletion cost before lowering replicas so the ReplicaSet removes exactly those pods. On an error each
+// pool keeps its replicas.
+func (r *DevboxRunnerReconciler) autoscaleWorkerPools(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, pools *devboxPools, class v1alpha1.DevboxSandboxClass, capacity devboxCapacity) error {
 	wp := lo.FromPtr(runner.Spec.WorkerPool)
 	as := wp.Autoscaling
 	status := lo.FromPtr(runner.Status.Capacity)
-	current, found, _ := unstructured.NestedInt64(pool.Object, "spec", "replicas")
-	if !found {
-		current = int64(lo.FromPtrOr(as.MinReplicas, 1))
+	for _, t := range pools.targets {
+		if !t.found {
+			t.current = int64(lo.FromPtrOr(as.MinReplicas, 1))
+		}
+		t.replicas = t.current
 	}
 	if capacity.PerWorker == 0 {
-		return current, fmt.Errorf("autoscaling sizes workers by instance slots, so it needs spec.workerPool.resources.limits")
+		return fmt.Errorf("autoscaling sizes workers by instance slots, so it needs spec.workerPool.resources.limits")
 	}
-	selector, _, _ := unstructured.NestedString(pool.Object, "status", "selector")
-	if pool.GetUID() == "" || selector == "" {
-		return desiredDevboxWorkers(as, capacity.PerWorker, 0, 0), nil
+	if !pools.zonal() && !pools.targets[0].observable() {
+		pools.targets[0].replicas = desiredDevboxWorkers(as, capacity.PerWorker, 0, 0)
+		return nil
 	}
 
-	parsed, err := labels.Parse(selector)
-	if err != nil {
-		return current, fmt.Errorf("parsing WorkerPool selector %q: %w", selector, err)
-	}
-	pods := &corev1.PodList{}
-	if err := r.APIReader.List(ctx, pods, client.InNamespace(pool.GetNamespace()), client.MatchingLabelsSelector{Selector: parsed}); err != nil {
-		return current, fmt.Errorf("listing worker pods: %w", err)
-	}
 	workers, err := api.ListWorkers(ctx)
 	if err != nil {
-		return current, fmt.Errorf("listing Substrate workers: %w", err)
+		return fmt.Errorf("listing Substrate workers: %w", err)
 	}
-	var pinned map[string]bool
-	var warm map[string]int64
-	if atespace := lo.FromPtr(runner.Status.Atespace); atespace != "" {
-		actors, err := api.ListActors(ctx, atespace)
-		if err != nil {
-			return current, fmt.Errorf("listing actors: %w", err)
+	actors := pools.actors
+	if !pools.listed {
+		if atespace := lo.FromPtr(runner.Status.Atespace); atespace != "" {
+			if actors, err = api.ListActors(ctx, atespace); err != nil {
+				return fmt.Errorf("listing actors: %w", err)
+			}
 		}
-		pinned = undurableSnapshotNodes(actors)
-		warm = warmActorsByWorker(actors)
+	}
+	pinned := undurableSnapshotNodes(actors)
+	warm := warmActorsByWorker(actors)
+	for _, t := range pools.targets {
+		if !t.observable() {
+			continue
+		}
+		selector, _, _ := unstructured.NestedString(t.pool.Object, "status", "selector")
+		parsed, err := labels.Parse(selector)
+		if err != nil {
+			return fmt.Errorf("parsing WorkerPool selector %q: %w", selector, err)
+		}
+		pods := &corev1.PodList{}
+		if err := r.APIReader.List(ctx, pods, client.InNamespace(t.pool.GetNamespace()), client.MatchingLabelsSelector{Selector: parsed}); err != nil {
+			return fmt.Errorf("listing worker pods: %w", err)
+		}
+		t.view = newDevboxPoolView(pods.Items, workers, t.pool.GetNamespace(), t.pool.GetName(), pinned, warm)
 	}
 
-	view := newDevboxPoolView(pods.Items, workers, pool.GetNamespace(), pool.GetName(), pinned, warm)
 	additional := lo.SliceToMap(runner.Status.AdditionalWorkerPools, func(p string) (string, bool) { return p, true })
 	additionalFree := additionalFreeInstances(workers, additional, class, capacity)
-	desired := desiredDevboxWorkers(as, capacity.PerWorker, view.used(), additionalFree)
+	var desired, active []int64
+	if pools.zonal() {
+		loads := lo.Map(pools.targets, func(t *devboxPoolTarget, _ int) devboxZoneLoad {
+			return devboxZoneLoad{
+				zone: t.zone, homes: t.homes, used: t.view.used(), waiting: t.waiting,
+				schedulable: int64(len(t.view.schedulable)), retained: int64(len(t.view.held) + len(t.view.drainedIdle)),
+				placeable: t.placeable(),
+			}
+		})
+		desired, active = planZonalWorkers(as, capacity.PerWorker, additionalFree, loads)
+	} else {
+		view := pools.targets[0].view
+		d := desiredDevboxWorkers(as, capacity.PerWorker, view.used(), additionalFree)
+		desired = []int64{d}
+		active = []int64{scaleUpWorkers(d, int64(len(view.schedulable)), int64(len(view.held)+len(view.drainedIdle)), as.MaxReplicas)}
+	}
+
 	scaleDownDelay := lo.FromPtrOr(as.ScaleDownDelay, metav1.Duration{Duration: 10 * time.Minute}).Duration
 	cooledDown := status.LastScaleTime == nil || time.Since(status.LastScaleTime.Time) >= scaleDownDelay
+	scaled := false
+	var totals devboxPoolView
+	var zoneStatus []v1alpha1.DevboxZoneCapacity
+	for i, t := range pools.targets {
+		next, err := r.scalePool(ctx, api, t, desired[i], active[i], cooledDown, pinned)
+		if err != nil {
+			return err
+		}
+		scaled = scaled || next || t.replicas != t.current
+		totals.schedulable = append(totals.schedulable, t.view.schedulable...)
+		totals.held = append(totals.held, t.view.held...)
+		totals.drainedIdle = append(totals.drainedIdle, t.view.drainedIdle...)
+		if t.zone != "" {
+			zoneStatus = append(zoneStatus, v1alpha1.DevboxZoneCapacity{
+				Zone: t.zone, Workers: int32(len(t.view.schedulable)), DesiredWorkers: int32(desired[i]),
+				Homes: int32(t.homes), RunningInstances: int32(t.view.used()), WaitingInstances: int32(t.waiting),
+			})
+		}
+	}
 
+	status.Workers = int32(len(totals.schedulable))
+	status.DrainingWorkers = int32(len(totals.drainedIdle) + len(totals.held))
+	status.RunningInstances = int32(totals.used())
+	status.AdditionalFreeInstances = int32(additionalFree)
+	status.DesiredWorkers = lo.ToPtr(int32(min(lo.Sum(desired), int64(as.MaxReplicas))))
+	status.Zones = zoneStatus
+	if scaled {
+		status.LastScaleTime = lo.ToPtr(metav1.Now())
+	}
+	runner.Status.Capacity = &status
+	return nil
+}
+
+// observable reports whether the pool exists and reports the selector its pods are listed by.
+func (t *devboxPoolTarget) observable() bool {
+	selector, _, _ := unstructured.NestedString(t.pool.Object, "status", "selector")
+	return t.pool.GetUID() != "" && selector != ""
+}
+
+// scalePool sets one pool's replicas from its desired workers and the workers to run when scaling up, and reports
+// whether it scaled.
+func (r *DevboxRunnerReconciler) scalePool(ctx context.Context, api substrate.API, t *devboxPoolTarget, desired, scaleUp int64, cooledDown bool, pinned map[string]bool) (bool, error) {
+	view := &t.view
 	scaled := false
 	active := int64(len(view.schedulable))
 	switch {
 	case desired > active:
-		next := scaleUpWorkers(desired, active, int64(len(view.held)+len(view.drainedIdle)), as.MaxReplicas)
-		active, scaled = next, next > active
+		scaled = scaleUp > active
+		active = scaleUp
 	case desired < active && cooledDown:
-		drained, err := r.drainIdleWorkers(ctx, api, &view, active-desired, pinned)
+		drained, err := r.drainIdleWorkers(ctx, api, view, active-desired, pinned)
 		if err != nil {
-			return current, err
+			return false, err
 		}
 		active -= drained
 		scaled = drained > 0
@@ -224,21 +291,12 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, api su
 	replicas := active + int64(len(view.held)) + int64(len(view.drainedIdle))
 	if len(view.drainedIdle) > 0 && !lo.SomeBy(view.schedulable, func(p devboxWorkerPod) bool { return !p.ready() }) {
 		if err := r.markForDeletion(ctx, view.drainedIdle); err != nil {
-			return current, err
+			return false, err
 		}
 		replicas = int64(len(view.schedulable) + len(view.held))
 	}
-
-	status.Workers = int32(len(view.schedulable))
-	status.DrainingWorkers = int32(len(view.drainedIdle) + len(view.held))
-	status.RunningInstances = int32(view.used())
-	status.AdditionalFreeInstances = int32(additionalFree)
-	status.DesiredWorkers = lo.ToPtr(int32(desired))
-	if scaled || replicas != current {
-		status.LastScaleTime = lo.ToPtr(metav1.Now())
-	}
-	runner.Status.Capacity = &status
-	return replicas, nil
+	t.replicas = replicas
+	return scaled, nil
 }
 
 // drainIdleWorkers drains up to n active or unavailable workers that host no instance and whose node holds no

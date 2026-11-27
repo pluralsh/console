@@ -432,6 +432,88 @@ zerofs:
     affinity: {}
     priorityClassName: system-node-critical
 
+# Opt-in block storage devbox homes: one disk per home, formatted ext4 and mounted by the node's kernel. The disks
+# come from the CSI driver for disks the cluster already runs (the provider: the AWS EBS or GCP PD CSI driver, or any
+# other that attaches disks and snapshots them), which the deployment-operator's devbox-block drives through
+# Kubernetes: a claim per disk and a pod that keeps it attached to its node. A disk is created on its home's first
+# attach, in that node's zone, and the gateway keeps each box in its home's zone. DevboxRunners select it with
+# spec.home.storage: Block.
+block:
+  enabled: false
+  image:
+    repository: ghcr.io/pluralsh/devbox-block
+    # -- The deployment-operator release; each release's agent-substrate PR pins it. Required unless digest is set.
+    tag: ""
+    digest: ""
+  # -- The provider, by CSI driver name, e.g. ebs.csi.aws.com. Empty: the provisioner of the cluster's default
+  # StorageClass (in-tree names map to their CSI driver). The controller checks the provider's CSIDriver, the
+  # snapshot API and a VolumeSnapshotClass for it, and reports the result on the StorageClass, where DevboxRunners
+  # read it.
+  provider: ""
+  # -- The StorageClass DevboxRunners name (provisioner block.devbox.plural.sh).
+  storageClassName: devbox-block
+  # -- The provider's StorageClass parameters for each disk, e.g. type, iops, throughput, or on EBS
+  # volumeInitializationRate (MiB/s) to hydrate homes created from the golden snapshot at a known speed.
+  parameters: {}
+  # -- The size of a home created without one.
+  defaultCapacityGiB: 20
+  # Owner and mode of a new, empty home: the devbox images' dev user.
+  home:
+    uid: 1000
+    gid: 1000
+    mode: "0755"
+  # -- SPIFFE IDs allowed to call the controller. Empty: ate-api-server.
+  allowedClients: []
+  # The driver's pods request and limit CPU and memory, have liveness and readiness probes, and run as non-root with
+  # a read-only root filesystem where they can, so common admission policies pass them. The node plugin has to be
+  # privileged to mount homes, as the ZeroFS and JuiceFS node plugins are, so policies need an exception for it.
+  controller:
+    podLabels: {}
+    podAnnotations: {}
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+  # The pod that keeps each attached home's disk attached to and mounted on its node, one per running box. It does
+  # nothing, but counts against the node's pod limit. Its defaults pass the restricted Pod Security Standard and
+  # common admission policies: non-root, read-only root filesystem, no capabilities, no host namespaces, CPU and
+  # memory requests and limits (5m/16Mi, 50m/32Mi), probes, its own ServiceAccount without a token.
+  anchor:
+    podLabels: {}
+    podAnnotations: {}
+    # -- Evicting an anchor detaches its box's home, so it gets the node's own priority by default.
+    priorityClassName: system-node-critical
+    # -- Runs anchors on the host network, so they take no pod IP. Useful where pod IPs are scarce (the AWS VPC CNI
+    # without prefix delegation), but policies that forbid host namespaces will refuse it.
+    hostNetwork: false
+    # -- Merged over the defaults.
+    resources: {}
+    # -- Empty: every taint, since an anchor goes wherever Substrate put its box.
+    tolerations: []
+    # -- A partial Pod merged over everything above, for what has no value of its own, e.g. spec.securityContext.
+    # Maps merge; a list replaces the chart's. The pod's name, node, image, args and home volume are always the
+    # controller's. Don't set spec.securityContext.fsGroup: the kubelet would change the group of every file in
+    # the home each time it's mounted.
+    overrides: {}
+  node:
+    podLabels: {}
+    podAnnotations: {}
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+    # -- Defaults to atelet's scheduling, since homes are mounted wherever atelet runs actors.
+    tolerations: []
+    nodeSelector: {}
+    affinity: {}
+    priorityClassName: system-node-critical
+
 # The bundled Kubernetes Secrets credential provider (`k8s.io`).
 k8sCredentialProvider:
   # -- Atespace allow-list (namespace-policy.yaml `policies`).
