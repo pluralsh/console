@@ -19,6 +19,8 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -578,7 +580,7 @@ func TestCompleteAfterBackstopLosesToResume(t *testing.T) {
 	h.clock.advance(15 * 24 * time.Hour)
 	inst.op.Lock()
 	h.g.backstops(context.Background())
-	_, err := h.g.resumeLocked(context.Background(), inst)
+	_, err := h.g.resumeLocked(context.Background(), inst, true)
 	inst.op.Unlock()
 	if err != nil {
 		t.Fatal(err)
@@ -749,14 +751,35 @@ func TestSnapshotAndStartFromSnapshot(t *testing.T) {
 	}
 }
 
-type fakeSeeds struct {
+// fakeHomes is the JuiceFS controller: seeded maps the volumes it cloned to their seeds, and missing seeds are
+// NotFound.
+type fakeHomes struct {
 	mu      sync.Mutex
 	saved   map[string]string
 	deleted []string
 	failErr error
+	seeded  map[string]string
+	missing bool
 }
 
-func (f *fakeSeeds) SaveSeed(_ context.Context, seedID, volumeID string) error {
+func (f *fakeHomes) ClaimSeed(context.Context, string, string) error { return nil }
+
+func (f *fakeHomes) SeedVolume(_ context.Context, volumeID, seedID string, _ int64) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.missing {
+		return status.Errorf(codes.NotFound, "the source of volume %s doesn't exist", volumeID)
+	}
+	if f.seeded == nil {
+		f.seeded = map[string]string{}
+	}
+	f.seeded[volumeID] = seedID
+	return nil
+}
+
+func (f *fakeHomes) DeleteVolume(context.Context, string) error { return nil }
+
+func (f *fakeHomes) SaveSeed(_ context.Context, seedID, volumeID string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.failErr != nil {
@@ -769,18 +792,21 @@ func (f *fakeSeeds) SaveSeed(_ context.Context, seedID, volumeID string) error {
 	return nil
 }
 
-func (f *fakeSeeds) DeleteSeed(_ context.Context, seedID string) error {
+func (f *fakeHomes) DeleteSeed(_ context.Context, seedID string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.deleted = append(f.deleted, seedID)
 	return nil
 }
 
+var juiceFSHome = Home{Storage: v1alpha1.DevboxHomeJuiceFS, Class: "devbox-juicefs", Bytes: 20 << 30, Seed: "golden.tmpl-uid"}
+
 func TestJuiceFSHomes(t *testing.T) {
 	h := newHarness(t, nil)
-	h.g.deps.Runners.(StaticRunners)[testRunner].HomeStorage = v1alpha1.DevboxHomeJuiceFS
-	seeds := &fakeSeeds{}
+	h.g.deps.Runners.(StaticRunners)[testRunner].Home = juiceFSHome
+	seeds := &fakeHomes{}
 	h.g.deps.Seeds = seeds
+	h.g.deps.Homes = map[v1alpha1.DevboxHomeStorage]homes.Driver{v1alpha1.DevboxHomeJuiceFS: seeds}
 	h.ate.ExternalHomes = true
 	ctx := context.Background()
 
@@ -792,6 +818,13 @@ func TestJuiceFSHomes(t *testing.T) {
 	}
 	if actor.GetSourceTag() != nil || !h.ate.Preview(ref.Atespace, ref.Name) {
 		t.Fatalf("the actor must take the template's golden tag with the preview header: source %v", actor.GetSourceTag())
+	}
+	home := "substrate-" + actor.GetMetadata().GetUid() + "-home"
+	seeds.mu.Lock()
+	seeded := maps.Clone(seeds.seeded)
+	seeds.mu.Unlock()
+	if want := map[string]string{home: juiceFSHome.Seed}; !maps.Equal(seeded, want) {
+		t.Fatalf("seeded homes = %v, want %v", seeded, want)
 	}
 
 	snapshot := func(id string) *devboxv1.ReportSnapshotRequest {
@@ -819,7 +852,7 @@ func TestJuiceFSHomes(t *testing.T) {
 	seeds.mu.Lock()
 	saved := maps.Clone(seeds.saved)
 	seeds.mu.Unlock()
-	if want := map[string]string{testAtespace + ".tag.snap-snap-1": "substrate-" + actor.GetMetadata().GetUid() + "-home"}; !maps.Equal(saved, want) {
+	if want := map[string]string{testAtespace + ".tag.snap-snap-1": home}; !maps.Equal(saved, want) {
 		t.Fatalf("seeds = %v, want %v", saved, want)
 	}
 
@@ -850,6 +883,39 @@ func TestJuiceFSHomes(t *testing.T) {
 	}
 	if _, err := h.g.deps.Actors.GetTag(ctx, actors.Ref{Atespace: testAtespace, Name: "snap-snap-2"}); status.Code(err) != codes.NotFound {
 		t.Fatalf("the failed snapshot's tag is left behind: %v", err)
+	}
+}
+
+// Without the revision's golden home, an instance fails before its first resume instead of crashing on restore.
+func TestJuiceFSHomesNeedTheGoldenHome(t *testing.T) {
+	for name, tc := range map[string]struct {
+		home  Home
+		homes *fakeHomes
+		want  string
+	}{
+		"the seed wasn't captured":  {home: juiceFSHome, homes: &fakeHomes{missing: true}, want: probe.ErrHomeSeedMissing},
+		"the gateway has no driver": {home: juiceFSHome, want: "no JuiceFS controller address"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			h := newHarness(t, nil)
+			h.g.deps.Runners.(StaticRunners)[testRunner].Home = tc.home
+			if tc.homes != nil {
+				h.g.deps.Homes = map[v1alpha1.DevboxHomeStorage]homes.Driver{v1alpha1.DevboxHomeJuiceFS: tc.homes}
+			}
+			h.ate.ExternalHomes = true
+			if _, err := h.g.CreateInstance(context.Background(), &devboxv1.CreateInstanceRequest{InstanceId: "inst-1", RunnerName: testRunner}); err != nil {
+				t.Fatal(err)
+			}
+			inst := h.g.get("inst-1")
+			h.eventually("instance failed", func() bool { return inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_FAILED })
+			if msg := inst.record().Message; !strings.Contains(msg, tc.want) {
+				t.Errorf("message = %q, want it to name %q", msg, tc.want)
+			}
+			if a, err := h.g.deps.Actors.GetActor(context.Background(), actors.Ref{Atespace: testAtespace, Name: "dbx-inst-1"}); err == nil &&
+				a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_RUNNING {
+				t.Error("the actor was resumed without its home")
+			}
+		})
 	}
 }
 
@@ -1045,11 +1111,14 @@ func TestResumeOutlivesTheCallersDeadline(t *testing.T) {
 func TestZeroFSHomes(t *testing.T) {
 	h := newHarness(t, nil)
 	runner := h.g.deps.Runners.(StaticRunners)[testRunner]
-	runner.HomeStorage = v1alpha1.DevboxHomeZeroFS
-	runner.Revisions[2] = RunnerRevision{Template: "tmpl-r2", GoldenTag: "golden-r2", HomeStorage: v1alpha1.DevboxHomeZeroFS}
-	// The JuiceFS seed client must never see a ZeroFS volume.
-	seeds := &fakeSeeds{failErr: errors.New("not a JuiceFS volume")}
+	home := Home{Storage: v1alpha1.DevboxHomeZeroFS, Class: "devbox-zerofs", Bytes: 20 << 30, Seed: "golden.tmpl-r2-uid"}
+	runner.Home = home
+	runner.Revisions[2] = RunnerRevision{Template: "tmpl-r2", GoldenTag: "golden-r2", Home: home}
+	// The JuiceFS seed client must never see a ZeroFS volume; the ZeroFS driver seeds the home.
+	seeds := &fakeHomes{failErr: errors.New("not a JuiceFS volume")}
+	zerofs := &fakeHomes{}
 	h.g.deps.Seeds = seeds
+	h.g.deps.Homes = map[v1alpha1.DevboxHomeStorage]homes.Driver{v1alpha1.DevboxHomeJuiceFS: seeds, v1alpha1.DevboxHomeZeroFS: zerofs}
 	h.ate.ExternalHomes = true
 	ctx := context.Background()
 
@@ -1061,6 +1130,12 @@ func TestZeroFSHomes(t *testing.T) {
 	}
 	if actor.GetSourceTag() != nil || !h.ate.Preview(ref.Atespace, ref.Name) {
 		t.Fatalf("the actor must take the template's golden tag with the preview header: source %v", actor.GetSourceTag())
+	}
+	zerofs.mu.Lock()
+	seeded := maps.Clone(zerofs.seeded)
+	zerofs.mu.Unlock()
+	if want := map[string]string{"substrate-" + actor.GetMetadata().GetUid() + "-home": home.Seed}; !maps.Equal(seeded, want) {
+		t.Fatalf("ZeroFS homes seeded = %v, want %v", seeded, want)
 	}
 
 	// As after a restart whose adopt couldn't read the runner.

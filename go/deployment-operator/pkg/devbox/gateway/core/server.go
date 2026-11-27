@@ -69,6 +69,54 @@ func (g *Gateway) ResumeInstance(ctx context.Context, req *devboxv1.InstanceActi
 	return &devboxv1.InstanceActionResponse{InstanceId: inst.ID, Status: st}, nil
 }
 
+// RebaseInstance moves an instance to another revision of its runner in the background; the outcome is reported
+// with the instance's status.
+func (g *Gateway) RebaseInstance(ctx context.Context, req *devboxv1.RebaseInstanceRequest) (*devboxv1.RebaseInstanceResponse, error) {
+	inst := g.get(req.GetInstanceId())
+	if inst == nil {
+		return nil, errNotFound(req.GetInstanceId())
+	}
+	rec := inst.record()
+	runner, err := g.deps.Runners.Get(ctx, rec.Runner)
+	if err != nil {
+		return nil, status.Errorf(codes.FailedPrecondition, "%v", err)
+	}
+	to, err := runner.target(req.GetTargetRevision())
+	if err != nil {
+		return nil, status.Errorf(codes.FailedPrecondition, "%v", err)
+	}
+	resp := &devboxv1.RebaseInstanceResponse{InstanceId: inst.ID, Status: rec.status(), TargetRevision: to.revision}
+	if rec.TemplateRevision == to.revision {
+		resp.Message = "already on this revision"
+		return resp, nil
+	}
+	// Only an unattended move keeps every agent the instance was offered: one a person asked for (its owner's, a
+	// forced update's at its deadline) goes ahead, as the docs say.
+	var keep []*devboxv1.AgentLaunch
+	if req.GetOnlyIfIdle() {
+		keep = inst.request().GetAgents()
+	}
+	if err := runner.movable(rec.TemplateRevision, keep, to); err != nil {
+		return nil, statusError(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED, "instance %s can't be moved: %v", inst.ID, err)
+	}
+	switch st := rec.status(); st {
+	case devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED:
+	case devboxv1.InstanceStatus_INSTANCE_STATUS_PROVISIONING, devboxv1.InstanceStatus_INSTANCE_STATUS_PENDING,
+		devboxv1.InstanceStatus_INSTANCE_STATUS_SNAPSHOTTING:
+		return nil, statusError(codes.Unavailable, devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING, "instance %s is %s", inst.ID, st)
+	default:
+		return nil, status.Errorf(codes.FailedPrecondition, "instance %s is %s", inst.ID, st)
+	}
+	if req.GetOnlyIfIdle() && inst.inUse() {
+		resp.Message = errInUse.Error()
+		return resp, nil
+	}
+	reason, onlyIfIdle := req.GetReason(), req.GetOnlyIfIdle()
+	g.goBackground(func(ctx context.Context) { g.rebase(ctx, inst, to, reason, onlyIfIdle) })
+	resp.Accepted = true
+	return resp, nil
+}
+
 func (g *Gateway) SnapshotInstance(_ context.Context, req *devboxv1.SnapshotInstanceRequest) (*devboxv1.SnapshotInstanceResponse, error) {
 	inst := g.get(req.GetInstanceId())
 	if inst == nil {

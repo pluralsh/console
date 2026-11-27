@@ -1013,9 +1013,17 @@ type ReportInstanceStatusRequest struct {
 	Idle             *IdleState             `protobuf:"bytes,9,opt,name=idle,proto3" json:"idle,omitempty"`
 	ObservedAt       *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
 	// Monotonic per instance; console ignores older reports.
-	Generation    uint64 `protobuf:"varint,11,opt,name=generation,proto3" json:"generation,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Generation uint64 `protobuf:"varint,11,opt,name=generation,proto3" json:"generation,omitempty"`
+	// The devbox-daemon version of template_revision. Empty for revisions whose daemon is the image's own.
+	DaemonVersion string `protobuf:"bytes,12,opt,name=daemon_version,json=daemonVersion,proto3" json:"daemon_version,omitempty"`
+	// The last move to another template revision, if any. UNSPECIFIED leaves console's value as it is.
+	RebaseState RebaseState `protobuf:"varint,13,opt,name=rebase_state,json=rebaseState,proto3,enum=devbox.v1.RebaseState" json:"rebase_state,omitempty"`
+	// Why the move failed, when rebase_state is FAILED.
+	RebaseMessage string `protobuf:"bytes,14,opt,name=rebase_message,json=rebaseMessage,proto3" json:"rebase_message,omitempty"`
+	// The revision the move was to.
+	RebaseRevision int64 `protobuf:"varint,15,opt,name=rebase_revision,json=rebaseRevision,proto3" json:"rebase_revision,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ReportInstanceStatusRequest) Reset() {
@@ -1121,6 +1129,34 @@ func (x *ReportInstanceStatusRequest) GetObservedAt() *timestamppb.Timestamp {
 func (x *ReportInstanceStatusRequest) GetGeneration() uint64 {
 	if x != nil {
 		return x.Generation
+	}
+	return 0
+}
+
+func (x *ReportInstanceStatusRequest) GetDaemonVersion() string {
+	if x != nil {
+		return x.DaemonVersion
+	}
+	return ""
+}
+
+func (x *ReportInstanceStatusRequest) GetRebaseState() RebaseState {
+	if x != nil {
+		return x.RebaseState
+	}
+	return RebaseState_REBASE_STATE_UNSPECIFIED
+}
+
+func (x *ReportInstanceStatusRequest) GetRebaseMessage() string {
+	if x != nil {
+		return x.RebaseMessage
+	}
+	return ""
+}
+
+func (x *ReportInstanceStatusRequest) GetRebaseRevision() int64 {
+	if x != nil {
+		return x.RebaseRevision
 	}
 	return 0
 }
@@ -2378,7 +2414,7 @@ const file_devbox_v1_ingest_proto_rawDesc = "" +
 	"\x06stream\x18\r \x01(\tR\x06stream\"E\n" +
 	"\x19PushInstanceDeltasRequest\x12(\n" +
 	"\x06deltas\x18\x01 \x03(\v2\x10.devbox.v1.DeltaR\x06deltas\"\x1c\n" +
-	"\x1aPushInstanceDeltasResponse\"\xec\x03\n" +
+	"\x1aPushInstanceDeltasResponse\"\x9e\x05\n" +
 	"\x1bReportInstanceStatusRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x121\n" +
@@ -2395,7 +2431,11 @@ const file_devbox_v1_ingest_proto_rawDesc = "" +
 	"observedAt\x12\x1e\n" +
 	"\n" +
 	"generation\x18\v \x01(\x04R\n" +
-	"generation\"Q\n" +
+	"generation\x12%\n" +
+	"\x0edaemon_version\x18\f \x01(\tR\rdaemonVersion\x129\n" +
+	"\frebase_state\x18\r \x01(\x0e2\x16.devbox.v1.RebaseStateR\vrebaseState\x12%\n" +
+	"\x0erebase_message\x18\x0e \x01(\tR\rrebaseMessage\x12'\n" +
+	"\x0frebase_revision\x18\x0f \x01(\x03R\x0erebaseRevision\"Q\n" +
 	"\x1cReportInstanceStatusResponse\x121\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x19.devbox.v1.InstanceStatusR\x06status\"\xc9\x02\n" +
 	"\x15ReportSnapshotRequest\x12\x1f\n" +
@@ -2593,10 +2633,11 @@ var file_devbox_v1_ingest_proto_goTypes = []any{
 	(EntityType)(0),                        // 42: devbox.v1.EntityType
 	(*AcpEntity)(nil),                      // 43: devbox.v1.AcpEntity
 	(SuspendReason)(0),                     // 44: devbox.v1.SuspendReason
-	(*SnapshotRef)(nil),                    // 45: devbox.v1.SnapshotRef
-	(*CredentialSelector)(nil),             // 46: devbox.v1.CredentialSelector
-	(*InstanceCredential)(nil),             // 47: devbox.v1.InstanceCredential
-	(*structpb.Struct)(nil),                // 48: google.protobuf.Struct
+	(RebaseState)(0),                       // 45: devbox.v1.RebaseState
+	(*SnapshotRef)(nil),                    // 46: devbox.v1.SnapshotRef
+	(*CredentialSelector)(nil),             // 47: devbox.v1.CredentialSelector
+	(*InstanceCredential)(nil),             // 48: devbox.v1.InstanceCredential
+	(*structpb.Struct)(nil),                // 49: google.protobuf.Struct
 }
 var file_devbox_v1_ingest_proto_depIdxs = []int32{
 	4,  // 0: devbox.v1.RegisterGatewayResponse.instances:type_name -> devbox.v1.InstanceSummary
@@ -2623,49 +2664,50 @@ var file_devbox_v1_ingest_proto_depIdxs = []int32{
 	36, // 21: devbox.v1.ReportInstanceStatusRequest.error:type_name -> devbox.v1.ErrorDetail
 	34, // 22: devbox.v1.ReportInstanceStatusRequest.idle:type_name -> devbox.v1.IdleState
 	35, // 23: devbox.v1.ReportInstanceStatusRequest.observed_at:type_name -> google.protobuf.Timestamp
-	32, // 24: devbox.v1.ReportInstanceStatusResponse.status:type_name -> devbox.v1.InstanceStatus
-	1,  // 25: devbox.v1.ReportSnapshotRequest.state:type_name -> devbox.v1.SnapshotState
-	45, // 26: devbox.v1.ReportSnapshotRequest.snapshot:type_name -> devbox.v1.SnapshotRef
-	36, // 27: devbox.v1.ReportSnapshotRequest.error:type_name -> devbox.v1.ErrorDetail
-	35, // 28: devbox.v1.ReportSnapshotRequest.completed_at:type_name -> google.protobuf.Timestamp
-	46, // 29: devbox.v1.GetInstanceCredentialsRequest.credentials:type_name -> devbox.v1.CredentialSelector
-	47, // 30: devbox.v1.GetInstanceCredentialsResponse.credentials:type_name -> devbox.v1.InstanceCredential
-	35, // 31: devbox.v1.UpdateAgentCredentialRequest.refreshed_at:type_name -> google.protobuf.Timestamp
-	47, // 32: devbox.v1.UpdateAgentCredentialResponse.current:type_name -> devbox.v1.InstanceCredential
-	35, // 33: devbox.v1.ReportPullRequestRequest.observed_at:type_name -> google.protobuf.Timestamp
-	48, // 34: devbox.v1.PullRequestAttributes.extra:type_name -> google.protobuf.Struct
-	25, // 35: devbox.v1.PullRequestAttributes.difficulty:type_name -> devbox.v1.PullRequestDifficulty
-	26, // 36: devbox.v1.PullRequestAttributes.commit_shas:type_name -> devbox.v1.CommitSha
-	24, // 37: devbox.v1.DevboxPullRequestRequest.attributes:type_name -> devbox.v1.PullRequestAttributes
-	31, // 38: devbox.v1.ListDevboxPullRequestsResponse.pull_requests:type_name -> devbox.v1.DevboxPullRequestRecord
-	35, // 39: devbox.v1.DevboxPullRequestRecord.created_at:type_name -> google.protobuf.Timestamp
-	2,  // 40: devbox.v1.Ingest.RegisterGateway:input_type -> devbox.v1.RegisterGatewayRequest
-	5,  // 41: devbox.v1.Ingest.Heartbeat:input_type -> devbox.v1.HeartbeatRequest
-	9,  // 42: devbox.v1.Ingest.UpsertInstanceIndex:input_type -> devbox.v1.UpsertInstanceIndexRequest
-	12, // 43: devbox.v1.Ingest.PushInstanceDeltas:input_type -> devbox.v1.PushInstanceDeltasRequest
-	14, // 44: devbox.v1.Ingest.ReportInstanceStatus:input_type -> devbox.v1.ReportInstanceStatusRequest
-	16, // 45: devbox.v1.Ingest.ReportSnapshot:input_type -> devbox.v1.ReportSnapshotRequest
-	18, // 46: devbox.v1.Ingest.GetInstanceCredentials:input_type -> devbox.v1.GetInstanceCredentialsRequest
-	20, // 47: devbox.v1.Ingest.UpdateAgentCredential:input_type -> devbox.v1.UpdateAgentCredentialRequest
-	22, // 48: devbox.v1.Ingest.ReportPullRequest:input_type -> devbox.v1.ReportPullRequestRequest
-	27, // 49: devbox.v1.Ingest.DevboxPullRequest:input_type -> devbox.v1.DevboxPullRequestRequest
-	29, // 50: devbox.v1.Ingest.ListDevboxPullRequests:input_type -> devbox.v1.ListDevboxPullRequestsRequest
-	3,  // 51: devbox.v1.Ingest.RegisterGateway:output_type -> devbox.v1.RegisterGatewayResponse
-	7,  // 52: devbox.v1.Ingest.Heartbeat:output_type -> devbox.v1.HeartbeatResponse
-	10, // 53: devbox.v1.Ingest.UpsertInstanceIndex:output_type -> devbox.v1.UpsertInstanceIndexResponse
-	13, // 54: devbox.v1.Ingest.PushInstanceDeltas:output_type -> devbox.v1.PushInstanceDeltasResponse
-	15, // 55: devbox.v1.Ingest.ReportInstanceStatus:output_type -> devbox.v1.ReportInstanceStatusResponse
-	17, // 56: devbox.v1.Ingest.ReportSnapshot:output_type -> devbox.v1.ReportSnapshotResponse
-	19, // 57: devbox.v1.Ingest.GetInstanceCredentials:output_type -> devbox.v1.GetInstanceCredentialsResponse
-	21, // 58: devbox.v1.Ingest.UpdateAgentCredential:output_type -> devbox.v1.UpdateAgentCredentialResponse
-	23, // 59: devbox.v1.Ingest.ReportPullRequest:output_type -> devbox.v1.ReportPullRequestResponse
-	28, // 60: devbox.v1.Ingest.DevboxPullRequest:output_type -> devbox.v1.DevboxPullRequestResponse
-	30, // 61: devbox.v1.Ingest.ListDevboxPullRequests:output_type -> devbox.v1.ListDevboxPullRequestsResponse
-	51, // [51:62] is the sub-list for method output_type
-	40, // [40:51] is the sub-list for method input_type
-	40, // [40:40] is the sub-list for extension type_name
-	40, // [40:40] is the sub-list for extension extendee
-	0,  // [0:40] is the sub-list for field type_name
+	45, // 24: devbox.v1.ReportInstanceStatusRequest.rebase_state:type_name -> devbox.v1.RebaseState
+	32, // 25: devbox.v1.ReportInstanceStatusResponse.status:type_name -> devbox.v1.InstanceStatus
+	1,  // 26: devbox.v1.ReportSnapshotRequest.state:type_name -> devbox.v1.SnapshotState
+	46, // 27: devbox.v1.ReportSnapshotRequest.snapshot:type_name -> devbox.v1.SnapshotRef
+	36, // 28: devbox.v1.ReportSnapshotRequest.error:type_name -> devbox.v1.ErrorDetail
+	35, // 29: devbox.v1.ReportSnapshotRequest.completed_at:type_name -> google.protobuf.Timestamp
+	47, // 30: devbox.v1.GetInstanceCredentialsRequest.credentials:type_name -> devbox.v1.CredentialSelector
+	48, // 31: devbox.v1.GetInstanceCredentialsResponse.credentials:type_name -> devbox.v1.InstanceCredential
+	35, // 32: devbox.v1.UpdateAgentCredentialRequest.refreshed_at:type_name -> google.protobuf.Timestamp
+	48, // 33: devbox.v1.UpdateAgentCredentialResponse.current:type_name -> devbox.v1.InstanceCredential
+	35, // 34: devbox.v1.ReportPullRequestRequest.observed_at:type_name -> google.protobuf.Timestamp
+	49, // 35: devbox.v1.PullRequestAttributes.extra:type_name -> google.protobuf.Struct
+	25, // 36: devbox.v1.PullRequestAttributes.difficulty:type_name -> devbox.v1.PullRequestDifficulty
+	26, // 37: devbox.v1.PullRequestAttributes.commit_shas:type_name -> devbox.v1.CommitSha
+	24, // 38: devbox.v1.DevboxPullRequestRequest.attributes:type_name -> devbox.v1.PullRequestAttributes
+	31, // 39: devbox.v1.ListDevboxPullRequestsResponse.pull_requests:type_name -> devbox.v1.DevboxPullRequestRecord
+	35, // 40: devbox.v1.DevboxPullRequestRecord.created_at:type_name -> google.protobuf.Timestamp
+	2,  // 41: devbox.v1.Ingest.RegisterGateway:input_type -> devbox.v1.RegisterGatewayRequest
+	5,  // 42: devbox.v1.Ingest.Heartbeat:input_type -> devbox.v1.HeartbeatRequest
+	9,  // 43: devbox.v1.Ingest.UpsertInstanceIndex:input_type -> devbox.v1.UpsertInstanceIndexRequest
+	12, // 44: devbox.v1.Ingest.PushInstanceDeltas:input_type -> devbox.v1.PushInstanceDeltasRequest
+	14, // 45: devbox.v1.Ingest.ReportInstanceStatus:input_type -> devbox.v1.ReportInstanceStatusRequest
+	16, // 46: devbox.v1.Ingest.ReportSnapshot:input_type -> devbox.v1.ReportSnapshotRequest
+	18, // 47: devbox.v1.Ingest.GetInstanceCredentials:input_type -> devbox.v1.GetInstanceCredentialsRequest
+	20, // 48: devbox.v1.Ingest.UpdateAgentCredential:input_type -> devbox.v1.UpdateAgentCredentialRequest
+	22, // 49: devbox.v1.Ingest.ReportPullRequest:input_type -> devbox.v1.ReportPullRequestRequest
+	27, // 50: devbox.v1.Ingest.DevboxPullRequest:input_type -> devbox.v1.DevboxPullRequestRequest
+	29, // 51: devbox.v1.Ingest.ListDevboxPullRequests:input_type -> devbox.v1.ListDevboxPullRequestsRequest
+	3,  // 52: devbox.v1.Ingest.RegisterGateway:output_type -> devbox.v1.RegisterGatewayResponse
+	7,  // 53: devbox.v1.Ingest.Heartbeat:output_type -> devbox.v1.HeartbeatResponse
+	10, // 54: devbox.v1.Ingest.UpsertInstanceIndex:output_type -> devbox.v1.UpsertInstanceIndexResponse
+	13, // 55: devbox.v1.Ingest.PushInstanceDeltas:output_type -> devbox.v1.PushInstanceDeltasResponse
+	15, // 56: devbox.v1.Ingest.ReportInstanceStatus:output_type -> devbox.v1.ReportInstanceStatusResponse
+	17, // 57: devbox.v1.Ingest.ReportSnapshot:output_type -> devbox.v1.ReportSnapshotResponse
+	19, // 58: devbox.v1.Ingest.GetInstanceCredentials:output_type -> devbox.v1.GetInstanceCredentialsResponse
+	21, // 59: devbox.v1.Ingest.UpdateAgentCredential:output_type -> devbox.v1.UpdateAgentCredentialResponse
+	23, // 60: devbox.v1.Ingest.ReportPullRequest:output_type -> devbox.v1.ReportPullRequestResponse
+	28, // 61: devbox.v1.Ingest.DevboxPullRequest:output_type -> devbox.v1.DevboxPullRequestResponse
+	30, // 62: devbox.v1.Ingest.ListDevboxPullRequests:output_type -> devbox.v1.ListDevboxPullRequestsResponse
+	52, // [52:63] is the sub-list for method output_type
+	41, // [41:52] is the sub-list for method input_type
+	41, // [41:41] is the sub-list for extension type_name
+	41, // [41:41] is the sub-list for extension extendee
+	0,  // [0:41] is the sub-list for field type_name
 }
 
 func init() { file_devbox_v1_ingest_proto_init() }

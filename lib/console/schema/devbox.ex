@@ -8,6 +8,7 @@ defmodule Console.Schema.Devbox do
   defenum ProbeStatus, pending: 0, ok: 1, failed: 2, missing: 3
   defenum CloudProvider, aws: 0, gcp: 1, azure: 2
   defenum Autonomy, manual: 0, auto: 1, full: 2
+  defenum UpdateMode, on_resume: 0, manual: 1
 
   @autonomy_rank %{manual: 0, auto: 1, full: 2}
 
@@ -120,6 +121,10 @@ defmodule Console.Schema.Devbox do
     field :image,                :string
     field :resolved_image,       :string
     field :template_revision,    :string
+    field :revision,             :integer
+    field :runtime_image,        :string
+    field :daemon_version,       :string
+    field :update_mode,          UpdateMode, default: :on_resume
     field :status,               Status, default: :pending
     field :resources,            :map
     field :allowed_repositories, {:array, :string}
@@ -255,7 +260,8 @@ defmodule Console.Schema.Devbox do
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(d in query, order_by: ^order)
   end
-  @valid ~w(name image resolved_image template_revision status resources allowed_repositories max_instances browser last_heartbeat_at)a
+  @valid ~w(name image resolved_image template_revision revision runtime_image daemon_version update_mode status resources
+            allowed_repositories max_instances browser last_heartbeat_at)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -279,7 +285,7 @@ defmodule Console.Schema.Devbox do
 
   def heartbeat_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(status resolved_image template_revision last_heartbeat_at)a)
+    |> cast(attrs, ~w(status resolved_image template_revision revision runtime_image daemon_version last_heartbeat_at)a)
     |> cast_embed(:conditions, with: &condition_changeset/2)
   end
 

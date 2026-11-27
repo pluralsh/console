@@ -12,6 +12,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 )
 
@@ -90,5 +92,28 @@ func TestConfigMapProbeClientNeedsRegisteredDevbox(t *testing.T) {
 	pc := &ConfigMapProbeClient{Client: fake.NewClientBuilder().WithScheme(scheme).Build(), Namespace: devboxTestNamespace, Tokens: newFakeDevboxConsole()}
 	if err := pc.Request(context.Background(), DevboxProbeRequest{Request: probe.Request{Runner: "r", Revision: 1}}); err == nil {
 		t.Fatal("a probe token can't be minted without a console Devbox")
+	}
+}
+
+// An agent the environment image's C libraries can't run fails the revision; other failed probes (no credentials)
+// only warn.
+func TestEvaluateDevboxProbeLibc(t *testing.T) {
+	runner := &v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{Agents: []v1alpha1.DevboxAgent{{Type: v1alpha1.DevboxAgentClaude}}}}
+	for name, tc := range map[string]struct {
+		err string
+		ok  bool
+	}{
+		"old glibc":      {err: "node: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.28' not found"},
+		"no libstdc++":   {err: "error while loading shared libraries: libstdc++.so.6: cannot open shared object file"},
+		"no credentials": {err: "authentication required", ok: true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			eval := EvaluateDevboxProbe(runner, &DevboxProbeResult{Response: &devboxv1.ProbeAgentsResponse{Agents: []*devboxv1.AgentCatalogEntry{
+				{Type: devboxv1.AgentType_AGENT_TYPE_CLAUDE, ProbeStatus: devboxv1.ProbeStatus_PROBE_STATUS_FAILED, ProbeError: tc.err},
+			}}})
+			if eval.OK() != tc.ok || (len(eval.Warnings) == 1) != tc.ok {
+				t.Fatalf("evaluation = %+v", eval)
+			}
+		})
 	}
 }

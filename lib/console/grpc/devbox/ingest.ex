@@ -45,7 +45,7 @@ defmodule Console.GRPC.Devbox.Ingest do
 
   def report_instance_status(req, stream) do
     cluster = Auth.authenticate!(stream)
-    attrs = Proto.to_map(req) |> drop_zero(:template_revision) |> drop_zero(:generation)
+    attrs = Proto.to_map(req) |> drop_zero(:template_revision) |> drop_zero(:generation) |> drop_zero(:rebase_revision)
     with {:ok, %DevboxInstance{status: status}} <- Ingest.report_instance_status(attrs, cluster) do
       %V1.ReportInstanceStatusResponse{status: Proto.enum(status, V1.InstanceStatus)}
     end

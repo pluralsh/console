@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Devboxes
-  alias Console.Devboxes.{AgentCredentials, Billing, Ingest, Threads, Workspace}
+  alias Console.Devboxes.{AgentCredentials, Billing, Ingest, Threads, Updates, Workspace}
   alias Console.WorkloadIdentity.Snippets
   alias Console.Schema.{
     Devbox,
@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
     DevboxInstanceSession,
     DevboxInstanceInteraction,
     DevboxSnapshot,
+    DevboxUpdateCampaign,
     User
   }
 
@@ -183,6 +184,24 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
 
   def cancel_devbox_instance(%{id: id}, %{context: %{current_user: user}}), do: Devboxes.cancel_instance(id, user)
   def suspend_devbox_instance(%{id: id}, %{context: %{current_user: user}}), do: Devboxes.suspend_instance(id, user)
+  def rebase_devbox_instance(%{id: id}, %{context: %{current_user: user}}), do: Updates.rebase_instance(id, user)
+
+  def create_devbox_update_campaign(%{devbox_id: id} = args, %{context: %{current_user: user}}),
+    do: Updates.create_campaign(Map.get(args, :attributes) || %{}, id, user)
+
+  def cancel_devbox_update_campaign(%{id: id}, %{context: %{current_user: user}}), do: Updates.cancel_campaign(id, user)
+
+  def devbox_outdated_instances(%Devbox{id: id}, _, _), do: {:ok, Updates.outdated_count(id)}
+
+  def devbox_update_campaigns(%Devbox{id: id}, args, _) do
+    DevboxUpdateCampaign.for_devbox(id)
+    |> DevboxUpdateCampaign.ordered()
+    |> DevboxUpdateCampaign.with_limit(min(args[:first] || 10, 100))
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def devbox_update_campaign_progress(%DevboxUpdateCampaign{} = campaign, _, _), do: {:ok, Updates.progress(campaign)}
   def resume_devbox_instance(%{id: id}, %{context: %{current_user: user}}), do: Devboxes.resume_instance(id, user)
   def ping_devbox_instance(%{id: id}, %{context: %{current_user: user}}), do: Devboxes.ping_instance(id, user)
   def leave_devbox_instance(%{id: id}, %{context: %{current_user: user}}), do: Devboxes.leave_instance(id, user)

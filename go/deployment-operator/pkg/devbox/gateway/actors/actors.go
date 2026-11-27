@@ -171,19 +171,28 @@ func (c *Client) GetActorTemplate(ctx context.Context, ref Ref) (*ateapi.ActorTe
 	return c.control.GetActorTemplate(ctx, &ateapi.GetActorTemplateRequest{ActorTemplate: ref.object()})
 }
 
+// setTemplateAttempts bounds SetTemplate's retries of a lost update.
+const setTemplateAttempts = 3
+
 // SetTemplate points a (suspended) actor at another template; its next resume restores volume data and
-// cold-boots (filesystem fidelity).
+// cold-boots (filesystem fidelity). Substrate only accepts templates with the actor's volumes and container
+// mounts. The update carries the version it read, so one that lost to a concurrent write (Aborted) is retried.
 func (c *Client) SetTemplate(ctx context.Context, ref Ref, template string) error {
-	actor, err := c.GetActor(ctx, ref)
-	if err != nil {
-		return err
+	var err error
+	for range setTemplateAttempts {
+		var actor *ateapi.Actor
+		if actor, err = c.GetActor(ctx, ref); err != nil {
+			return err
+		}
+		if actor.GetActorTemplate().GetName() == template {
+			return nil
+		}
+		actor.ActorTemplate = &ateapi.ObjectRef{Atespace: ref.Atespace, Name: template}
+		actor.Status = nil
+		if _, err = c.control.UpdateActor(ctx, &ateapi.UpdateActorRequest{Actor: actor}); status.Code(err) != codes.Aborted {
+			return err
+		}
 	}
-	if actor.GetActorTemplate().GetName() == template {
-		return nil
-	}
-	actor.ActorTemplate = &ateapi.ObjectRef{Atespace: ref.Atespace, Name: template}
-	actor.Status = nil
-	_, err = c.control.UpdateActor(ctx, &ateapi.UpdateActorRequest{Actor: actor})
 	return err
 }
 

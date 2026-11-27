@@ -3490,6 +3490,44 @@ export const ClusterNamespaceUsageFragmentDoc = /*#__PURE__*/ gql`
   storageCost
 }
     ` as unknown as DocumentNode<Types.ClusterNamespaceUsageFragment, unknown>;
+export const DevboxUpdateCampaignFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxUpdateCampaign on DevboxUpdateCampaign {
+  id
+  force
+  status
+  reason
+  startsAt
+  noticeMinutes
+  deadlineAt
+  expiresAt
+  maxConcurrency
+  completedAt
+  insertedAt
+  progress {
+    outdated
+    updated
+    failed
+  }
+  user {
+    id
+    name
+    email
+  }
+}
+    ` as unknown as DocumentNode<Types.DevboxUpdateCampaignFragment, unknown>;
+export const DevboxUpdatesFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxUpdates on Devbox {
+  id
+  revision
+  runtimeImage
+  daemonVersion
+  updateMode
+  outdatedInstances
+  updateCampaigns(first: 5) {
+    ...DevboxUpdateCampaign
+  }
+}
+    ${DevboxUpdateCampaignFragmentDoc}` as unknown as DocumentNode<Types.DevboxUpdatesFragment, unknown>;
 export const DevboxSnapshotFragmentDoc = /*#__PURE__*/ gql`
     fragment DevboxSnapshot on DevboxSnapshot {
   id
@@ -3535,10 +3573,24 @@ export const DevboxInstanceTinyFragmentDoc = /*#__PURE__*/ gql`
   suspendedAt
   lastActivityAt
   viewerCount
+  templateRevision
+  daemonVersion
+  outdated
+  rebaseState
+  rebaseError
+  rebaseRevision
+  updateDeadlineAt
+  updateCampaign {
+    id
+    force
+    reason
+  }
   devbox {
     id
     name
     browser
+    revision
+    daemonVersion
   }
   user {
     id
@@ -3579,6 +3631,9 @@ export const DevboxTinyFragmentDoc = /*#__PURE__*/ gql`
   image
   resolvedImage
   templateRevision
+  revision
+  daemonVersion
+  updateMode
   browser
   resources
   maxInstances
@@ -3929,7 +3984,6 @@ export const DevboxInstanceFragmentDoc = /*#__PURE__*/ gql`
   ...DevboxInstanceTiny
   configOptions
   maxRunningThreads
-  templateRevision
   imageDigest
   restoreFidelity
   completedAt
@@ -9775,6 +9829,13 @@ export const DevboxDocument = /*#__PURE__*/ gql`
   }
 }
     ${DevboxFragmentDoc}` as unknown as DocumentNode<Types.DevboxQuery, Types.DevboxQueryVariables>;
+export const DevboxUpdatesDocument = /*#__PURE__*/ gql`
+    query DevboxUpdates($id: ID!) {
+  devbox(id: $id) {
+    ...DevboxUpdates
+  }
+}
+    ${DevboxUpdatesFragmentDoc}` as unknown as DocumentNode<Types.DevboxUpdatesQuery, Types.DevboxUpdatesQueryVariables>;
 export const DevboxAgentsDocument = /*#__PURE__*/ gql`
     query DevboxAgents($workbenchId: ID!, $devboxId: ID!) {
   devboxAgents(workbenchId: $workbenchId, devboxId: $devboxId) {
@@ -10075,6 +10136,27 @@ export const ResumeDevboxInstanceDocument = /*#__PURE__*/ gql`
   }
 }
     ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.ResumeDevboxInstanceMutation, Types.ResumeDevboxInstanceMutationVariables>;
+export const RebaseDevboxInstanceDocument = /*#__PURE__*/ gql`
+    mutation RebaseDevboxInstance($id: ID!) {
+  rebaseDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.RebaseDevboxInstanceMutation, Types.RebaseDevboxInstanceMutationVariables>;
+export const CreateDevboxUpdateCampaignDocument = /*#__PURE__*/ gql`
+    mutation CreateDevboxUpdateCampaign($devboxId: ID!, $attributes: DevboxUpdateCampaignAttributes) {
+  createDevboxUpdateCampaign(devboxId: $devboxId, attributes: $attributes) {
+    ...DevboxUpdateCampaign
+  }
+}
+    ${DevboxUpdateCampaignFragmentDoc}` as unknown as DocumentNode<Types.CreateDevboxUpdateCampaignMutation, Types.CreateDevboxUpdateCampaignMutationVariables>;
+export const CancelDevboxUpdateCampaignDocument = /*#__PURE__*/ gql`
+    mutation CancelDevboxUpdateCampaign($id: ID!) {
+  cancelDevboxUpdateCampaign(id: $id) {
+    ...DevboxUpdateCampaign
+  }
+}
+    ${DevboxUpdateCampaignFragmentDoc}` as unknown as DocumentNode<Types.CancelDevboxUpdateCampaignMutation, Types.CancelDevboxUpdateCampaignMutationVariables>;
 export const PingDevboxInstanceDocument = /*#__PURE__*/ gql`
     mutation PingDevboxInstance($id: ID!) {
   pingDevboxInstance(id: $id) {

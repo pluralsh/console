@@ -18,10 +18,13 @@ const (
 	ParamUID  = "uid"
 	ParamGID  = "gid"
 	ParamMode = "mode"
-	// ParamSeed names the seed a StorageClass's volumes start from, as the JuiceFS driver's does. The first volume
-	// created with it is the golden actor's, which starts empty and becomes the seed when Substrate deletes it after
-	// the golden tag; every later volume is a copy of that seed.
+	// ParamSeed names the seed a StorageClass's volumes start from, as the JuiceFS driver's does, for revisions from
+	// older operators. The first volume created with it is the golden actor's, which starts empty and becomes the
+	// seed when Substrate deletes it after the golden tag; every later volume is a copy of that seed.
 	ParamSeed = "seed"
+	// ParamClaimSeed claims a seed for an existing volume instead of creating one, as the JuiceFS driver's does:
+	// the gateway passes it for the golden actor's home it found through Substrate.
+	ParamClaimSeed = "claimSeed"
 )
 
 // contextCapacity carries a volume's size to NodeStageVolume, which sizes the block device by it.
@@ -65,22 +68,31 @@ func (c *Controller) ControllerGetCapabilities(context.Context, *csi.ControllerG
 }
 
 // CreateVolume writes nothing for an unseeded volume: its first writer initializes the database. A volume of a
-// seeded StorageClass claims the seed or starts as a copy of it. Either way it's idempotent on the name, and an
-// existing volume is returned as it is.
+// seeded StorageClass claims the seed or starts as a copy of it, and a volume whose content source is a seed (the
+// CSI snapshot) starts as a copy of it. Either way it's idempotent on the name, and an existing volume is returned
+// as it is. With ParamClaimSeed it only claims a seed for an existing volume (claimExisting).
 func (c *Controller) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (*csi.CreateVolumeResponse, error) {
 	id := req.GetName()
 	if !validID(id) {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid volume name %q", id)
 	}
+	if seed, ok := req.GetParameters()[ParamClaimSeed]; ok {
+		return c.claimExisting(ctx, id, seed)
+	}
 	if err := validateCapabilities(req.GetVolumeCapabilities()); err != nil {
 		return nil, err
 	}
-	if req.GetVolumeContentSource() != nil {
-		return nil, status.Error(codes.Unimplemented, "ZeroFS volumes can't start from a snapshot or volume")
+	source := req.GetVolumeContentSource()
+	if source != nil && source.GetSnapshot() == nil {
+		return nil, status.Error(codes.Unimplemented, "ZeroFS volumes can't start from another volume")
 	}
 	seed := req.GetParameters()[ParamSeed]
 	if seed != "" && !validID(seed) {
 		return nil, status.Errorf(codes.InvalidArgument, "parameter %s=%q isn't a valid seed id", ParamSeed, seed)
+	}
+	from := source.GetSnapshot().GetSnapshotId()
+	if source != nil && !validID(from) {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid snapshot id %q", from)
 	}
 	capacity := req.GetCapacityRange().GetRequiredBytes()
 	if capacity == 0 {
@@ -96,7 +108,12 @@ func (c *Controller) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequ
 	if err != nil {
 		return nil, err
 	}
-	if seed != "" {
+	switch {
+	case from != "":
+		if err := c.copySeed(ctx, id, from); err != nil {
+			return nil, err
+		}
+	case seed != "":
 		if err := c.seedVolume(ctx, id, seed); err != nil {
 			return nil, err
 		}
@@ -122,6 +139,75 @@ func (c *Controller) seedVolume(ctx context.Context, id, seed string) error {
 			return err
 		}
 	}
+}
+
+// copySeed starts the volume as a copy of a captured seed. A claimed seed that isn't captured yet is
+// FailedPrecondition: Substrate deletes the golden actor, which captures its home, just after the golden tag. The
+// volume must be new (the gateway names a fresh actor's home before its first resume): a volume with objects but
+// no copy marker is overwritten.
+func (c *Controller) copySeed(ctx context.Context, id, seed string) error {
+	if done, err := c.copyCapturedSeed(ctx, id, seed); done || err != nil {
+		return err
+	}
+	if _, claimed, err := c.Store.Read(ctx, c.Storage.metaKey(metaClaim, seed)); err != nil {
+		return status.Errorf(codes.Internal, "reading the claim of seed %s: %v", seed, err)
+	} else if claimed {
+		return status.Errorf(codes.FailedPrecondition, "seed %s isn't captured yet", seed)
+	}
+	return status.Errorf(codes.NotFound, "seed %s doesn't exist", seed)
+}
+
+// claimExisting makes an existing volume, the golden actor's home, the source of seed, so the volume is captured
+// into the seed when it's deleted. A seed claimed by or captured from another volume, or a volume that is a copy of
+// a seed or another seed's source, is AlreadyExists. Claiming again is a no-op. Unlike the JuiceFS driver's, it
+// can't tell a volume that doesn't exist (an unwritten volume has no objects), so the caller must only name one
+// Substrate created. Holds the seed's lock, then the volume's.
+func (c *Controller) claimExisting(ctx context.Context, id, seed string) (*csi.CreateVolumeResponse, error) {
+	if !validID(seed) {
+		return nil, status.Errorf(codes.InvalidArgument, "parameter %s=%q isn't a valid seed id", ParamClaimSeed, seed)
+	}
+	defer c.seeds.lock(seed)()
+	defer c.volumes.lock(id)()
+	read := func(kind metaKind, key string) (string, bool, error) {
+		v, ok, err := c.Store.Read(ctx, c.Storage.metaKey(kind, key))
+		if err != nil {
+			return "", false, status.Errorf(codes.Internal, "reading the %s record of %s: %v", kind, key, err)
+		}
+		return string(v), ok, nil
+	}
+	// The volume is gone once its seed is captured.
+	if source, ok, err := read(metaCaptured, seed); err != nil {
+		return nil, err
+	} else if ok && source != id {
+		return nil, status.Errorf(codes.AlreadyExists, "seed %s was captured from volume %s", seed, source)
+	} else if ok {
+		return &csi.CreateVolumeResponse{Volume: &csi.Volume{VolumeId: id}}, nil
+	}
+	if _, cloned, err := read(metaCloned, id); err != nil {
+		return nil, err
+	} else if cloned {
+		return nil, status.Errorf(codes.AlreadyExists, "volume %s is a copy of a seed", id)
+	}
+	if golden, ok, err := read(metaGolden, id); err != nil {
+		return nil, err
+	} else if ok && golden != seed {
+		return nil, status.Errorf(codes.AlreadyExists, "volume %s is the source of seed %s", id, golden)
+	}
+	switch claim, ok, err := read(metaClaim, seed); {
+	case err != nil:
+		return nil, err
+	case ok && claim != id:
+		return nil, status.Errorf(codes.AlreadyExists, "seed %s is claimed by volume %s", seed, claim)
+	case !ok:
+		if err := c.Store.Write(ctx, c.Storage.metaKey(metaClaim, seed), []byte(id)); err != nil {
+			return nil, status.Errorf(codes.Internal, "claiming seed %s: %v", seed, err)
+		}
+	}
+	if err := c.Store.Write(ctx, c.Storage.metaKey(metaGolden, id), []byte(seed)); err != nil {
+		return nil, status.Errorf(codes.Internal, "marking volume %s as the source of seed %s: %v", id, seed, err)
+	}
+	c.Log.Info("existing volume claims seed", "volume", id, "seed", seed)
+	return &csi.CreateVolumeResponse{Volume: &csi.Volume{VolumeId: id}}, nil
 }
 
 // copyCapturedSeed starts the volume as a copy of its seed if the seed is captured. Holds the volume's lock.

@@ -103,6 +103,12 @@
       "groupName": "agent harnesses"
     },
     {
+      "description": "The devbox runtime resolves each npm pin's dependencies as of a day after its release (runtime/assemble.sh), and refuses younger versions",
+      "matchFileNames": ["go/deployment-operator/dockerfiles/devbox/runtime-core.Dockerfile"],
+      "matchDatasources": ["npm"],
+      "minimumReleaseAge": "2 days"
+    },
+    {
       "matchManagers": ["mix"],
       "additionalBranchPrefix": "backend/",
       "semanticCommitScope": "backend",

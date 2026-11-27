@@ -26,6 +26,9 @@ const (
 	// golden actor's, which starts empty and becomes the seed when Substrate deletes it after the golden tag;
 	// every later volume is a clone of that seed.
 	ParamSeed = "seed"
+	// ParamClaimSeed claims a seed for an existing volume instead of creating one: the gateway passes it for the
+	// golden actor's home it found through Substrate, which becomes the seed when Substrate deletes it.
+	ParamClaimSeed = "claimSeed"
 )
 
 // Controller is the CSI controller service. Root is where the whole filesystem is mounted.
@@ -69,11 +72,15 @@ func (c *Controller) ControllerGetCapabilities(context.Context, *csi.ControllerG
 
 // CreateVolume is idempotent on the name: an existing home is returned as it is, whatever content source the
 // call names, because Substrate creates an actor's volumes without one after the gateway may have seeded them.
-// Without a content source, a volume of a StorageClass with a seed parameter is cloned from that seed.
+// Without a content source, a volume of a StorageClass with a seed parameter is cloned from that seed. With
+// ParamClaimSeed it only claims a seed for an existing volume (claimSeed).
 func (c *Controller) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (*csi.CreateVolumeResponse, error) {
 	id := req.GetName()
 	if !validID(id) {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid volume name %q", id)
+	}
+	if seed, ok := req.GetParameters()[ParamClaimSeed]; ok {
+		return c.claimSeed(id, seed)
 	}
 	if err := validateCapabilities(req.GetVolumeCapabilities()); err != nil {
 		return nil, err
@@ -126,6 +133,44 @@ func (c *Controller) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequ
 	}}, nil
 }
 
+// claimSeed makes an existing volume the source of seed, so the volume is captured into the seed when it's
+// deleted. It never creates a volume: a missing one is NotFound. A seed claimed by or captured from another
+// volume, or a volume that is already another seed's source, is AlreadyExists. Claiming again is a no-op.
+func (c *Controller) claimSeed(id, seed string) (*csi.CreateVolumeResponse, error) {
+	if !validID(seed) {
+		return nil, status.Errorf(codes.InvalidArgument, "parameter %s=%q isn't a valid seed id", ParamClaimSeed, seed)
+	}
+	defer c.snapshots.lock(seed)()
+	defer c.volumes.lock(id)()
+	if source, err := os.ReadFile(filepath.Join(c.seedDir(seed), seedSourceKey)); err == nil {
+		if string(source) != id {
+			return nil, status.Errorf(codes.AlreadyExists, "seed %s was captured from volume %s", seed, source)
+		}
+		return &csi.CreateVolumeResponse{Volume: &csi.Volume{VolumeId: id}}, nil
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return nil, status.Errorf(codes.Internal, "reading seed %s: %v", seed, err)
+	}
+	if ok, err := isDir(c.homeDir(id)); err != nil {
+		return nil, status.Errorf(codes.Internal, "checking volume %s: %v", id, err)
+	} else if !ok {
+		return nil, status.Errorf(codes.NotFound, "volume %s doesn't exist", id)
+	}
+	if golden, err := os.ReadFile(c.goldenFile(id)); err == nil && string(golden) != seed {
+		return nil, status.Errorf(codes.AlreadyExists, "volume %s is the source of seed %s", id, golden)
+	} else if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return nil, status.Errorf(codes.Internal, "reading the seed of volume %s: %v", id, err)
+	}
+	claimed, err := c.claim(id, seed)
+	if err != nil {
+		return nil, err
+	}
+	if !claimed {
+		return nil, status.Errorf(codes.AlreadyExists, "seed %s is claimed by another volume", seed)
+	}
+	c.Log.Info("volume claims seed", "volume", id, "seed", seed)
+	return &csi.CreateVolumeResponse{Volume: &csi.Volume{VolumeId: id}}, nil
+}
+
 // seedSource is where a new volume of a seeded StorageClass starts: the seed once it's captured, or nothing for
 // the volume that claims it. Holds the seed's lock.
 func (c *Controller) seedSource(id, seed string) (*csi.VolumeContentSource, error) {
@@ -136,9 +181,27 @@ func (c *Controller) seedSource(id, seed string) (*csi.VolumeContentSource, erro
 			Snapshot: &csi.VolumeContentSource_SnapshotSource{SnapshotId: seed},
 		}}, nil
 	}
+	claimed, err := c.claim(id, seed)
+	if err != nil {
+		return nil, err
+	}
+	if !claimed {
+		owner, err := os.ReadFile(c.claimFile(seed))
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "reading the claim of seed %s: %v", seed, err)
+		}
+		return nil, status.Errorf(codes.FailedPrecondition, "seed %s isn't captured from volume %s yet", seed, owner)
+	}
+	c.Log.Info("volume claims seed", "volume", id, "seed", seed)
+	return nil, nil
+}
+
+// claim records volume id as the source of seed and seed as what id becomes when it's deleted. It reports false
+// when another volume claimed the seed first. Holds the seed's lock.
+func (c *Controller) claim(id, seed string) (bool, error) {
 	for _, dir := range []string{claimsDir, goldenDir} {
 		if err := os.MkdirAll(filepath.Join(c.Root, dir), 0o755); err != nil {
-			return nil, status.Errorf(codes.Internal, "creating the %s directory: %v", dir, err)
+			return false, status.Errorf(codes.Internal, "creating the %s directory: %v", dir, err)
 		}
 	}
 	f, err := os.OpenFile(c.claimFile(seed), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
@@ -146,24 +209,23 @@ func (c *Controller) seedSource(id, seed string) (*csi.VolumeContentSource, erro
 	case err == nil:
 		_, werr := f.WriteString(id)
 		if err := errors.Join(werr, f.Close()); err != nil {
-			return nil, status.Errorf(codes.Internal, "claiming seed %s: %v", seed, err)
+			return false, status.Errorf(codes.Internal, "claiming seed %s: %v", seed, err)
 		}
 	case errors.Is(err, fs.ErrExist):
 		owner, err := os.ReadFile(c.claimFile(seed))
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "reading the claim of seed %s: %v", seed, err)
+			return false, status.Errorf(codes.Internal, "reading the claim of seed %s: %v", seed, err)
 		}
 		if string(owner) != id {
-			return nil, status.Errorf(codes.FailedPrecondition, "seed %s isn't captured from volume %s yet", seed, owner)
+			return false, nil
 		}
 	default:
-		return nil, status.Errorf(codes.Internal, "claiming seed %s: %v", seed, err)
+		return false, status.Errorf(codes.Internal, "claiming seed %s: %v", seed, err)
 	}
 	if err := os.WriteFile(c.goldenFile(id), []byte(seed), 0o644); err != nil {
-		return nil, status.Errorf(codes.Internal, "marking volume %s as the source of seed %s: %v", id, seed, err)
+		return false, status.Errorf(codes.Internal, "marking volume %s as the source of seed %s: %v", id, seed, err)
 	}
-	c.Log.Info("volume claims seed", "volume", id, "seed", seed)
-	return nil, nil
+	return true, nil
 }
 
 func (c *Controller) provision(ctx context.Context, id string, source *csi.VolumeContentSource, owner owner) error {
@@ -196,6 +258,12 @@ func (c *Controller) provision(ctx context.Context, id string, source *csi.Volum
 	} else if ok, err := isDir(from); err != nil {
 		return status.Errorf(codes.Internal, "checking the source of volume %s: %v", id, err)
 	} else if !ok {
+		// A claimed seed is captured when Substrate deletes the golden actor, just after the golden tag.
+		if sid := source.GetSnapshot().GetSnapshotId(); sid != "" {
+			if _, err := os.Stat(c.claimFile(sid)); err == nil {
+				return status.Errorf(codes.FailedPrecondition, "seed %s isn't captured yet", sid)
+			}
+		}
 		return status.Errorf(codes.NotFound, "the source of volume %s doesn't exist", id)
 	} else if err := c.CLI.Clone(ctx, from, partial); err != nil {
 		return status.Errorf(codes.Internal, "cloning volume %s: %v", id, err)

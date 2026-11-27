@@ -15,8 +15,10 @@ ARG GO_IMAGE=golang:1.27.2-trixie
 ARG NODE_VERSION=24.11.1
 ARG DAEMON_SOURCE=build
 
-# Harness versions are the agent-run images' pins (dockerfiles/agent-harness/*);
-# test.sh fails if they drift.
+# Harness versions are the agent-run images' pins (dockerfiles/agent-harness/*).
+# The operator runs the agents of devbox-runtime-core, which win over these; they
+# stay in this image for one more release, for operators older than the runtime's
+# agents (PROD-5487), and can then go.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 ARG CLAUDE_VERSION=2.1.332
 # renovate: datasource=npm depName=@agentclientprotocol/claude-agent-acp

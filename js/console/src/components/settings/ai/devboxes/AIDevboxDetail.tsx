@@ -53,6 +53,7 @@ import {
 import { devboxSizing } from 'components/workbenches/workbench/devboxes/devboxSizing'
 import { modelsOf } from 'components/workbenches/workbench/devboxes/devboxStartForm'
 import { SETTINGS_BREADCRUMBS } from '../../Settings'
+import { AIDevboxUpdates } from './AIDevboxUpdates'
 
 export function devboxIssuerOf(
   box: Nullable<Pick<DevboxFragment, 'workloadIdentity'>>
@@ -128,6 +129,9 @@ export function AIDevboxDetail() {
               <DevboxAgentCatalog agents={box.agents} />
             </Section>
             <DevboxPolicies box={box} />
+            <Section title="Instance updates">
+              <AIDevboxUpdates devboxId={box.id} />
+            </Section>
             <Section title="Cloud identity">
               <DevboxCloudIdentity
                 boxName={box.name}
@@ -382,36 +386,59 @@ function DevboxPolicies({ box }: { box: DevboxFragment }) {
   const mins = (s: Nullable<number>) =>
     s ? `${Math.round(s / 60)} min` : 'default'
   return (
-    <PolicyGridSC>
-      <Card css={{ padding: 16 }}>
-        <Body2BoldP>Allowed repositories</Body2BoldP>
-        <ListSC>
-          {repos.length ? (
-            repos.map((r) => <li key={r}>{r}</li>)
-          ) : (
-            <li>Any repository the SCM connections can reach</li>
-          )}
-        </ListSC>
-        <Body2BoldP css={{ marginTop: 8 }}>SCM connections</Body2BoldP>
-        <ListSC>
-          {scms.length ? (
-            scms.map((s) => (
-              <li key={s.id}>
-                {s.name} ({s.type?.toLowerCase()})
-              </li>
-            ))
-          ) : (
-            <li>None</li>
-          )}
-        </ListSC>
-      </Card>
+    <Flex
+      direction="column"
+      gap="medium"
+    >
+      <PolicyGridSC>
+        <Card css={{ padding: 16 }}>
+          <Body2BoldP>Allowed repositories</Body2BoldP>
+          <ListSC>
+            {repos.length ? (
+              repos.map((r) => <li key={r}>{r}</li>)
+            ) : (
+              <li>Any repository the SCM connections can reach</li>
+            )}
+          </ListSC>
+          <Body2BoldP css={{ marginTop: 8 }}>SCM connections</Body2BoldP>
+          <ListSC>
+            {scms.length ? (
+              scms.map((s) => (
+                <li key={s.id}>
+                  {s.name} ({s.type?.toLowerCase()})
+                </li>
+              ))
+            ) : (
+              <li>None</li>
+            )}
+          </ListSC>
+        </Card>
+        <Card css={{ padding: 16 }}>
+          <Body2BoldP>Idle policy</Body2BoldP>
+          <ListSC>
+            <li>Grace period: {mins(idle?.gracePeriod)}</li>
+            <li>Activity window: {mins(idle?.activityWindow)}</li>
+            <li>Max keep-awake: {mins(idle?.maxDeferral)}</li>
+            <li>Max continuous awake: {mins(idle?.maxContinuousAwake)}</li>
+            <li>
+              Completes after:{' '}
+              {idle?.completeAfter
+                ? `${Math.round(idle.completeAfter / 86400)} days suspended`
+                : 'default'}
+            </li>
+          </ListSC>
+        </Card>
+      </PolicyGridSC>
+      {/* the allowlist can run to dozens of hosts: it takes a row of its own, in columns */}
       <Card css={{ padding: 16 }}>
         <Body2BoldP>HTTP allowlist</Body2BoldP>
-        <ListSC>
+        <ListSC css={{ columnWidth: 260, columnGap: 24 }}>
           {hosts.length ? (
             hosts.map((h) => (
               <li key={`${h.host}:${h.port ?? ''}`}>
                 {h.host}
+                {/* a long host wraps before its port rather than inside it */}
+                <wbr />
                 {h.port ? `:${h.port}` : ''}
                 {h.passthrough ? ' (TLS passthrough)' : ''}
               </li>
@@ -421,22 +448,7 @@ function DevboxPolicies({ box }: { box: DevboxFragment }) {
           )}
         </ListSC>
       </Card>
-      <Card css={{ padding: 16 }}>
-        <Body2BoldP>Idle policy</Body2BoldP>
-        <ListSC>
-          <li>Grace period: {mins(idle?.gracePeriod)}</li>
-          <li>Activity window: {mins(idle?.activityWindow)}</li>
-          <li>Max keep-awake: {mins(idle?.maxDeferral)}</li>
-          <li>Max continuous awake: {mins(idle?.maxContinuousAwake)}</li>
-          <li>
-            Completes after:{' '}
-            {idle?.completeAfter
-              ? `${Math.round(idle.completeAfter / 86400)} days suspended`
-              : 'default'}
-          </li>
-        </ListSC>
-      </Card>
-    </PolicyGridSC>
+    </Flex>
   )
 }
 
@@ -530,7 +542,8 @@ const PropsGridSC = styled.div(({ theme }) => ({
 
 const PolicyGridSC = styled.div(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+  // auto-fit, so the cards share the row instead of leaving empty tracks
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
   gap: theme.spacing.medium,
 }))
 
@@ -539,5 +552,6 @@ const ListSC = styled.ul(({ theme }) => ({
   color: theme.colors['text-light'],
   margin: 0,
   paddingLeft: theme.spacing.medium,
-  wordBreak: 'break-all',
+  // wraps at word boundaries (and the <wbr> before a port) when it can
+  overflowWrap: 'anywhere',
 }))

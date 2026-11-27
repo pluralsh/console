@@ -21,7 +21,7 @@ tests:
       - hasDocuments:
           count: 0
 
-  - it: keeps homes in the snapshot bucket and lets only ate-api-server call the controller
+  - it: keeps homes in the snapshot bucket and lets ate-api-server and the devbox-gateway call the controller
     template: templates/zerofs.yaml
     documentSelector:
       path: metadata.name
@@ -38,7 +38,7 @@ tests:
           content: --default-capacity=107374182400
       - contains:
           path: spec.template.spec.containers[0].args
-          content: --allowed-clients=spiffe://cluster.local/ns/ate-system/sa/ate-api-server
+          content: --allowed-clients=spiffe://cluster.local/ns/ate-system/sa/ate-api-server,spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -271,6 +271,21 @@ tests:
         documentSelector:
           path: metadata.name
           value: devbox-zerofs-controller
+
+  - it: lets the devbox-gateway reach the controller to seed homes
+    template: templates/networkpolicies.yaml
+    set:
+      devboxes.enabled: true
+    documentSelector:
+      path: metadata.name
+      value: devbox-zerofs-controller
+    asserts:
+      - contains:
+          path: spec.ingress[0].from
+          content:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: plrl-deploy-operator
 
   - it: needs an image
     template: templates/validate.yaml

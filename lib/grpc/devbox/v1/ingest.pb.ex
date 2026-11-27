@@ -214,6 +214,10 @@ defmodule Devbox.V1.ReportInstanceStatusRequest do
   field :idle, 9, type: Devbox.V1.IdleState
   field :observed_at, 10, type: Google.Protobuf.Timestamp, json_name: "observedAt"
   field :generation, 11, type: :uint64
+  field :daemon_version, 12, type: :string, json_name: "daemonVersion"
+  field :rebase_state, 13, type: Devbox.V1.RebaseState, json_name: "rebaseState", enum: true
+  field :rebase_message, 14, type: :string, json_name: "rebaseMessage"
+  field :rebase_revision, 15, type: :int64, json_name: "rebaseRevision"
 end
 
 defmodule Devbox.V1.ReportInstanceStatusResponse do

@@ -416,6 +416,8 @@ defmodule Devbox.V1.Gateway.Service do
 
   rpc :SetAgentBilling, Devbox.V1.SetAgentBillingRequest, Devbox.V1.SetAgentBillingResponse
 
+  rpc :RebaseInstance, Devbox.V1.RebaseInstanceRequest, Devbox.V1.RebaseInstanceResponse
+
   rpc :CreateThread, Devbox.V1.CreateThreadRequest, Devbox.V1.ThreadResponse
 
   rpc :ListThreads, Devbox.V1.ListThreadsRequest, Devbox.V1.ListThreadsResponse

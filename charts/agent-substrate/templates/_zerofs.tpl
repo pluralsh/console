@@ -35,11 +35,15 @@ password
 {{- end -}}
 {{- end -}}
 
-{{/* SPIFFE IDs allowed to call the controller: ate-api-server creates and deletes homes. */}}
+{{/* SPIFFE IDs allowed to call the controller: ate-api-server creates and deletes homes, and the devbox-gateway
+seeds them from their revision's golden home. */}}
 {{- define "substrate.zerofs.allowedClients" -}}
 {{- $out := .Values.zerofs.allowedClients -}}
 {{- if not $out -}}
 {{- $out = list (include "substrate.spiffeID" (list (include "substrate.namespace" .) "ate-api-server")) -}}
+{{- if .Values.devboxes.enabled -}}
+{{- $out = append $out (include "substrate.spiffeID" (list .Values.devboxes.gatewayNamespace "devbox-gateway")) -}}
+{{- end -}}
 {{- end -}}
 {{- join "," $out -}}
 {{- end -}}

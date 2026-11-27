@@ -1,0 +1,11 @@
+*
+!client
+!polly
+!deployment-operator/go.mod
+!deployment-operator/go.sum
+!deployment-operator/cmd
+!deployment-operator/pkg
+!deployment-operator/internal
+!deployment-operator/api
+!deployment-operator/dockerfiles/devbox/runtime
+!deployment-operator/dockerfiles/devbox/patches

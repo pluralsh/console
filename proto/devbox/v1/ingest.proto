@@ -208,6 +208,14 @@ message ReportInstanceStatusRequest {
   google.protobuf.Timestamp observed_at = 10;
   // Monotonic per instance; console ignores older reports.
   uint64 generation = 11;
+  // The devbox-daemon version of template_revision. Empty for revisions whose daemon is the image's own.
+  string daemon_version = 12;
+  // The last move to another template revision, if any. UNSPECIFIED leaves console's value as it is.
+  RebaseState rebase_state = 13;
+  // Why the move failed, when rebase_state is FAILED.
+  string rebase_message = 14;
+  // The revision the move was to.
+  int64 rebase_revision = 15;
 }
 
 message ReportInstanceStatusResponse {

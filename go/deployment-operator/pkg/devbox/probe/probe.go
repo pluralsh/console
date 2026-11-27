@@ -60,6 +60,10 @@ const (
 	ClaimTTL = 20 * time.Minute
 )
 
+// ErrHomeSeedMissing is in the error of a probe whose revision's golden home was never captured, so no actor can
+// start on it; the operator builds the revision again.
+const ErrHomeSeedMissing = "the revision's golden home wasn't captured"
+
 // Request is request.json. The operator embeds it in its own type, which adds the declared agents.
 type Request struct {
 	Runner        string `json:"runner"`
@@ -71,6 +75,12 @@ type Request struct {
 	// explicit tag: the probe actor starts from the template's golden tag by default instead. The JSON name
 	// predates ZeroFS; it stays so operators and gateways of either version read each other's requests.
 	ExternalHome bool `json:"juiceFSHome,omitempty"`
+	// HomeSeed is the seed of the revision's golden home, which the probe actor's home is copied from before its
+	// first resume, by the driver of HomeStorage; HomeBytes is the home's capacity. Empty for homes the golden tag
+	// carries.
+	HomeSeed    string `json:"homeSeed,omitempty"`
+	HomeStorage string `json:"homeStorage,omitempty"`
+	HomeBytes   int64  `json:"homeBytes,omitempty"`
 	// DevboxID is the console Devbox the probe token is scoped to.
 	DevboxID string `json:"devboxId"`
 	// Probe is a protojson devbox.v1.ProbeAgentsRequest.

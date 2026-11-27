@@ -89,8 +89,11 @@ func register(fs *flag.FlagSet) *options {
 	fs.StringVar(&c.IdentityDir, "identity-dir", env("DEVBOX_IDENTITY_DIR", "/run/plural/identity"), "federated token files and cloud SDK config")
 	fs.StringVar(&c.AgentAuthDir, "agent-auth-dir", env("DEVBOX_AGENT_AUTH_DIR", "/run/plural/agent-auth"), "tmpfs for subscription credentials")
 	fs.StringVar(&c.ImageInfo, "image-info", env("DEVBOX_IMAGE_INFO", "/etc/devbox/image.json"), "image description written by the image build")
+	fs.StringVar(&c.RuntimeDir, "runtime-dir", env("DEVBOX_RUNTIME_DIR", ""), "runtime installed by the plural-runtime sidecar, whose agents win over the image's")
 	fs.StringVar(&c.Contract, "contract", env("DEVBOX_CONTRACT", ""), "image contract version (default: image.json)")
 	fs.StringVar(&c.Shell, "shell", env("DEVBOX_SHELL", env("SHELL", "/bin/bash")), "terminal login shell")
+	fs.StringVar(&c.BootScript, "boot-script", env("DEVBOX_BOOT_SCRIPT", ""), "user script run when an existing instance cold-boots (default ~/.config/devbox/boot.sh)")
+	fs.DurationVar(&c.BootScriptTimeout, "boot-script-timeout", envDuration("DEVBOX_BOOT_SCRIPT_TIMEOUT", 0), "time limit of the boot script (default 5m)")
 	fs.StringVar(&c.Chromium, "chromium", env("DEVBOX_CHROMIUM", "/usr/bin/chromium"), "Chromium binary")
 	fs.StringVar(&c.Xvfb, "xvfb", env("DEVBOX_XVFB", "Xvfb"), "Xvfb binary")
 	fs.StringVar(&c.X11VNC, "x11vnc", env("DEVBOX_X11VNC", "x11vnc"), "x11vnc binary")
@@ -205,7 +208,7 @@ func runProbe(args []string, stdout, stderr io.Writer) int {
 	o.logFormat = "text"
 	o.finish(stderr)
 
-	img, err := harness.LoadImageInfo(o.cfg.ImageInfo)
+	img, err := daemon.LoadImage(o.cfg)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1

@@ -28,6 +28,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,10 +39,11 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/core"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/prober"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/router"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/tunnel"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/homedriver"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
@@ -69,6 +71,7 @@ type options struct {
 	serviceDNSCA   string
 	routerAddress  string
 	juicefsAddress string
+	zerofsAddress  string
 	credProvider   string
 	extProc        string
 	mcpAddr        string
@@ -127,7 +130,8 @@ func register(fs *flag.FlagSet) *options {
 	fs.StringVar(&o.serviceDNSDir, "service-dns-dir", env("DEVBOX_SERVICE_DNS_DIR", "/run/servicedns.podcert.ate.dev"), "servicedns serving credential bundle (DEVBOX_SERVICE_DNS_DIR)")
 	fs.StringVar(&o.serviceDNSCA, "service-dns-ca-dir", env("DEVBOX_SERVICE_DNS_CA_DIR", "/run/servicedns-ca.podcert.ate.dev"), "servicedns trust bundle (DEVBOX_SERVICE_DNS_CA_DIR)")
 	fs.StringVar(&o.routerAddress, "router-address", env("DEVBOX_ROUTER_ADDRESS", router.DefaultAddress), "atenet-router address (DEVBOX_ROUTER_ADDRESS)")
-	fs.StringVar(&o.juicefsAddress, "juicefs-address", env("DEVBOX_JUICEFS_ADDRESS", ""), "JuiceFS CSI controller address, <service>.<namespace>.svc:<port>, for saving the homes of snapshots (DEVBOX_JUICEFS_ADDRESS; empty disables)")
+	fs.StringVar(&o.juicefsAddress, "juicefs-address", env("DEVBOX_JUICEFS_ADDRESS", ""), "JuiceFS CSI controller address, <service>.<namespace>.svc:<port>, for seeding JuiceFS homes and saving the homes of snapshots (DEVBOX_JUICEFS_ADDRESS; empty disables)")
+	fs.StringVar(&o.zerofsAddress, "zerofs-address", env("DEVBOX_ZEROFS_ADDRESS", ""), "ZeroFS CSI controller address, <service>.<namespace>.svc:<port>, for seeding ZeroFS homes (DEVBOX_ZEROFS_ADDRESS; empty disables)")
 	fs.StringVar(&o.credProvider, "credential-provider-addr", env("DEVBOX_CREDENTIAL_PROVIDER_ADDR", egress.DefaultCredentialProviderAddr), "credential provider listen address (DEVBOX_CREDENTIAL_PROVIDER_ADDR)")
 	fs.StringVar(&o.extProc, "extproc-addr", env("DEVBOX_EXTPROC_ADDR", egress.DefaultAuthzAddr), "egress ext_proc listen address (DEVBOX_EXTPROC_ADDR)")
 	fs.StringVar(&o.mcpAddr, "mcp-addr", env("DEVBOX_MCP_ADDR", egress.DefaultMCPAddr), "devbox MCP and SandboxCredentials listen address (DEVBOX_MCP_ADDR)")
@@ -241,23 +245,11 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	}
 	defer rt.Close() // nolint: errcheck
 
-	var seeds core.Seeds
-	if o.juicefsAddress != "" {
-		host, _, err := net.SplitHostPort(o.juicefsAddress)
-		if err != nil {
-			return fmt.Errorf("parsing DEVBOX_JUICEFS_ADDRESS: %w", err)
-		}
-		tlsCfg, err := podcert.ClientTLS(filepath.Join(o.podIdentityDir, "credential-bundle.pem"), filepath.Join(o.serviceDNSCA, "trust-bundle.pem"), host)
-		if err != nil {
-			return fmt.Errorf("configuring the JuiceFS controller client: %w", err)
-		}
-		jfs, err := juicefs.Dial(o.juicefsAddress, tlsCfg)
-		if err != nil {
-			return err
-		}
-		defer jfs.Close() // nolint: errcheck
-		seeds = jfs
+	homeDrivers, seeds, closeDrivers, err := o.dialHomeDrivers()
+	if err != nil {
+		return err
 	}
+	defer closeDrivers()
 
 	token := o.deployToken
 	kas, err := tunnel.Dial(tunnel.DialConfig{
@@ -317,6 +309,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		Records: &core.KubeRecords{Client: kube, Namespace: o.podNamespace},
 		Runners: runners,
 		Seeds:   seeds,
+		Homes:   homeDrivers,
 		Log:     log.WithName("core"),
 	})
 	if err != nil {
@@ -332,7 +325,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 			Holder:     o.podName,
 			ConsoleURL: o.consoleURL,
 			AIProxyURL: o.aiProxyURL,
-		}, prober.Deps{Client: kube, Actors: ate, Daemons: rt, Log: log.WithName("prober")})
+		}, prober.Deps{Client: kube, Actors: ate, Daemons: rt, Homes: homeDrivers, Log: log.WithName("prober")})
 		if err != nil {
 			return err
 		}
@@ -392,6 +385,10 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	g.Go(func() error { return serveMCPPort(gctx, o, gw, mcpHandler, log) })
 	if prb != nil {
 		g.Go(func() error { return prb.Run(gctx) })
+	}
+	if len(homeDrivers) > 0 {
+		claimer := &homes.Claimer{Client: kube, Actors: ate, Drivers: homeDrivers, Log: log.WithName("homes")}
+		g.Go(func() error { return claimer.Run(gctx) })
 	}
 	g.Go(func() error { return serveMetrics(gctx, o.metricsAddr) })
 	log.Info("devbox-gateway started", "version", version, "kas", o.kasURL, "gateway", gatewayURL)
@@ -546,4 +543,48 @@ func portOf(addr string, def int32) int32 {
 		return def
 	}
 	return int32(n)
+}
+
+// dialHomeDrivers connects to the CSI controllers of the home drivers with addresses, with the gateway's pod
+// identity, which they allow by SPIFFE ID. They seed new homes from their revision's golden home, and JuiceFS's
+// also saves the homes of snapshots.
+func (o *options) dialHomeDrivers() (map[v1alpha1.DevboxHomeStorage]homes.Driver, core.Seeds, func(), error) {
+	drivers := map[v1alpha1.DevboxHomeStorage]homes.Driver{}
+	var seeds core.Seeds
+	var conns []*grpc.ClientConn
+	closeAll := func() {
+		for _, c := range conns {
+			_ = c.Close()
+		}
+	}
+	for _, d := range []struct {
+		storage v1alpha1.DevboxHomeStorage
+		address string
+	}{{v1alpha1.DevboxHomeJuiceFS, o.juicefsAddress}, {v1alpha1.DevboxHomeZeroFS, o.zerofsAddress}} {
+		if d.address == "" {
+			continue
+		}
+		host, _, err := net.SplitHostPort(d.address)
+		if err != nil {
+			closeAll()
+			return nil, nil, nil, fmt.Errorf("parsing the %s controller address: %w", d.storage, err)
+		}
+		tlsCfg, err := podcert.ClientTLS(filepath.Join(o.podIdentityDir, "credential-bundle.pem"), filepath.Join(o.serviceDNSCA, "trust-bundle.pem"), host)
+		if err != nil {
+			closeAll()
+			return nil, nil, nil, fmt.Errorf("configuring the %s controller client: %w", d.storage, err)
+		}
+		conn, err := grpc.NewClient(d.address, grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg)))
+		if err != nil {
+			closeAll()
+			return nil, nil, nil, fmt.Errorf("dialing the %s controller: %w", d.storage, err)
+		}
+		conns = append(conns, conn)
+		driver := homedriver.NewClient(conn)
+		drivers[d.storage] = driver
+		if d.storage == v1alpha1.DevboxHomeJuiceFS {
+			seeds = driver
+		}
+	}
+	return drivers, seeds, closeAll, nil
 }

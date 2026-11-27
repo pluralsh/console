@@ -8,6 +8,10 @@ spec:
   imageUpdatePolicy:
     mode: poll
     interval: 1h
+  # devbox-daemon comes from the operator's runtime sidecar, not from the image. onResume (the default) moves a
+  # suspended instance to a new image or daemon when it is next resumed; manual leaves it to users and admins.
+  instanceUpdatePolicy:
+    mode: onResume
   agents:
     - type: claude
       default: true

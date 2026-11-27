@@ -13,11 +13,8 @@ import (
 
 func devboxImage() *ResolvedDevboxImage {
 	return &ResolvedDevboxImage{
-		Labels: map[string]string{
-			v1alpha1.DevboxImageContractLabel:      "v1",
-			v1alpha1.DevboxImageDaemonVersionLabel: "0.12.0",
-		},
-		Entrypoint: []string{devboxDaemonEntrypoint},
+		Labels:     map[string]string{v1alpha1.DevboxImageContractLabel: "v1"},
+		Entrypoint: []string{"/usr/local/bin/devbox-daemon"},
 		User:       "1000:1000",
 		Env:        map[string]string{"DEVBOX_TRUST_DIR": "/var/lib/devbox/trust"},
 	}
@@ -26,41 +23,56 @@ func devboxImage() *ResolvedDevboxImage {
 func TestDevboxImageContract(t *testing.T) {
 	g := NewWithT(t)
 
-	g.Expect(CheckDevboxImageContract(devboxImage(), "0.12.0").OK()).To(BeTrue())
-	g.Expect(CheckDevboxImageContract(devboxImage(), "dev").OK()).To(BeTrue(), "dev builds skip the version check")
+	g.Expect(CheckDevboxImageContract(devboxImage()).OK()).To(BeTrue())
+
+	// The devbox container runs the runtime sidecar's daemon, so the image's own entrypoint and daemon don't matter.
+	img := devboxImage()
+	img.Entrypoint = []string{"/bin/bash", "-c"}
+	img.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "9.9.9"
+	g.Expect(CheckDevboxImageContract(img).OK()).To(BeTrue())
 
 	cases := map[string]struct {
 		mutate    func(*ResolvedDevboxImage)
-		operator  string
 		violation string
 	}{
-		"missing label":       {mutate: func(i *ResolvedDevboxImage) { delete(i.Labels, v1alpha1.DevboxImageContractLabel) }, violation: "sh.plural.devbox/contract"},
-		"entrypoint override": {mutate: func(i *ResolvedDevboxImage) { i.Entrypoint = []string{"/bin/sh", "-c"} }, violation: "must not override ENTRYPOINT"},
-		"root user":           {mutate: func(i *ResolvedDevboxImage) { i.User = "" }, violation: "want UID 1000"},
-		"named user":          {mutate: func(i *ResolvedDevboxImage) { i.User = "dev" }, violation: "want UID 1000"},
-		"no trust dir":        {mutate: func(i *ResolvedDevboxImage) { delete(i.Env, "DEVBOX_TRUST_DIR") }, violation: "DEVBOX_TRUST_DIR"},
-		"no daemon version":   {mutate: func(i *ResolvedDevboxImage) { delete(i.Labels, v1alpha1.DevboxImageDaemonVersionLabel) }, violation: "daemon-version is missing"},
-		"other major":         {mutate: func(i *ResolvedDevboxImage) { i.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "1.0.0" }, violation: "different release line"},
-		"newer minor":         {mutate: func(i *ResolvedDevboxImage) { i.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "0.13.1" }, violation: "newer than the operator"},
+		"missing label": {mutate: func(i *ResolvedDevboxImage) { delete(i.Labels, v1alpha1.DevboxImageContractLabel) }, violation: "sh.plural.devbox/contract"},
+		"root user":     {mutate: func(i *ResolvedDevboxImage) { i.User = "" }, violation: "want UID 1000"},
+		"named user":    {mutate: func(i *ResolvedDevboxImage) { i.User = "dev" }, violation: "want UID 1000"},
+		"no trust dir":  {mutate: func(i *ResolvedDevboxImage) { delete(i.Env, "DEVBOX_TRUST_DIR") }, violation: "DEVBOX_TRUST_DIR"},
 	}
 	for desc, tc := range cases {
 		img := devboxImage()
 		tc.mutate(img)
-		res := CheckDevboxImageContract(img, "0.12.0")
+		res := CheckDevboxImageContract(img)
 		g.Expect(res.OK()).To(BeFalse(), desc)
 		g.Expect(res.Violations).To(ContainElement(ContainSubstring(tc.violation)), desc)
 	}
+}
 
-	img := devboxImage()
-	img.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "0.11.4"
-	res := CheckDevboxImageContract(img, "0.12.0")
-	g.Expect(res.OK()).To(BeTrue())
-	g.Expect(res.Outdated).To(BeEmpty(), "one minor behind is fine")
+func TestDevboxRuntimeContract(t *testing.T) {
+	g := NewWithT(t)
+	runtime := func() *ResolvedDevboxImage {
+		return &ResolvedDevboxImage{Labels: map[string]string{
+			v1alpha1.DevboxRuntimeContractLabel:    "v1",
+			v1alpha1.DevboxImageDaemonVersionLabel: "0.10.0",
+		}}
+	}
 
-	img.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "0.10.0"
-	res = CheckDevboxImageContract(img, "0.12.0")
+	// The daemon keeps the version of the release that last changed it, so it may trail the operator by any distance.
+	res := CheckDevboxRuntimeContract(runtime())
 	g.Expect(res.OK()).To(BeTrue())
-	g.Expect(res.Outdated).To(ContainSubstring("more than one minor release behind"))
+	g.Expect(res.DaemonVersion).To(Equal("0.10.0"))
+
+	img := runtime()
+	delete(img.Labels, v1alpha1.DevboxRuntimeContractLabel)
+	g.Expect(CheckDevboxRuntimeContract(img).Violations).To(ContainElement(ContainSubstring("sh.plural.devbox/runtime-contract")))
+
+	// An environment image is not a runtime.
+	g.Expect(CheckDevboxRuntimeContract(devboxImage()).OK()).To(BeFalse())
+
+	img = runtime()
+	delete(img.Labels, v1alpha1.DevboxImageDaemonVersionLabel)
+	g.Expect(CheckDevboxRuntimeContract(img).Violations).To(ContainElement(ContainSubstring("daemon-version is missing")))
 }
 
 func TestDevboxDockerConfigKeychain(t *testing.T) {
@@ -85,6 +97,7 @@ func TestDevboxConfigDefaults(t *testing.T) {
 
 	g.Expect(cfg.Enabled).To(BeTrue())
 	g.Expect(cfg.DevboxImage()).To(Equal("ghcr.io/pluralsh/devbox-fat:0.12.0"))
+	g.Expect(cfg.RuntimeImageRef()).To(Equal("ghcr.io/pluralsh/devbox-runtime-core:0.12.0"))
 	g.Expect(cfg.GatewayImageRef()).To(Equal("ghcr.io/pluralsh/devbox-gateway:0.12.0"))
 	g.Expect(cfg.KasURL).To(Equal("wss://console.example.com/ext/devbox"))
 	g.Expect(cfg.GatewayServiceAccountAnnotations).To(HaveKeyWithValue("eks.amazonaws.com/role-arn", "arn:aws:iam::1:role/gw"))
@@ -101,8 +114,10 @@ func TestDevboxConfigBaseRegistry(t *testing.T) {
 	cfg := DevboxConfig{OperatorVersion: "0.12.0"}
 	g.Expect(cfg.DevboxImage()).To(Equal("mirror.example.com/plural/pluralsh/devbox-fat:0.12.0"))
 	g.Expect(cfg.GatewayImageRef()).To(Equal("mirror.example.com/plural/pluralsh/devbox-gateway:0.12.0"))
+	g.Expect(cfg.RuntimeImageRef()).To(Equal("mirror.example.com/plural/pluralsh/devbox-runtime-core:0.12.0"))
 
-	cfg.DefaultImage, cfg.GatewayImage = "registry.internal/devbox:1", "registry.internal/gateway:1"
+	cfg.DefaultImage, cfg.GatewayImage, cfg.RuntimeImage = "registry.internal/devbox:1", "registry.internal/gateway:1", "registry.internal/runtime:1"
+	g.Expect(cfg.RuntimeImageRef()).To(Equal("registry.internal/runtime:1"))
 	g.Expect(cfg.DevboxImage()).To(Equal("registry.internal/devbox:1"))
 	g.Expect(cfg.GatewayImageRef()).To(Equal("registry.internal/gateway:1"))
 }

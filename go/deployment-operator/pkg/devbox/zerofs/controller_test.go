@@ -61,6 +61,16 @@ func seeded(name, seed string) *csi.CreateVolumeRequest {
 	}
 }
 
+func fromSeed(seed string) *csi.VolumeContentSource {
+	return &csi.VolumeContentSource{Type: &csi.VolumeContentSource_Snapshot{
+		Snapshot: &csi.VolumeContentSource_SnapshotSource{SnapshotId: seed},
+	}}
+}
+
+func claim(name, seed string) *csi.CreateVolumeRequest {
+	return &csi.CreateVolumeRequest{Name: name, Parameters: map[string]string{ParamClaimSeed: seed}}
+}
+
 func mountCap() []*csi.VolumeCapability {
 	return []*csi.VolumeCapability{{
 		AccessType: &csi.VolumeCapability_Mount{Mount: &csi.VolumeCapability_MountVolume{}},
@@ -137,8 +147,8 @@ func TestCreateVolumeRefusesWhatItCantServe(t *testing.T) {
 		AccessType: &csi.VolumeCapability_Mount{Mount: &csi.VolumeCapability_MountVolume{FsType: "xfs"}},
 		AccessMode: &csi.VolumeCapability_AccessMode{Mode: csi.VolumeCapability_AccessMode_SINGLE_NODE_WRITER},
 	}}
-	snapshot := &csi.VolumeContentSource{Type: &csi.VolumeContentSource_Snapshot{
-		Snapshot: &csi.VolumeContentSource_SnapshotSource{SnapshotId: "seed"},
+	volume := &csi.VolumeContentSource{Type: &csi.VolumeContentSource_Volume{
+		Volume: &csi.VolumeContentSource_VolumeSource{VolumeId: "other"},
 	}}
 	for name, tc := range map[string]struct {
 		req  *csi.CreateVolumeRequest
@@ -150,8 +160,10 @@ func TestCreateVolumeRefusesWhatItCantServe(t *testing.T) {
 		"xfs":        {&csi.CreateVolumeRequest{Name: "a", VolumeCapabilities: xfs}, codes.InvalidArgument},
 		"bad mode": {&csi.CreateVolumeRequest{Name: "a", VolumeCapabilities: mountCap(),
 			Parameters: map[string]string{ParamMode: "rwx"}}, codes.InvalidArgument},
-		"snapshot": {&csi.CreateVolumeRequest{Name: "a", VolumeCapabilities: mountCap(),
-			VolumeContentSource: snapshot}, codes.Unimplemented},
+		"volume source": {&csi.CreateVolumeRequest{Name: "a", VolumeCapabilities: mountCap(),
+			VolumeContentSource: volume}, codes.Unimplemented},
+		"missing seed": {&csi.CreateVolumeRequest{Name: "a", VolumeCapabilities: mountCap(),
+			VolumeContentSource: fromSeed("golden.never-claimed")}, codes.NotFound},
 		"bad seed": {&csi.CreateVolumeRequest{Name: "a", VolumeCapabilities: mountCap(),
 			Parameters: map[string]string{ParamSeed: "../rev-1"}}, codes.InvalidArgument},
 	} {
@@ -246,6 +258,61 @@ func TestSeededVolumesStartFromTheGoldenVolume(t *testing.T) {
 	if got["devbox-homes/seeds/ate.rev-1/wal/00001.sst"] != "w1" {
 		t.Fatalf("seed lost: %v", got)
 	}
+}
+
+// The gateway claims the golden actor's home for its revision's seed after Substrate created it from a StorageClass
+// without one, and starts new homes as copies of the seed before Substrate creates them.
+func TestTheGatewayClaimsAndCopiesSeeds(t *testing.T) {
+	ctx := context.Background()
+	store := memStore(t)
+	c := newController(store)
+	const seed = "golden.tmpl-uid"
+	wantCode := func(err error, code codes.Code) {
+		t.Helper()
+		if status.Code(err) != code {
+			t.Fatalf("err = %v, want %s", err, code)
+		}
+	}
+
+	if _, err := c.CreateVolume(ctx, &csi.CreateVolumeRequest{Name: "golden-home", VolumeCapabilities: mountCap()}); err != nil {
+		t.Fatal(err)
+	}
+	for range 2 {
+		if _, err := c.CreateVolume(ctx, claim("golden-home", seed)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, err := c.CreateVolume(ctx, claim("other-home", seed))
+	wantCode(err, codes.AlreadyExists)
+	_, err = c.CreateVolume(ctx, claim("golden-home", "golden.other"))
+	wantCode(err, codes.AlreadyExists)
+	_, err = c.CreateVolume(ctx, &csi.CreateVolumeRequest{Name: "box-1-home", VolumeCapabilities: mountCap(), VolumeContentSource: fromSeed(seed)})
+	wantCode(err, codes.FailedPrecondition)
+
+	put(t, store, map[string]string{"devbox-homes/homes/golden-home/wal/00001.sst": "w1"})
+	if _, err := c.DeleteVolume(ctx, &csi.DeleteVolumeRequest{VolumeId: "golden-home"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.CreateVolume(ctx, claim("golden-home", seed)); err != nil {
+		t.Fatalf("claiming the captured seed again from its own volume: %v", err)
+	}
+	if _, ok := objects(t, store)["devbox-homes/meta/golden/golden-home"]; ok {
+		t.Fatal("claiming a captured seed again marked its deleted volume golden")
+	}
+	for range 2 {
+		if _, err := c.CreateVolume(ctx, &csi.CreateVolumeRequest{Name: "box-1-home", VolumeCapabilities: mountCap(), VolumeContentSource: fromSeed(seed)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Substrate creates the copied volume again without a source.
+	if _, err := c.CreateVolume(ctx, &csi.CreateVolumeRequest{Name: "box-1-home", VolumeCapabilities: mountCap()}); err != nil {
+		t.Fatal(err)
+	}
+	if got := objects(t, store)["devbox-homes/homes/box-1-home/wal/00001.sst"]; got != "w1" {
+		t.Fatalf("box-1-home wasn't copied from the seed: %q", got)
+	}
+	_, err = c.CreateVolume(ctx, claim("box-1-home", "golden.next"))
+	wantCode(err, codes.AlreadyExists)
 }
 
 func TestSeededVolumeReplacesAnInterruptedCopy(t *testing.T) {

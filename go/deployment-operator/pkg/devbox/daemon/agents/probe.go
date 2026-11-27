@@ -28,6 +28,8 @@ type ProbeOptions struct {
 	Log        *slog.Logger
 	// Present reports whether an agent's ACP command exists (nil: always).
 	Present func(devboxv1.AgentType) bool
+	// MissingReason explains why agents may be missing (the runtime's agents can't run in this image).
+	MissingReason string
 	// AdapterVersion is the image's pinned adapter version.
 	AdapterVersion func(devboxv1.AgentType) string
 	// ScratchDir is where probe sessions run.
@@ -55,7 +57,10 @@ func probeOne(ctx context.Context, opts ProbeOptions, spec *devboxv1.AgentProbeS
 	}
 	if opts.Present != nil && !opts.Present(spec.GetType()) {
 		entry.ProbeStatus = devboxv1.ProbeStatus_PROBE_STATUS_MISSING
-		entry.ProbeError = fmt.Sprintf("%s is not installed in the image", harness.AgentName(spec.GetType()))
+		entry.ProbeError = fmt.Sprintf("%s is not installed in the runtime or the image", harness.AgentName(spec.GetType()))
+		if opts.MissingReason != "" {
+			entry.ProbeError += ": " + opts.MissingReason
+		}
 		return entry
 	}
 	fail := func(err error) *devboxv1.AgentCatalogEntry {

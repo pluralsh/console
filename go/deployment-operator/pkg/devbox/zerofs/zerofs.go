@@ -12,12 +12,14 @@
 // volume, so one box's load never stalls another's. The controller has nothing to create for an unseeded volume,
 // because the first writer initializes the database; it deletes the prefix when Substrate deletes the volume.
 //
-// A StorageClass's seed parameter ties its volumes to a golden boot, like the JuiceFS driver's: the first volume
-// claims the seed and starts empty, its database is copied to
+// A seed ties volumes to a golden boot, like the JuiceFS driver's: the golden volume claims it, its database is
+// copied to
 //
 //	<storage path>/seeds/<seed>/        a stopped volume's database
 //
-// when Substrate deletes it after the golden tag, and every later volume starts as a copy of that. Copies are
+// when Substrate deletes it after the golden tag, and every later volume starts as a copy of that. The gateway
+// claims the golden actor's existing volume (ParamClaimSeed) and creates later volumes with the seed as their
+// content source; revisions from older operators name the seed in their StorageClass (ParamSeed) instead. Copies are
 // whole databases taken with no writer attached, so each is a consistent, independent ZeroFS filesystem. What
 // the controller knows about seeds is kept under <storage path>/meta/.
 package zerofs

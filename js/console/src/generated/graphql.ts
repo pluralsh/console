@@ -4776,6 +4776,8 @@ export type Devbox = {
   conditions?: Maybe<Array<Maybe<DevboxCondition>>>;
   /** who may attach this box to a workbench and start instances on it */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the devbox-daemon version new and updated instances run */
+  daemonVersion?: Maybe<Scalars['String']['output']>;
   /** whether agents billed to the AI proxy can run at autonomy auto, reviewed by a decision model */
   decisionReview?: Maybe<Scalars['Boolean']['output']>;
   httpAllowlist?: Maybe<Array<Maybe<DevboxHttpAllow>>>;
@@ -4786,14 +4788,29 @@ export type Devbox = {
   lastHeartbeatAt?: Maybe<Scalars['DateTime']['output']>;
   maxInstances?: Maybe<Scalars['Int']['output']>;
   name: Scalars['String']['output'];
+  /** how many live instances are behind the box's current template revision */
+  outdatedInstances?: Maybe<Scalars['Int']['output']>;
   resolvedImage?: Maybe<Scalars['String']['output']>;
   resources?: Maybe<Scalars['Map']['output']>;
+  /** the number of the template revision new instances start from */
+  revision?: Maybe<Scalars['Int']['output']>;
+  /** the runtime sidecar image, pinned by digest, that delivers devbox-daemon */
+  runtimeImage?: Maybe<Scalars['String']['output']>;
   scmConnections?: Maybe<Array<Maybe<ScmConnection>>>;
   status?: Maybe<DevboxStatus>;
   templateRevision?: Maybe<Scalars['String']['output']>;
+  /** the box's update campaigns, newest first */
+  updateCampaigns?: Maybe<Array<Maybe<DevboxUpdateCampaign>>>;
+  /** on_resume moves an outdated instance to the current revision when it is next resumed */
+  updateMode?: Maybe<DevboxUpdateMode>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the box's workload identity issuer and how to trust it from cloud accounts */
   workloadIdentity?: Maybe<DevboxWorkloadIdentity>;
+};
+
+
+export type DevboxUpdateCampaignsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type DevboxAgent = {
@@ -4905,6 +4922,8 @@ export type DevboxAttributes = {
   conditions?: InputMaybe<Array<InputMaybe<DevboxConditionAttributes>>>;
   /** who may attach this box to a workbench and start instances on it, falling back to the global create policy if empty */
   createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
+  /** the devbox-daemon version of the runtime image */
+  daemonVersion?: InputMaybe<Scalars['String']['input']>;
   /** hosts instances may reach */
   httpAllowlist?: InputMaybe<Array<InputMaybe<DevboxHttpAllowAttributes>>>;
   idlePolicy?: InputMaybe<DevboxIdlePolicyAttributes>;
@@ -4918,11 +4937,17 @@ export type DevboxAttributes = {
   resolvedImage?: InputMaybe<Scalars['String']['input']>;
   /** the resources for each instance */
   resources?: InputMaybe<Scalars['Json']['input']>;
+  /** the number of the template revision, which instances report as theirs */
+  revision?: InputMaybe<Scalars['Int']['input']>;
+  /** the runtime sidecar image, pinned by digest, that delivers devbox-daemon */
+  runtimeImage?: InputMaybe<Scalars['String']['input']>;
   /** names of the scm connections instances may use */
   scmConnections?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   status?: InputMaybe<DevboxStatus>;
   /** the golden template revision instances boot from */
   templateRevision?: InputMaybe<Scalars['String']['input']>;
+  /** how instances move to a new template revision */
+  updateMode?: InputMaybe<DevboxUpdateMode>;
 };
 
 export type DevboxAudioContent = {
@@ -5257,7 +5282,10 @@ export enum DevboxForegroundState {
 
 export type DevboxHeartbeatAttributes = {
   conditions?: InputMaybe<Array<InputMaybe<DevboxConditionAttributes>>>;
+  daemonVersion?: InputMaybe<Scalars['String']['input']>;
   resolvedImage?: InputMaybe<Scalars['String']['input']>;
+  revision?: InputMaybe<Scalars['Int']['input']>;
+  runtimeImage?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<DevboxStatus>;
   templateRevision?: InputMaybe<Scalars['String']['input']>;
 };
@@ -5358,6 +5386,8 @@ export type DevboxInstance = {
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** initial config option values, by config id */
   configOptions?: Maybe<Scalars['Map']['output']>;
+  /** the devbox-daemon version the instance runs */
+  daemonVersion?: Maybe<Scalars['String']['output']>;
   devbox?: Maybe<Devbox>;
   /** requires_action if any thread needs you */
   foregroundState?: Maybe<DevboxForegroundState>;
@@ -5369,9 +5399,18 @@ export type DevboxInstance = {
   keepAwakeBy?: Maybe<User>;
   keepAwakeUntil?: Maybe<Scalars['DateTime']['output']>;
   lastActivityAt?: Maybe<Scalars['DateTime']['output']>;
+  lastRebasedAt?: Maybe<Scalars['DateTime']['output']>;
   leases?: Maybe<Array<Maybe<DevboxLease>>>;
   maxRunningThreads?: Maybe<Scalars['Int']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  /** whether the box has a newer template revision (a new image or daemon) than the instance runs */
+  outdated?: Maybe<Scalars['Boolean']['output']>;
+  /** why the last update failed; the instance was returned to the revision it had */
+  rebaseError?: Maybe<Scalars['String']['output']>;
+  /** the revision the last update was to */
+  rebaseRevision?: Maybe<Scalars['String']['output']>;
+  /** the outcome of the last update to another template revision */
+  rebaseState?: Maybe<DevboxRebaseState>;
   repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   requestedModel?: Maybe<Scalars['String']['output']>;
   /** filesystem if the box's template changed since the snapshot, so the instance cold-boots */
@@ -5385,6 +5424,9 @@ export type DevboxInstance = {
   templateRevision?: Maybe<Scalars['String']['output']>;
   /** the instance's threads and their subagents (kind SUBAGENT, under their parent) */
   threads?: Maybe<Array<Maybe<DevboxThread>>>;
+  updateCampaign?: Maybe<DevboxUpdateCampaign>;
+  /** when a forced update will restart this instance; its processes and anything outside the home directory are lost */
+  updateDeadlineAt?: Maybe<Scalars['DateTime']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
   viewerCount?: Maybe<Scalars['Int']['output']>;
@@ -5650,6 +5692,12 @@ export enum DevboxQueuedPromptAction {
   Edit = 'EDIT',
   /** run the prompt next, stopping the current turn */
   SendNow = 'SEND_NOW'
+}
+
+export enum DevboxRebaseState {
+  Failed = 'FAILED',
+  InProgress = 'IN_PROGRESS',
+  Succeeded = 'SUCCEEDED'
 }
 
 export type DevboxRepository = {
@@ -6013,6 +6061,64 @@ export type DevboxUnknownContent = {
   /** the unrecognized ACP type */
   variant?: Maybe<Scalars['String']['output']>;
 };
+
+/** An admin's request to move every outdated instance of a box to its current template revision */
+export type DevboxUpdateCampaign = {
+  __typename?: 'DevboxUpdateCampaign';
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** when a forced campaign starts restarting instances that are in use */
+  deadlineAt?: Maybe<Scalars['DateTime']['output']>;
+  devbox?: Maybe<Devbox>;
+  /** when the campaign stops waiting for instances to become idle */
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether instances in use are restarted too, once the deadline passes */
+  force: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  maxConcurrency?: Maybe<Scalars['Int']['output']>;
+  noticeMinutes?: Maybe<Scalars['Int']['output']>;
+  progress?: Maybe<DevboxUpdateCampaignProgress>;
+  reason?: Maybe<Scalars['String']['output']>;
+  startsAt?: Maybe<Scalars['DateTime']['output']>;
+  status: DevboxUpdateCampaignStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+export type DevboxUpdateCampaignAttributes = {
+  /** also restart instances that are in use, after the notice period (admins only) */
+  force?: InputMaybe<Scalars['Boolean']['input']>;
+  /** how many instances update at once, default 5 */
+  maxConcurrency?: InputMaybe<Scalars['Int']['input']>;
+  /** how long users of a forced campaign are warned before their instance restarts, 10 to 30, default 15 */
+  noticeMinutes?: InputMaybe<Scalars['Int']['input']>;
+  /** shown to the users whose instances are restarted */
+  reason?: InputMaybe<Scalars['String']['input']>;
+  /** when to start, now if unset */
+  startsAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type DevboxUpdateCampaignProgress = {
+  __typename?: 'DevboxUpdateCampaignProgress';
+  /** instances whose update failed and was rolled back */
+  failed: Scalars['Int']['output'];
+  /** live instances of the box still behind its current revision */
+  outdated: Scalars['Int']['output'];
+  /** instances this campaign updated */
+  updated: Scalars['Int']['output'];
+};
+
+export enum DevboxUpdateCampaignStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
+export enum DevboxUpdateMode {
+  Manual = 'MANUAL',
+  OnResume = 'ON_RESUME'
+}
 
 export type DevboxUsage = {
   __typename?: 'DevboxUsage';
@@ -11658,6 +11764,7 @@ export type RootMutationType = {
   cancelDevboxInstance?: Maybe<DevboxInstance>;
   cancelDevboxKeepAwake?: Maybe<DevboxInstance>;
   cancelDevboxPrompt?: Maybe<DevboxThread>;
+  cancelDevboxUpdateCampaign?: Maybe<DevboxUpdateCampaign>;
   /** Cancels a workbench job. Allowed for the job owner or users with write access to the workbench. */
   cancelWorkbenchJob?: Maybe<WorkbenchJob>;
   /** saves a set of messages and generates a new one transactionally */
@@ -11702,6 +11809,8 @@ export type RootMutationType = {
   createDevboxPullRequest?: Maybe<DevboxPullRequestJob>;
   createDevboxSnapshot?: Maybe<DevboxSnapshot>;
   createDevboxThread?: Maybe<DevboxThread>;
+  /** Starts updating every outdated instance of a box. Forcing it (admins only) also restarts instances in use after the notice period */
+  createDevboxUpdateCampaign?: Maybe<DevboxUpdateCampaign>;
   createFederatedCredential?: Maybe<FederatedCredential>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
@@ -11905,6 +12014,8 @@ export type RootMutationType = {
   promptDevboxThread?: Maybe<DevboxThread>;
   readAppNotifications?: Maybe<Scalars['Int']['output']>;
   readNotifications?: Maybe<User>;
+  /** Moves an outdated instance to its box's current template revision. A running instance restarts: its processes and anything outside the home directory are lost, the home directory and threads are kept */
+  rebaseDevboxInstance?: Maybe<DevboxInstance>;
   reconfigureRenovate?: Maybe<ServiceDeployment>;
   /** Refreshes an insight, which will trigger a new AI insight generation in the background */
   refreshInsight?: Maybe<AiInsight>;
@@ -12168,6 +12279,11 @@ export type RootMutationTypeCancelDevboxPromptArgs = {
 };
 
 
+export type RootMutationTypeCancelDevboxUpdateCampaignArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCancelWorkbenchJobArgs = {
   jobId: Scalars['ID']['input'];
 };
@@ -12358,6 +12474,12 @@ export type RootMutationTypeCreateDevboxSnapshotArgs = {
 export type RootMutationTypeCreateDevboxThreadArgs = {
   attributes?: InputMaybe<DevboxThreadAttributes>;
   instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateDevboxUpdateCampaignArgs = {
+  attributes?: InputMaybe<DevboxUpdateCampaignAttributes>;
+  devboxId: Scalars['ID']['input'];
 };
 
 
@@ -13231,6 +13353,11 @@ export type RootMutationTypePromptDevboxThreadArgs = {
   content?: InputMaybe<Array<InputMaybe<DevboxPromptBlockAttributes>>>;
   id: Scalars['ID']['input'];
   prompt?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootMutationTypeRebaseDevboxInstanceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -24170,9 +24297,13 @@ export type DevboxSessionCapabilitiesFragment = { __typename?: 'DevboxSessionCap
 
 export type DevboxAgentFragment = { __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeStatus?: DevboxProbeStatus | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null };
 
-export type DevboxTinyFragment = { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null };
+export type DevboxTinyFragment = { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, revision?: number | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null };
 
-export type DevboxFragment = { __typename?: 'Devbox', resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null };
+export type DevboxFragment = { __typename?: 'Devbox', resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, revision?: number | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null };
+
+export type DevboxUpdateCampaignFragment = { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, status: DevboxUpdateCampaignStatus, reason?: string | null, startsAt?: string | null, noticeMinutes?: number | null, deadlineAt?: string | null, expiresAt?: string | null, maxConcurrency?: number | null, completedAt?: string | null, insertedAt?: string | null, progress?: { __typename?: 'DevboxUpdateCampaignProgress', outdated: number, updated: number, failed: number } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
+
+export type DevboxUpdatesFragment = { __typename?: 'Devbox', id: string, revision?: number | null, runtimeImage?: string | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, outdatedInstances?: number | null, updateCampaigns?: Array<{ __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, status: DevboxUpdateCampaignStatus, reason?: string | null, startsAt?: string | null, noticeMinutes?: number | null, deadlineAt?: string | null, expiresAt?: string | null, maxConcurrency?: number | null, completedAt?: string | null, insertedAt?: string | null, progress?: { __typename?: 'DevboxUpdateCampaignProgress', outdated: number, updated: number, failed: number } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null };
 
 export type DevboxUsageFragment = { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null };
 
@@ -24194,9 +24325,9 @@ export type DevboxInteractionFragment = { __typename?: 'DevboxInteraction', id: 
 
 export type DevboxSnapshotFragment = { __typename?: 'DevboxSnapshot', id: string, name?: string | null, status: DevboxSnapshotStatus, fidelity?: DevboxSnapshotFidelity | null, sizeBytes?: any | null, error?: string | null, templateRevision?: string | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, templateRevision?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
 
-export type DevboxInstanceTinyFragment = { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
+export type DevboxInstanceTinyFragment = { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
 
-export type DevboxInstanceFragment = { __typename?: 'DevboxInstance', configOptions?: Record<string, unknown> | null, maxRunningThreads?: number | null, templateRevision?: string | null, imageDigest?: string | null, restoreFidelity?: DevboxSnapshotFidelity | null, completedAt?: string | null, id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, agentConnections?: Array<{ __typename?: 'DevboxAgentConnection', agent?: DevboxAgentType | null, protocolVersion?: number | null, adapterName?: string | null, adapterVersion?: string | null, capabilities?: Record<string, unknown> | null, billing?: string | null } | null> | null, agentBilling?: Array<{ __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null } | null> | null, checkouts?: Array<{ __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, snapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, fidelity?: DevboxSnapshotFidelity | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null, threads?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, stage: DevboxThreadStage, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, parentToolCallId?: string | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, queuedPrompts?: Array<{ __typename?: 'DevboxQueuedPrompt', promptId: string, text?: string | null, attachments?: Array<string | null> | null, queuedAt?: string | null } | null> | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
+export type DevboxInstanceFragment = { __typename?: 'DevboxInstance', configOptions?: Record<string, unknown> | null, maxRunningThreads?: number | null, imageDigest?: string | null, restoreFidelity?: DevboxSnapshotFidelity | null, completedAt?: string | null, id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentConnections?: Array<{ __typename?: 'DevboxAgentConnection', agent?: DevboxAgentType | null, protocolVersion?: number | null, adapterName?: string | null, adapterVersion?: string | null, capabilities?: Record<string, unknown> | null, billing?: string | null } | null> | null, agentBilling?: Array<{ __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null } | null> | null, checkouts?: Array<{ __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, snapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, fidelity?: DevboxSnapshotFidelity | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null, resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, updateMode?: DevboxUpdateMode | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null, threads?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, stage: DevboxThreadStage, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, parentToolCallId?: string | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, queuedPrompts?: Array<{ __typename?: 'DevboxQueuedPrompt', promptId: string, text?: string | null, attachments?: Array<string | null> | null, queuedAt?: string | null } | null> | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
         | { __typename?: 'DevboxToolCallBlock', type: DevboxToolCallContentType, content?:
             | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
             | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
@@ -24208,7 +24339,7 @@ export type DevboxInstanceFragment = { __typename?: 'DevboxInstance', configOpti
         | { __typename?: 'DevboxToolCallDiff', type: DevboxToolCallContentType, path?: string | null, oldText?: string | null, newText?: string | null }
         | { __typename?: 'DevboxToolCallTerminal', type: DevboxToolCallContentType, terminalId?: string | null }
         | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
-       | null> | null } | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
+       | null> | null } | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
 
 export type DevboxAgentBillingFragment = { __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null };
 
@@ -24340,7 +24471,7 @@ export type WorkbenchDevboxesQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchDevboxesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, configuration?: { __typename?: 'WorkbenchConfiguration', coding?: { __typename?: 'WorkbenchCoding', repositories?: Array<string | null> | null } | null, devbox?: { __typename?: 'WorkbenchDevboxConfig', maxSnapshots?: number | null, maxDeferral?: number | null, allowSubscriptionCredentials?: boolean | null } | null } | null, devboxes?: Array<{ __typename?: 'Devbox', allowedRepositories?: Array<string | null> | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null> | null } | null };
+export type WorkbenchDevboxesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, configuration?: { __typename?: 'WorkbenchConfiguration', coding?: { __typename?: 'WorkbenchCoding', repositories?: Array<string | null> | null } | null, devbox?: { __typename?: 'WorkbenchDevboxConfig', maxSnapshots?: number | null, maxDeferral?: number | null, allowSubscriptionCredentials?: boolean | null } | null } | null, devboxes?: Array<{ __typename?: 'Devbox', allowedRepositories?: Array<string | null> | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, revision?: number | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null> | null } | null };
 
 export type DevboxesQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -24351,14 +24482,21 @@ export type DevboxesQueryVariables = Exact<{
 }>;
 
 
-export type DevboxesQuery = { __typename?: 'RootQueryType', devboxes?: { __typename?: 'DevboxConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'DevboxEdge', node?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null } | null> | null } | null };
+export type DevboxesQuery = { __typename?: 'RootQueryType', devboxes?: { __typename?: 'DevboxConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'DevboxEdge', node?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, revision?: number | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null } | null> | null } | null };
 
 export type DevboxQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DevboxQuery = { __typename?: 'RootQueryType', devbox?: { __typename?: 'Devbox', resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
+export type DevboxQuery = { __typename?: 'RootQueryType', devbox?: { __typename?: 'Devbox', resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, revision?: number | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
+
+export type DevboxUpdatesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxUpdatesQuery = { __typename?: 'RootQueryType', devbox?: { __typename?: 'Devbox', id: string, revision?: number | null, runtimeImage?: string | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, outdatedInstances?: number | null, updateCampaigns?: Array<{ __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, status: DevboxUpdateCampaignStatus, reason?: string | null, startsAt?: string | null, noticeMinutes?: number | null, deadlineAt?: string | null, expiresAt?: string | null, maxConcurrency?: number | null, completedAt?: string | null, insertedAt?: string | null, progress?: { __typename?: 'DevboxUpdateCampaignProgress', outdated: number, updated: number, failed: number } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null } | null };
 
 export type DevboxAgentsQueryVariables = Exact<{
   workbenchId: Scalars['ID']['input'];
@@ -24378,7 +24516,7 @@ export type WorkbenchDevboxInstancesQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchDevboxInstancesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, devboxInstances?: { __typename?: 'DevboxInstanceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'DevboxInstanceEdge', node?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null> | null } | null } | null };
+export type WorkbenchDevboxInstancesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, devboxInstances?: { __typename?: 'DevboxInstanceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'DevboxInstanceEdge', node?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchDevboxSnapshotsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24413,7 +24551,7 @@ export type DevboxInstanceQueryVariables = Exact<{
 }>;
 
 
-export type DevboxInstanceQuery = { __typename?: 'RootQueryType', devboxInstance?: { __typename?: 'DevboxInstance', configOptions?: Record<string, unknown> | null, maxRunningThreads?: number | null, templateRevision?: string | null, imageDigest?: string | null, restoreFidelity?: DevboxSnapshotFidelity | null, completedAt?: string | null, id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, agentConnections?: Array<{ __typename?: 'DevboxAgentConnection', agent?: DevboxAgentType | null, protocolVersion?: number | null, adapterName?: string | null, adapterVersion?: string | null, capabilities?: Record<string, unknown> | null, billing?: string | null } | null> | null, agentBilling?: Array<{ __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null } | null> | null, checkouts?: Array<{ __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, snapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, fidelity?: DevboxSnapshotFidelity | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null, threads?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, stage: DevboxThreadStage, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, parentToolCallId?: string | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, queuedPrompts?: Array<{ __typename?: 'DevboxQueuedPrompt', promptId: string, text?: string | null, attachments?: Array<string | null> | null, queuedAt?: string | null } | null> | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
+export type DevboxInstanceQuery = { __typename?: 'RootQueryType', devboxInstance?: { __typename?: 'DevboxInstance', configOptions?: Record<string, unknown> | null, maxRunningThreads?: number | null, imageDigest?: string | null, restoreFidelity?: DevboxSnapshotFidelity | null, completedAt?: string | null, id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentConnections?: Array<{ __typename?: 'DevboxAgentConnection', agent?: DevboxAgentType | null, protocolVersion?: number | null, adapterName?: string | null, adapterVersion?: string | null, capabilities?: Record<string, unknown> | null, billing?: string | null } | null> | null, agentBilling?: Array<{ __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null } | null> | null, checkouts?: Array<{ __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, snapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, fidelity?: DevboxSnapshotFidelity | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null, resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, updateMode?: DevboxUpdateMode | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, subscriptionDefaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, subscriptionModels?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null, threads?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, stage: DevboxThreadStage, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, parentToolCallId?: string | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, queuedPrompts?: Array<{ __typename?: 'DevboxQueuedPrompt', promptId: string, text?: string | null, attachments?: Array<string | null> | null, queuedAt?: string | null } | null> | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
           | { __typename?: 'DevboxToolCallBlock', type: DevboxToolCallContentType, content?:
               | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
               | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
@@ -24425,7 +24563,7 @@ export type DevboxInstanceQuery = { __typename?: 'RootQueryType', devboxInstance
           | { __typename?: 'DevboxToolCallDiff', type: DevboxToolCallContentType, path?: string | null, oldText?: string | null, newText?: string | null }
           | { __typename?: 'DevboxToolCallTerminal', type: DevboxToolCallContentType, terminalId?: string | null }
           | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
-         | null> | null } | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+         | null> | null } | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
 
 export type DevboxThreadQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24618,7 +24756,7 @@ export type AttachDevboxMutationVariables = Exact<{
 }>;
 
 
-export type AttachDevboxMutation = { __typename?: 'RootMutationType', attachDevbox?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null };
+export type AttachDevboxMutation = { __typename?: 'RootMutationType', attachDevbox?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, revision?: number | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null };
 
 export type DetachDevboxMutationVariables = Exact<{
   workbenchId: Scalars['ID']['input'];
@@ -24626,7 +24764,7 @@ export type DetachDevboxMutationVariables = Exact<{
 }>;
 
 
-export type DetachDevboxMutation = { __typename?: 'RootMutationType', detachDevbox?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null };
+export type DetachDevboxMutation = { __typename?: 'RootMutationType', detachDevbox?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, revision?: number | null, daemonVersion?: string | null, updateMode?: DevboxUpdateMode | null, browser?: boolean | null, resources?: Record<string, unknown> | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null };
 
 export type CreateDevboxInstanceMutationVariables = Exact<{
   workbenchId: Scalars['ID']['input'];
@@ -24634,7 +24772,7 @@ export type CreateDevboxInstanceMutationVariables = Exact<{
 }>;
 
 
-export type CreateDevboxInstanceMutation = { __typename?: 'RootMutationType', createDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+export type CreateDevboxInstanceMutation = { __typename?: 'RootMutationType', createDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
 
 export type RestoreDevboxSnapshotMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24642,28 +24780,50 @@ export type RestoreDevboxSnapshotMutationVariables = Exact<{
 }>;
 
 
-export type RestoreDevboxSnapshotMutation = { __typename?: 'RootMutationType', restoreDevboxSnapshot?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+export type RestoreDevboxSnapshotMutation = { __typename?: 'RootMutationType', restoreDevboxSnapshot?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
 
 export type CancelDevboxInstanceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type CancelDevboxInstanceMutation = { __typename?: 'RootMutationType', cancelDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+export type CancelDevboxInstanceMutation = { __typename?: 'RootMutationType', cancelDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
 
 export type SuspendDevboxInstanceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SuspendDevboxInstanceMutation = { __typename?: 'RootMutationType', suspendDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+export type SuspendDevboxInstanceMutation = { __typename?: 'RootMutationType', suspendDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
 
 export type ResumeDevboxInstanceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ResumeDevboxInstanceMutation = { __typename?: 'RootMutationType', resumeDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+export type ResumeDevboxInstanceMutation = { __typename?: 'RootMutationType', resumeDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type RebaseDevboxInstanceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RebaseDevboxInstanceMutation = { __typename?: 'RootMutationType', rebaseDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type CreateDevboxUpdateCampaignMutationVariables = Exact<{
+  devboxId: Scalars['ID']['input'];
+  attributes?: InputMaybe<DevboxUpdateCampaignAttributes>;
+}>;
+
+
+export type CreateDevboxUpdateCampaignMutation = { __typename?: 'RootMutationType', createDevboxUpdateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, status: DevboxUpdateCampaignStatus, reason?: string | null, startsAt?: string | null, noticeMinutes?: number | null, deadlineAt?: string | null, expiresAt?: string | null, maxConcurrency?: number | null, completedAt?: string | null, insertedAt?: string | null, progress?: { __typename?: 'DevboxUpdateCampaignProgress', outdated: number, updated: number, failed: number } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type CancelDevboxUpdateCampaignMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CancelDevboxUpdateCampaignMutation = { __typename?: 'RootMutationType', cancelDevboxUpdateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, status: DevboxUpdateCampaignStatus, reason?: string | null, startsAt?: string | null, noticeMinutes?: number | null, deadlineAt?: string | null, expiresAt?: string | null, maxConcurrency?: number | null, completedAt?: string | null, insertedAt?: string | null, progress?: { __typename?: 'DevboxUpdateCampaignProgress', outdated: number, updated: number, failed: number } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
 
 export type PingDevboxInstanceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24832,7 +24992,7 @@ export type DevboxInstanceStatusDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type DevboxInstanceStatusDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxInstanceStatusDelta?: { __typename?: 'DevboxInstanceDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null };
+export type DevboxInstanceStatusDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxInstanceStatusDelta?: { __typename?: 'DevboxInstanceDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, templateRevision?: string | null, daemonVersion?: string | null, outdated?: boolean | null, rebaseState?: DevboxRebaseState | null, rebaseError?: string | null, rebaseRevision?: string | null, updateDeadlineAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, updateCampaign?: { __typename?: 'DevboxUpdateCampaign', id: string, force: boolean, reason?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, revision?: number | null, daemonVersion?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null };
 
 export type DevboxThreadDeltaSubscriptionVariables = Exact<{
   instanceId: Scalars['ID']['input'];
@@ -35247,6 +35407,42 @@ export type DevboxSuspenseQueryHookResult = ReturnType<typeof useDevboxSuspenseQ
 export type DevboxQueryResult = Apollo.QueryResult<DevboxQuery, DevboxQueryVariables>;
 
 /**
+ * __useDevboxUpdatesQuery__
+ *
+ * To run a query within a React component, call `useDevboxUpdatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxUpdatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxUpdatesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDevboxUpdatesQuery(baseOptions: Apollo.QueryHookOptions<DevboxUpdatesQuery, DevboxUpdatesQueryVariables> & ({ variables: DevboxUpdatesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>(Operations.DevboxUpdates, options);
+      }
+export function useDevboxUpdatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>(Operations.DevboxUpdates, options);
+        }
+// @ts-ignore
+export function useDevboxUpdatesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>;
+export function useDevboxUpdatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxUpdatesQuery | undefined, DevboxUpdatesQueryVariables>;
+export function useDevboxUpdatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>(Operations.DevboxUpdates, options);
+        }
+export type DevboxUpdatesQueryHookResult = ReturnType<typeof useDevboxUpdatesQuery>;
+export type DevboxUpdatesLazyQueryHookResult = ReturnType<typeof useDevboxUpdatesLazyQuery>;
+export type DevboxUpdatesSuspenseQueryHookResult = ReturnType<typeof useDevboxUpdatesSuspenseQuery>;
+export type DevboxUpdatesQueryResult = Apollo.QueryResult<DevboxUpdatesQuery, DevboxUpdatesQueryVariables>;
+
+/**
  * __useDevboxAgentsQuery__
  *
  * To run a query within a React component, call `useDevboxAgentsQuery` and pass it any options that fit your needs.
@@ -36193,6 +36389,85 @@ export function useResumeDevboxInstanceMutation(baseOptions?: Apollo.MutationHoo
 export type ResumeDevboxInstanceMutationHookResult = ReturnType<typeof useResumeDevboxInstanceMutation>;
 export type ResumeDevboxInstanceMutationResult = Apollo.MutationResult<ResumeDevboxInstanceMutation>;
 export type ResumeDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<ResumeDevboxInstanceMutation, ResumeDevboxInstanceMutationVariables>;
+export type RebaseDevboxInstanceMutationFn = Apollo.MutationFunction<RebaseDevboxInstanceMutation, RebaseDevboxInstanceMutationVariables>;
+
+/**
+ * __useRebaseDevboxInstanceMutation__
+ *
+ * To run a mutation, you first call `useRebaseDevboxInstanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRebaseDevboxInstanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rebaseDevboxInstanceMutation, { data, loading, error }] = useRebaseDevboxInstanceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRebaseDevboxInstanceMutation(baseOptions?: Apollo.MutationHookOptions<RebaseDevboxInstanceMutation, RebaseDevboxInstanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RebaseDevboxInstanceMutation, RebaseDevboxInstanceMutationVariables>(Operations.RebaseDevboxInstance, options);
+      }
+export type RebaseDevboxInstanceMutationHookResult = ReturnType<typeof useRebaseDevboxInstanceMutation>;
+export type RebaseDevboxInstanceMutationResult = Apollo.MutationResult<RebaseDevboxInstanceMutation>;
+export type RebaseDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<RebaseDevboxInstanceMutation, RebaseDevboxInstanceMutationVariables>;
+export type CreateDevboxUpdateCampaignMutationFn = Apollo.MutationFunction<CreateDevboxUpdateCampaignMutation, CreateDevboxUpdateCampaignMutationVariables>;
+
+/**
+ * __useCreateDevboxUpdateCampaignMutation__
+ *
+ * To run a mutation, you first call `useCreateDevboxUpdateCampaignMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDevboxUpdateCampaignMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDevboxUpdateCampaignMutation, { data, loading, error }] = useCreateDevboxUpdateCampaignMutation({
+ *   variables: {
+ *      devboxId: // value for 'devboxId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateDevboxUpdateCampaignMutation(baseOptions?: Apollo.MutationHookOptions<CreateDevboxUpdateCampaignMutation, CreateDevboxUpdateCampaignMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDevboxUpdateCampaignMutation, CreateDevboxUpdateCampaignMutationVariables>(Operations.CreateDevboxUpdateCampaign, options);
+      }
+export type CreateDevboxUpdateCampaignMutationHookResult = ReturnType<typeof useCreateDevboxUpdateCampaignMutation>;
+export type CreateDevboxUpdateCampaignMutationResult = Apollo.MutationResult<CreateDevboxUpdateCampaignMutation>;
+export type CreateDevboxUpdateCampaignMutationOptions = Apollo.BaseMutationOptions<CreateDevboxUpdateCampaignMutation, CreateDevboxUpdateCampaignMutationVariables>;
+export type CancelDevboxUpdateCampaignMutationFn = Apollo.MutationFunction<CancelDevboxUpdateCampaignMutation, CancelDevboxUpdateCampaignMutationVariables>;
+
+/**
+ * __useCancelDevboxUpdateCampaignMutation__
+ *
+ * To run a mutation, you first call `useCancelDevboxUpdateCampaignMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelDevboxUpdateCampaignMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelDevboxUpdateCampaignMutation, { data, loading, error }] = useCancelDevboxUpdateCampaignMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCancelDevboxUpdateCampaignMutation(baseOptions?: Apollo.MutationHookOptions<CancelDevboxUpdateCampaignMutation, CancelDevboxUpdateCampaignMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelDevboxUpdateCampaignMutation, CancelDevboxUpdateCampaignMutationVariables>(Operations.CancelDevboxUpdateCampaign, options);
+      }
+export type CancelDevboxUpdateCampaignMutationHookResult = ReturnType<typeof useCancelDevboxUpdateCampaignMutation>;
+export type CancelDevboxUpdateCampaignMutationResult = Apollo.MutationResult<CancelDevboxUpdateCampaignMutation>;
+export type CancelDevboxUpdateCampaignMutationOptions = Apollo.BaseMutationOptions<CancelDevboxUpdateCampaignMutation, CancelDevboxUpdateCampaignMutationVariables>;
 export type PingDevboxInstanceMutationFn = Apollo.MutationFunction<PingDevboxInstanceMutation, PingDevboxInstanceMutationVariables>;
 
 /**
@@ -46768,6 +47043,7 @@ export const namedOperations = {
     WorkbenchDevboxes: 'WorkbenchDevboxes',
     Devboxes: 'Devboxes',
     Devbox: 'Devbox',
+    DevboxUpdates: 'DevboxUpdates',
     DevboxAgents: 'DevboxAgents',
     WorkbenchDevboxInstances: 'WorkbenchDevboxInstances',
     WorkbenchDevboxSnapshots: 'WorkbenchDevboxSnapshots',
@@ -47059,6 +47335,9 @@ export const namedOperations = {
     CancelDevboxInstance: 'CancelDevboxInstance',
     SuspendDevboxInstance: 'SuspendDevboxInstance',
     ResumeDevboxInstance: 'ResumeDevboxInstance',
+    RebaseDevboxInstance: 'RebaseDevboxInstance',
+    CreateDevboxUpdateCampaign: 'CreateDevboxUpdateCampaign',
+    CancelDevboxUpdateCampaign: 'CancelDevboxUpdateCampaign',
     PingDevboxInstance: 'PingDevboxInstance',
     LeaveDevboxInstance: 'LeaveDevboxInstance',
     KeepDevboxInstanceAwake: 'KeepDevboxInstanceAwake',
@@ -47395,6 +47674,8 @@ export const namedOperations = {
     DevboxAgent: 'DevboxAgent',
     DevboxTiny: 'DevboxTiny',
     Devbox: 'Devbox',
+    DevboxUpdateCampaign: 'DevboxUpdateCampaign',
+    DevboxUpdates: 'DevboxUpdates',
     DevboxUsage: 'DevboxUsage',
     DevboxThread: 'DevboxThread',
     DevboxInteraction: 'DevboxInteraction',

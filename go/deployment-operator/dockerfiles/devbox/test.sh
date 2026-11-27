@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Builds and tests the devbox images.
 #
-#   ./test.sh [step...]     steps: versions lint minimal gateway fat fat-check example all
-#                           (default: versions lint minimal gateway fat-check)
+#   ./test.sh [step...]     steps: versions lint minimal gateway runtime fat fat-check example all
+#                           (default: versions lint minimal gateway runtime fat-check)
 #
 # Environment:
 #   DAEMON_SOURCE   build | stub   (default: build if cmd/devbox-daemon exists, else stub)
@@ -13,7 +13,7 @@
 #                   --load), so their cache can be dropped with the builder. fat and
 #                   example build FROM a local image and always use the default builder.
 #   KEEP_IMAGES=1   keep the built images instead of removing them at exit
-#   MINIMAL_IMAGE, FAT_IMAGE, GATEWAY_IMAGE
+#   MINIMAL_IMAGE, FAT_IMAGE, GATEWAY_IMAGE, RUNTIME_IMAGE
 #                   test these published images (pulled if missing) instead of
 #                   building them; CD sets them to the digests it pushed
 set -euo pipefail
@@ -31,6 +31,7 @@ HADOLINT_IMAGE="${HADOLINT_IMAGE:-hadolint/hadolint:v2.14.0}"
 minimal_image="${MINIMAL_IMAGE:-devbox-minimal:${TAG}}"
 fat_image="${FAT_IMAGE:-devbox-fat:${TAG}}"
 gateway_image="${GATEWAY_IMAGE:-devbox-gateway:${TAG}}"
+runtime_image="${RUNTIME_IMAGE:-devbox-runtime-core:${TAG}}"
 example_image="devbox-example:${TAG}"
 built=()
 
@@ -138,14 +139,14 @@ runtime_test() {
   echo "PID 1 ok, /readyz $([ -n "${ready}" ] && echo ok || echo skipped), SIGTERM exit in $((end - start))s"
 }
 
-# Harness pins must match the agent-run images.
+# The runtime's agent pins (runtime-core.Dockerfile) must match the agent-run images.
 step_versions() {
-  log "Checking harness versions against dockerfiles/agent-harness"
+  log "Checking the runtime's agent versions against dockerfiles/agent-harness"
   local ah="${operator_dir}/dockerfiles/agent-harness" fail=0
   arg() { sed -n "s/^ARG $2=\(.*\)$/\1/p" "$1" | head -1; }
   check() {
     local name="$1" want="$2" got
-    got="$(arg "${here}/minimal.Dockerfile" "${name}")"
+    got="$(arg "${here}/runtime-core.Dockerfile" "${name}")"
     if [ "${got}" = "${want}" ]; then echo "  ${name}=${got}"; else echo "  ${name}=${got}, agent-run images use ${want}"; fail=1; fi
   }
   check CLAUDE_VERSION "$(arg "${ah}/claude.Dockerfile" AGENT_VERSION)"
@@ -158,13 +159,21 @@ step_versions() {
   check PI_ACP_VERSION "$(arg "${ah}/pi.Dockerfile" ACP_VERSION)"
   check PI_MCP_ADAPTER_VERSION "$(arg "${ah}/pi.Dockerfile" MCP_ADAPTER_VERSION)"
   check NODE_VERSION "$(sed -n 's/^ *NODE_VERSION: *//p' "${go_dir}/../.github/workflows/deployment-operator-cd-agent-harness.yaml" | head -1)"
+  # devbox-minimal keeps its own agents for one more release; they must match the runtime's.
+  local name
+  for name in CLAUDE_VERSION CLAUDE_ACP_VERSION CODEX_VERSION CODEX_ACP_VERSION OPENCODE_VERSION GEMINI_VERSION \
+    PI_VERSION PI_ACP_VERSION PI_MCP_ADAPTER_VERSION PLAYWRIGHT_MCP_VERSION; do
+    if [ "$(arg "${here}/minimal.Dockerfile" "${name}")" != "$(arg "${here}/runtime-core.Dockerfile" "${name}")" ]; then
+      echo "  ${name} differs between minimal.Dockerfile and runtime-core.Dockerfile"; fail=1
+    fi
+  done
   return "${fail}"
 }
 
 step_lint() {
   log "hadolint"
   local f rc=0
-  for f in minimal.Dockerfile fat.Dockerfile gateway.Dockerfile examples/Dockerfile; do
+  for f in minimal.Dockerfile fat.Dockerfile gateway.Dockerfile runtime-core.Dockerfile examples/Dockerfile; do
     echo "  ${f}"
     docker run --rm -i -v "${here}/.hadolint.yaml:/.hadolint.yaml:ro" "${HADOLINT_IMAGE}" \
       hadolint --config /.hadolint.yaml - < "${here}/${f}" || rc=1
@@ -191,6 +200,68 @@ step_gateway() {
       --build-arg GATEWAY_SOURCE="${GATEWAY_SOURCE}" --build-arg VERSION="0.0.0-${TAG}"
   fi
   structure_test "${gateway_image}" gateway.yaml
+}
+
+# The sidecar next to an environment image, as the operator runs them: the installer puts the daemon and the
+# runner's agents into a shared home volume and publishes the marker, a second run keeps them, and they then run
+# from the home volume as UID 1000 in an environment image that has nothing of its own. The probe matrix
+# (runtime/probe-matrix.sh) checks every agent's ACP handshake across environment images.
+step_runtime() {
+  if [ -n "${RUNTIME_IMAGE:-}" ]; then
+    pull "${runtime_image}"
+  else
+    build_isolated "${runtime_image}" runtime-core.Dockerfile --build-arg VERSION="0.0.0-${TAG}"
+  fi
+  structure_test "${runtime_image}" runtime-core.yaml
+
+  local volume="devbox-runtime-test-$$" digest="sha256:test" agents="claude,codex" id dir out size
+  # runtimemanifest.InstallID: the digest and a hash of the agent selection.
+  id="${digest}+$(printf 'agents=%s\nbrowser=false\n' "$(echo "${agents}" | tr , '\n' | LC_ALL=C sort -u | paste -sd, -)" | sha256sum | cut -c1-12)"
+  dir="/home/dev/.plural-runtime/$(echo "${id}" | tr ':+' '--')"
+  log "Install test ${runtime_image}"
+  docker volume create "${volume}" >/dev/null
+  # shellcheck disable=SC2064
+  trap "docker volume rm -f ${volume} >/dev/null 2>&1 || true; cleanup" EXIT
+  run_installer() {
+    docker run --rm ${platform_args[@]+"${platform_args[@]}"} -v "${volume}:/mnt/home" "${runtime_image}" \
+      --digest "${digest}" --agents "${agents}" --stay=false 2>&1
+  }
+  out="$(run_installer)"
+  echo "${out}" | grep -q '"msg":"runtime installed"' || { echo "first run did not install: ${out}"; return 1; }
+  out="$(run_installer)"
+  echo "${out}" | grep -q '"msg":"runtime kept"' || { echo "second run did not keep the runtime: ${out}"; return 1; }
+  out="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} --user 1000:1000 -v "${volume}:/home/dev" \
+    -e ID="${id}" -e DIR="${dir}" "${RUNTIME_ENV_IMAGE:-debian:trixie-20261104-slim}" sh -c \
+    '[ "$(cat /home/dev/.plural-runtime/ready)" = "${ID}" ] && "${DIR}/bin/devbox-daemon" -version &&
+     "${DIR}/bin/claude" --version && "${DIR}/bin/codex" --version && "${DIR}/bin/codex-acp" --version')"
+  [ -n "${out}" ] || { echo "the runtime did not run from the home volume as UID 1000"; return 1; }
+  echo "installed, kept, and runs from the home volume as UID 1000:"
+  echo "${out}" | sed 's/^/  /'
+
+  # Everything a runner selects is copied into each of its instances' home volume and snapshots: budget what a
+  # runner with every agent and Playwright MCP (--browser; Chromium is the environment image's) installs (the
+  # installer's count, whatever Docker's image store reports).
+  docker volume rm -f "${volume}" >/dev/null && docker volume create "${volume}" >/dev/null
+  size="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} -v "${volume}:/mnt/home" "${runtime_image}" \
+    --digest "${digest}" --agents claude,codex,gemini,opencode,pi --browser --stay=false 2>&1 |
+    sed -n 's/.*"bytes":\([0-9]*\).*/\1/p')"
+  [ -n "${size}" ] || { echo "the full install did not report its size"; return 1; }
+  [ "${size}" -lt $((1536 * 1024 * 1024)) ] || { echo "every agent installs ${size} bytes, over the 1.5GiB budget"; return 1; }
+  echo "every agent and Playwright MCP install $((size / 1024 / 1024)) MiB"
+  # pi runs from its own bundle, and pi-mcp-adapter without the packages pi provides: the extensions the daemon loads
+  # (the subagent one and the adapter) must still load.
+  out="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} --user 1000:1000 -e HOME=/tmp -v "${volume}:/home/dev" \
+    "${RUNTIME_ENV_IMAGE:-debian:trixie-20261104-slim}" sh -c \
+    'c=/home/dev/.plural-runtime/components
+     sub=$(find "$c" -path "*/examples/extensions/subagent/index.ts" | head -1)
+     mcp=$(find "$c" -path "*/node_modules/pi-mcp-adapter/index.ts" | head -1)
+     [ -n "${sub}" ] && [ -n "${mcp}" ] && /home/dev/.plural-runtime/sha256-*/bin/pi -ne -e "${sub}" -e "${mcp}" --mode rpc </dev/null 2>&1' || true)"
+  if ! echo "${out}" | grep -q "pi-mcp-adapter" || echo "${out}" | grep -q "Failed to load extension\|No such file"; then
+    echo "pi can't load its subagent extension and pi-mcp-adapter: ${out}"; return 1
+  fi
+  echo "pi loads its subagent extension and pi-mcp-adapter"
+  docker volume rm -f "${volume}" >/dev/null
+  trap cleanup EXIT
 }
 
 ensure_minimal() {
@@ -230,8 +301,8 @@ step_example() {
 }
 
 steps=("$@")
-[ "${#steps[@]}" -eq 0 ] && steps=(versions lint minimal gateway fat-check)
-[ "${steps[*]}" = "all" ] && steps=(versions lint minimal gateway fat example)
+[ "${#steps[@]}" -eq 0 ] && steps=(versions lint minimal gateway runtime fat-check)
+[ "${steps[*]}" = "all" ] && steps=(versions lint minimal gateway runtime fat example)
 
 echo "daemon source: ${DAEMON_SOURCE}, gateway source: ${GATEWAY_SOURCE}"
 for s in "${steps[@]}"; do

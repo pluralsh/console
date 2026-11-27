@@ -45,6 +45,7 @@ const (
 	Gateway_SnapshotInstance_FullMethodName      = "/devbox.v1.Gateway/SnapshotInstance"
 	Gateway_DeleteSnapshot_FullMethodName        = "/devbox.v1.Gateway/DeleteSnapshot"
 	Gateway_SetAgentBilling_FullMethodName       = "/devbox.v1.Gateway/SetAgentBilling"
+	Gateway_RebaseInstance_FullMethodName        = "/devbox.v1.Gateway/RebaseInstance"
 	Gateway_CreateThread_FullMethodName          = "/devbox.v1.Gateway/CreateThread"
 	Gateway_ListThreads_FullMethodName           = "/devbox.v1.Gateway/ListThreads"
 	Gateway_ImportThread_FullMethodName          = "/devbox.v1.Gateway/ImportThread"
@@ -88,6 +89,7 @@ type GatewayClient interface {
 	SnapshotInstance(ctx context.Context, in *SnapshotInstanceRequest, opts ...grpc.CallOption) (*SnapshotInstanceResponse, error)
 	DeleteSnapshot(ctx context.Context, in *DeleteSnapshotRequest, opts ...grpc.CallOption) (*DeleteSnapshotResponse, error)
 	SetAgentBilling(ctx context.Context, in *SetAgentBillingRequest, opts ...grpc.CallOption) (*SetAgentBillingResponse, error)
+	RebaseInstance(ctx context.Context, in *RebaseInstanceRequest, opts ...grpc.CallOption) (*RebaseInstanceResponse, error)
 	CreateThread(ctx context.Context, in *CreateThreadRequest, opts ...grpc.CallOption) (*ThreadResponse, error)
 	ListThreads(ctx context.Context, in *ListThreadsRequest, opts ...grpc.CallOption) (*ListThreadsResponse, error)
 	ImportThread(ctx context.Context, in *ImportThreadRequest, opts ...grpc.CallOption) (*ThreadResponse, error)
@@ -203,6 +205,16 @@ func (c *gatewayClient) SetAgentBilling(ctx context.Context, in *SetAgentBilling
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetAgentBillingResponse)
 	err := c.cc.Invoke(ctx, Gateway_SetAgentBilling_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayClient) RebaseInstance(ctx context.Context, in *RebaseInstanceRequest, opts ...grpc.CallOption) (*RebaseInstanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RebaseInstanceResponse)
+	err := c.cc.Invoke(ctx, Gateway_RebaseInstance_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -487,6 +499,7 @@ type GatewayServer interface {
 	SnapshotInstance(context.Context, *SnapshotInstanceRequest) (*SnapshotInstanceResponse, error)
 	DeleteSnapshot(context.Context, *DeleteSnapshotRequest) (*DeleteSnapshotResponse, error)
 	SetAgentBilling(context.Context, *SetAgentBillingRequest) (*SetAgentBillingResponse, error)
+	RebaseInstance(context.Context, *RebaseInstanceRequest) (*RebaseInstanceResponse, error)
 	CreateThread(context.Context, *CreateThreadRequest) (*ThreadResponse, error)
 	ListThreads(context.Context, *ListThreadsRequest) (*ListThreadsResponse, error)
 	ImportThread(context.Context, *ImportThreadRequest) (*ThreadResponse, error)
@@ -551,6 +564,9 @@ func (UnimplementedGatewayServer) DeleteSnapshot(context.Context, *DeleteSnapsho
 }
 func (UnimplementedGatewayServer) SetAgentBilling(context.Context, *SetAgentBillingRequest) (*SetAgentBillingResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetAgentBilling not implemented")
+}
+func (UnimplementedGatewayServer) RebaseInstance(context.Context, *RebaseInstanceRequest) (*RebaseInstanceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RebaseInstance not implemented")
 }
 func (UnimplementedGatewayServer) CreateThread(context.Context, *CreateThreadRequest) (*ThreadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateThread not implemented")
@@ -791,6 +807,24 @@ func _Gateway_SetAgentBilling_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServer).SetAgentBilling(ctx, req.(*SetAgentBillingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Gateway_RebaseInstance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RebaseInstanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServer).RebaseInstance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Gateway_RebaseInstance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServer).RebaseInstance(ctx, req.(*RebaseInstanceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1290,6 +1324,10 @@ var Gateway_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetAgentBilling",
 			Handler:    _Gateway_SetAgentBilling_Handler,
+		},
+		{
+			MethodName: "RebaseInstance",
+			Handler:    _Gateway_RebaseInstance_Handler,
 		},
 		{
 			MethodName: "CreateThread",

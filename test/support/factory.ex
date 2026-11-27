@@ -1601,6 +1601,18 @@ defmodule Console.Factory do
     }
   end
 
+  def devbox_update_campaign_factory do
+    now = DateTime.utc_now()
+    %Schema.DevboxUpdateCampaign{
+      status: :pending,
+      force: false,
+      starts_at: now,
+      expires_at: Timex.shift(now, hours: 24),
+      max_concurrency: 5,
+      devbox: build(:devbox, revision: 2)
+    }
+  end
+
   def devbox_snapshot_factory do
     %Schema.DevboxSnapshot{
       name: sequence(:devbox_snapshot, & "snapshot-#{&1}"),

@@ -152,6 +152,36 @@ defmodule Devbox.V1.InstanceActionResponse do
   field :message, 3, type: :string
 end
 
+defmodule Devbox.V1.RebaseInstanceRequest do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.RebaseInstanceRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :instance_id, 1, type: :string, json_name: "instanceId"
+  field :target_revision, 2, type: :int64, json_name: "targetRevision"
+  field :reason, 3, type: :string
+  field :requested_by, 4, type: Devbox.V1.Principal, json_name: "requestedBy"
+  field :only_if_idle, 5, type: :bool, json_name: "onlyIfIdle"
+end
+
+defmodule Devbox.V1.RebaseInstanceResponse do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.RebaseInstanceResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :instance_id, 1, type: :string, json_name: "instanceId"
+  field :accepted, 2, type: :bool
+  field :status, 3, type: Devbox.V1.InstanceStatus, enum: true
+  field :target_revision, 4, type: :int64, json_name: "targetRevision"
+  field :message, 5, type: :string
+end
+
 defmodule Devbox.V1.SnapshotInstanceRequest do
   @moduledoc false
 
@@ -706,6 +736,8 @@ defmodule Devbox.V1.Control.Service do
   rpc :DeleteSnapshot, Devbox.V1.DeleteSnapshotRequest, Devbox.V1.DeleteSnapshotResponse
 
   rpc :SetAgentBilling, Devbox.V1.SetAgentBillingRequest, Devbox.V1.SetAgentBillingResponse
+
+  rpc :RebaseInstance, Devbox.V1.RebaseInstanceRequest, Devbox.V1.RebaseInstanceResponse
 
   rpc :CreateThread, Devbox.V1.CreateThreadRequest, Devbox.V1.ThreadResponse
 

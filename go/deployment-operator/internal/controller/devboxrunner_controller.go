@@ -135,6 +135,11 @@ func (r *DevboxRunnerReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		r.trySyncConsole(ctx, runner)
 		return ctrl.Result{RequeueAfter: nextPoll}, nil
 	}
+	// Likewise for the runtime, which a failed resolution keeps at its previous digest. A runner that never had
+	// one builds no revision, but its worker pool and console registration are still reconciled.
+	if err := r.reconcileRuntime(ctx, runner); err != nil {
+		logger.Error(err, "unable to resolve the devbox runtime image")
+	}
 
 	api, err := r.Substrate.For(ctx, runner)
 	if err != nil {
@@ -156,7 +161,12 @@ func (r *DevboxRunnerReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return jitterRequeue(requeueDevboxRunnerError, jitter), nil
 	}
 
-	if err := r.reconcileRevisions(ctx, api, runner, atespace, lo.FromPtr(runner.Status.ResolvedImage)); err != nil {
+	if runner.Status.ResolvedRuntime == nil {
+		r.markReady(runner)
+		_ = r.syncConsole(ctx, runner)
+		return jitterRequeue(requeueDevboxRunnerError, jitter), nil
+	}
+	if err := r.reconcileRevisions(ctx, api, runner, atespace, lo.FromPtr(runner.Status.ResolvedImage), lo.FromPtr(runner.Status.ResolvedRuntime)); err != nil {
 		return r.substrateError(ctx, runner, err)
 	}
 	if err := r.gcRevisions(ctx, api, runner, atespace); err != nil {
@@ -232,8 +242,7 @@ func (r *DevboxRunnerReconciler) reconcileImage(ctx context.Context, runner *v1a
 	utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxImageResolvedConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason,
 		fmt.Sprintf("%s resolved to %s", image, resolved.Digest))
 
-	result := CheckDevboxImageContract(resolved, r.Config.OperatorVersion)
-	runner.Status.DaemonVersion = lo.EmptyableToPtr(result.DaemonVersion)
+	result := CheckDevboxImageContract(resolved)
 	if !result.OK() {
 		// The previous digest stays, so the serving revision keeps serving.
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxImageContractConditionType, metav1.ConditionFalse, v1alpha1.DevboxImageContractViolatedReason,
@@ -243,18 +252,52 @@ func (r *DevboxRunnerReconciler) reconcileImage(ctx context.Context, runner *v1a
 
 	runner.Status.ResolvedImage = &resolved.Reference
 	utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxImageContractConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "image meets devbox contract v1")
-	if result.Outdated != "" {
-		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxImageOutdatedConditionType, metav1.ConditionTrue, v1alpha1.DevboxImageOutdatedReason, result.Outdated)
-	} else {
-		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxImageOutdatedConditionType, metav1.ConditionFalse, v1alpha1.DevboxImageCurrentReason, "")
-	}
+	// Operators that ran the daemon baked into spec.image compared it with their own in this condition.
+	meta.RemoveStatusCondition(&runner.Status.Conditions, "ImageOutdated")
 	return nextPoll, nil
+}
+
+// reconcileRuntime resolves the runtime image, the plural-runtime sidecar that delivers devbox-daemon, to a
+// digest. Its reference follows the operator's version, so an operator upgrade is what changes it; it is also
+// re-resolved every poll interval, for a mirror that caught up or an override tag that moved. A failed
+// resolution or contract check keeps the previous digest, and with it the serving revision.
+func (r *DevboxRunnerReconciler) reconcileRuntime(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
+	image := r.Config.RuntimeImageRef()
+	st := &runner.Status
+	if st.ResolvedRuntime != nil && lo.FromPtr(st.ResolvedRuntimeFrom) == image && time.Since(lo.FromPtr(st.RuntimeResolvedAt).Time) < defaultPollInterval {
+		return nil
+	}
+
+	resolved, err := r.Images.Resolve(ctx, image, runner.Spec.ImagePullSecrets)
+	if err != nil {
+		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxRuntimeResolvedConditionType, metav1.ConditionFalse, v1alpha1.ErrorConditionReason, err.Error())
+		return err
+	}
+	result := CheckDevboxRuntimeContract(resolved)
+	if !result.OK() {
+		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxRuntimeResolvedConditionType, metav1.ConditionFalse, v1alpha1.DevboxImageContractViolatedReason,
+			fmt.Sprintf("%s: %s", resolved.Reference, strings.Join(result.Violations, "; ")))
+		return nil
+	}
+
+	st.ResolvedRuntime = &resolved.Reference
+	st.ResolvedRuntimeFrom = &image
+	st.RuntimeResolvedAt = lo.ToPtr(metav1.Now())
+	st.DaemonVersion = &result.DaemonVersion
+	utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxRuntimeResolvedConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason,
+		fmt.Sprintf("%s resolved to %s (devbox-daemon %s)", image, resolved.Digest, result.DaemonVersion))
+	return nil
 }
 
 func (r *DevboxRunnerReconciler) markReady(runner *v1alpha1.DevboxRunner) {
 	blocking := []v1alpha1.ConditionType{
 		v1alpha1.DevboxImageContractConditionType,
 		v1alpha1.DevboxGatewayReadyConditionType,
+	}
+	// A runtime that never resolved blocks; one that fails to re-resolve keeps its digest and its revision, and
+	// shows on the RuntimeResolved condition without making a serving runner unready over a registry blip.
+	if runner.Status.ResolvedRuntime == nil {
+		blocking = append(blocking, v1alpha1.DevboxRuntimeResolvedConditionType)
 	}
 	for _, t := range blocking {
 		if c := meta.FindStatusCondition(runner.Status.Conditions, t.String()); c != nil && c.Status == metav1.ConditionFalse {
@@ -361,12 +404,28 @@ func (r *DevboxRunnerReconciler) syncConsole(ctx context.Context, runner *v1alph
 }
 
 func (r *DevboxRunnerReconciler) heartbeatAttributes(runner *v1alpha1.DevboxRunner) console.DevboxHeartbeatAttributes {
+	runtime, daemonVersion := servingRuntime(runner)
 	return console.DevboxHeartbeatAttributes{
 		Status:           lo.ToPtr(r.consoleStatus(runner)),
 		ResolvedImage:    r.servingImage(runner),
 		TemplateRevision: runner.Status.TemplateName,
+		Revision:         runner.Status.TemplateRevision,
+		RuntimeImage:     runtime,
+		DaemonVersion:    daemonVersion,
 		Conditions:       devboxConsoleConditions(runner),
 	}
+}
+
+// servingRuntime is the runtime image and devbox-daemon version of the serving revision, which is what new and
+// updated instances get. Both are nil for a revision from before the runtime sidecar.
+func servingRuntime(runner *v1alpha1.DevboxRunner) (image, daemonVersion *string) {
+	if runner.Status.TemplateRevision == nil {
+		return nil, nil
+	}
+	if rev := runner.RevisionByNumber(*runner.Status.TemplateRevision); rev != nil {
+		return rev.Runtime, rev.DaemonVersion
+	}
+	return nil, nil
 }
 
 // servingImage is the image of the serving revision, which may lag status.resolvedImage while a new one builds.
@@ -410,11 +469,17 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 		return console.DevboxAttributes{}, err
 	}
 
+	runtime, daemonVersion := servingRuntime(runner)
 	attrs := console.DevboxAttributes{
-		Name:                runner.ConsoleName(),
-		Image:               &image,
-		ResolvedImage:       r.servingImage(runner),
-		TemplateRevision:    runner.Status.TemplateName,
+		Name:             runner.ConsoleName(),
+		Image:            &image,
+		ResolvedImage:    r.servingImage(runner),
+		TemplateRevision: runner.Status.TemplateName,
+		Revision:         runner.Status.TemplateRevision,
+		RuntimeImage:     runtime,
+		DaemonVersion:    daemonVersion,
+		UpdateMode: lo.ToPtr(lo.Ternary(runner.InstanceUpdateMode() == v1alpha1.DevboxInstanceUpdateManual,
+			console.DevboxUpdateModeManual, console.DevboxUpdateModeOnResume)),
 		Resources:           lo.ToPtr(string(resourcesJSON)),
 		AllowedRepositories: lo.ToSlicePtr(runner.Spec.AllowedRepositories),
 		Browser:             lo.ToPtr(runner.Spec.Browser != nil && runner.Spec.Browser.Enabled),

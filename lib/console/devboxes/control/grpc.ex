@@ -114,6 +114,17 @@ defmodule Console.Devboxes.Control.Grpc do
   end
 
   @impl true
+  def rebase_instance(inst, opts) do
+    req = %V1.RebaseInstanceRequest{
+      instance_id: inst.id,
+      reason: Proto.str(opts[:reason]),
+      requested_by: principal(opts[:principal]),
+      only_if_idle: opts[:only_if_idle] || false
+    }
+    call(cluster_id(inst), :rebase_instance, req) |> to_map()
+  end
+
+  @impl true
   def set_agent_billing(inst, launch) do
     req = %V1.SetAgentBillingRequest{instance_id: inst.id, agent: agent_launch(launch), requested_by: principal(launch[:principal])}
     call(cluster_id(inst), :set_agent_billing, req) |> to_map()

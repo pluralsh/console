@@ -1,0 +1,43 @@
+{
+  "contract": "v1",
+  "components": {
+    "daemon": {"version": "@daemon", "bin": {"devbox-daemon": {"path": "bin/devbox-daemon"}}},
+    "node": {"version": "@node", "private": true, "bin": {"node": {"path": "bin/node"}}},
+    "claude": {"package": "@anthropic-ai/claude-code",
+      "bin": {"claude": {"path": "bin/claude"}}},
+    "claude-acp": {"package": "@agentclientprotocol/claude-agent-acp", "requires": ["node"],
+      "bin": {"claude-agent-acp": {"path": "index.mjs", "interpreter": "node"}}},
+    "codex": {"package": "@openai/codex",
+      "bin": {"codex": {"path": "bin/codex"}}},
+    "codex-acp": {"package": "@agentclientprotocol/codex-acp", "requires": ["node"],
+      "bin": {"codex-acp": {"path": "index.mjs", "interpreter": "node"}}},
+    "opencode": {"package": "opencode-ai",
+      "bin": {"opencode": {"path": "bin/opencode"}}},
+    "gemini": {"package": "@google/gemini-cli", "requires": ["node"],
+      "bin": {"gemini": {"path": "node_modules/@google/gemini-cli/bundle/gemini.js", "interpreter": "node"}}},
+    "pi": {"package": "@earendil-works/pi-coding-agent", "requires": ["node"],
+      "bin": {"pi": {"path": "node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js", "interpreter": "node"}}},
+    "pi-acp": {"package": "pi-acp", "requires": ["node"],
+      "bin": {"pi-acp": {"path": "index.mjs", "interpreter": "node"}}},
+    "pi-mcp-adapter": {"package": "pi-mcp-adapter"},
+    "playwright-mcp": {"package": "@playwright/mcp", "requires": ["node"],
+      "bin": {"playwright-mcp": {"path": "node_modules/@playwright/mcp/cli.js", "interpreter": "node"}}}
+  },
+  "agents": {
+    "claude": {"component": "claude", "command": "claude",
+      "acp": {"component": "claude-acp", "command": "claude-agent-acp"},
+      "env": {"CLAUDE_CODE_EXECUTABLE": "${bin}/claude"}},
+    "codex": {"component": "codex", "command": "codex",
+      "acp": {"component": "codex-acp", "command": "codex-acp"},
+      "env": {"CODEX_PATH": "${bin}/codex"}},
+    "opencode": {"component": "opencode", "command": "opencode",
+      "acp": {"component": "opencode", "command": "opencode", "args": ["acp"]}},
+    "gemini": {"component": "gemini", "command": "gemini",
+      "acp": {"component": "gemini", "command": "gemini", "args": ["--acp"]}},
+    "pi": {"component": "pi", "command": "pi",
+      "acp": {"component": "pi-acp", "command": "pi-acp"},
+      "components": ["pi-mcp-adapter"],
+      "env": {"PI_MCP_ADAPTER_DIR": "${component:pi-mcp-adapter}"}}
+  },
+  "playwrightMcp": {"component": "playwright-mcp", "command": "playwright-mcp"}
+}

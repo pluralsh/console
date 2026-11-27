@@ -420,10 +420,12 @@ spec:
                 type: object
               image:
                 description: |-
-                  Image is the devbox image. Defaults to ghcr.io/pluralsh/devbox-fat at the operator's version;
-                  ghcr.io/pluralsh/devbox-minimal is the lean alternative. Custom images must meet the image
-                  contract (sh.plural.devbox/contract=v1 label, devbox-daemon entrypoint, UID 1000) and are
-                  normally built FROM one of these.
+                  Image is the devbox environment image: the distribution, tools and browser an instance runs with. Defaults
+                  to ghcr.io/pluralsh/devbox-fat at the operator's version; ghcr.io/pluralsh/devbox-minimal is the lean
+                  alternative. devbox-daemon and the agents are not taken from this image: the operator delivers them through
+                  the runtime sidecar (see spec.runtime). Custom images must meet the requirements at
+                  https://docs.plural.sh/plural-features/devboxes/environment-images (glibc 2.28 or newer, the
+                  sh.plural.devbox/contract=v1 label, UID 1000, a POSIX shell at spec.runtime.shell).
                 type: string
               imagePullSecrets:
                 description: |-
@@ -459,6 +461,23 @@ spec:
                     enum:
                     - pinned
                     - poll
+                    type: string
+                type: object
+              instanceUpdatePolicy:
+                description: |-
+                  InstanceUpdatePolicy controls how existing instances move to a new template revision, which a new
+                  environment image digest, a new daemon (an operator upgrade) or a template change rolls. Updating
+                  restarts the instance's processes and resets its root filesystem to the image; the home directory
+                  and agent threads are kept.
+                properties:
+                  mode:
+                    default: onResume
+                    description: |-
+                      Mode is onResume (default) or manual. Console-driven updates (a user's or admin's update, a forced
+                      remediation) apply in both modes.
+                    enum:
+                    - onResume
+                    - manual
                     type: string
                 type: object
               mise:
@@ -629,6 +648,18 @@ spec:
                       way as CPU.
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
+                type: object
+              runtime:
+                description: Runtime configures how the operator's devbox-daemon runs
+                  next to the environment image.
+                properties:
+                  shell:
+                    description: |-
+                      Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with
+                      it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then
+                      execs the daemon, and the agents' launchers run with it. Defaults to /bin/sh.
+                    pattern: ^/[^\s]+$
+                    type: string
                 type: object
               scmConnections:
                 description: ScmConnections are names of console SCM connections instances
@@ -1262,7 +1293,7 @@ spec:
                 x-kubernetes-list-type: map
               daemonVersion:
                 description: DaemonVersion is the devbox-daemon version from the resolved
-                  image's labels.
+                  runtime image's labels.
                 type: string
               id:
                 description: ID of the resource in the Console API.
@@ -1282,19 +1313,56 @@ spec:
               resolvedImage:
                 description: ResolvedImage is spec.image pinned by digest.
                 type: string
+              resolvedRuntime:
+                description: ResolvedRuntime is the runtime image pinned by digest.
+                type: string
+              resolvedRuntimeFrom:
+                description: ResolvedRuntimeFrom is the image reference ResolvedRuntime
+                  was resolved from.
+                type: string
               revisions:
                 description: Revisions are the ActorTemplate revisions that still
                   exist, newest first.
                 items:
                   properties:
+                    agents:
+                      description: |-
+                        Agents are the agents of spec.agents this revision's runtime sidecar installs. An instance only moves to a
+                        revision that still has the agents it was created with. Unset on revisions from before that.
+                      items:
+                        description: DevboxAgentType is a coding-agent harness a devbox
+                          can run (section 4.2a).
+                        enum:
+                        - claude
+                        - codex
+                        - opencode
+                        - gemini
+                        - pi
+                        type: string
+                      type: array
                     createdAt:
                       format: date-time
+                      type: string
+                    daemonVersion:
+                      description: DaemonVersion is the devbox-daemon version of Runtime.
                       type: string
                     goldenTag:
                       type: string
                     hash:
                       description: Hash of the inputs that produced this revision.
                       type: string
+                    homeSeed:
+                      description: |-
+                        HomeSeed is the seed the golden boot's external home is captured into, which new instances' homes are cloned
+                        from.
+                      type: string
+                    homeSize:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: HomeSize is the capacity of an external home.
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
                     homeStorage:
                       description: HomeStorage is where this revision's template keeps
                         /home/dev; unset means Snapshot.
@@ -1302,6 +1370,12 @@ spec:
                       - Snapshot
                       - JuiceFS
                       - ZeroFS
+                      type: string
+                    homeStorageClass:
+                      description: |-
+                        HomeStorageClass is the StorageClass of an external home, the runner's for every revision, so instances
+                        can move between revisions that keep the same class and size. Unset on revisions from before that, which
+                        each had their own class.
                       type: string
                     image:
                       type: string
@@ -1317,6 +1391,11 @@ spec:
                     revision:
                       format: int64
                       type: integer
+                    runtime:
+                      description: |-
+                        Runtime is the runtime image of the revision. Empty for revisions from before the runtime sidecar,
+                        whose daemon is the one baked into Image.
+                      type: string
                   required:
                   - hash
                   - image
@@ -1325,6 +1404,11 @@ spec:
                   - revision
                   type: object
                 type: array
+              runtimeResolvedAt:
+                description: RuntimeResolvedAt is when the runtime image was last
+                  resolved.
+                format: date-time
+                type: string
               sha:
                 description: SHA of last applied configuration.
                 type: string

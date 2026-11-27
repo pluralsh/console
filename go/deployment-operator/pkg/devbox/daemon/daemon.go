@@ -63,7 +63,9 @@ const (
 	loginCheck  = 5 * time.Minute
 )
 
-// instanceFile persists Initialize so a restarted daemon resumes with the same configuration.
+// instanceFile persists Initialize so a restarted daemon resumes with the same configuration. It lives on the home
+// volume and so outlives the daemon that wrote it: an instance moved to another template revision is read by a
+// newer daemon, and one rolled back by an older one, so fields may only be added (unknown ones are ignored).
 type instanceFile struct {
 	Request         []byte `json:"request"`
 	FirstThreadDone bool   `json:"firstThreadDone"`
@@ -142,7 +144,7 @@ func New(cfg Config) (*Daemon, error) {
 		}
 	}
 
-	img, err := harness.LoadImageInfo(cfg.ImageInfo)
+	img, err := LoadImage(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -263,6 +265,8 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	switch {
 	case req != nil:
 		d.bg.Go(func() { d.hydrate(req) })
+		// The daemon of an existing instance starting is a cold boot: the root filesystem is the image's again.
+		d.bg.Go(func() { d.runBootScript(d.ctx) })
 	case d.needsGolden():
 		// set before /readyz is served, so Substrate can't snapshot the golden boot before its work
 		d.setStatus(StatusBootstrapping)
@@ -608,7 +612,7 @@ func (d *Daemon) loadInstance() error {
 		return err
 	}
 	req := &devboxv1.InitializeRequest{}
-	if err := protojson.Unmarshal(f.Request, req); err != nil {
+	if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(f.Request, req); err != nil {
 		return err
 	}
 	d.inst = f

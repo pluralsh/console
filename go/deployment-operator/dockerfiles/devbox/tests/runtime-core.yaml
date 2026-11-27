@@ -1,0 +1,67 @@
+schemaVersion: 2.0.0
+
+metadataTest:
+  labels:
+    - key: sh.plural.devbox/runtime-contract
+      value: v1
+    - key: sh.plural.devbox/daemon-version
+      value: .+
+      isRegex: true
+  entrypoint: ["/devbox-runtime-installer"]
+
+fileExistenceTests:
+  - name: the installer
+    path: /devbox-runtime-installer
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: the payload manifest
+    path: /payload/manifest.json
+    shouldExist: true
+  - name: devbox-daemon
+    path: /payload/components/daemon/bin/devbox-daemon
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: node
+    path: /payload/components/node/bin/node
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: claude
+    path: /payload/components/claude/bin/claude
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: codex
+    path: /payload/components/codex/bin/codex
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: opencode
+    path: /payload/components/opencode/bin/opencode
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: claude-agent-acp, bundled
+    path: /payload/components/claude-acp/index.mjs
+    shouldExist: true
+  - name: codex-acp, bundled
+    path: /payload/components/codex-acp/index.mjs
+    shouldExist: true
+  - name: pi-acp, bundled
+    path: /payload/components/pi-acp/index.mjs
+    shouldExist: true
+  - name: gemini
+    path: /payload/components/gemini/node_modules/@google/gemini-cli/bundle/gemini.js
+    shouldExist: true
+  - name: pi
+    path: /payload/components/pi/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js
+    shouldExist: true
+  - name: pi-mcp-adapter
+    path: /payload/components/pi-mcp-adapter/node_modules/pi-mcp-adapter/package.json
+    shouldExist: true
+  - name: playwright-mcp
+    path: /payload/components/playwright-mcp/node_modules/@playwright/mcp/cli.js
+    shouldExist: true
+  # The installer and the payload are all there is: no shell, no libc. The agents use the environment image's.
+  - name: no shell
+    path: /bin/sh
+    shouldExist: false
+  - name: no build tools in the payload
+    path: /payload/components/esbuild
+    shouldExist: false

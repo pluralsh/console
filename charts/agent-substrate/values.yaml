@@ -304,7 +304,7 @@ juicefs:
     gid: 1000
     mode: "0755"
   # -- SPIFFE IDs allowed to call the controller. Empty: ate-api-server and, with devboxes.enabled, the
-  # devbox-gateway, which seeds homes from snapshots.
+  # devbox-gateway, which seeds homes from their revision's golden home and from snapshots.
   allowedClients: []
   serviceAccount:
     # -- Workload identity for the bucket (IRSA, GKE Workload Identity). The controller and every node plugin
@@ -379,7 +379,8 @@ zerofs:
     existingSecret:
       name: ""
       key: password
-  # -- SPIFFE IDs allowed to call the controller. Empty: ate-api-server.
+  # -- SPIFFE IDs allowed to call the controller. Empty: ate-api-server and, with devboxes.enabled, the
+  # devbox-gateway, which seeds homes from their revision's golden home.
   allowedClients: []
   serviceAccount:
     # -- Workload identity for the bucket (IRSA, GKE Workload Identity). The controller deletes homes; every node

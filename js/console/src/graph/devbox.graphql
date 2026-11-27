@@ -70,6 +70,9 @@ fragment DevboxTiny on Devbox {
   image
   resolvedImage
   templateRevision
+  revision
+  daemonVersion
+  updateMode
   browser
   resources
   maxInstances
@@ -144,6 +147,42 @@ fragment Devbox on Devbox {
       title
       content
     }
+  }
+}
+
+fragment DevboxUpdateCampaign on DevboxUpdateCampaign {
+  id
+  force
+  status
+  reason
+  startsAt
+  noticeMinutes
+  deadlineAt
+  expiresAt
+  maxConcurrency
+  completedAt
+  insertedAt
+  progress {
+    outdated
+    updated
+    failed
+  }
+  user {
+    id
+    name
+    email
+  }
+}
+
+fragment DevboxUpdates on Devbox {
+  id
+  revision
+  runtimeImage
+  daemonVersion
+  updateMode
+  outdatedInstances
+  updateCampaigns(first: 5) {
+    ...DevboxUpdateCampaign
   }
 }
 
@@ -299,10 +338,24 @@ fragment DevboxInstanceTiny on DevboxInstance {
   suspendedAt
   lastActivityAt
   viewerCount
+  templateRevision
+  daemonVersion
+  outdated
+  rebaseState
+  rebaseError
+  rebaseRevision
+  updateDeadlineAt
+  updateCampaign {
+    id
+    force
+    reason
+  }
   devbox {
     id
     name
     browser
+    revision
+    daemonVersion
   }
   user {
     id
@@ -317,7 +370,6 @@ fragment DevboxInstance on DevboxInstance {
   ...DevboxInstanceTiny
   configOptions
   maxRunningThreads
-  templateRevision
   imageDigest
   restoreFidelity
   completedAt
@@ -719,6 +771,12 @@ query Devbox($id: ID!) {
   }
 }
 
+query DevboxUpdates($id: ID!) {
+  devbox(id: $id) {
+    ...DevboxUpdates
+  }
+}
+
 query DevboxAgents($workbenchId: ID!, $devboxId: ID!) {
   devboxAgents(workbenchId: $workbenchId, devboxId: $devboxId) {
     ...DevboxAgent
@@ -1040,6 +1098,27 @@ mutation SuspendDevboxInstance($id: ID!) {
 mutation ResumeDevboxInstance($id: ID!) {
   resumeDevboxInstance(id: $id) {
     ...DevboxInstanceTiny
+  }
+}
+
+mutation RebaseDevboxInstance($id: ID!) {
+  rebaseDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+
+mutation CreateDevboxUpdateCampaign(
+  $devboxId: ID!
+  $attributes: DevboxUpdateCampaignAttributes
+) {
+  createDevboxUpdateCampaign(devboxId: $devboxId, attributes: $attributes) {
+    ...DevboxUpdateCampaign
+  }
+}
+
+mutation CancelDevboxUpdateCampaign($id: ID!) {
+  cancelDevboxUpdateCampaign(id: $id) {
+    ...DevboxUpdateCampaign
   }
 }
 

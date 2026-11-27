@@ -746,6 +746,164 @@ func (x *InstanceActionResponse) GetMessage() string {
 	return ""
 }
 
+type RebaseInstanceRequest struct {
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	// The runner revision to move to. Zero is the runner's current revision.
+	TargetRevision int64 `protobuf:"varint,2,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
+	// Why, for the log and the instance's status message (e.g. "requested by the owner", "remediation <id>").
+	Reason      string     `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	RequestedBy *Principal `protobuf:"bytes,4,opt,name=requested_by,json=requestedBy,proto3" json:"requested_by,omitempty"`
+	// Only move a running instance while it is idle, as the gateway sees it when the move starts: an instance in
+	// use is not restarted, and the response (or, after it was accepted, the update's outcome) says so.
+	OnlyIfIdle    bool `protobuf:"varint,5,opt,name=only_if_idle,json=onlyIfIdle,proto3" json:"only_if_idle,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RebaseInstanceRequest) Reset() {
+	*x = RebaseInstanceRequest{}
+	mi := &file_devbox_v1_control_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RebaseInstanceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RebaseInstanceRequest) ProtoMessage() {}
+
+func (x *RebaseInstanceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_devbox_v1_control_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RebaseInstanceRequest.ProtoReflect.Descriptor instead.
+func (*RebaseInstanceRequest) Descriptor() ([]byte, []int) {
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RebaseInstanceRequest) GetInstanceId() string {
+	if x != nil {
+		return x.InstanceId
+	}
+	return ""
+}
+
+func (x *RebaseInstanceRequest) GetTargetRevision() int64 {
+	if x != nil {
+		return x.TargetRevision
+	}
+	return 0
+}
+
+func (x *RebaseInstanceRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *RebaseInstanceRequest) GetRequestedBy() *Principal {
+	if x != nil {
+		return x.RequestedBy
+	}
+	return nil
+}
+
+func (x *RebaseInstanceRequest) GetOnlyIfIdle() bool {
+	if x != nil {
+		return x.OnlyIfIdle
+	}
+	return false
+}
+
+type RebaseInstanceResponse struct {
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	// False when there is nothing to do: the instance is already on the target revision.
+	Accepted bool           `protobuf:"varint,2,opt,name=accepted,proto3" json:"accepted,omitempty"`
+	Status   InstanceStatus `protobuf:"varint,3,opt,name=status,proto3,enum=devbox.v1.InstanceStatus" json:"status,omitempty"`
+	// The revision the instance is on (not accepted) or moving to (accepted).
+	TargetRevision int64  `protobuf:"varint,4,opt,name=target_revision,json=targetRevision,proto3" json:"target_revision,omitempty"`
+	Message        string `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *RebaseInstanceResponse) Reset() {
+	*x = RebaseInstanceResponse{}
+	mi := &file_devbox_v1_control_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RebaseInstanceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RebaseInstanceResponse) ProtoMessage() {}
+
+func (x *RebaseInstanceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_devbox_v1_control_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RebaseInstanceResponse.ProtoReflect.Descriptor instead.
+func (*RebaseInstanceResponse) Descriptor() ([]byte, []int) {
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RebaseInstanceResponse) GetInstanceId() string {
+	if x != nil {
+		return x.InstanceId
+	}
+	return ""
+}
+
+func (x *RebaseInstanceResponse) GetAccepted() bool {
+	if x != nil {
+		return x.Accepted
+	}
+	return false
+}
+
+func (x *RebaseInstanceResponse) GetStatus() InstanceStatus {
+	if x != nil {
+		return x.Status
+	}
+	return InstanceStatus_INSTANCE_STATUS_UNSPECIFIED
+}
+
+func (x *RebaseInstanceResponse) GetTargetRevision() int64 {
+	if x != nil {
+		return x.TargetRevision
+	}
+	return 0
+}
+
+func (x *RebaseInstanceResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type SnapshotInstanceRequest struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	InstanceId string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
@@ -762,7 +920,7 @@ type SnapshotInstanceRequest struct {
 
 func (x *SnapshotInstanceRequest) Reset() {
 	*x = SnapshotInstanceRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[6]
+	mi := &file_devbox_v1_control_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -774,7 +932,7 @@ func (x *SnapshotInstanceRequest) String() string {
 func (*SnapshotInstanceRequest) ProtoMessage() {}
 
 func (x *SnapshotInstanceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[6]
+	mi := &file_devbox_v1_control_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -787,7 +945,7 @@ func (x *SnapshotInstanceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SnapshotInstanceRequest.ProtoReflect.Descriptor instead.
 func (*SnapshotInstanceRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{6}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SnapshotInstanceRequest) GetInstanceId() string {
@@ -842,7 +1000,7 @@ type SnapshotInstanceResponse struct {
 
 func (x *SnapshotInstanceResponse) Reset() {
 	*x = SnapshotInstanceResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[7]
+	mi := &file_devbox_v1_control_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -854,7 +1012,7 @@ func (x *SnapshotInstanceResponse) String() string {
 func (*SnapshotInstanceResponse) ProtoMessage() {}
 
 func (x *SnapshotInstanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[7]
+	mi := &file_devbox_v1_control_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -867,7 +1025,7 @@ func (x *SnapshotInstanceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SnapshotInstanceResponse.ProtoReflect.Descriptor instead.
 func (*SnapshotInstanceResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{7}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SnapshotInstanceResponse) GetSnapshotId() string {
@@ -893,7 +1051,7 @@ type DeleteSnapshotRequest struct {
 
 func (x *DeleteSnapshotRequest) Reset() {
 	*x = DeleteSnapshotRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[8]
+	mi := &file_devbox_v1_control_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -905,7 +1063,7 @@ func (x *DeleteSnapshotRequest) String() string {
 func (*DeleteSnapshotRequest) ProtoMessage() {}
 
 func (x *DeleteSnapshotRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[8]
+	mi := &file_devbox_v1_control_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -918,7 +1076,7 @@ func (x *DeleteSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSnapshotRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSnapshotRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{8}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DeleteSnapshotRequest) GetSnapshot() *SnapshotRef {
@@ -937,7 +1095,7 @@ type DeleteSnapshotResponse struct {
 
 func (x *DeleteSnapshotResponse) Reset() {
 	*x = DeleteSnapshotResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[9]
+	mi := &file_devbox_v1_control_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -949,7 +1107,7 @@ func (x *DeleteSnapshotResponse) String() string {
 func (*DeleteSnapshotResponse) ProtoMessage() {}
 
 func (x *DeleteSnapshotResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[9]
+	mi := &file_devbox_v1_control_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -962,7 +1120,7 @@ func (x *DeleteSnapshotResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSnapshotResponse.ProtoReflect.Descriptor instead.
 func (*DeleteSnapshotResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{9}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DeleteSnapshotResponse) GetDeleted() bool {
@@ -983,7 +1141,7 @@ type SetAgentBillingRequest struct {
 
 func (x *SetAgentBillingRequest) Reset() {
 	*x = SetAgentBillingRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[10]
+	mi := &file_devbox_v1_control_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -995,7 +1153,7 @@ func (x *SetAgentBillingRequest) String() string {
 func (*SetAgentBillingRequest) ProtoMessage() {}
 
 func (x *SetAgentBillingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[10]
+	mi := &file_devbox_v1_control_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1008,7 +1166,7 @@ func (x *SetAgentBillingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetAgentBillingRequest.ProtoReflect.Descriptor instead.
 func (*SetAgentBillingRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{10}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SetAgentBillingRequest) GetInstanceId() string {
@@ -1043,7 +1201,7 @@ type SetAgentBillingResponse struct {
 
 func (x *SetAgentBillingResponse) Reset() {
 	*x = SetAgentBillingResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[11]
+	mi := &file_devbox_v1_control_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1055,7 +1213,7 @@ func (x *SetAgentBillingResponse) String() string {
 func (*SetAgentBillingResponse) ProtoMessage() {}
 
 func (x *SetAgentBillingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[11]
+	mi := &file_devbox_v1_control_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1068,7 +1226,7 @@ func (x *SetAgentBillingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetAgentBillingResponse.ProtoReflect.Descriptor instead.
 func (*SetAgentBillingResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{11}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SetAgentBillingResponse) GetConnection() *AgentConnection {
@@ -1097,7 +1255,7 @@ type ThreadRef struct {
 
 func (x *ThreadRef) Reset() {
 	*x = ThreadRef{}
-	mi := &file_devbox_v1_control_proto_msgTypes[12]
+	mi := &file_devbox_v1_control_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1109,7 +1267,7 @@ func (x *ThreadRef) String() string {
 func (*ThreadRef) ProtoMessage() {}
 
 func (x *ThreadRef) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[12]
+	mi := &file_devbox_v1_control_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1122,7 +1280,7 @@ func (x *ThreadRef) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadRef.ProtoReflect.Descriptor instead.
 func (*ThreadRef) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{12}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ThreadRef) GetInstanceId() string {
@@ -1168,7 +1326,7 @@ type CreateThreadRequest struct {
 
 func (x *CreateThreadRequest) Reset() {
 	*x = CreateThreadRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[13]
+	mi := &file_devbox_v1_control_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1180,7 +1338,7 @@ func (x *CreateThreadRequest) String() string {
 func (*CreateThreadRequest) ProtoMessage() {}
 
 func (x *CreateThreadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[13]
+	mi := &file_devbox_v1_control_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1193,7 +1351,7 @@ func (x *CreateThreadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateThreadRequest.ProtoReflect.Descriptor instead.
 func (*CreateThreadRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{13}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CreateThreadRequest) GetInstanceId() string {
@@ -1275,7 +1433,7 @@ type ThreadResponse struct {
 
 func (x *ThreadResponse) Reset() {
 	*x = ThreadResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[14]
+	mi := &file_devbox_v1_control_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1287,7 +1445,7 @@ func (x *ThreadResponse) String() string {
 func (*ThreadResponse) ProtoMessage() {}
 
 func (x *ThreadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[14]
+	mi := &file_devbox_v1_control_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1300,7 +1458,7 @@ func (x *ThreadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadResponse.ProtoReflect.Descriptor instead.
 func (*ThreadResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{14}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ThreadResponse) GetSession() *Session {
@@ -1320,7 +1478,7 @@ type ListThreadsRequest struct {
 
 func (x *ListThreadsRequest) Reset() {
 	*x = ListThreadsRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[15]
+	mi := &file_devbox_v1_control_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1332,7 +1490,7 @@ func (x *ListThreadsRequest) String() string {
 func (*ListThreadsRequest) ProtoMessage() {}
 
 func (x *ListThreadsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[15]
+	mi := &file_devbox_v1_control_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1345,7 +1503,7 @@ func (x *ListThreadsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListThreadsRequest.ProtoReflect.Descriptor instead.
 func (*ListThreadsRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{15}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListThreadsRequest) GetInstanceId() string {
@@ -1372,7 +1530,7 @@ type ListThreadsResponse struct {
 
 func (x *ListThreadsResponse) Reset() {
 	*x = ListThreadsResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[16]
+	mi := &file_devbox_v1_control_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1384,7 +1542,7 @@ func (x *ListThreadsResponse) String() string {
 func (*ListThreadsResponse) ProtoMessage() {}
 
 func (x *ListThreadsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[16]
+	mi := &file_devbox_v1_control_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1397,7 +1555,7 @@ func (x *ListThreadsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListThreadsResponse.ProtoReflect.Descriptor instead.
 func (*ListThreadsResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{16}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ListThreadsResponse) GetThreads() []*Session {
@@ -1428,7 +1586,7 @@ type ImportThreadRequest struct {
 
 func (x *ImportThreadRequest) Reset() {
 	*x = ImportThreadRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[17]
+	mi := &file_devbox_v1_control_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1440,7 +1598,7 @@ func (x *ImportThreadRequest) String() string {
 func (*ImportThreadRequest) ProtoMessage() {}
 
 func (x *ImportThreadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[17]
+	mi := &file_devbox_v1_control_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1453,7 +1611,7 @@ func (x *ImportThreadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportThreadRequest.ProtoReflect.Descriptor instead.
 func (*ImportThreadRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{17}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ImportThreadRequest) GetInstanceId() string {
@@ -1511,7 +1669,7 @@ type ResumeThreadRequest struct {
 
 func (x *ResumeThreadRequest) Reset() {
 	*x = ResumeThreadRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[18]
+	mi := &file_devbox_v1_control_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1523,7 +1681,7 @@ func (x *ResumeThreadRequest) String() string {
 func (*ResumeThreadRequest) ProtoMessage() {}
 
 func (x *ResumeThreadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[18]
+	mi := &file_devbox_v1_control_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1536,7 +1694,7 @@ func (x *ResumeThreadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResumeThreadRequest.ProtoReflect.Descriptor instead.
 func (*ResumeThreadRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{18}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ResumeThreadRequest) GetThread() *ThreadRef {
@@ -1578,7 +1736,7 @@ type ThreadActionRequest struct {
 
 func (x *ThreadActionRequest) Reset() {
 	*x = ThreadActionRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[19]
+	mi := &file_devbox_v1_control_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1590,7 +1748,7 @@ func (x *ThreadActionRequest) String() string {
 func (*ThreadActionRequest) ProtoMessage() {}
 
 func (x *ThreadActionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[19]
+	mi := &file_devbox_v1_control_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1603,7 +1761,7 @@ func (x *ThreadActionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadActionRequest.ProtoReflect.Descriptor instead.
 func (*ThreadActionRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{19}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ThreadActionRequest) GetThread() *ThreadRef {
@@ -1637,7 +1795,7 @@ type DeleteThreadResponse struct {
 
 func (x *DeleteThreadResponse) Reset() {
 	*x = DeleteThreadResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[20]
+	mi := &file_devbox_v1_control_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1649,7 +1807,7 @@ func (x *DeleteThreadResponse) String() string {
 func (*DeleteThreadResponse) ProtoMessage() {}
 
 func (x *DeleteThreadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[20]
+	mi := &file_devbox_v1_control_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1662,7 +1820,7 @@ func (x *DeleteThreadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteThreadResponse.ProtoReflect.Descriptor instead.
 func (*DeleteThreadResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{20}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *DeleteThreadResponse) GetSession() *Session {
@@ -1692,7 +1850,7 @@ type ForkThreadRequest struct {
 
 func (x *ForkThreadRequest) Reset() {
 	*x = ForkThreadRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[21]
+	mi := &file_devbox_v1_control_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1704,7 +1862,7 @@ func (x *ForkThreadRequest) String() string {
 func (*ForkThreadRequest) ProtoMessage() {}
 
 func (x *ForkThreadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[21]
+	mi := &file_devbox_v1_control_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1717,7 +1875,7 @@ func (x *ForkThreadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ForkThreadRequest.ProtoReflect.Descriptor instead.
 func (*ForkThreadRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{21}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ForkThreadRequest) GetThread() *ThreadRef {
@@ -1774,7 +1932,7 @@ type PromptRequest struct {
 
 func (x *PromptRequest) Reset() {
 	*x = PromptRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[22]
+	mi := &file_devbox_v1_control_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1786,7 +1944,7 @@ func (x *PromptRequest) String() string {
 func (*PromptRequest) ProtoMessage() {}
 
 func (x *PromptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[22]
+	mi := &file_devbox_v1_control_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1799,7 +1957,7 @@ func (x *PromptRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromptRequest.ProtoReflect.Descriptor instead.
 func (*PromptRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{22}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *PromptRequest) GetThread() *ThreadRef {
@@ -1856,7 +2014,7 @@ type PromptAttachment struct {
 
 func (x *PromptAttachment) Reset() {
 	*x = PromptAttachment{}
-	mi := &file_devbox_v1_control_proto_msgTypes[23]
+	mi := &file_devbox_v1_control_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1868,7 +2026,7 @@ func (x *PromptAttachment) String() string {
 func (*PromptAttachment) ProtoMessage() {}
 
 func (x *PromptAttachment) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[23]
+	mi := &file_devbox_v1_control_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1881,7 +2039,7 @@ func (x *PromptAttachment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromptAttachment.ProtoReflect.Descriptor instead.
 func (*PromptAttachment) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{23}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *PromptAttachment) GetName() string {
@@ -1917,7 +2075,7 @@ type PromptResponse struct {
 
 func (x *PromptResponse) Reset() {
 	*x = PromptResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[24]
+	mi := &file_devbox_v1_control_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1929,7 +2087,7 @@ func (x *PromptResponse) String() string {
 func (*PromptResponse) ProtoMessage() {}
 
 func (x *PromptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[24]
+	mi := &file_devbox_v1_control_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1942,7 +2100,7 @@ func (x *PromptResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromptResponse.ProtoReflect.Descriptor instead.
 func (*PromptResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{24}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *PromptResponse) GetPromptId() string {
@@ -1976,7 +2134,7 @@ type CancelPromptRequest struct {
 
 func (x *CancelPromptRequest) Reset() {
 	*x = CancelPromptRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[25]
+	mi := &file_devbox_v1_control_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1988,7 +2146,7 @@ func (x *CancelPromptRequest) String() string {
 func (*CancelPromptRequest) ProtoMessage() {}
 
 func (x *CancelPromptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[25]
+	mi := &file_devbox_v1_control_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2001,7 +2159,7 @@ func (x *CancelPromptRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelPromptRequest.ProtoReflect.Descriptor instead.
 func (*CancelPromptRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{25}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *CancelPromptRequest) GetThread() *ThreadRef {
@@ -2027,7 +2185,7 @@ type CancelPromptResponse struct {
 
 func (x *CancelPromptResponse) Reset() {
 	*x = CancelPromptResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[26]
+	mi := &file_devbox_v1_control_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2039,7 +2197,7 @@ func (x *CancelPromptResponse) String() string {
 func (*CancelPromptResponse) ProtoMessage() {}
 
 func (x *CancelPromptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[26]
+	mi := &file_devbox_v1_control_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2052,7 +2210,7 @@ func (x *CancelPromptResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelPromptResponse.ProtoReflect.Descriptor instead.
 func (*CancelPromptResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{26}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *CancelPromptResponse) GetCancelled() bool {
@@ -2076,7 +2234,7 @@ type UpdateQueuedPromptRequest struct {
 
 func (x *UpdateQueuedPromptRequest) Reset() {
 	*x = UpdateQueuedPromptRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[27]
+	mi := &file_devbox_v1_control_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2088,7 +2246,7 @@ func (x *UpdateQueuedPromptRequest) String() string {
 func (*UpdateQueuedPromptRequest) ProtoMessage() {}
 
 func (x *UpdateQueuedPromptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[27]
+	mi := &file_devbox_v1_control_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2101,7 +2259,7 @@ func (x *UpdateQueuedPromptRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateQueuedPromptRequest.ProtoReflect.Descriptor instead.
 func (*UpdateQueuedPromptRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{27}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *UpdateQueuedPromptRequest) GetThread() *ThreadRef {
@@ -2150,7 +2308,7 @@ type UpdateQueuedPromptResponse struct {
 
 func (x *UpdateQueuedPromptResponse) Reset() {
 	*x = UpdateQueuedPromptResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[28]
+	mi := &file_devbox_v1_control_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2162,7 +2320,7 @@ func (x *UpdateQueuedPromptResponse) String() string {
 func (*UpdateQueuedPromptResponse) ProtoMessage() {}
 
 func (x *UpdateQueuedPromptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[28]
+	mi := &file_devbox_v1_control_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2175,7 +2333,7 @@ func (x *UpdateQueuedPromptResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateQueuedPromptResponse.ProtoReflect.Descriptor instead.
 func (*UpdateQueuedPromptResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{28}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *UpdateQueuedPromptResponse) GetUpdated() bool {
@@ -2204,7 +2362,7 @@ type SetThreadConfigOptionRequest struct {
 
 func (x *SetThreadConfigOptionRequest) Reset() {
 	*x = SetThreadConfigOptionRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[29]
+	mi := &file_devbox_v1_control_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2216,7 +2374,7 @@ func (x *SetThreadConfigOptionRequest) String() string {
 func (*SetThreadConfigOptionRequest) ProtoMessage() {}
 
 func (x *SetThreadConfigOptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[29]
+	mi := &file_devbox_v1_control_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2229,7 +2387,7 @@ func (x *SetThreadConfigOptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetThreadConfigOptionRequest.ProtoReflect.Descriptor instead.
 func (*SetThreadConfigOptionRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{29}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *SetThreadConfigOptionRequest) GetThread() *ThreadRef {
@@ -2270,7 +2428,7 @@ type SetThreadConfigOptionResponse struct {
 
 func (x *SetThreadConfigOptionResponse) Reset() {
 	*x = SetThreadConfigOptionResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[30]
+	mi := &file_devbox_v1_control_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2282,7 +2440,7 @@ func (x *SetThreadConfigOptionResponse) String() string {
 func (*SetThreadConfigOptionResponse) ProtoMessage() {}
 
 func (x *SetThreadConfigOptionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[30]
+	mi := &file_devbox_v1_control_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2295,7 +2453,7 @@ func (x *SetThreadConfigOptionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetThreadConfigOptionResponse.ProtoReflect.Descriptor instead.
 func (*SetThreadConfigOptionResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{30}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *SetThreadConfigOptionResponse) GetConfigOptions() []*ConfigOption {
@@ -2319,7 +2477,7 @@ type RespondInteractionRequest struct {
 
 func (x *RespondInteractionRequest) Reset() {
 	*x = RespondInteractionRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[31]
+	mi := &file_devbox_v1_control_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2331,7 +2489,7 @@ func (x *RespondInteractionRequest) String() string {
 func (*RespondInteractionRequest) ProtoMessage() {}
 
 func (x *RespondInteractionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[31]
+	mi := &file_devbox_v1_control_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2344,7 +2502,7 @@ func (x *RespondInteractionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RespondInteractionRequest.ProtoReflect.Descriptor instead.
 func (*RespondInteractionRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{31}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *RespondInteractionRequest) GetInstanceId() string {
@@ -2398,7 +2556,7 @@ type RespondInteractionResponse struct {
 
 func (x *RespondInteractionResponse) Reset() {
 	*x = RespondInteractionResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[32]
+	mi := &file_devbox_v1_control_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2410,7 +2568,7 @@ func (x *RespondInteractionResponse) String() string {
 func (*RespondInteractionResponse) ProtoMessage() {}
 
 func (x *RespondInteractionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[32]
+	mi := &file_devbox_v1_control_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2423,7 +2581,7 @@ func (x *RespondInteractionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RespondInteractionResponse.ProtoReflect.Descriptor instead.
 func (*RespondInteractionResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{32}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *RespondInteractionResponse) GetInteraction() *Interaction {
@@ -2444,7 +2602,7 @@ type ListCommandsRequest struct {
 
 func (x *ListCommandsRequest) Reset() {
 	*x = ListCommandsRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[33]
+	mi := &file_devbox_v1_control_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2456,7 +2614,7 @@ func (x *ListCommandsRequest) String() string {
 func (*ListCommandsRequest) ProtoMessage() {}
 
 func (x *ListCommandsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[33]
+	mi := &file_devbox_v1_control_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2469,7 +2627,7 @@ func (x *ListCommandsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommandsRequest.ProtoReflect.Descriptor instead.
 func (*ListCommandsRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{33}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ListCommandsRequest) GetThread() *ThreadRef {
@@ -2495,7 +2653,7 @@ type ListCommandsResponse struct {
 
 func (x *ListCommandsResponse) Reset() {
 	*x = ListCommandsResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[34]
+	mi := &file_devbox_v1_control_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2507,7 +2665,7 @@ func (x *ListCommandsResponse) String() string {
 func (*ListCommandsResponse) ProtoMessage() {}
 
 func (x *ListCommandsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[34]
+	mi := &file_devbox_v1_control_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2520,7 +2678,7 @@ func (x *ListCommandsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommandsResponse.ProtoReflect.Descriptor instead.
 func (*ListCommandsResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{34}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ListCommandsResponse) GetCommands() []*AvailableCommand {
@@ -2550,7 +2708,7 @@ type GetTimelineRequest struct {
 
 func (x *GetTimelineRequest) Reset() {
 	*x = GetTimelineRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[35]
+	mi := &file_devbox_v1_control_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2562,7 +2720,7 @@ func (x *GetTimelineRequest) String() string {
 func (*GetTimelineRequest) ProtoMessage() {}
 
 func (x *GetTimelineRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[35]
+	mi := &file_devbox_v1_control_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2575,7 +2733,7 @@ func (x *GetTimelineRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTimelineRequest.ProtoReflect.Descriptor instead.
 func (*GetTimelineRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{35}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *GetTimelineRequest) GetInstanceId() string {
@@ -2669,7 +2827,7 @@ type GetTimelineResponse struct {
 
 func (x *GetTimelineResponse) Reset() {
 	*x = GetTimelineResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[36]
+	mi := &file_devbox_v1_control_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2681,7 +2839,7 @@ func (x *GetTimelineResponse) String() string {
 func (*GetTimelineResponse) ProtoMessage() {}
 
 func (x *GetTimelineResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[36]
+	mi := &file_devbox_v1_control_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2694,7 +2852,7 @@ func (x *GetTimelineResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTimelineResponse.ProtoReflect.Descriptor instead.
 func (*GetTimelineResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{36}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *GetTimelineResponse) GetEntities() []*AcpEntity {
@@ -2748,7 +2906,7 @@ type GetSessionsRequest struct {
 
 func (x *GetSessionsRequest) Reset() {
 	*x = GetSessionsRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[37]
+	mi := &file_devbox_v1_control_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2760,7 +2918,7 @@ func (x *GetSessionsRequest) String() string {
 func (*GetSessionsRequest) ProtoMessage() {}
 
 func (x *GetSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[37]
+	mi := &file_devbox_v1_control_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2773,7 +2931,7 @@ func (x *GetSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionsRequest.ProtoReflect.Descriptor instead.
 func (*GetSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{37}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *GetSessionsRequest) GetInstanceId() string {
@@ -2794,7 +2952,7 @@ type GetSessionsResponse struct {
 
 func (x *GetSessionsResponse) Reset() {
 	*x = GetSessionsResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[38]
+	mi := &file_devbox_v1_control_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2806,7 +2964,7 @@ func (x *GetSessionsResponse) String() string {
 func (*GetSessionsResponse) ProtoMessage() {}
 
 func (x *GetSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[38]
+	mi := &file_devbox_v1_control_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2819,7 +2977,7 @@ func (x *GetSessionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionsResponse.ProtoReflect.Descriptor instead.
 func (*GetSessionsResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{38}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *GetSessionsResponse) GetSessions() []*Session {
@@ -2849,7 +3007,7 @@ type SetInstanceLeasesRequest struct {
 
 func (x *SetInstanceLeasesRequest) Reset() {
 	*x = SetInstanceLeasesRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[39]
+	mi := &file_devbox_v1_control_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2861,7 +3019,7 @@ func (x *SetInstanceLeasesRequest) String() string {
 func (*SetInstanceLeasesRequest) ProtoMessage() {}
 
 func (x *SetInstanceLeasesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[39]
+	mi := &file_devbox_v1_control_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2874,7 +3032,7 @@ func (x *SetInstanceLeasesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetInstanceLeasesRequest.ProtoReflect.Descriptor instead.
 func (*SetInstanceLeasesRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{39}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *SetInstanceLeasesRequest) GetInstanceId() string {
@@ -2909,7 +3067,7 @@ type SetInstanceLeasesResponse struct {
 
 func (x *SetInstanceLeasesResponse) Reset() {
 	*x = SetInstanceLeasesResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[40]
+	mi := &file_devbox_v1_control_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2921,7 +3079,7 @@ func (x *SetInstanceLeasesResponse) String() string {
 func (*SetInstanceLeasesResponse) ProtoMessage() {}
 
 func (x *SetInstanceLeasesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[40]
+	mi := &file_devbox_v1_control_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2934,7 +3092,7 @@ func (x *SetInstanceLeasesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetInstanceLeasesResponse.ProtoReflect.Descriptor instead.
 func (*SetInstanceLeasesResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{40}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *SetInstanceLeasesResponse) GetLeases() []*Lease {
@@ -2970,7 +3128,7 @@ type OpenStreamRequest struct {
 
 func (x *OpenStreamRequest) Reset() {
 	*x = OpenStreamRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[41]
+	mi := &file_devbox_v1_control_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2982,7 +3140,7 @@ func (x *OpenStreamRequest) String() string {
 func (*OpenStreamRequest) ProtoMessage() {}
 
 func (x *OpenStreamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[41]
+	mi := &file_devbox_v1_control_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2995,7 +3153,7 @@ func (x *OpenStreamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenStreamRequest.ProtoReflect.Descriptor instead.
 func (*OpenStreamRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{41}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *OpenStreamRequest) GetInstanceId() string {
@@ -3075,7 +3233,7 @@ type OpenStreamResponse struct {
 
 func (x *OpenStreamResponse) Reset() {
 	*x = OpenStreamResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[42]
+	mi := &file_devbox_v1_control_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3087,7 +3245,7 @@ func (x *OpenStreamResponse) String() string {
 func (*OpenStreamResponse) ProtoMessage() {}
 
 func (x *OpenStreamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[42]
+	mi := &file_devbox_v1_control_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3100,7 +3258,7 @@ func (x *OpenStreamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenStreamResponse.ProtoReflect.Descriptor instead.
 func (*OpenStreamResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{42}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *OpenStreamResponse) GetStreamId() string {
@@ -3166,7 +3324,7 @@ type InvalidateAllowlistRequest struct {
 
 func (x *InvalidateAllowlistRequest) Reset() {
 	*x = InvalidateAllowlistRequest{}
-	mi := &file_devbox_v1_control_proto_msgTypes[43]
+	mi := &file_devbox_v1_control_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3178,7 +3336,7 @@ func (x *InvalidateAllowlistRequest) String() string {
 func (*InvalidateAllowlistRequest) ProtoMessage() {}
 
 func (x *InvalidateAllowlistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[43]
+	mi := &file_devbox_v1_control_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3191,7 +3349,7 @@ func (x *InvalidateAllowlistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvalidateAllowlistRequest.ProtoReflect.Descriptor instead.
 func (*InvalidateAllowlistRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{43}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *InvalidateAllowlistRequest) GetDevboxId() string {
@@ -3231,7 +3389,7 @@ type InvalidateAllowlistResponse struct {
 
 func (x *InvalidateAllowlistResponse) Reset() {
 	*x = InvalidateAllowlistResponse{}
-	mi := &file_devbox_v1_control_proto_msgTypes[44]
+	mi := &file_devbox_v1_control_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3243,7 +3401,7 @@ func (x *InvalidateAllowlistResponse) String() string {
 func (*InvalidateAllowlistResponse) ProtoMessage() {}
 
 func (x *InvalidateAllowlistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_control_proto_msgTypes[44]
+	mi := &file_devbox_v1_control_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3256,7 +3414,7 @@ func (x *InvalidateAllowlistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvalidateAllowlistResponse.ProtoReflect.Descriptor instead.
 func (*InvalidateAllowlistResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_control_proto_rawDescGZIP(), []int{44}
+	return file_devbox_v1_control_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *InvalidateAllowlistResponse) GetInstancesUpdated() int32 {
@@ -3323,7 +3481,22 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x121\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x19.devbox.v1.InstanceStatusR\x06status\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\"\xf9\x01\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"\xd4\x01\n" +
+	"\x15RebaseInstanceRequest\x12\x1f\n" +
+	"\vinstance_id\x18\x01 \x01(\tR\n" +
+	"instanceId\x12'\n" +
+	"\x0ftarget_revision\x18\x02 \x01(\x03R\x0etargetRevision\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x127\n" +
+	"\frequested_by\x18\x04 \x01(\v2\x14.devbox.v1.PrincipalR\vrequestedBy\x12 \n" +
+	"\fonly_if_idle\x18\x05 \x01(\bR\n" +
+	"onlyIfIdle\"\xcb\x01\n" +
+	"\x16RebaseInstanceResponse\x12\x1f\n" +
+	"\vinstance_id\x18\x01 \x01(\tR\n" +
+	"instanceId\x12\x1a\n" +
+	"\baccepted\x18\x02 \x01(\bR\baccepted\x121\n" +
+	"\x06status\x18\x03 \x01(\x0e2\x19.devbox.v1.InstanceStatusR\x06status\x12'\n" +
+	"\x0ftarget_revision\x18\x04 \x01(\x03R\x0etargetRevision\x12\x18\n" +
+	"\amessage\x18\x05 \x01(\tR\amessage\"\xf9\x01\n" +
 	"\x17SnapshotInstanceRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x1f\n" +
@@ -3544,7 +3717,7 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"\x17STREAM_KIND_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14STREAM_KIND_TERMINAL\x10\x01\x12\x13\n" +
 	"\x0fSTREAM_KIND_VNC\x10\x02\x12\x17\n" +
-	"\x13STREAM_KIND_PREVIEW\x10\x032\xd6\x15\n" +
+	"\x13STREAM_KIND_PREVIEW\x10\x032\xad\x16\n" +
 	"\aControl\x12U\n" +
 	"\x0eCreateInstance\x12 .devbox.v1.CreateInstanceRequest\x1a!.devbox.v1.CreateInstanceResponse\x12[\n" +
 	"\x11StartFromSnapshot\x12#.devbox.v1.StartFromSnapshotRequest\x1a!.devbox.v1.CreateInstanceResponse\x12U\n" +
@@ -3553,7 +3726,8 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"\x0eResumeInstance\x12 .devbox.v1.InstanceActionRequest\x1a!.devbox.v1.InstanceActionResponse\x12[\n" +
 	"\x10SnapshotInstance\x12\".devbox.v1.SnapshotInstanceRequest\x1a#.devbox.v1.SnapshotInstanceResponse\x12U\n" +
 	"\x0eDeleteSnapshot\x12 .devbox.v1.DeleteSnapshotRequest\x1a!.devbox.v1.DeleteSnapshotResponse\x12X\n" +
-	"\x0fSetAgentBilling\x12!.devbox.v1.SetAgentBillingRequest\x1a\".devbox.v1.SetAgentBillingResponse\x12I\n" +
+	"\x0fSetAgentBilling\x12!.devbox.v1.SetAgentBillingRequest\x1a\".devbox.v1.SetAgentBillingResponse\x12U\n" +
+	"\x0eRebaseInstance\x12 .devbox.v1.RebaseInstanceRequest\x1a!.devbox.v1.RebaseInstanceResponse\x12I\n" +
 	"\fCreateThread\x12\x1e.devbox.v1.CreateThreadRequest\x1a\x19.devbox.v1.ThreadResponse\x12L\n" +
 	"\vListThreads\x12\x1d.devbox.v1.ListThreadsRequest\x1a\x1e.devbox.v1.ListThreadsResponse\x12I\n" +
 	"\fImportThread\x12\x1e.devbox.v1.ImportThreadRequest\x1a\x19.devbox.v1.ThreadResponse\x12I\n" +
@@ -3596,7 +3770,7 @@ func file_devbox_v1_control_proto_rawDescGZIP() []byte {
 }
 
 var file_devbox_v1_control_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_devbox_v1_control_proto_msgTypes = make([]protoimpl.MessageInfo, 45)
+var file_devbox_v1_control_proto_msgTypes = make([]protoimpl.MessageInfo, 47)
 var file_devbox_v1_control_proto_goTypes = []any{
 	(PromptDisposition)(0),                // 0: devbox.v1.PromptDisposition
 	(QueuedPromptAction)(0),               // 1: devbox.v1.QueuedPromptAction
@@ -3607,228 +3781,234 @@ var file_devbox_v1_control_proto_goTypes = []any{
 	(*StartFromSnapshotRequest)(nil),      // 6: devbox.v1.StartFromSnapshotRequest
 	(*InstanceActionRequest)(nil),         // 7: devbox.v1.InstanceActionRequest
 	(*InstanceActionResponse)(nil),        // 8: devbox.v1.InstanceActionResponse
-	(*SnapshotInstanceRequest)(nil),       // 9: devbox.v1.SnapshotInstanceRequest
-	(*SnapshotInstanceResponse)(nil),      // 10: devbox.v1.SnapshotInstanceResponse
-	(*DeleteSnapshotRequest)(nil),         // 11: devbox.v1.DeleteSnapshotRequest
-	(*DeleteSnapshotResponse)(nil),        // 12: devbox.v1.DeleteSnapshotResponse
-	(*SetAgentBillingRequest)(nil),        // 13: devbox.v1.SetAgentBillingRequest
-	(*SetAgentBillingResponse)(nil),       // 14: devbox.v1.SetAgentBillingResponse
-	(*ThreadRef)(nil),                     // 15: devbox.v1.ThreadRef
-	(*CreateThreadRequest)(nil),           // 16: devbox.v1.CreateThreadRequest
-	(*ThreadResponse)(nil),                // 17: devbox.v1.ThreadResponse
-	(*ListThreadsRequest)(nil),            // 18: devbox.v1.ListThreadsRequest
-	(*ListThreadsResponse)(nil),           // 19: devbox.v1.ListThreadsResponse
-	(*ImportThreadRequest)(nil),           // 20: devbox.v1.ImportThreadRequest
-	(*ResumeThreadRequest)(nil),           // 21: devbox.v1.ResumeThreadRequest
-	(*ThreadActionRequest)(nil),           // 22: devbox.v1.ThreadActionRequest
-	(*DeleteThreadResponse)(nil),          // 23: devbox.v1.DeleteThreadResponse
-	(*ForkThreadRequest)(nil),             // 24: devbox.v1.ForkThreadRequest
-	(*PromptRequest)(nil),                 // 25: devbox.v1.PromptRequest
-	(*PromptAttachment)(nil),              // 26: devbox.v1.PromptAttachment
-	(*PromptResponse)(nil),                // 27: devbox.v1.PromptResponse
-	(*CancelPromptRequest)(nil),           // 28: devbox.v1.CancelPromptRequest
-	(*CancelPromptResponse)(nil),          // 29: devbox.v1.CancelPromptResponse
-	(*UpdateQueuedPromptRequest)(nil),     // 30: devbox.v1.UpdateQueuedPromptRequest
-	(*UpdateQueuedPromptResponse)(nil),    // 31: devbox.v1.UpdateQueuedPromptResponse
-	(*SetThreadConfigOptionRequest)(nil),  // 32: devbox.v1.SetThreadConfigOptionRequest
-	(*SetThreadConfigOptionResponse)(nil), // 33: devbox.v1.SetThreadConfigOptionResponse
-	(*RespondInteractionRequest)(nil),     // 34: devbox.v1.RespondInteractionRequest
-	(*RespondInteractionResponse)(nil),    // 35: devbox.v1.RespondInteractionResponse
-	(*ListCommandsRequest)(nil),           // 36: devbox.v1.ListCommandsRequest
-	(*ListCommandsResponse)(nil),          // 37: devbox.v1.ListCommandsResponse
-	(*GetTimelineRequest)(nil),            // 38: devbox.v1.GetTimelineRequest
-	(*GetTimelineResponse)(nil),           // 39: devbox.v1.GetTimelineResponse
-	(*GetSessionsRequest)(nil),            // 40: devbox.v1.GetSessionsRequest
-	(*GetSessionsResponse)(nil),           // 41: devbox.v1.GetSessionsResponse
-	(*SetInstanceLeasesRequest)(nil),      // 42: devbox.v1.SetInstanceLeasesRequest
-	(*SetInstanceLeasesResponse)(nil),     // 43: devbox.v1.SetInstanceLeasesResponse
-	(*OpenStreamRequest)(nil),             // 44: devbox.v1.OpenStreamRequest
-	(*OpenStreamResponse)(nil),            // 45: devbox.v1.OpenStreamResponse
-	(*InvalidateAllowlistRequest)(nil),    // 46: devbox.v1.InvalidateAllowlistRequest
-	(*InvalidateAllowlistResponse)(nil),   // 47: devbox.v1.InvalidateAllowlistResponse
-	(*Principal)(nil),                     // 48: devbox.v1.Principal
-	(AgentType)(0),                        // 49: devbox.v1.AgentType
-	(*ConfigOptionSetting)(nil),           // 50: devbox.v1.ConfigOptionSetting
-	(*AgentLaunch)(nil),                   // 51: devbox.v1.AgentLaunch
-	(*RepositorySpec)(nil),                // 52: devbox.v1.RepositorySpec
-	(*IdlePolicy)(nil),                    // 53: devbox.v1.IdlePolicy
-	(*Lease)(nil),                         // 54: devbox.v1.Lease
-	(InstanceStatus)(0),                   // 55: devbox.v1.InstanceStatus
-	(SnapshotFidelity)(0),                 // 56: devbox.v1.SnapshotFidelity
-	(SuspendReason)(0),                    // 57: devbox.v1.SuspendReason
-	(*AgentConnection)(nil),               // 58: devbox.v1.AgentConnection
-	(*Session)(nil),                       // 59: devbox.v1.Session
-	(*ImportableSession)(nil),             // 60: devbox.v1.ImportableSession
-	(*ContentBlock)(nil),                  // 61: devbox.v1.ContentBlock
-	(*QueuedPrompt)(nil),                  // 62: devbox.v1.QueuedPrompt
-	(*ConfigOption)(nil),                  // 63: devbox.v1.ConfigOption
-	(*InteractionResponse)(nil),           // 64: devbox.v1.InteractionResponse
-	(*Interaction)(nil),                   // 65: devbox.v1.Interaction
-	(*AvailableCommand)(nil),              // 66: devbox.v1.AvailableCommand
-	(*AcpEntity)(nil),                     // 67: devbox.v1.AcpEntity
-	(*IdleState)(nil),                     // 68: devbox.v1.IdleState
-	(*CreateTerminalRequest)(nil),         // 69: devbox.v1.CreateTerminalRequest
-	(*StartBrowserRequest)(nil),           // 70: devbox.v1.StartBrowserRequest
-	(*timestamppb.Timestamp)(nil),         // 71: google.protobuf.Timestamp
-	(*TerminalInfo)(nil),                  // 72: devbox.v1.TerminalInfo
-	(*BrowserInfo)(nil),                   // 73: devbox.v1.BrowserInfo
-	(*AddRepositoryRequest)(nil),          // 74: devbox.v1.AddRepositoryRequest
-	(*ListRepositoriesRequest)(nil),       // 75: devbox.v1.ListRepositoriesRequest
-	(*ListFilesRequest)(nil),              // 76: devbox.v1.ListFilesRequest
-	(*ReadFileRequest)(nil),               // 77: devbox.v1.ReadFileRequest
-	(*WriteFileRequest)(nil),              // 78: devbox.v1.WriteFileRequest
-	(*GetChangesRequest)(nil),             // 79: devbox.v1.GetChangesRequest
-	(*PreparePullRequestRequest)(nil),     // 80: devbox.v1.PreparePullRequestRequest
-	(*AddRepositoryResponse)(nil),         // 81: devbox.v1.AddRepositoryResponse
-	(*ListRepositoriesResponse)(nil),      // 82: devbox.v1.ListRepositoriesResponse
-	(*ListFilesResponse)(nil),             // 83: devbox.v1.ListFilesResponse
-	(*ReadFileResponse)(nil),              // 84: devbox.v1.ReadFileResponse
-	(*WriteFileResponse)(nil),             // 85: devbox.v1.WriteFileResponse
-	(*GetChangesResponse)(nil),            // 86: devbox.v1.GetChangesResponse
-	(*PreparePullRequestResponse)(nil),    // 87: devbox.v1.PreparePullRequestResponse
+	(*RebaseInstanceRequest)(nil),         // 9: devbox.v1.RebaseInstanceRequest
+	(*RebaseInstanceResponse)(nil),        // 10: devbox.v1.RebaseInstanceResponse
+	(*SnapshotInstanceRequest)(nil),       // 11: devbox.v1.SnapshotInstanceRequest
+	(*SnapshotInstanceResponse)(nil),      // 12: devbox.v1.SnapshotInstanceResponse
+	(*DeleteSnapshotRequest)(nil),         // 13: devbox.v1.DeleteSnapshotRequest
+	(*DeleteSnapshotResponse)(nil),        // 14: devbox.v1.DeleteSnapshotResponse
+	(*SetAgentBillingRequest)(nil),        // 15: devbox.v1.SetAgentBillingRequest
+	(*SetAgentBillingResponse)(nil),       // 16: devbox.v1.SetAgentBillingResponse
+	(*ThreadRef)(nil),                     // 17: devbox.v1.ThreadRef
+	(*CreateThreadRequest)(nil),           // 18: devbox.v1.CreateThreadRequest
+	(*ThreadResponse)(nil),                // 19: devbox.v1.ThreadResponse
+	(*ListThreadsRequest)(nil),            // 20: devbox.v1.ListThreadsRequest
+	(*ListThreadsResponse)(nil),           // 21: devbox.v1.ListThreadsResponse
+	(*ImportThreadRequest)(nil),           // 22: devbox.v1.ImportThreadRequest
+	(*ResumeThreadRequest)(nil),           // 23: devbox.v1.ResumeThreadRequest
+	(*ThreadActionRequest)(nil),           // 24: devbox.v1.ThreadActionRequest
+	(*DeleteThreadResponse)(nil),          // 25: devbox.v1.DeleteThreadResponse
+	(*ForkThreadRequest)(nil),             // 26: devbox.v1.ForkThreadRequest
+	(*PromptRequest)(nil),                 // 27: devbox.v1.PromptRequest
+	(*PromptAttachment)(nil),              // 28: devbox.v1.PromptAttachment
+	(*PromptResponse)(nil),                // 29: devbox.v1.PromptResponse
+	(*CancelPromptRequest)(nil),           // 30: devbox.v1.CancelPromptRequest
+	(*CancelPromptResponse)(nil),          // 31: devbox.v1.CancelPromptResponse
+	(*UpdateQueuedPromptRequest)(nil),     // 32: devbox.v1.UpdateQueuedPromptRequest
+	(*UpdateQueuedPromptResponse)(nil),    // 33: devbox.v1.UpdateQueuedPromptResponse
+	(*SetThreadConfigOptionRequest)(nil),  // 34: devbox.v1.SetThreadConfigOptionRequest
+	(*SetThreadConfigOptionResponse)(nil), // 35: devbox.v1.SetThreadConfigOptionResponse
+	(*RespondInteractionRequest)(nil),     // 36: devbox.v1.RespondInteractionRequest
+	(*RespondInteractionResponse)(nil),    // 37: devbox.v1.RespondInteractionResponse
+	(*ListCommandsRequest)(nil),           // 38: devbox.v1.ListCommandsRequest
+	(*ListCommandsResponse)(nil),          // 39: devbox.v1.ListCommandsResponse
+	(*GetTimelineRequest)(nil),            // 40: devbox.v1.GetTimelineRequest
+	(*GetTimelineResponse)(nil),           // 41: devbox.v1.GetTimelineResponse
+	(*GetSessionsRequest)(nil),            // 42: devbox.v1.GetSessionsRequest
+	(*GetSessionsResponse)(nil),           // 43: devbox.v1.GetSessionsResponse
+	(*SetInstanceLeasesRequest)(nil),      // 44: devbox.v1.SetInstanceLeasesRequest
+	(*SetInstanceLeasesResponse)(nil),     // 45: devbox.v1.SetInstanceLeasesResponse
+	(*OpenStreamRequest)(nil),             // 46: devbox.v1.OpenStreamRequest
+	(*OpenStreamResponse)(nil),            // 47: devbox.v1.OpenStreamResponse
+	(*InvalidateAllowlistRequest)(nil),    // 48: devbox.v1.InvalidateAllowlistRequest
+	(*InvalidateAllowlistResponse)(nil),   // 49: devbox.v1.InvalidateAllowlistResponse
+	(*Principal)(nil),                     // 50: devbox.v1.Principal
+	(AgentType)(0),                        // 51: devbox.v1.AgentType
+	(*ConfigOptionSetting)(nil),           // 52: devbox.v1.ConfigOptionSetting
+	(*AgentLaunch)(nil),                   // 53: devbox.v1.AgentLaunch
+	(*RepositorySpec)(nil),                // 54: devbox.v1.RepositorySpec
+	(*IdlePolicy)(nil),                    // 55: devbox.v1.IdlePolicy
+	(*Lease)(nil),                         // 56: devbox.v1.Lease
+	(InstanceStatus)(0),                   // 57: devbox.v1.InstanceStatus
+	(SnapshotFidelity)(0),                 // 58: devbox.v1.SnapshotFidelity
+	(SuspendReason)(0),                    // 59: devbox.v1.SuspendReason
+	(*AgentConnection)(nil),               // 60: devbox.v1.AgentConnection
+	(*Session)(nil),                       // 61: devbox.v1.Session
+	(*ImportableSession)(nil),             // 62: devbox.v1.ImportableSession
+	(*ContentBlock)(nil),                  // 63: devbox.v1.ContentBlock
+	(*QueuedPrompt)(nil),                  // 64: devbox.v1.QueuedPrompt
+	(*ConfigOption)(nil),                  // 65: devbox.v1.ConfigOption
+	(*InteractionResponse)(nil),           // 66: devbox.v1.InteractionResponse
+	(*Interaction)(nil),                   // 67: devbox.v1.Interaction
+	(*AvailableCommand)(nil),              // 68: devbox.v1.AvailableCommand
+	(*AcpEntity)(nil),                     // 69: devbox.v1.AcpEntity
+	(*IdleState)(nil),                     // 70: devbox.v1.IdleState
+	(*CreateTerminalRequest)(nil),         // 71: devbox.v1.CreateTerminalRequest
+	(*StartBrowserRequest)(nil),           // 72: devbox.v1.StartBrowserRequest
+	(*timestamppb.Timestamp)(nil),         // 73: google.protobuf.Timestamp
+	(*TerminalInfo)(nil),                  // 74: devbox.v1.TerminalInfo
+	(*BrowserInfo)(nil),                   // 75: devbox.v1.BrowserInfo
+	(*AddRepositoryRequest)(nil),          // 76: devbox.v1.AddRepositoryRequest
+	(*ListRepositoriesRequest)(nil),       // 77: devbox.v1.ListRepositoriesRequest
+	(*ListFilesRequest)(nil),              // 78: devbox.v1.ListFilesRequest
+	(*ReadFileRequest)(nil),               // 79: devbox.v1.ReadFileRequest
+	(*WriteFileRequest)(nil),              // 80: devbox.v1.WriteFileRequest
+	(*GetChangesRequest)(nil),             // 81: devbox.v1.GetChangesRequest
+	(*PreparePullRequestRequest)(nil),     // 82: devbox.v1.PreparePullRequestRequest
+	(*AddRepositoryResponse)(nil),         // 83: devbox.v1.AddRepositoryResponse
+	(*ListRepositoriesResponse)(nil),      // 84: devbox.v1.ListRepositoriesResponse
+	(*ListFilesResponse)(nil),             // 85: devbox.v1.ListFilesResponse
+	(*ReadFileResponse)(nil),              // 86: devbox.v1.ReadFileResponse
+	(*WriteFileResponse)(nil),             // 87: devbox.v1.WriteFileResponse
+	(*GetChangesResponse)(nil),            // 88: devbox.v1.GetChangesResponse
+	(*PreparePullRequestResponse)(nil),    // 89: devbox.v1.PreparePullRequestResponse
 }
 var file_devbox_v1_control_proto_depIdxs = []int32{
-	48,  // 0: devbox.v1.CreateInstanceRequest.owner:type_name -> devbox.v1.Principal
-	49,  // 1: devbox.v1.CreateInstanceRequest.agent:type_name -> devbox.v1.AgentType
-	50,  // 2: devbox.v1.CreateInstanceRequest.config_options:type_name -> devbox.v1.ConfigOptionSetting
-	51,  // 3: devbox.v1.CreateInstanceRequest.agents:type_name -> devbox.v1.AgentLaunch
-	52,  // 4: devbox.v1.CreateInstanceRequest.repositories:type_name -> devbox.v1.RepositorySpec
-	53,  // 5: devbox.v1.CreateInstanceRequest.idle_policy:type_name -> devbox.v1.IdlePolicy
-	54,  // 6: devbox.v1.CreateInstanceRequest.leases:type_name -> devbox.v1.Lease
-	55,  // 7: devbox.v1.CreateInstanceResponse.status:type_name -> devbox.v1.InstanceStatus
-	56,  // 8: devbox.v1.CreateInstanceResponse.restore_fidelity:type_name -> devbox.v1.SnapshotFidelity
-	56,  // 9: devbox.v1.SnapshotRef.fidelity:type_name -> devbox.v1.SnapshotFidelity
+	50,  // 0: devbox.v1.CreateInstanceRequest.owner:type_name -> devbox.v1.Principal
+	51,  // 1: devbox.v1.CreateInstanceRequest.agent:type_name -> devbox.v1.AgentType
+	52,  // 2: devbox.v1.CreateInstanceRequest.config_options:type_name -> devbox.v1.ConfigOptionSetting
+	53,  // 3: devbox.v1.CreateInstanceRequest.agents:type_name -> devbox.v1.AgentLaunch
+	54,  // 4: devbox.v1.CreateInstanceRequest.repositories:type_name -> devbox.v1.RepositorySpec
+	55,  // 5: devbox.v1.CreateInstanceRequest.idle_policy:type_name -> devbox.v1.IdlePolicy
+	56,  // 6: devbox.v1.CreateInstanceRequest.leases:type_name -> devbox.v1.Lease
+	57,  // 7: devbox.v1.CreateInstanceResponse.status:type_name -> devbox.v1.InstanceStatus
+	58,  // 8: devbox.v1.CreateInstanceResponse.restore_fidelity:type_name -> devbox.v1.SnapshotFidelity
+	58,  // 9: devbox.v1.SnapshotRef.fidelity:type_name -> devbox.v1.SnapshotFidelity
 	3,   // 10: devbox.v1.StartFromSnapshotRequest.instance:type_name -> devbox.v1.CreateInstanceRequest
 	5,   // 11: devbox.v1.StartFromSnapshotRequest.snapshot:type_name -> devbox.v1.SnapshotRef
-	48,  // 12: devbox.v1.InstanceActionRequest.requested_by:type_name -> devbox.v1.Principal
-	57,  // 13: devbox.v1.InstanceActionRequest.reason:type_name -> devbox.v1.SuspendReason
-	55,  // 14: devbox.v1.InstanceActionResponse.status:type_name -> devbox.v1.InstanceStatus
-	56,  // 15: devbox.v1.SnapshotInstanceRequest.fidelity:type_name -> devbox.v1.SnapshotFidelity
-	48,  // 16: devbox.v1.SnapshotInstanceRequest.requested_by:type_name -> devbox.v1.Principal
-	5,   // 17: devbox.v1.DeleteSnapshotRequest.snapshot:type_name -> devbox.v1.SnapshotRef
-	51,  // 18: devbox.v1.SetAgentBillingRequest.agent:type_name -> devbox.v1.AgentLaunch
-	48,  // 19: devbox.v1.SetAgentBillingRequest.requested_by:type_name -> devbox.v1.Principal
-	58,  // 20: devbox.v1.SetAgentBillingResponse.connection:type_name -> devbox.v1.AgentConnection
-	49,  // 21: devbox.v1.CreateThreadRequest.agent:type_name -> devbox.v1.AgentType
-	50,  // 22: devbox.v1.CreateThreadRequest.config_options:type_name -> devbox.v1.ConfigOptionSetting
-	48,  // 23: devbox.v1.CreateThreadRequest.created_by:type_name -> devbox.v1.Principal
-	59,  // 24: devbox.v1.ThreadResponse.session:type_name -> devbox.v1.Session
-	59,  // 25: devbox.v1.ListThreadsResponse.threads:type_name -> devbox.v1.Session
-	60,  // 26: devbox.v1.ListThreadsResponse.importable:type_name -> devbox.v1.ImportableSession
-	49,  // 27: devbox.v1.ImportThreadRequest.agent:type_name -> devbox.v1.AgentType
-	48,  // 28: devbox.v1.ImportThreadRequest.imported_by:type_name -> devbox.v1.Principal
-	15,  // 29: devbox.v1.ResumeThreadRequest.thread:type_name -> devbox.v1.ThreadRef
-	48,  // 30: devbox.v1.ResumeThreadRequest.requested_by:type_name -> devbox.v1.Principal
-	15,  // 31: devbox.v1.ThreadActionRequest.thread:type_name -> devbox.v1.ThreadRef
-	48,  // 32: devbox.v1.ThreadActionRequest.requested_by:type_name -> devbox.v1.Principal
-	59,  // 33: devbox.v1.DeleteThreadResponse.session:type_name -> devbox.v1.Session
-	15,  // 34: devbox.v1.ForkThreadRequest.thread:type_name -> devbox.v1.ThreadRef
-	48,  // 35: devbox.v1.ForkThreadRequest.requested_by:type_name -> devbox.v1.Principal
-	15,  // 36: devbox.v1.PromptRequest.thread:type_name -> devbox.v1.ThreadRef
-	61,  // 37: devbox.v1.PromptRequest.content:type_name -> devbox.v1.ContentBlock
-	48,  // 38: devbox.v1.PromptRequest.sent_by:type_name -> devbox.v1.Principal
-	26,  // 39: devbox.v1.PromptRequest.attachments:type_name -> devbox.v1.PromptAttachment
-	0,   // 40: devbox.v1.PromptResponse.disposition:type_name -> devbox.v1.PromptDisposition
-	15,  // 41: devbox.v1.CancelPromptRequest.thread:type_name -> devbox.v1.ThreadRef
-	48,  // 42: devbox.v1.CancelPromptRequest.requested_by:type_name -> devbox.v1.Principal
-	15,  // 43: devbox.v1.UpdateQueuedPromptRequest.thread:type_name -> devbox.v1.ThreadRef
-	1,   // 44: devbox.v1.UpdateQueuedPromptRequest.action:type_name -> devbox.v1.QueuedPromptAction
-	48,  // 45: devbox.v1.UpdateQueuedPromptRequest.requested_by:type_name -> devbox.v1.Principal
-	62,  // 46: devbox.v1.UpdateQueuedPromptResponse.queued_prompts:type_name -> devbox.v1.QueuedPrompt
-	15,  // 47: devbox.v1.SetThreadConfigOptionRequest.thread:type_name -> devbox.v1.ThreadRef
-	50,  // 48: devbox.v1.SetThreadConfigOptionRequest.option:type_name -> devbox.v1.ConfigOptionSetting
-	48,  // 49: devbox.v1.SetThreadConfigOptionRequest.requested_by:type_name -> devbox.v1.Principal
-	63,  // 50: devbox.v1.SetThreadConfigOptionResponse.config_options:type_name -> devbox.v1.ConfigOption
-	64,  // 51: devbox.v1.RespondInteractionRequest.response:type_name -> devbox.v1.InteractionResponse
-	48,  // 52: devbox.v1.RespondInteractionRequest.answered_by:type_name -> devbox.v1.Principal
-	65,  // 53: devbox.v1.RespondInteractionResponse.interaction:type_name -> devbox.v1.Interaction
-	15,  // 54: devbox.v1.ListCommandsRequest.thread:type_name -> devbox.v1.ThreadRef
-	66,  // 55: devbox.v1.ListCommandsResponse.commands:type_name -> devbox.v1.AvailableCommand
-	67,  // 56: devbox.v1.GetTimelineResponse.entities:type_name -> devbox.v1.AcpEntity
-	59,  // 57: devbox.v1.GetSessionsResponse.sessions:type_name -> devbox.v1.Session
-	58,  // 58: devbox.v1.GetSessionsResponse.connections:type_name -> devbox.v1.AgentConnection
-	54,  // 59: devbox.v1.SetInstanceLeasesRequest.leases:type_name -> devbox.v1.Lease
-	54,  // 60: devbox.v1.SetInstanceLeasesResponse.leases:type_name -> devbox.v1.Lease
-	68,  // 61: devbox.v1.SetInstanceLeasesResponse.idle:type_name -> devbox.v1.IdleState
-	2,   // 62: devbox.v1.OpenStreamRequest.kind:type_name -> devbox.v1.StreamKind
-	69,  // 63: devbox.v1.OpenStreamRequest.create_terminal:type_name -> devbox.v1.CreateTerminalRequest
-	70,  // 64: devbox.v1.OpenStreamRequest.start_browser:type_name -> devbox.v1.StartBrowserRequest
-	48,  // 65: devbox.v1.OpenStreamRequest.requested_by:type_name -> devbox.v1.Principal
-	2,   // 66: devbox.v1.OpenStreamResponse.kind:type_name -> devbox.v1.StreamKind
-	71,  // 67: devbox.v1.OpenStreamResponse.expires_at:type_name -> google.protobuf.Timestamp
-	72,  // 68: devbox.v1.OpenStreamResponse.terminal:type_name -> devbox.v1.TerminalInfo
-	73,  // 69: devbox.v1.OpenStreamResponse.browser:type_name -> devbox.v1.BrowserInfo
-	3,   // 70: devbox.v1.Control.CreateInstance:input_type -> devbox.v1.CreateInstanceRequest
-	6,   // 71: devbox.v1.Control.StartFromSnapshot:input_type -> devbox.v1.StartFromSnapshotRequest
-	7,   // 72: devbox.v1.Control.CancelInstance:input_type -> devbox.v1.InstanceActionRequest
-	7,   // 73: devbox.v1.Control.SuspendInstance:input_type -> devbox.v1.InstanceActionRequest
-	7,   // 74: devbox.v1.Control.ResumeInstance:input_type -> devbox.v1.InstanceActionRequest
-	9,   // 75: devbox.v1.Control.SnapshotInstance:input_type -> devbox.v1.SnapshotInstanceRequest
-	11,  // 76: devbox.v1.Control.DeleteSnapshot:input_type -> devbox.v1.DeleteSnapshotRequest
-	13,  // 77: devbox.v1.Control.SetAgentBilling:input_type -> devbox.v1.SetAgentBillingRequest
-	16,  // 78: devbox.v1.Control.CreateThread:input_type -> devbox.v1.CreateThreadRequest
-	18,  // 79: devbox.v1.Control.ListThreads:input_type -> devbox.v1.ListThreadsRequest
-	20,  // 80: devbox.v1.Control.ImportThread:input_type -> devbox.v1.ImportThreadRequest
-	21,  // 81: devbox.v1.Control.ResumeThread:input_type -> devbox.v1.ResumeThreadRequest
-	22,  // 82: devbox.v1.Control.CloseThread:input_type -> devbox.v1.ThreadActionRequest
-	22,  // 83: devbox.v1.Control.DeleteThread:input_type -> devbox.v1.ThreadActionRequest
-	24,  // 84: devbox.v1.Control.ForkThread:input_type -> devbox.v1.ForkThreadRequest
-	25,  // 85: devbox.v1.Control.Prompt:input_type -> devbox.v1.PromptRequest
-	28,  // 86: devbox.v1.Control.CancelPrompt:input_type -> devbox.v1.CancelPromptRequest
-	30,  // 87: devbox.v1.Control.UpdateQueuedPrompt:input_type -> devbox.v1.UpdateQueuedPromptRequest
-	32,  // 88: devbox.v1.Control.SetThreadConfigOption:input_type -> devbox.v1.SetThreadConfigOptionRequest
-	34,  // 89: devbox.v1.Control.RespondInteraction:input_type -> devbox.v1.RespondInteractionRequest
-	36,  // 90: devbox.v1.Control.ListCommands:input_type -> devbox.v1.ListCommandsRequest
-	38,  // 91: devbox.v1.Control.GetTimeline:input_type -> devbox.v1.GetTimelineRequest
-	40,  // 92: devbox.v1.Control.GetSessions:input_type -> devbox.v1.GetSessionsRequest
-	42,  // 93: devbox.v1.Control.SetInstanceLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
-	74,  // 94: devbox.v1.Control.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
-	75,  // 95: devbox.v1.Control.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
-	76,  // 96: devbox.v1.Control.ListFiles:input_type -> devbox.v1.ListFilesRequest
-	77,  // 97: devbox.v1.Control.ReadFile:input_type -> devbox.v1.ReadFileRequest
-	78,  // 98: devbox.v1.Control.WriteFile:input_type -> devbox.v1.WriteFileRequest
-	79,  // 99: devbox.v1.Control.GetChanges:input_type -> devbox.v1.GetChangesRequest
-	80,  // 100: devbox.v1.Control.PreparePullRequest:input_type -> devbox.v1.PreparePullRequestRequest
-	44,  // 101: devbox.v1.Control.OpenStream:input_type -> devbox.v1.OpenStreamRequest
-	46,  // 102: devbox.v1.Control.InvalidateAllowlist:input_type -> devbox.v1.InvalidateAllowlistRequest
-	4,   // 103: devbox.v1.Control.CreateInstance:output_type -> devbox.v1.CreateInstanceResponse
-	4,   // 104: devbox.v1.Control.StartFromSnapshot:output_type -> devbox.v1.CreateInstanceResponse
-	8,   // 105: devbox.v1.Control.CancelInstance:output_type -> devbox.v1.InstanceActionResponse
-	8,   // 106: devbox.v1.Control.SuspendInstance:output_type -> devbox.v1.InstanceActionResponse
-	8,   // 107: devbox.v1.Control.ResumeInstance:output_type -> devbox.v1.InstanceActionResponse
-	10,  // 108: devbox.v1.Control.SnapshotInstance:output_type -> devbox.v1.SnapshotInstanceResponse
-	12,  // 109: devbox.v1.Control.DeleteSnapshot:output_type -> devbox.v1.DeleteSnapshotResponse
-	14,  // 110: devbox.v1.Control.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
-	17,  // 111: devbox.v1.Control.CreateThread:output_type -> devbox.v1.ThreadResponse
-	19,  // 112: devbox.v1.Control.ListThreads:output_type -> devbox.v1.ListThreadsResponse
-	17,  // 113: devbox.v1.Control.ImportThread:output_type -> devbox.v1.ThreadResponse
-	17,  // 114: devbox.v1.Control.ResumeThread:output_type -> devbox.v1.ThreadResponse
-	17,  // 115: devbox.v1.Control.CloseThread:output_type -> devbox.v1.ThreadResponse
-	23,  // 116: devbox.v1.Control.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
-	17,  // 117: devbox.v1.Control.ForkThread:output_type -> devbox.v1.ThreadResponse
-	27,  // 118: devbox.v1.Control.Prompt:output_type -> devbox.v1.PromptResponse
-	29,  // 119: devbox.v1.Control.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
-	31,  // 120: devbox.v1.Control.UpdateQueuedPrompt:output_type -> devbox.v1.UpdateQueuedPromptResponse
-	33,  // 121: devbox.v1.Control.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
-	35,  // 122: devbox.v1.Control.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
-	37,  // 123: devbox.v1.Control.ListCommands:output_type -> devbox.v1.ListCommandsResponse
-	39,  // 124: devbox.v1.Control.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
-	41,  // 125: devbox.v1.Control.GetSessions:output_type -> devbox.v1.GetSessionsResponse
-	43,  // 126: devbox.v1.Control.SetInstanceLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
-	81,  // 127: devbox.v1.Control.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
-	82,  // 128: devbox.v1.Control.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
-	83,  // 129: devbox.v1.Control.ListFiles:output_type -> devbox.v1.ListFilesResponse
-	84,  // 130: devbox.v1.Control.ReadFile:output_type -> devbox.v1.ReadFileResponse
-	85,  // 131: devbox.v1.Control.WriteFile:output_type -> devbox.v1.WriteFileResponse
-	86,  // 132: devbox.v1.Control.GetChanges:output_type -> devbox.v1.GetChangesResponse
-	87,  // 133: devbox.v1.Control.PreparePullRequest:output_type -> devbox.v1.PreparePullRequestResponse
-	45,  // 134: devbox.v1.Control.OpenStream:output_type -> devbox.v1.OpenStreamResponse
-	47,  // 135: devbox.v1.Control.InvalidateAllowlist:output_type -> devbox.v1.InvalidateAllowlistResponse
-	103, // [103:136] is the sub-list for method output_type
-	70,  // [70:103] is the sub-list for method input_type
-	70,  // [70:70] is the sub-list for extension type_name
-	70,  // [70:70] is the sub-list for extension extendee
-	0,   // [0:70] is the sub-list for field type_name
+	50,  // 12: devbox.v1.InstanceActionRequest.requested_by:type_name -> devbox.v1.Principal
+	59,  // 13: devbox.v1.InstanceActionRequest.reason:type_name -> devbox.v1.SuspendReason
+	57,  // 14: devbox.v1.InstanceActionResponse.status:type_name -> devbox.v1.InstanceStatus
+	50,  // 15: devbox.v1.RebaseInstanceRequest.requested_by:type_name -> devbox.v1.Principal
+	57,  // 16: devbox.v1.RebaseInstanceResponse.status:type_name -> devbox.v1.InstanceStatus
+	58,  // 17: devbox.v1.SnapshotInstanceRequest.fidelity:type_name -> devbox.v1.SnapshotFidelity
+	50,  // 18: devbox.v1.SnapshotInstanceRequest.requested_by:type_name -> devbox.v1.Principal
+	5,   // 19: devbox.v1.DeleteSnapshotRequest.snapshot:type_name -> devbox.v1.SnapshotRef
+	53,  // 20: devbox.v1.SetAgentBillingRequest.agent:type_name -> devbox.v1.AgentLaunch
+	50,  // 21: devbox.v1.SetAgentBillingRequest.requested_by:type_name -> devbox.v1.Principal
+	60,  // 22: devbox.v1.SetAgentBillingResponse.connection:type_name -> devbox.v1.AgentConnection
+	51,  // 23: devbox.v1.CreateThreadRequest.agent:type_name -> devbox.v1.AgentType
+	52,  // 24: devbox.v1.CreateThreadRequest.config_options:type_name -> devbox.v1.ConfigOptionSetting
+	50,  // 25: devbox.v1.CreateThreadRequest.created_by:type_name -> devbox.v1.Principal
+	61,  // 26: devbox.v1.ThreadResponse.session:type_name -> devbox.v1.Session
+	61,  // 27: devbox.v1.ListThreadsResponse.threads:type_name -> devbox.v1.Session
+	62,  // 28: devbox.v1.ListThreadsResponse.importable:type_name -> devbox.v1.ImportableSession
+	51,  // 29: devbox.v1.ImportThreadRequest.agent:type_name -> devbox.v1.AgentType
+	50,  // 30: devbox.v1.ImportThreadRequest.imported_by:type_name -> devbox.v1.Principal
+	17,  // 31: devbox.v1.ResumeThreadRequest.thread:type_name -> devbox.v1.ThreadRef
+	50,  // 32: devbox.v1.ResumeThreadRequest.requested_by:type_name -> devbox.v1.Principal
+	17,  // 33: devbox.v1.ThreadActionRequest.thread:type_name -> devbox.v1.ThreadRef
+	50,  // 34: devbox.v1.ThreadActionRequest.requested_by:type_name -> devbox.v1.Principal
+	61,  // 35: devbox.v1.DeleteThreadResponse.session:type_name -> devbox.v1.Session
+	17,  // 36: devbox.v1.ForkThreadRequest.thread:type_name -> devbox.v1.ThreadRef
+	50,  // 37: devbox.v1.ForkThreadRequest.requested_by:type_name -> devbox.v1.Principal
+	17,  // 38: devbox.v1.PromptRequest.thread:type_name -> devbox.v1.ThreadRef
+	63,  // 39: devbox.v1.PromptRequest.content:type_name -> devbox.v1.ContentBlock
+	50,  // 40: devbox.v1.PromptRequest.sent_by:type_name -> devbox.v1.Principal
+	28,  // 41: devbox.v1.PromptRequest.attachments:type_name -> devbox.v1.PromptAttachment
+	0,   // 42: devbox.v1.PromptResponse.disposition:type_name -> devbox.v1.PromptDisposition
+	17,  // 43: devbox.v1.CancelPromptRequest.thread:type_name -> devbox.v1.ThreadRef
+	50,  // 44: devbox.v1.CancelPromptRequest.requested_by:type_name -> devbox.v1.Principal
+	17,  // 45: devbox.v1.UpdateQueuedPromptRequest.thread:type_name -> devbox.v1.ThreadRef
+	1,   // 46: devbox.v1.UpdateQueuedPromptRequest.action:type_name -> devbox.v1.QueuedPromptAction
+	50,  // 47: devbox.v1.UpdateQueuedPromptRequest.requested_by:type_name -> devbox.v1.Principal
+	64,  // 48: devbox.v1.UpdateQueuedPromptResponse.queued_prompts:type_name -> devbox.v1.QueuedPrompt
+	17,  // 49: devbox.v1.SetThreadConfigOptionRequest.thread:type_name -> devbox.v1.ThreadRef
+	52,  // 50: devbox.v1.SetThreadConfigOptionRequest.option:type_name -> devbox.v1.ConfigOptionSetting
+	50,  // 51: devbox.v1.SetThreadConfigOptionRequest.requested_by:type_name -> devbox.v1.Principal
+	65,  // 52: devbox.v1.SetThreadConfigOptionResponse.config_options:type_name -> devbox.v1.ConfigOption
+	66,  // 53: devbox.v1.RespondInteractionRequest.response:type_name -> devbox.v1.InteractionResponse
+	50,  // 54: devbox.v1.RespondInteractionRequest.answered_by:type_name -> devbox.v1.Principal
+	67,  // 55: devbox.v1.RespondInteractionResponse.interaction:type_name -> devbox.v1.Interaction
+	17,  // 56: devbox.v1.ListCommandsRequest.thread:type_name -> devbox.v1.ThreadRef
+	68,  // 57: devbox.v1.ListCommandsResponse.commands:type_name -> devbox.v1.AvailableCommand
+	69,  // 58: devbox.v1.GetTimelineResponse.entities:type_name -> devbox.v1.AcpEntity
+	61,  // 59: devbox.v1.GetSessionsResponse.sessions:type_name -> devbox.v1.Session
+	60,  // 60: devbox.v1.GetSessionsResponse.connections:type_name -> devbox.v1.AgentConnection
+	56,  // 61: devbox.v1.SetInstanceLeasesRequest.leases:type_name -> devbox.v1.Lease
+	56,  // 62: devbox.v1.SetInstanceLeasesResponse.leases:type_name -> devbox.v1.Lease
+	70,  // 63: devbox.v1.SetInstanceLeasesResponse.idle:type_name -> devbox.v1.IdleState
+	2,   // 64: devbox.v1.OpenStreamRequest.kind:type_name -> devbox.v1.StreamKind
+	71,  // 65: devbox.v1.OpenStreamRequest.create_terminal:type_name -> devbox.v1.CreateTerminalRequest
+	72,  // 66: devbox.v1.OpenStreamRequest.start_browser:type_name -> devbox.v1.StartBrowserRequest
+	50,  // 67: devbox.v1.OpenStreamRequest.requested_by:type_name -> devbox.v1.Principal
+	2,   // 68: devbox.v1.OpenStreamResponse.kind:type_name -> devbox.v1.StreamKind
+	73,  // 69: devbox.v1.OpenStreamResponse.expires_at:type_name -> google.protobuf.Timestamp
+	74,  // 70: devbox.v1.OpenStreamResponse.terminal:type_name -> devbox.v1.TerminalInfo
+	75,  // 71: devbox.v1.OpenStreamResponse.browser:type_name -> devbox.v1.BrowserInfo
+	3,   // 72: devbox.v1.Control.CreateInstance:input_type -> devbox.v1.CreateInstanceRequest
+	6,   // 73: devbox.v1.Control.StartFromSnapshot:input_type -> devbox.v1.StartFromSnapshotRequest
+	7,   // 74: devbox.v1.Control.CancelInstance:input_type -> devbox.v1.InstanceActionRequest
+	7,   // 75: devbox.v1.Control.SuspendInstance:input_type -> devbox.v1.InstanceActionRequest
+	7,   // 76: devbox.v1.Control.ResumeInstance:input_type -> devbox.v1.InstanceActionRequest
+	11,  // 77: devbox.v1.Control.SnapshotInstance:input_type -> devbox.v1.SnapshotInstanceRequest
+	13,  // 78: devbox.v1.Control.DeleteSnapshot:input_type -> devbox.v1.DeleteSnapshotRequest
+	15,  // 79: devbox.v1.Control.SetAgentBilling:input_type -> devbox.v1.SetAgentBillingRequest
+	9,   // 80: devbox.v1.Control.RebaseInstance:input_type -> devbox.v1.RebaseInstanceRequest
+	18,  // 81: devbox.v1.Control.CreateThread:input_type -> devbox.v1.CreateThreadRequest
+	20,  // 82: devbox.v1.Control.ListThreads:input_type -> devbox.v1.ListThreadsRequest
+	22,  // 83: devbox.v1.Control.ImportThread:input_type -> devbox.v1.ImportThreadRequest
+	23,  // 84: devbox.v1.Control.ResumeThread:input_type -> devbox.v1.ResumeThreadRequest
+	24,  // 85: devbox.v1.Control.CloseThread:input_type -> devbox.v1.ThreadActionRequest
+	24,  // 86: devbox.v1.Control.DeleteThread:input_type -> devbox.v1.ThreadActionRequest
+	26,  // 87: devbox.v1.Control.ForkThread:input_type -> devbox.v1.ForkThreadRequest
+	27,  // 88: devbox.v1.Control.Prompt:input_type -> devbox.v1.PromptRequest
+	30,  // 89: devbox.v1.Control.CancelPrompt:input_type -> devbox.v1.CancelPromptRequest
+	32,  // 90: devbox.v1.Control.UpdateQueuedPrompt:input_type -> devbox.v1.UpdateQueuedPromptRequest
+	34,  // 91: devbox.v1.Control.SetThreadConfigOption:input_type -> devbox.v1.SetThreadConfigOptionRequest
+	36,  // 92: devbox.v1.Control.RespondInteraction:input_type -> devbox.v1.RespondInteractionRequest
+	38,  // 93: devbox.v1.Control.ListCommands:input_type -> devbox.v1.ListCommandsRequest
+	40,  // 94: devbox.v1.Control.GetTimeline:input_type -> devbox.v1.GetTimelineRequest
+	42,  // 95: devbox.v1.Control.GetSessions:input_type -> devbox.v1.GetSessionsRequest
+	44,  // 96: devbox.v1.Control.SetInstanceLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
+	76,  // 97: devbox.v1.Control.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
+	77,  // 98: devbox.v1.Control.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
+	78,  // 99: devbox.v1.Control.ListFiles:input_type -> devbox.v1.ListFilesRequest
+	79,  // 100: devbox.v1.Control.ReadFile:input_type -> devbox.v1.ReadFileRequest
+	80,  // 101: devbox.v1.Control.WriteFile:input_type -> devbox.v1.WriteFileRequest
+	81,  // 102: devbox.v1.Control.GetChanges:input_type -> devbox.v1.GetChangesRequest
+	82,  // 103: devbox.v1.Control.PreparePullRequest:input_type -> devbox.v1.PreparePullRequestRequest
+	46,  // 104: devbox.v1.Control.OpenStream:input_type -> devbox.v1.OpenStreamRequest
+	48,  // 105: devbox.v1.Control.InvalidateAllowlist:input_type -> devbox.v1.InvalidateAllowlistRequest
+	4,   // 106: devbox.v1.Control.CreateInstance:output_type -> devbox.v1.CreateInstanceResponse
+	4,   // 107: devbox.v1.Control.StartFromSnapshot:output_type -> devbox.v1.CreateInstanceResponse
+	8,   // 108: devbox.v1.Control.CancelInstance:output_type -> devbox.v1.InstanceActionResponse
+	8,   // 109: devbox.v1.Control.SuspendInstance:output_type -> devbox.v1.InstanceActionResponse
+	8,   // 110: devbox.v1.Control.ResumeInstance:output_type -> devbox.v1.InstanceActionResponse
+	12,  // 111: devbox.v1.Control.SnapshotInstance:output_type -> devbox.v1.SnapshotInstanceResponse
+	14,  // 112: devbox.v1.Control.DeleteSnapshot:output_type -> devbox.v1.DeleteSnapshotResponse
+	16,  // 113: devbox.v1.Control.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
+	10,  // 114: devbox.v1.Control.RebaseInstance:output_type -> devbox.v1.RebaseInstanceResponse
+	19,  // 115: devbox.v1.Control.CreateThread:output_type -> devbox.v1.ThreadResponse
+	21,  // 116: devbox.v1.Control.ListThreads:output_type -> devbox.v1.ListThreadsResponse
+	19,  // 117: devbox.v1.Control.ImportThread:output_type -> devbox.v1.ThreadResponse
+	19,  // 118: devbox.v1.Control.ResumeThread:output_type -> devbox.v1.ThreadResponse
+	19,  // 119: devbox.v1.Control.CloseThread:output_type -> devbox.v1.ThreadResponse
+	25,  // 120: devbox.v1.Control.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
+	19,  // 121: devbox.v1.Control.ForkThread:output_type -> devbox.v1.ThreadResponse
+	29,  // 122: devbox.v1.Control.Prompt:output_type -> devbox.v1.PromptResponse
+	31,  // 123: devbox.v1.Control.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
+	33,  // 124: devbox.v1.Control.UpdateQueuedPrompt:output_type -> devbox.v1.UpdateQueuedPromptResponse
+	35,  // 125: devbox.v1.Control.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
+	37,  // 126: devbox.v1.Control.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
+	39,  // 127: devbox.v1.Control.ListCommands:output_type -> devbox.v1.ListCommandsResponse
+	41,  // 128: devbox.v1.Control.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
+	43,  // 129: devbox.v1.Control.GetSessions:output_type -> devbox.v1.GetSessionsResponse
+	45,  // 130: devbox.v1.Control.SetInstanceLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
+	83,  // 131: devbox.v1.Control.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
+	84,  // 132: devbox.v1.Control.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
+	85,  // 133: devbox.v1.Control.ListFiles:output_type -> devbox.v1.ListFilesResponse
+	86,  // 134: devbox.v1.Control.ReadFile:output_type -> devbox.v1.ReadFileResponse
+	87,  // 135: devbox.v1.Control.WriteFile:output_type -> devbox.v1.WriteFileResponse
+	88,  // 136: devbox.v1.Control.GetChanges:output_type -> devbox.v1.GetChangesResponse
+	89,  // 137: devbox.v1.Control.PreparePullRequest:output_type -> devbox.v1.PreparePullRequestResponse
+	47,  // 138: devbox.v1.Control.OpenStream:output_type -> devbox.v1.OpenStreamResponse
+	49,  // 139: devbox.v1.Control.InvalidateAllowlist:output_type -> devbox.v1.InvalidateAllowlistResponse
+	106, // [106:140] is the sub-list for method output_type
+	72,  // [72:106] is the sub-list for method input_type
+	72,  // [72:72] is the sub-list for extension type_name
+	72,  // [72:72] is the sub-list for extension extendee
+	0,   // [0:72] is the sub-list for field type_name
 }
 
 func init() { file_devbox_v1_control_proto_init() }
@@ -3839,7 +4019,7 @@ func file_devbox_v1_control_proto_init() {
 	file_devbox_v1_common_proto_init()
 	file_devbox_v1_acp_proto_init()
 	file_devbox_v1_workspace_proto_init()
-	file_devbox_v1_control_proto_msgTypes[35].OneofWrappers = []any{
+	file_devbox_v1_control_proto_msgTypes[37].OneofWrappers = []any{
 		(*GetTimelineRequest_AfterPosition)(nil),
 		(*GetTimelineRequest_BeforePosition)(nil),
 	}
@@ -3849,7 +4029,7 @@ func file_devbox_v1_control_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_devbox_v1_control_proto_rawDesc), len(file_devbox_v1_control_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   45,
+			NumMessages:   47,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

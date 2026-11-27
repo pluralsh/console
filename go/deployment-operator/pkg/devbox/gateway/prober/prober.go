@@ -26,9 +26,11 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -48,6 +50,7 @@ type Actors interface {
 	ApplyEgressPolicy(ctx context.Context, ref actors.Ref, rules []*ateapi.EgressRule) error
 	Resume(ctx context.Context, ref actors.Ref) error
 	WaitState(ctx context.Context, ref actors.Ref, states ...ateapi.ActorState) (*ateapi.Actor, error)
+	GetActor(ctx context.Context, ref actors.Ref) (*ateapi.Actor, error)
 	DeleteActor(ctx context.Context, ref actors.Ref) error
 }
 
@@ -82,8 +85,11 @@ type Deps struct {
 	Actors      Actors
 	Daemons     Daemons
 	Credentials Credentials
-	Log         logr.Logger
-	Now         func() time.Time
+	// Homes seed probe actors' external homes by storage (homedriver.Client); a revision with a home seed can't be
+	// probed without its storage's.
+	Homes map[v1alpha1.DevboxHomeStorage]homes.Driver
+	Log   logr.Logger
+	Now   func() time.Time
 }
 
 type Prober struct {
@@ -344,6 +350,10 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	if creds == nil {
 		return nil, errors.New("egress isn't running yet")
 	}
+	driver := p.deps.Homes[v1alpha1.DevboxHomeStorage(req.HomeStorage)]
+	if req.HomeSeed != "" && driver == nil {
+		return nil, permanentError{fmt.Errorf("the gateway has no %s controller address to seed the probe's home", req.HomeStorage)}
+	}
 	ref := actors.Ref{Atespace: req.Atespace, Name: name}
 	instanceID := InstanceID(name)
 	aiHost := hostOf(p.cfg.AIProxyURL)
@@ -388,17 +398,31 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 	if req.ExternalHome {
 		actorSpec.SourceTag, actorSpec.Preview = "", true
 	}
-	if _, err := p.deps.Actors.CreateActor(ctx, actorSpec); err != nil {
+	actor, err := p.deps.Actors.CreateActor(ctx, actorSpec)
+	if err != nil {
 		return nil, fmt.Errorf("creating probe actor %s: %w", ref, err)
 	}
-	if err := p.deps.Actors.ApplyEgressPolicy(ctx, ref, rules); err != nil {
-		return nil, fmt.Errorf("applying the probe egress policy: %w", err)
+	start := func() error {
+		if err := p.deps.Actors.ApplyEgressPolicy(ctx, ref, rules); err != nil {
+			return fmt.Errorf("applying the probe egress policy: %w", err)
+		}
+		if err := p.deps.Actors.Resume(ctx, ref); err != nil {
+			return fmt.Errorf("resuming probe actor %s: %w", ref, err)
+		}
+		if _, err := p.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING); err != nil {
+			return fmt.Errorf("waiting for probe actor %s: %w", ref, err)
+		}
+		return nil
 	}
-	if err := p.deps.Actors.Resume(ctx, ref); err != nil {
-		return nil, fmt.Errorf("resuming probe actor %s: %w", ref, err)
+	if req.HomeSeed != "" {
+		err = homes.Start(ctx, driver, p.deps.Actors, actor, req.HomeSeed, req.HomeBytes, start)
+	} else {
+		err = start()
 	}
-	if _, err := p.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING); err != nil {
-		return nil, fmt.Errorf("waiting for probe actor %s: %w", ref, err)
+	if errors.Is(err, homes.ErrSeedMissing) || errors.Is(err, homes.ErrVolumeNaming) {
+		return nil, permanentError{err}
+	} else if err != nil {
+		return nil, err
 	}
 	daemon := p.deps.Daemons.Daemon(ref.String())
 	if err := waitServing(ctx, daemon); err != nil {

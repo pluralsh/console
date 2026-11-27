@@ -26,6 +26,18 @@ type Record struct {
 	Template         string `json:"template,omitempty"`
 	TemplateRevision int64  `json:"templateRevision,omitempty"`
 	ImageDigest      string `json:"imageDigest,omitempty"`
+	// DaemonVersion is the devbox-daemon of TemplateRevision's runtime sidecar.
+	DaemonVersion string `json:"daemonVersion,omitempty"`
+
+	// Rebase is set from when the actor is pointed at another revision's template until it has started there
+	// once. It is how to get back if it doesn't start.
+	Rebase *RebaseIntent `json:"rebase,omitempty"`
+	// RebaseState, RebaseMessage and RebaseRevision describe the last move to another revision (RebaseState).
+	RebaseState    string `json:"rebaseState,omitempty"`
+	RebaseMessage  string `json:"rebaseMessage,omitempty"`
+	RebaseRevision int64  `json:"rebaseRevision,omitempty"`
+	// SkipRevision is a revision the instance didn't start on; the runner's onResume policy won't try it again.
+	SkipRevision int64 `json:"skipRevision,omitempty"`
 
 	Status          string    `json:"status"`
 	SuspendReason   string    `json:"suspendReason,omitempty"`
@@ -38,6 +50,27 @@ type Record struct {
 
 	// Request is the protojson CreateInstanceRequest, kept current with allowlist and billing changes.
 	Request json.RawMessage `json:"request"`
+}
+
+// RebaseIntent is the revision an instance was on before its actor was pointed at another template.
+type RebaseIntent struct {
+	FromTemplate      string `json:"fromTemplate"`
+	FromRevision      int64  `json:"fromRevision"`
+	FromImageDigest   string `json:"fromImageDigest,omitempty"`
+	FromDaemonVersion string `json:"fromDaemonVersion,omitempty"`
+	ToTemplate        string `json:"toTemplate"`
+	ToRevision        int64  `json:"toRevision"`
+}
+
+func (r *Record) rebaseState() devboxv1.RebaseState {
+	return devboxv1.RebaseState(devboxv1.RebaseState_value[r.RebaseState])
+}
+
+// failRebase records that the move to revision failed.
+func (r *Record) failRebase(revision int64, message string) {
+	r.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
+	r.RebaseMessage = message
+	r.RebaseRevision = revision
 }
 
 // ActorID is "<atespace>/<actor>".
@@ -135,6 +168,13 @@ func (i *Instance) updateRequest(fn func(*devboxv1.CreateInstanceRequest)) Recor
 	fn(i.req)
 	i.rec.setRequest(i.req)
 	return i.rec
+}
+
+// inUse reports whether the instance is running and its daemon hasn't reported it idle.
+func (i *Instance) inUse() bool {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	return i.rec.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING && !i.idle.GetIdle()
 }
 
 func (i *Instance) idlePolicy() *devboxv1.IdlePolicy {

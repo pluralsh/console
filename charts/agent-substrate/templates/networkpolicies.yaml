@@ -197,8 +197,8 @@ spec:
 {{- end }}
 {{- if .Values.zerofs.enabled }}
 ---
-# The ZeroFS controller: ate-api-server creates and deletes homes, and is also
-# checked by its SPIFFE ID.
+# The ZeroFS controller: ate-api-server creates and deletes homes, the
+# devbox-gateway seeds them. Both are also checked by their SPIFFE ID.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -217,6 +217,11 @@ spec:
         - podSelector:
             matchLabels:
               app: ate-api-server
+        {{- if .Values.devboxes.enabled }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.devboxes.gatewayNamespace }}
+        {{- end }}
       ports:
         - protocol: TCP
           port: grpc

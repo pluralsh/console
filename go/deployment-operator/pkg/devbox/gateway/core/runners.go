@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -31,10 +32,17 @@ type Runner struct {
 	Revision    int64
 	GoldenTag   string
 	ImageDigest string
-	// HomeStorage is where the current revision keeps homes.
-	HomeStorage v1alpha1.DevboxHomeStorage
+	// DaemonVersion is the devbox-daemon of Revision's runtime sidecar; empty when the daemon is the image's own.
+	DaemonVersion string
+	// Home is the current revision's home volume.
+	Home Home
+	// Agents are the agents the current revision installs; nil for revisions that didn't record them.
+	Agents []v1alpha1.DevboxAgentType
 	// Revisions maps every revision that still exists to its template and golden tag.
 	Revisions map[int64]RunnerRevision
+	// UpdateOnResume is the runner's instance update policy: a suspended instance behind Revision moves to it
+	// when it is resumed.
+	UpdateOnResume bool
 
 	AllowedRepositories []string
 	// Repositories are the URLs golden boots preclone; instances refetch them on boot.
@@ -49,9 +57,77 @@ type Runner struct {
 }
 
 type RunnerRevision struct {
-	Template    string
-	GoldenTag   string
-	HomeStorage v1alpha1.DevboxHomeStorage
+	Template  string
+	GoldenTag string
+	Home      Home
+}
+
+// Home is a revision's home volume: a durable dir in the instance's snapshots (Storage Snapshot), or an external
+// volume of a StorageClass.
+type Home struct {
+	Storage v1alpha1.DevboxHomeStorage
+	// Class and Bytes are an external home's StorageClass and capacity. Class is empty for revisions from before
+	// the runner-wide class, which had a class of their own.
+	Class string
+	Bytes int64
+	// Seed is the seed of the revision's golden home, which new instances' homes are cloned from.
+	Seed string
+}
+
+// sameVolume reports whether Substrate sees the two homes as the same template volume, which it requires to move
+// an actor between templates.
+func (h Home) sameVolume(o Home) bool {
+	if !h.Storage.External() && !o.Storage.External() {
+		return true
+	}
+	return h.Storage == o.Storage && h.Class != "" && h.Class == o.Class && h.Bytes == o.Bytes
+}
+
+// revisionTarget is a revision an instance can be moved to.
+type revisionTarget struct {
+	revision      int64
+	template      string
+	imageDigest   string
+	daemonVersion string
+	home          Home
+	agents        []v1alpha1.DevboxAgentType
+}
+
+// errHomeNotMovable is moving an instance to a revision whose home is another volume than the instance's: another
+// storage, StorageClass or size, or a revision from before external homes had one class for every revision.
+// Substrate refuses to move an actor to a template with other volumes.
+var errHomeNotMovable = errors.New("its home volume differs between the revisions (storage, StorageClass or size), so it can't move; create a new instance to use the new revision")
+
+// errAgentRemoved is moving an instance to a revision that doesn't install an agent the instance was created with,
+// which its threads may use.
+var errAgentRemoved = errors.New("the new revision doesn't install an agent it uses")
+
+// movable reports whether an instance on revision from with the agents it was created with can move to to:
+// Substrate only moves an actor between templates with the same volumes, and its threads keep their agents.
+func (r *Runner) movable(from int64, agents []*devboxv1.AgentLaunch, to revisionTarget) error {
+	if !r.Revisions[from].Home.sameVolume(to.home) {
+		return errHomeNotMovable
+	}
+	for _, a := range agents {
+		if name := v1alpha1.DevboxAgentType(a.GetAgent().Name()); to.agents != nil && !slices.Contains(to.agents, name) {
+			return fmt.Errorf("%w (%s), so it can't move; create a new instance to use the new revision", errAgentRemoved, name)
+		}
+	}
+	return nil
+}
+
+// target resolves the revision instances move to, which is the runner's current one; revision is zero or names
+// it. A newer revision hasn't passed its probe, and an older one would undo an update (and the onResume policy
+// would move the instance forward again).
+func (r *Runner) target(revision int64) (revisionTarget, error) {
+	if r.Revision == 0 || r.Template == "" {
+		return revisionTarget{}, fmt.Errorf("%w: %s", ErrRunnerNotReady, r.Name)
+	}
+	if revision != 0 && revision != r.Revision {
+		return revisionTarget{}, fmt.Errorf("devbox runner %s serves revision %d, instances can't be moved to revision %d", r.Name, r.Revision, revision)
+	}
+	return revisionTarget{revision: r.Revision, template: r.Template, imageDigest: r.ImageDigest, daemonVersion: r.DaemonVersion,
+		home: r.Home, agents: r.Agents}, nil
 }
 
 // ErrRunnerNotReady means the runner has no ready revision to start instances from.
@@ -215,16 +291,19 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 		ImageDigest:         digestOf(deref(st.ResolvedImage)),
 		Revisions:           map[int64]RunnerRevision{},
 		AllowedRepositories: obj.Spec.AllowedRepositories,
+		UpdateOnResume:      obj.InstanceUpdateMode() == v1alpha1.DevboxInstanceUpdateOnResume,
 	}
 	if st.TemplateRevision != nil {
 		r.Revision = *st.TemplateRevision
 	}
 	for _, rev := range st.Revisions {
-		home := deref(rev.HomeStorage)
-		r.Revisions[rev.Revision] = RunnerRevision{Template: rev.Name, GoldenTag: deref(rev.GoldenTag), HomeStorage: home}
+		home := homeOf(rev)
+		r.Revisions[rev.Revision] = RunnerRevision{Template: rev.Name, GoldenTag: deref(rev.GoldenTag), Home: home}
 		if rev.Revision == r.Revision {
 			r.GoldenTag = deref(rev.GoldenTag)
-			r.HomeStorage = home
+			r.DaemonVersion = deref(rev.DaemonVersion)
+			r.Home = home
+			r.Agents = rev.Agents
 			if r.Template == "" {
 				r.Template = rev.Name
 			}
@@ -323,4 +402,12 @@ func digestOf(image string) string {
 		return d
 	}
 	return ""
+}
+
+func homeOf(rev v1alpha1.DevboxRevision) Home {
+	h := Home{Storage: deref(rev.HomeStorage), Class: deref(rev.HomeStorageClass), Seed: deref(rev.HomeSeed)}
+	if rev.HomeSize != nil {
+		h.Bytes = rev.HomeSize.Value()
+	}
+	return h
 }

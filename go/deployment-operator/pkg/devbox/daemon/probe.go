@@ -46,7 +46,7 @@ func ImageProbeSpecs(img *harness.ImageInfo, def string) []*devboxv1.AgentProbeS
 // Probe runs the section 4.2a probe outside a running daemon (image builds, `devbox-daemon probe --json`).
 func Probe(ctx context.Context, cfg Config, specs []*devboxv1.AgentProbeSpec, ep *devboxv1.HarnessEndpoints) ([]*devboxv1.AgentCatalogEntry, error) {
 	cfg.defaults()
-	img, err := harness.LoadImageInfo(cfg.ImageInfo)
+	img, err := LoadImage(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -69,5 +69,5 @@ func Probe(ctx context.Context, cfg Config, specs []*devboxv1.AgentProbeSpec, ep
 	defer sup.StopAll(context.Background(), 0)
 	return agents.Probe(ctx, agents.ProbeOptions{Launcher: h, Supervisor: sup, Log: cfg.Log,
 		Present:        func(t devboxv1.AgentType) bool { _, ok := h.Present(t); return ok },
-		AdapterVersion: h.AdapterVersion, ScratchDir: scratch, Endpoints: ep}, specs), nil
+		AdapterVersion: h.AdapterVersion, ScratchDir: scratch, Endpoints: ep, MissingReason: img.RuntimeUnavailable}, specs), nil
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -12,6 +13,7 @@ import (
 	"github.com/pelletier/go-toml/v2"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/runtimemanifest"
 )
 
 var proxyEndpoints = &devboxv1.HarnessEndpoints{AiProxyUrl: "https://console.example.com/ext/ai/"}
@@ -25,6 +27,8 @@ func testConfig(t *testing.T) *Config {
 			return []string{"PATH=/usr/bin", "ANTHROPIC_DEFAULT_OPUS_MODEL=stale"}
 		},
 		CodexBundledModels: func() ([]byte, error) { return nil, errors.New("no codex in tests") },
+		// Not the machine's: tests run the same inside a devbox image, which has managed settings.
+		ClaudeManagedSettings: filepath.Join(dir, "no-managed-settings.json"),
 	}
 }
 
@@ -578,5 +582,154 @@ func TestHeadlessUsesSubscriptionCredentials(t *testing.T) {
 
 	if _, _, _, err := c.Headless(devboxv1.AgentType_AGENT_TYPE_GEMINI, "x", ""); err == nil {
 		t.Fatal("gemini has no headless mode")
+	}
+}
+
+// The runtime sidecar's agents win over the image's, by absolute path, with their env; the image keeps the
+// agents the runtime doesn't carry.
+func TestMergeRuntime(t *testing.T) {
+	hash := strings.Repeat("ab", 32)
+	m := &runtimemanifest.Manifest{
+		Contract: runtimemanifest.Contract,
+		Components: map[string]runtimemanifest.Component{
+			"daemon":         {Version: "1", Hash: hash, Dir: "../components/daemon-x"},
+			"claude":         {Version: "2.1.0", Hash: hash, Dir: "../components/claude-x", Bin: map[string]runtimemanifest.Bin{"claude": {Path: "bin/claude"}}},
+			"claude-acp":     {Version: "0.75.1", Hash: hash, Dir: "../components/claude-acp-x", Bin: map[string]runtimemanifest.Bin{"claude-agent-acp": {Path: "index.mjs"}}},
+			"opencode":       {Version: "1.18.0", Hash: hash, Dir: "../components/opencode-x", Bin: map[string]runtimemanifest.Bin{"opencode": {Path: "bin/opencode"}}},
+			"pi":             {Version: "0.84.1", Hash: hash, Dir: "../components/pi-x", Bin: map[string]runtimemanifest.Bin{"pi": {Path: "cli.js"}}},
+			"playwright-mcp": {Version: "0.0.85", Hash: hash, Dir: "../components/pw-x", Bin: map[string]runtimemanifest.Bin{"playwright-mcp": {Path: "cli.js"}}},
+		},
+		Agents: map[string]runtimemanifest.Agent{
+			"claude": {Tool: runtimemanifest.Tool{Component: "claude", Command: "claude"},
+				ACP: runtimemanifest.Tool{Component: "claude-acp", Command: "claude-agent-acp"},
+				Env: map[string]string{"CLAUDE_CODE_EXECUTABLE": "${bin}/claude"}},
+			"opencode": {Tool: runtimemanifest.Tool{Component: "opencode", Command: "opencode"},
+				ACP: runtimemanifest.Tool{Component: "opencode", Command: "opencode", Args: []string{"acp"}}},
+			"pi": {Tool: runtimemanifest.Tool{Component: "pi", Command: "pi"}, ACP: runtimemanifest.Tool{Component: "pi", Command: "pi"}},
+		},
+		PlaywrightMCP: &runtimemanifest.Tool{Component: "playwright-mcp", Command: "playwright-mcp"},
+	}
+	if err := m.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	img := &ImageInfo{PlaywrightMCP: "playwright-mcp", Agents: map[string]ImageAgent{
+		"claude": {Command: "claude", Version: "1.0.0"},
+		"gemini": {Command: "gemini", Version: "0.44.1"},
+	}}
+	dir := "/home/dev/.plural-runtime/sha256-aaaa"
+	img.MergeRuntime(dir, m)
+
+	claude := img.Agents["claude"]
+	if claude.Command != dir+"/bin/claude" || claude.ACP.Command != dir+"/bin/claude-agent-acp" || claude.Version != "2.1.0" || claude.ACP.Version != "0.75.1" {
+		t.Errorf("claude = %+v", claude)
+	}
+	if got := claude.Env["CLAUDE_CODE_EXECUTABLE"]; got != dir+"/bin/claude" {
+		t.Errorf("CLAUDE_CODE_EXECUTABLE = %q", got)
+	}
+	if oc := img.Agents["opencode"]; oc.ACP.Version != "" || !slices.Equal(oc.ACP.Args, []string{"acp"}) {
+		t.Errorf("opencode = %+v, want no adapter version", oc)
+	}
+	if img.Agents["gemini"].Command != "gemini" {
+		t.Errorf("the image's gemini was dropped: %+v", img.Agents["gemini"])
+	}
+	if img.PlaywrightMCP != dir+"/bin/playwright-mcp" {
+		t.Errorf("playwrightMcp = %q", img.PlaywrightMCP)
+	}
+
+	c := testConfig(t)
+	c.Image = img
+	if got := c.AdapterVersion(devboxv1.AgentType_AGENT_TYPE_CLAUDE); got != "0.75.1" {
+		t.Errorf("adapter version = %q", got)
+	}
+	if got := c.PiSubagentDir(); got != "/home/dev/.plural-runtime/components/pi-x/node_modules/"+piSubagentExtension {
+		t.Errorf("pi subagent dir = %q", got)
+	}
+	spec, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, nil, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if spec.Path != dir+"/bin/claude-agent-acp" {
+		t.Errorf("path = %q", spec.Path)
+	}
+	envIs(t, spec.Env, "CLAUDE_CODE_EXECUTABLE", dir+"/bin/claude")
+}
+
+// An update moves pi's extension (image to runtime, one pi component to the next): only the current copy stays
+// registered, next to the user's own extensions.
+func TestPiSubagentsReplacesEarlierCopies(t *testing.T) {
+	c := testConfig(t)
+	c.PiSubagentExtension = filepath.Join(t.TempDir(), "components", "pi-new", "node_modules", piSubagentExtension)
+	if err := os.MkdirAll(c.PiSubagentExtension, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(c.PiSubagentExtension, "index.ts"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	settings := filepath.Join(c.Home, ".pi", "agent", "settings.json")
+	if err := os.MkdirAll(filepath.Dir(settings), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	old := `{"extensions": ["/usr/local/lib/node_modules/` + piSubagentExtension + `/index.ts", "/home/dev/mine.ts",
+		"/home/dev/.plural-runtime/components/pi-old/node_modules/` + piSubagentExtension + `/index.ts"]}`
+	if err := os.WriteFile(settings, []byte(old), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.syncPiSubagents(); err != nil {
+		t.Fatal(err)
+	}
+	var got struct{ Extensions []string }
+	data, _ := os.ReadFile(settings)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"/home/dev/mine.ts", filepath.Join(c.PiSubagentExtension, "index.ts")}
+	if !slices.Equal(got.Extensions, want) {
+		t.Errorf("extensions = %v, want %v", got.Extensions, want)
+	}
+}
+
+// Without the devbox images' managed settings, Claude's own sandbox is turned off in the user's settings, unless
+// the user chose otherwise.
+func TestClaudeSandboxOffWithoutManagedSettings(t *testing.T) {
+	c := testConfig(t)
+	c.ClaudeManagedSettings = filepath.Join(t.TempDir(), "missing.json")
+	settings := filepath.Join(c.Home, ".claude", "settings.json")
+	read := func() map[string]any {
+		t.Helper()
+		data, err := os.ReadFile(settings)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out := map[string]any{}
+		if err := json.Unmarshal(data, &out); err != nil {
+			t.Fatal(err)
+		}
+		return out
+	}
+	if _, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := read()["sandbox"]; !reflect.DeepEqual(got, map[string]any{"enabled": false}) {
+		t.Errorf("sandbox = %v, want disabled", got)
+	}
+
+	if err := os.WriteFile(settings, []byte(`{"sandbox": {"enabled": true}}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := read()["sandbox"]; !reflect.DeepEqual(got, map[string]any{"enabled": true}) {
+		t.Errorf("sandbox = %v, the user's choice was overwritten", got)
+	}
+
+	// The image's managed settings already turn it off.
+	c.ClaudeManagedSettings = settings
+	c.Home = t.TempDir()
+	if _, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(c.Home, ".claude", "settings.json")); err == nil {
+		t.Error("user settings were written although the image has managed settings")
 	}
 }

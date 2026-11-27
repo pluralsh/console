@@ -178,7 +178,7 @@ already have the roles and schema `ate-setup`'s bootstrap creates.
 | Extra ext_proc filter | `atenet.egress.additionalExtprocService` (e.g. `plrl-deploy-operator/devbox-egress-authz:50053`), spliced into the egress Envoy config at Substrate's `#ATE_MITM_EXTPROC_*` markers like `ate-setup` does |
 | SPIFFE IDs | `atenet.router.ingressAllowedSPIFFEIDs`, `auth.egressGatewayExtraSPIFFEIDs` (e.g. `spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway`) |
 | Route timeout | `atenet.router.routeTimeout` |
-| Preview gates | `previewGates`, passed as `--preview=` to every Substrate container |
+| Preview gates | `previewGates`, passed as `--preview=` to every Substrate container. Devbox runners with `bootstrapScript`, `mise` or `repositories` need `GoldenEgressPolicy`; JuiceFS and ZeroFS homes need `ExternalVolumes`, which the chart adds itself |
 | Dataplane | `atenet.dataplane: envoy` |
 | System-infra scheduling | `systemInfra.*` (`cordon` applies ate-setup's `--cordon-system-infra-components`) |
 | Telemetry | `otel.endpoint` (empty disables export), `logLevel` and per-component `logLevel` |
@@ -281,15 +281,19 @@ bucket:
   `juicefs mount` with its cache under `juicefs.node.cacheDir`. The chart turns on Substrate's
   `ExternalVolumes` preview gate.
 
-For each template revision, the operator creates a StorageClass `devbox-home.<atespace>.<template>`
-that copies this one and adds a `seed` parameter. The first home provisioned from it belongs to the
-revision's golden boot. When Substrate deletes the golden actor after tagging it, the driver clones
-that home into the seed, and every later instance of the revision starts from a clone of it, with
-the bootstrap script's clones and builds already there. Snapshots also save the home as a seed, but
-starting from a snapshot fails with `UNSUPPORTED` until Substrate can restore tags of templates
-with external volumes.
+Every template revision of a runner names this StorageClass (or the runner's
+`spec.home.storageClassName`), so an instance's home volume stays the same when it moves to a newer
+revision. While a revision's golden boot runs, the devbox-gateway claims the golden actor's home
+for the revision's seed (`golden.<template uid>`, a CreateVolume with the `claimSeed` parameter).
+When Substrate deletes the golden actor after tagging it, the driver clones that home into the seed.
+The gateway creates every later instance's home as a clone of it (a CreateVolume whose content
+source is the seed) before the instance's first resume, with the bootstrap script's clones and
+builds already there. Snapshots also save the home as a seed, but starting from a snapshot fails
+with `UNSUPPORTED` until Substrate can restore tags of templates with external volumes. Revisions
+from older operators have a StorageClass of their own, `devbox-home.<atespace>.<template>`, with a
+`seed` parameter, which the operator deletes with the revision.
 
-The operator needs `get`, `create` and `delete` on `storageclasses.storage.k8s.io` for these.
+The operator needs `get` and `delete` on `storageclasses.storage.k8s.io`.
 
 ### ZeroFS homes
 
@@ -301,8 +305,8 @@ the password in `devbox-zerofs-encryption`. The secrets hook generates that secr
 supply your own with `zerofs.encryption.existingSecret`. Losing the password loses every home.
 
 - **The controller** (`devbox-zerofs-controller`, unprivileged) passes a home's size and owner to
-  the node and deletes the home's objects when Substrate deletes the volume. Only ate-api-server can
-  call it.
+  the node and deletes the home's objects when Substrate deletes the volume. Only ate-api-server and,
+  with `devboxes.enabled`, the devbox-gateway can call it.
 - **The node plugin** (`devbox-zerofs-node`) is a privileged DaemonSet that runs only where atelet
   runs: it defaults to atelet's `nodeSelector`, `tolerations` and `affinity`, so nodes without
   devboxes pay nothing for it. Atelet reaches it through the plugin socket on its own node. Staging a
@@ -313,13 +317,12 @@ supply your own with `zerofs.encryption.existingSecret`. Losing the password los
   the home can be staged on any other node. `updateStrategy` is `OnDelete`, because restarting the
   plugin ends every home on the node.
 
-A DevboxRunner uses it with `spec.home.storage: ZeroFS`. Each template revision gets a seeded
-StorageClass as with [JuiceFS](#juicefs-homes). The first home from it is the golden boot's. When
-Substrate deletes it, the controller copies its objects to `<zerofs.prefix>/seeds/<seed>/`, and every
-later home of the revision starts from a server-side copy of that prefix. Snapshots don't save the
-home, and starting from a snapshot fails with `UNSUPPORTED`. CreateVolume with a content source
-fails with `UNIMPLEMENTED`. Homes still count against `spec.resources.disk`, because each writer's
-cache sits on node disk.
+A DevboxRunner uses it with `spec.home.storage: ZeroFS`. Its revisions share the runner's StorageClass
+and the gateway claims and seeds homes as with [JuiceFS](#juicefs-homes). When Substrate deletes the
+golden actor, the controller copies its objects to `<zerofs.prefix>/seeds/<seed>/`, and every later
+home of the revision starts from a server-side copy of that prefix. Snapshots don't save the home,
+and starting from a snapshot fails with `UNSUPPORTED`. Homes still count against
+`spec.resources.disk`, because each writer's cache sits on node disk.
 
 ## Values
 

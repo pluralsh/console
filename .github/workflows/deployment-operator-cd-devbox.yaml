@@ -3,7 +3,8 @@ name: CD / Devbox images
 # Images are tagged like the deployment operator's (sha-<head sha> and pr-<number> on pull requests, the
 # release version on tags), since the operator defaults devbox-fat and devbox-gateway to its own IMAGE_TAG.
 # Each image is tested (dockerfiles/devbox/test.sh) by the digest it was pushed as; devbox-minimal and
-# devbox-fat are only tagged once both platforms pass.
+# devbox-fat are only tagged once both platforms pass. devbox-runtime-core is only rebuilt when its sources
+# change (see publish-runtime).
 #
 # Layer caches live in ghcr.io/pluralsh/console-cache, readable by every branch and pull request. Nothing
 # builds these images on master, so pull requests and releases both write them.
@@ -456,7 +457,7 @@ jobs:
   # requests stay on GHCR.
   mirror:
     name: Mirror ${{ matrix.image }} to ${{ matrix.registry }}
-    needs: [version, publish, publish-gateway, publish-juicefs, publish-zerofs]
+    needs: [version, publish, publish-gateway, publish-juicefs, publish-zerofs, tag-runtime]
     if: github.event_name != 'pull_request'
     permissions:
       contents: read
@@ -465,7 +466,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [devbox-minimal, devbox-fat, devbox-gateway, devbox-juicefs, devbox-zerofs]
+        image: [devbox-minimal, devbox-fat, devbox-gateway, devbox-juicefs, devbox-zerofs, devbox-runtime-core]
         registry: [gcr.io, docker.io]
     runs-on: ubuntu-latest
     steps:
@@ -524,3 +525,207 @@ jobs:
         with:
           digest: ${{ steps.inspect.outputs.digest }}
           images: ${{ matrix.registry }}/pluralsh/${{ matrix.image }}
+
+  # devbox-runtime-core (the plural-runtime sidecar holding devbox-daemon and the agents) is built once per source hash
+  # (dockerfiles/devbox/runtime-src-hash.sh) and every later run with the same hash only adds its tags to that
+  # digest. The operator pins the image by digest, so a release that doesn't change the daemon doesn't roll a
+  # new template revision, which would cold-boot every instance on its next update. Pull requests build under
+  # their own pr-src-<hash> tags, and a release only reuses a digest that a release signed.
+  publish-runtime:
+    name: Build or reuse devbox-runtime-core
+    needs: [version]
+    outputs:
+      digest: ${{ steps.inspect.outputs.digest }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/pluralsh/devbox-runtime-core
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go/go.work
+          cache-dependency-path: go/deployment-operator/go.sum
+          cache: true
+      - name: Source hash
+        id: src
+        working-directory: go/deployment-operator/dockerfiles/devbox
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          hash="$(./runtime-src-hash.sh)"
+          prefix=src
+          if [ "${EVENT_NAME}" = "pull_request" ]; then prefix=pr-src; fi
+          echo "hash=${hash}" >> "$GITHUB_OUTPUT"
+          echo "ref=${IMAGE}:${prefix}-${hash}" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.8.2
+      # A src-<hash> tag is only a name: any run of this repository that can write packages can push one, also
+      # pointing it at an older signed image. A release therefore reuses an image only if a release run of this
+      # workflow signed that digest and every platform's image carries this source hash in its
+      # sh.plural.devbox/src-hash label, which the signed digest covers; it builds it otherwise. Pull requests,
+      # whose images are never signed, reuse their own pr-src-<hash> as it is.
+      - name: Look for an image of this source hash
+        id: existing
+        env:
+          SRC_REF: ${{ steps.src.outputs.ref }}
+          SRC_HASH: ${{ steps.src.outputs.hash }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          digest="$(docker buildx imagetools inspect "${SRC_REF}" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
+          found=false
+          if [[ "${digest}" == sha256:* ]]; then
+            if [ "${EVENT_NAME}" = "pull_request" ]; then
+              found=true
+            elif ! cosign verify "${IMAGE}@${digest}" \
+                --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+                --certificate-identity-regexp '^https://github\.com/pluralsh/console/\.github/workflows/deployment-operator-cd-devbox\.yaml@refs/(tags/go/deployment-operator/v[0-9]+\.[0-9]+\.[0-9]+|heads/master)$' \
+                >/dev/null; then
+              echo "::warning::${SRC_REF} (${digest}) is not signed by a release of this workflow; building it again"
+            elif [ "$(docker buildx imagetools inspect "${IMAGE}@${digest}" --format '{{json .Image}}' \
+                | jq -c '[.[].config.Labels["sh.plural.devbox/src-hash"]] | unique')" != "[\"${SRC_HASH}\"]" ]; then
+              echo "::warning::${SRC_REF} (${digest}) is a signed image of other sources; building it again"
+            else
+              found=true
+            fi
+          fi
+          echo "found=${found}" >> "$GITHUB_OUTPUT"
+          if [ "${found}" = "true" ]; then
+            echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+            echo "Reusing ${SRC_REF} (${digest})" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Building ${SRC_REF}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      # Reproducible (see runtime-core.Dockerfile): no metadata-action labels, no attestations, fixed timestamps.
+      # No registry cache either: pull requests can write it, and this build is kept for as long as the daemon's
+      # sources don't change. The Go build cross-compiles on the build platform, so no QEMU is needed.
+      - name: Build and push
+        id: build
+        if: steps.existing.outputs.found != 'true'
+        working-directory: go
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          SRC_HASH: ${{ steps.src.outputs.hash }}
+          SRC_REF: ${{ steps.src.outputs.ref }}
+          SOURCE_DATE_EPOCH: '0'
+        run: |
+          docker buildx bake --progress plain \
+            -f deployment-operator/dockerfiles/devbox/docker-bake.hcl runtime-core \
+            --metadata-file "${RUNNER_TEMP}/runtime-metadata.json" \
+            --set "runtime-core.platform=linux/amd64,linux/arm64" \
+            --set "runtime-core.output=type=image,name=${SRC_REF},push=true,rewrite-timestamp=true"
+          echo "digest=$(jq -er '.["runtime-core"]["containerimage.digest"]' "${RUNNER_TEMP}/runtime-metadata.json")" >> "$GITHUB_OUTPUT"
+      # From here on the image is named by digest: the one just built, or the one verified above.
+      - name: Resolve digest
+        id: inspect
+        env:
+          DIGEST: ${{ steps.build.outputs.digest || steps.existing.outputs.digest }}
+        run: |
+          if [[ "${DIGEST}" != sha256:* ]]; then
+            echo "no digest for the runtime image" >&2
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "${IMAGE}@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
+
+  # The runtime on each platform it is built for: the install test, and every agent's ACP handshake from the
+  # runtime in the environment images README.md says are supported (and the glibc message in one that isn't).
+  test-runtime:
+    name: Test devbox-runtime-core (${{ matrix.platforms.platform }})
+    needs: [publish-runtime]
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
+    defaults:
+      run:
+        working-directory: go/deployment-operator/dockerfiles/devbox
+    env:
+      RUNTIME_IMAGE: ghcr.io/pluralsh/devbox-runtime-core@${{ needs.publish-runtime.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install test
+        run: ./test.sh runtime
+      - name: Probe the agents
+        env:
+          PLATFORM: ${{ matrix.platforms.platform }}
+        run: |
+          docker pull --platform "${PLATFORM}" "${RUNTIME_IMAGE}"
+          ./runtime/probe-matrix.sh "${RUNTIME_IMAGE}" "${PLATFORM}"
+
+  # Tags and signs the runtime once it passed on every platform.
+  tag-runtime:
+    name: Publish devbox-runtime-core
+    needs: [version, publish-runtime, test-runtime]
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/pluralsh/devbox-runtime-core
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE }}
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.8.2
+      # The operator resolves devbox-runtime-core:<its own tag>, so every tag of this run must name the digest.
+      - name: Tag
+        env:
+          DIGEST: ${{ needs.publish-runtime.outputs.digest }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") "${IMAGE}@${DIGEST}"
+          tagged=$(docker buildx imagetools inspect "${IMAGE}:${VERSION}" --format '{{.Manifest.Digest}}')
+          if [ "${tagged}" != "${DIGEST}" ]; then
+            echo "${IMAGE}:${VERSION} is ${tagged}, want ${DIGEST}: retagging changed the digest" >&2
+            exit 1
+          fi
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ needs.publish-runtime.outputs.digest }}
+          images: ${{ env.IMAGE }}

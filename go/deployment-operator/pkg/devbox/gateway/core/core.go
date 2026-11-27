@@ -18,9 +18,11 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/homes"
 )
 
 // Router reaches daemons through atenet-router (see package router).
@@ -41,7 +43,7 @@ type CredentialService interface {
 	InstanceCredential(ctx context.Context, instanceID string, sel *devboxv1.CredentialSelector) (*devboxv1.InstanceCredential, error)
 }
 
-// Seeds saves the JuiceFS homes of snapshotted instances (juicefs.Client).
+// Seeds saves the JuiceFS homes of snapshotted instances (homedriver.Client).
 type Seeds interface {
 	SaveSeed(ctx context.Context, seedID, volumeID string) error
 	DeleteSeed(ctx context.Context, seedID string) error
@@ -129,6 +131,9 @@ type Deps struct {
 	Credentials CredentialService
 	// Seeds is optional; without it snapshots of JuiceFS homes keep no copy of the home.
 	Seeds Seeds
+	// Homes are the drivers that seed external homes from their revision's golden home, by storage
+	// (homedriver.Client); instances of a runner whose storage has none can't start.
+	Homes map[v1alpha1.DevboxHomeStorage]homes.Driver
 	Log   logr.Logger
 	Now   func() time.Time
 }
@@ -342,17 +347,41 @@ func (g *Gateway) setStatus(ctx context.Context, inst *Instance, u statusUpdate)
 	if err := g.persist(ctx, &rec); err != nil {
 		g.log.Error(err, "persisting instance record", "instance", inst.ID)
 	}
-	g.report(ctx, &devboxv1.ReportInstanceStatusRequest{
-		InstanceId:       inst.ID,
-		Status:           u.status,
-		SuspendReason:    u.reason,
-		Message:          u.message,
-		Error:            u.err,
+	req := statusReport(&rec, idle)
+	req.SuspendReason, req.Error = u.reason, u.err
+	g.report(ctx, req)
+}
+
+// statusReport is the record as console sees it.
+func statusReport(rec *Record, idle *devboxv1.IdleState) *devboxv1.ReportInstanceStatusRequest {
+	return &devboxv1.ReportInstanceStatusRequest{
+		InstanceId:       rec.InstanceID,
+		Status:           rec.status(),
+		SuspendReason:    devboxv1.SuspendReason(devboxv1.SuspendReason_value[rec.SuspendReason]),
+		Message:          rec.Message,
 		ActorId:          rec.ActorID(),
 		ImageDigest:      rec.ImageDigest,
 		TemplateRevision: rec.TemplateRevision,
 		Idle:             idle,
-	})
+		DaemonVersion:    rec.DaemonVersion,
+		RebaseState:      rec.rebaseState(),
+		RebaseMessage:    rec.RebaseMessage,
+		RebaseRevision:   rec.RebaseRevision,
+	}
+}
+
+// reportRecord persists the record and reports it without a status change, so a suspended instance keeps its
+// suspend time and reason.
+func (g *Gateway) reportRecord(ctx context.Context, inst *Instance) {
+	inst.mu.Lock()
+	inst.rec.UpdatedAt = g.now()
+	rec := inst.rec
+	idle := inst.idle
+	inst.mu.Unlock()
+	if err := g.persist(ctx, &rec); err != nil {
+		g.log.Error(err, "persisting instance record", "instance", inst.ID)
+	}
+	g.report(ctx, statusReport(&rec, idle))
 }
 
 func (g *Gateway) report(ctx context.Context, req *devboxv1.ReportInstanceStatusRequest) {

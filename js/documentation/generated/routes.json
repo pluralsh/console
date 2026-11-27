@@ -25,7 +25,7 @@
   },
   "/getting-started/first-steps/existing-cluster": {
     "relPath": "/getting-started/first-steps/existing-cluster.md",
-    "lastmod": "2026-10-20T19:27:25.000Z"
+    "lastmod": "2026-11-20T17:06:58.000Z"
   },
   "/getting-started/first-steps/plural-cloud": {
     "relPath": "/getting-started/first-steps/plural-cloud.md",
@@ -85,7 +85,7 @@
   },
   "/getting-started/advanced-config/sandboxing": {
     "relPath": "/getting-started/advanced-config/sandboxing.md",
-    "lastmod": "2026-10-30T03:01:56.000Z"
+    "lastmod": "2026-11-20T16:38:52.000Z"
   },
   "/getting-started/advanced-config/edge-configuration": {
     "relPath": "/getting-started/advanced-config/edge-configuration.md",
@@ -93,15 +93,15 @@
   },
   "/getting-started/advanced-config/network-configuration": {
     "relPath": "/getting-started/advanced-config/network-configuration.md",
-    "lastmod": "2026-10-20T19:27:25.000Z"
+    "lastmod": "2026-11-20T17:06:58.000Z"
   },
   "/getting-started/advanced-config/ingress-migration": {
     "relPath": "/getting-started/advanced-config/ingress-migration.md",
-    "lastmod": "2026-11-25T07:06:28.342Z"
+    "lastmod": "2026-11-20T17:06:58.000Z"
   },
   "/getting-started/advanced-config/private-ca": {
     "relPath": "/getting-started/advanced-config/private-ca.md",
-    "lastmod": "2026-11-20T15:20:42.000Z"
+    "lastmod": "2026-11-25T07:13:04.000Z"
   },
   "/api-reference": {
     "relPath": "/api-reference/index.md",
@@ -113,11 +113,11 @@
   },
   "/api-reference/kubernetes/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-11-16T22:13:27.000Z"
+    "lastmod": "2026-11-26T07:43:28.000Z"
   },
   "/api-reference/kubernetes/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-11-16T22:13:27.000Z"
+    "lastmod": "2026-11-26T12:40:30.000Z"
   },
   "/api-reference/graphql": {
     "relPath": "/api-reference/graphql.md",
@@ -391,6 +391,18 @@
     "relPath": "/plural-features/workbenches/use-cases.md",
     "lastmod": "2026-10-20T19:27:25.000Z"
   },
+  "/plural-features/devboxes": {
+    "relPath": "/plural-features/devboxes/index.md",
+    "lastmod": "2026-11-26T10:16:41.000Z"
+  },
+  "/plural-features/devboxes/environment-images": {
+    "relPath": "/plural-features/devboxes/environment-images.md",
+    "lastmod": "2026-11-26T12:40:59.000Z"
+  },
+  "/plural-features/devboxes/updates": {
+    "relPath": "/plural-features/devboxes/updates.md",
+    "lastmod": "2026-11-26T14:48:07.144Z"
+  },
   "/plural-features/continuous-deployment": {
     "relPath": "/plural-features/continuous-deployment/index.md",
     "lastmod": "2026-10-20T19:27:25.000Z"
@@ -437,11 +449,11 @@
   },
   "/plural-features/continuous-deployment/service-templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-11-25T07:06:28.864Z"
+    "lastmod": "2026-11-26T14:48:07.432Z"
   },
   "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters": {
     "relPath": "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters.md",
-    "lastmod": "2026-11-25T07:06:28.887Z"
+    "lastmod": "2026-11-26T14:48:07.499Z"
   },
   "/plural-features/continuous-deployment/lua": {
     "relPath": "/plural-features/continuous-deployment/lua.md",
@@ -489,7 +501,7 @@
   },
   "/plural-features/stacks-iac-management": {
     "relPath": "/plural-features/stacks-iac-management/index.md",
-    "lastmod": "2026-10-20T19:27:25.000Z"
+    "lastmod": "2026-11-26T07:43:28.000Z"
   },
   "/plural-features/stacks-iac-management/customize-runners": {
     "relPath": "/plural-features/stacks-iac-management/customize-runners.md",
@@ -717,7 +729,7 @@
   },
   "/getting-started/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-11-16T22:13:27.000Z"
+    "lastmod": "2026-11-26T12:40:30.000Z"
   },
   "/getting-started/readme": {
     "relPath": "/getting-started/index.md",
@@ -745,7 +757,7 @@
   },
   "/deployments/operator/api": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-11-16T22:13:27.000Z"
+    "lastmod": "2026-11-26T07:43:28.000Z"
   },
   "/deployments/cli-quickstart": {
     "relPath": "/getting-started/first-steps/cli-quickstart.md",
@@ -753,7 +765,7 @@
   },
   "/deployments/existing-cluster": {
     "relPath": "/getting-started/first-steps/existing-cluster.md",
-    "lastmod": "2026-10-20T19:27:25.000Z"
+    "lastmod": "2026-11-20T17:06:58.000Z"
   },
   "/getting-started/deployments": {
     "relPath": "/getting-started/first-steps/index.md",
@@ -797,15 +809,15 @@
   },
   "/deployments/sandboxing": {
     "relPath": "/getting-started/advanced-config/sandboxing.md",
-    "lastmod": "2026-10-30T03:01:56.000Z"
+    "lastmod": "2026-11-20T16:38:52.000Z"
   },
   "/deployments/network-configuration": {
     "relPath": "/getting-started/advanced-config/network-configuration.md",
-    "lastmod": "2026-10-20T19:27:25.000Z"
+    "lastmod": "2026-11-20T17:06:58.000Z"
   },
   "/deployments/private-ca": {
     "relPath": "/getting-started/advanced-config/private-ca.md",
-    "lastmod": "2026-11-20T15:20:42.000Z"
+    "lastmod": "2026-11-25T07:13:04.000Z"
   },
   "/deployments/operator/architecture": {
     "relPath": "/plural-features/continuous-deployment/deployment-operator/index.md",
@@ -865,7 +877,7 @@
   },
   "/deployments/stacks": {
     "relPath": "/plural-features/stacks-iac-management/index.md",
-    "lastmod": "2026-10-20T19:27:25.000Z"
+    "lastmod": "2026-11-26T07:43:28.000Z"
   },
   "/service-catalog/creation": {
     "relPath": "/plural-features/service-catalog/creation.md",
@@ -933,7 +945,7 @@
   },
   "/deployments/templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-11-25T07:06:29.607Z"
+    "lastmod": "2026-11-26T14:48:10.261Z"
   },
   "/deployments/multi-tenancy": {
     "relPath": "/plural-features/projects-and-multi-tenancy/index.md",
@@ -957,11 +969,11 @@
   },
   "/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-11-16T22:13:27.000Z"
+    "lastmod": "2026-11-26T07:43:28.000Z"
   },
   "/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-11-16T22:13:27.000Z"
+    "lastmod": "2026-11-26T12:40:30.000Z"
   },
   "/plural-features/workbenches/tools": {
     "relPath": "/plural-features/workbenches/integrations/tools.md",
