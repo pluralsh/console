@@ -179,6 +179,8 @@ spec:
             - --state-root={{ $z.node.stateDir }}
             - --socket-dir=/run/zerofs
             - --cache-disk-gb={{ $z.node.cacheDiskGB }}
+            - --cache-disk-percent={{ $z.node.cacheDiskPercent }}
+            - --cache-disk-max-gb={{ $z.node.cacheDiskMaxGB }}
             - --cache-memory-gb={{ $z.node.cacheMemoryGB }}
             - --parked-cache-gb={{ $z.node.parkedCacheGB }}
             - --nbds-max={{ $z.node.nbdsMax }}

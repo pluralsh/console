@@ -274,6 +274,9 @@ func (b *Browser) spawnEnv(name string, env []string, args ...string) (started, 
 	cmd.Stdout, cmd.Stderr = out, out
 	// Browser processes don't count as user activity on their own; stream bytes do.
 	p, err := b.opts.Supervisor.Spawn(name, cmd, cmd.Start, true)
+	if err == nil {
+		_ = proc.Deprioritize(p.Pid())
+	}
 	return started{p: p, out: out}, err
 }
 

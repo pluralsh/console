@@ -404,8 +404,12 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 	}
 
 	res := lo.FromPtr(runner.Spec.Resources)
+	disk := res.Disk
+	if runner.Spec.HomeStorage().External() {
+		disk = lo.ToPtr(runner.Spec.HomeSize())
+	}
 	resources := map[string]string{}
-	for k, q := range map[string]*resource.Quantity{"cpu": res.CPU, "memory": res.Memory, "disk": res.Disk} {
+	for k, q := range map[string]*resource.Quantity{"cpu": res.CPU, "memory": res.Memory, "disk": disk} {
 		if q != nil {
 			resources[k] = q.String()
 		}

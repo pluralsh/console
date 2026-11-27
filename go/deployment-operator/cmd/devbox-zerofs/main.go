@@ -73,6 +73,8 @@ type options struct {
 	storeOptions   stringList
 	nbdsMax        int
 	cacheDiskGB    float64
+	cacheDiskPct   float64
+	cacheDiskMaxGB float64
 	cacheMemoryGB  float64
 	parkedCacheGB  float64
 	mountOptions   string
@@ -102,7 +104,9 @@ func main() {
 	flag.Var(&o.nbdClientFlags, "nbd-client-flag", "node: an extra nbd-client flag when attaching a device, repeatable")
 	flag.Var(&o.storeOptions, "object-store-option", "node: an object_store `key=value` for every writer, such as allow_http=true, repeatable")
 	flag.IntVar(&o.nbdsMax, "nbds-max", 128, "node: the NBD devices to ask for when loading the nbd module, 0 to leave it alone")
-	flag.Float64Var(&o.cacheDiskGB, "cache-disk-gb", 10, "node: each writer's disk cache")
+	flag.Float64Var(&o.cacheDiskGB, "cache-disk-gb", 10, "node: the smallest disk cache a writer gets")
+	flag.Float64Var(&o.cacheDiskPct, "cache-disk-percent", 50, "node: each writer's disk cache as a percent of its volume's capacity, within --cache-disk-gb and --cache-disk-max-gb")
+	flag.Float64Var(&o.cacheDiskMaxGB, "cache-disk-max-gb", 100, "node: the largest disk cache a writer gets; 0 is no cap")
 	flag.Float64Var(&o.cacheMemoryGB, "cache-memory-gb", 0.25, "node: each writer's memory cache")
 	flag.Float64Var(&o.parkedCacheGB, "parked-cache-gb", 20, "node: the disk the caches of volumes no longer staged here may hold in all, so a home staged here again starts warm; 0 keeps none")
 	flag.StringVar(&o.mountOptions, "mount-options", "", "node: the ext4 mount's data options")
@@ -220,12 +224,17 @@ func runNode(ctx context.Context, o *options, storage zerofs.Storage, log logr.L
 		ObjectStoreOptions: storeOptions,
 		StateRoot:          o.stateRoot,
 		SocketDir:          o.socketDir,
-		Cache:              zerofs.CacheConfig{DiskGB: o.cacheDiskGB, MemoryGB: o.cacheMemoryGB},
-		ParkedCacheBytes:   int64(o.parkedCacheGB * (1 << 30)),
-		MountOptions:       o.mountOptions,
-		Mountinfo:          o.mountinfo,
-		SysBlock:           "/sys/block",
-		Log:                log,
+		Cache: zerofs.CacheConfig{
+			DiskPercent: o.cacheDiskPct,
+			MinDiskGB:   o.cacheDiskGB,
+			MaxDiskGB:   o.cacheDiskMaxGB,
+			MemoryGB:    o.cacheMemoryGB,
+		},
+		ParkedCacheBytes: int64(o.parkedCacheGB * (1 << 30)),
+		MountOptions:     o.mountOptions,
+		Mountinfo:        o.mountinfo,
+		SysBlock:         "/sys/block",
+		Log:              log,
 	}
 	if err := manager.DetachStale(ctx, o.targetRoot); err != nil {
 		log.Error(err, "detaching stale volumes")

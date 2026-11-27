@@ -38,7 +38,7 @@ func TestStageRoundTrip(t *testing.T) {
 		ObjectStoreOptions: map[string]string{"allow_http": "true"},
 		StateRoot:          filepath.Join(root, "state"),
 		SocketDir:          "/run/zerofs-e2e",
-		Cache:              CacheConfig{DiskGB: 1, MemoryGB: 0.1},
+		Cache:              CacheConfig{DiskPercent: 50, MinDiskGB: 1, MaxDiskGB: 1, MemoryGB: 0.1},
 		Mountinfo:          "/proc/self/mountinfo",
 		SysBlock:           "/sys/block",
 		Log:                testr.New(t),

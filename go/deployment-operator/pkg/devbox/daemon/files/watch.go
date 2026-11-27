@@ -21,7 +21,7 @@ const MaxWatchedDirs = 8192
 const renamePairWindow = 100 * time.Millisecond
 
 // skipDirs are never watched recursively.
-var skipDirs = map[string]bool{".git": true, "node_modules": true, ".cache": true}
+var skipDirs = map[string]bool{gitDir: true, "node_modules": true, ".cache": true}
 
 // Watch streams changes under a path until ctx ends or send fails.
 func (s *Service) Watch(ctx context.Context, req *devboxv1.WatchFilesRequest, send func(*devboxv1.FileEvent) error) error {

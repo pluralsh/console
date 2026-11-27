@@ -200,10 +200,14 @@ commandTests:
     command: cat
     args: ["/etc/containers/containers.conf.d/devbox.conf"]
     expectedOutput: ["compose_warning_logs = false"]
-  - name: rootless podman stores images with vfs in the home directory
+  - name: rootless podman stores images with vfs off the home directory
     command: cat
     args: ["/etc/containers/storage.conf"]
-    expectedOutput: ['driver = "vfs"', 'rootless_storage_path = "/home/dev/.local/share/containers/storage"']
+    expectedOutput: ['driver = "vfs"', 'rootless_storage_path = "/var/lib/devbox-containers/storage"']
+  - name: dev owns the container storage directory
+    command: stat
+    args: ["-c", "%u:%g %a", "/var/lib/devbox-containers"]
+    expectedOutput: ["(?m)^1000:1000 700$"]
   - name: dev has subordinate ids for rootless containers
     command: grep
     args: ["^dev:", "/etc/subuid", "/etc/subgid"]

@@ -53,7 +53,8 @@ func TestWriterConfig(t *testing.T) {
 	got := writerConfig{
 		StorageURL: "s3://snapshots/devbox-homes/homes/v1",
 		CacheDir:   "/var/lib/ate/zerofs/v1/cache",
-		Cache:      CacheConfig{DiskGB: 10, MemoryGB: 0.25},
+		DiskGB:     10,
+		MemoryGB:   0.25,
 		NBDSocket:  "/run/zerofs/x/nbd.sock",
 		NinePSock:  "/run/zerofs/x/9p.sock",
 		RPCSocket:  "/run/zerofs/x/rpc.sock",
@@ -66,6 +67,7 @@ func TestWriterConfig(t *testing.T) {
 		"[servers.nbd]\nunix_socket = \"/run/zerofs/x/nbd.sock\"\n",
 		"[servers.ninep]\nunix_socket = \"/run/zerofs/x/9p.sock\"\n",
 		"[servers.rpc]\nunix_socket = \"/run/zerofs/x/rpc.sock\"\n",
+		"[lsm]\nl0_max_ssts = 1024\n",
 		"[telemetry]\nenabled = false\n",
 		"[aws]\n\"allow_http\" = \"true\"\n\"aws_endpoint\" = \"http://rustfs:9000\"\n",
 	} {
@@ -75,6 +77,29 @@ func TestWriterConfig(t *testing.T) {
 	}
 	if q := quoteTOML("a\"b\\c\n"); q != `"a\"b\\c\u000A"` {
 		t.Errorf("quoteTOML = %s", q)
+	}
+}
+
+func TestCacheDiskFollowsCapacity(t *testing.T) {
+	c := CacheConfig{DiskPercent: 50, MinDiskGB: 10, MaxDiskGB: 100}
+	for _, tc := range []struct {
+		capacity int64
+		want     float64
+	}{
+		{0, 10},
+		{5 << 30, 10},
+		{20 << 30, 10},
+		{50 << 30, 25},
+		{100 << 30, 50},
+		{75<<30 + 1<<29, 37.8},
+		{1 << 40, 100},
+	} {
+		if got := c.diskGB(tc.capacity); got != tc.want {
+			t.Errorf("diskGB(%d) = %v, want %v", tc.capacity, got, tc.want)
+		}
+	}
+	if got := (CacheConfig{DiskPercent: 50, MinDiskGB: 10}).diskGB(1 << 40); got != 512 {
+		t.Errorf("uncapped diskGB(1Ti) = %v, want 512", got)
 	}
 }
 

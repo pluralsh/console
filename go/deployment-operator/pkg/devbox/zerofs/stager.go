@@ -123,7 +123,7 @@ func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err erro
 			}
 		}
 	}()
-	sockets, err := m.startWriter(ctx, v.ID)
+	sockets, err := m.startWriter(ctx, v.ID, v.CapacityBytes)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,8 @@ func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err erro
 	if err := removeEmptyLostFound(staging); err != nil {
 		m.Log.Error(err, "removing lost+found from the home", "volume", v.ID)
 	}
-	m.Log.Info("serving volume", "volume", v.ID, "device", dev, "formatted", formatted, "grown", grown)
+	m.Log.Info("serving volume", "volume", v.ID, "device", dev, "formatted", formatted, "grown", grown,
+		"cacheDiskGB", m.Cache.diskGB(v.CapacityBytes))
 	return nil
 }
 
@@ -217,7 +218,7 @@ func (m *Manager) closeVolume(ctx context.Context, id string) error {
 		if p != nil {
 			m.forgetWriter(id, p)
 		}
-		if _, err := m.startWriter(ctx, id); err != nil {
+		if _, err := m.startWriter(ctx, id, 0); err != nil {
 			return fmt.Errorf("restarting the writer to recover: %w", err)
 		}
 		p = m.writer(id)
@@ -268,7 +269,9 @@ func (m *Manager) Mounted(path string) (bool, error) {
 
 type writerSockets struct{ nbd, ninep, rpc string }
 
-func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, error) {
+// startWriter starts a volume's writer with its cache sized for capacity. A capacity of 0 reuses the config the
+// volume was last staged with, falling back to the smallest cache.
+func (m *Manager) startWriter(ctx context.Context, id string, capacity int64) (writerSockets, error) {
 	state, sock := m.stateDir(id), m.socketDir(id)
 	s := writerSockets{
 		nbd:   filepath.Join(sock, "nbd.sock"),
@@ -295,7 +298,8 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 	cfg := writerConfig{
 		StorageURL: m.Storage.VolumeURL(id),
 		CacheDir:   m.cacheDir(id),
-		Cache:      m.Cache,
+		DiskGB:     m.Cache.diskGB(capacity),
+		MemoryGB:   m.Cache.MemoryGB,
 		NBDSocket:  s.nbd,
 		NinePSock:  s.ninep,
 		RPCSocket:  s.rpc,
@@ -303,8 +307,10 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 		Options:    m.ObjectStoreOptions,
 	}
 	path := filepath.Join(state, configFile)
-	if err := os.WriteFile(path, []byte(cfg.render()), 0o600); err != nil {
-		return s, fmt.Errorf("writing the writer config: %w", err)
+	if capacity > 0 || !exists(path) {
+		if err := os.WriteFile(path, []byte(cfg.render()), 0o600); err != nil {
+			return s, fmt.Errorf("writing the writer config: %w", err)
+		}
 	}
 
 	// The writer outlives this call, so it can't be bound to the request's context.

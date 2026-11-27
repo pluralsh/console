@@ -283,19 +283,30 @@ func (g *Gateway) confirmUnresponsive(inst *Instance) {
 			inst.mu.Unlock()
 		}()
 		daemon := g.deps.Router.Daemon(inst.ActorID())
+		var health *devboxv1.HealthResponse
 		var err error
 		for i := range unresponsiveProbes {
 			if i > 0 && !sleep(ctx, unresponsiveProbeInterval) {
 				return
 			}
 			hctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-			_, err = daemon.Health(hctx, &devboxv1.HealthRequest{})
+			health, err = daemon.Health(hctx, &devboxv1.HealthRequest{})
 			cancel()
 			if err == nil {
 				break
 			}
 		}
 		if inst.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+			return
+		}
+		if msg := health.GetHomeError(); err == nil && msg != "" {
+			// A hung home blocks the daemon's event log, so a new stream would go silent too.
+			g.log.Info("daemon answers but its event stream went silent while its home is hung", "instance", inst.ID, "why", msg)
+			inst.mu.Lock()
+			inst.lastContact = g.now()
+			inst.conditions[homeCondition] = homeConditionDetail(msg)
+			inst.mu.Unlock()
+			g.remountHome(inst, msg)
 			return
 		}
 		if err == nil {

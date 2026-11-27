@@ -241,7 +241,8 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	if err := d.agents.Start(); err != nil {
 		d.log.Error("agents start", "err", err)
 	}
-	d.bg.Go(func() { d.events.SyncEvery(d.ctx, time.Second) })
+	// Matches ext4's journal commit interval; each sync of the home is a ZeroFS flush.
+	d.bg.Go(func() { d.events.SyncEvery(d.ctx, 5*time.Second) })
 	d.bg.Go(func() { d.ws.Watch(d.ctx) })
 	d.bg.Go(func() { d.files.ChangesCache.Run(d.ctx) })
 	d.files.ChangesCache.Warm(d.ctx, d.ws.Checkouts())
@@ -256,6 +257,7 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	d.bg.Go(func() { d.idleLoop(d.ctx) })
 	d.bg.Go(func() { d.restoreLoop(d.ctx) })
 	d.bg.Go(func() { d.homeLoop(d.ctx) })
+	d.bg.Go(func() { d.toolPriorityLoop(d.ctx) })
 	d.bg.Go(func() { d.loginLoop(d.ctx) })
 	d.bg.Go(d.importJavaTrust)
 
@@ -755,7 +757,7 @@ func (d *Daemon) setStatus(s string) {
 func (d *Daemon) health() *devboxv1.HealthResponse {
 	d.mu.Lock()
 	resp := &devboxv1.HealthResponse{Status: d.status, Version: d.cfg.Version, BootId: d.bootID,
-		Restored: d.restored, WorkspaceHydrated: d.ws.Hydrated()}
+		Restored: d.restored, WorkspaceHydrated: d.ws.Hydrated(), HomeError: d.home.error()}
 	resp.Ready = d.status == StatusReady || d.status == StatusDegraded
 	d.restored = false
 	scrubbed := d.scrubbed

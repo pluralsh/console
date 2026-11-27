@@ -32,6 +32,10 @@ type forwarder struct {
 	ackedCond chan struct{}
 }
 
+// daemonCallTimeout bounds the forwarder's unary calls to the daemon, which can block behind a hung home; the
+// stream itself stays open so heartbeats keep arriving.
+const daemonCallTimeout = 15 * time.Second
+
 // startForwarder starts (or keeps) the instance's forwarder.
 func (g *Gateway) startForwarder(inst *Instance) {
 	inst.mu.Lock()
@@ -119,7 +123,9 @@ func (f *forwarder) run() {
 	started := false
 	bootID := ""
 	for f.ctx.Err() == nil {
-		info, err := f.daemon.GetInfo(f.ctx, &devboxv1.GetInfoRequest{})
+		ictx, cancel := context.WithTimeout(f.ctx, daemonCallTimeout)
+		info, err := f.daemon.GetInfo(ictx, &devboxv1.GetInfoRequest{})
+		cancel()
 		if err == nil {
 			switch {
 			case !started:
@@ -342,13 +348,16 @@ func (f *forwarder) setHomeError(msg string) {
 	if msg == "" {
 		delete(inst.conditions, homeCondition)
 	} else {
-		inst.conditions[homeCondition] = &devboxv1.ErrorDetail{Message: msg,
-			Metadata: map[string]string{"type": homeCondition, "severity": "error"}}
+		inst.conditions[homeCondition] = homeConditionDetail(msg)
 	}
 	inst.mu.Unlock()
 	if msg != "" {
 		f.g.remountHome(inst, msg)
 	}
+}
+
+func homeConditionDetail(msg string) *devboxv1.ErrorDetail {
+	return &devboxv1.ErrorDetail{Message: msg, Metadata: map[string]string{"type": homeCondition, "severity": "error"}}
 }
 
 func (f *forwarder) setIdle(idle *devboxv1.IdleState) {
@@ -392,7 +401,10 @@ func (f *forwarder) flush(b *eventBatch) error {
 			return fmt.Errorf("upserting the instance index: %w", err)
 		}
 	}
-	if _, err := f.daemon.AckEvents(ctx, &devboxv1.AckEventsRequest{Offset: b.last}); err != nil {
+	actx, cancel := context.WithTimeout(ctx, daemonCallTimeout)
+	_, err := f.daemon.AckEvents(actx, &devboxv1.AckEventsRequest{Offset: b.last})
+	cancel()
+	if err != nil {
 		// Console already has everything; the daemon just keeps its log longer. Replays are idempotent.
 		g.log.V(1).Info("AckEvents failed", "instance", id, "offset", b.last, "error", err.Error())
 	}

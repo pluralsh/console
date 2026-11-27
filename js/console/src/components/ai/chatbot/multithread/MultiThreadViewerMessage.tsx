@@ -17,7 +17,6 @@ import {
   memo,
   ReactElement,
   ReactNode,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react'
@@ -576,46 +575,45 @@ function ShellCommandPreview({
   reserveIconSpace: boolean
 }) {
   const theme = useTheme()
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const preRef = useRef<HTMLPreElement | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [expanded, toggleExpanded] = useExpandedFor(command)
 
-  useLayoutEffect(() => {
-    preRef.current = wrapperRef.current?.querySelector('pre') ?? null
-  })
-
   const canExpand = useCanExpand({
-    ref: preRef,
+    ref: scrollRef,
     contentKey: command,
     expanded,
   })
 
   return (
-    <CommandBoxSC ref={wrapperRef}>
-      <Code
-        language="bash"
-        showHeader={false}
-        fillLevel={0}
-        css={{
-          '&&': {
-            border: 'none',
-            borderRadius: 0,
-            backgroundColor: 'transparent',
-          },
-          '& pre': {
-            ...toolOutputTextCss(theme),
-            whiteSpace: 'pre-wrap',
-            overflowWrap: 'anywhere',
-            maxHeight: `${expanded ? EXPANDED_PREVIEW_LINES : COMMAND_COLLAPSED_LINES}lh`,
-            overflow: expanded ? 'auto' : 'hidden',
-            ...(reserveIconSpace && { paddingRight: theme.spacing.large }),
-            ...(canExpand && !expanded && previewFadeCss),
-          },
-          ...(shimmer && shimmerWithinCss(theme)),
-        }}
+    <CommandBoxSC>
+      {/* The shimmer's background-clip: text breaks on a scrolling element, so a plain div scrolls, not the pre. */}
+      <CommandScrollSC
+        ref={scrollRef}
+        $expanded={expanded}
+        $fade={canExpand && !expanded}
       >
-        {`$ ${command}`}
-      </Code>
+        <Code
+          language="bash"
+          showHeader={false}
+          fillLevel={0}
+          css={{
+            '&&': {
+              border: 'none',
+              borderRadius: 0,
+              backgroundColor: 'transparent',
+            },
+            '& pre': {
+              ...toolOutputTextCss(theme),
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'anywhere',
+              ...(reserveIconSpace && { paddingRight: theme.spacing.large }),
+            },
+            ...(shimmer && shimmerWithinCss(theme)),
+          }}
+        >
+          {`$ ${command}`}
+        </Code>
+      </CommandScrollSC>
       {canExpand && (
         <ShowMoreSC
           type="button"
@@ -630,6 +628,17 @@ function ShellCommandPreview({
 }
 
 const COMMAND_COLLAPSED_LINES = 4
+
+const CommandScrollSC = styled.div<{ $expanded: boolean; $fade: boolean }>(
+  ({ theme, $expanded, $fade }) => ({
+    minHeight: 0,
+    lineHeight: toolOutputTextCss(theme).lineHeight,
+    // Code pads its content by spacing.small on each side.
+    maxHeight: `calc(${$expanded ? EXPANDED_PREVIEW_LINES : COMMAND_COLLAPSED_LINES}lh + 2 * ${theme.spacing.small}px)`,
+    overflow: $expanded ? 'auto' : 'hidden',
+    ...($fade && previewFadeCss),
+  })
+)
 
 const CommandBoxSC = styled.div(({ theme }) => ({
   ...toolSurfaceCss(theme),

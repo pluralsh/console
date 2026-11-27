@@ -52,6 +52,8 @@ type fakeDaemon struct {
 	bootID string
 	// unhealthy makes Health fail, like a wedged box.
 	unhealthy bool
+	// homeError is what Health reports about the workspace volume.
+	homeError string
 	// busy makes PrepareSuspend refuse automatic suspends, as a daemon with an agent turn running does.
 	busy bool
 
@@ -88,7 +90,7 @@ func (d *fakeDaemon) Health(context.Context, *devboxv1.HealthRequest) (*devboxv1
 	if len(d.initialized) == 0 {
 		return &devboxv1.HealthResponse{Status: "booting"}, nil
 	}
-	return &devboxv1.HealthResponse{Ready: true, Status: "ready"}, nil
+	return &devboxv1.HealthResponse{Ready: true, Status: "ready", HomeError: d.homeError}, nil
 }
 
 func (d *fakeDaemon) Initialize(ctx context.Context, req *devboxv1.InitializeRequest) (*devboxv1.InitializeResponse, error) {

@@ -142,6 +142,9 @@ message HealthResponse {
   // A memory restore was detected since the previous probe; activity timers were reset.
   bool restored = 5;
   bool workspace_hydrated = 6;
+  // As DaemonHeartbeat.home_error. A hung workspace volume can wedge the event stream that carries heartbeats
+  // while Health still answers.
+  string home_error = 7;
 }
 
 // HarnessEndpoints are the URLs harnesses are configured with. All are reached through atenet-egress, which

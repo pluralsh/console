@@ -329,8 +329,10 @@ defmodule Console.Devboxes.Control.Grpc do
 
   @impl true
   def list_files(inst, path, opts) do
+    # the daemon shows dot entries inside checkouts (.github) and hides the home's own (.config, .plural)
     req = %V1.ListFilesRequest{instance_id: inst.id, path: Proto.str(path), depth: 1, respect_gitignore: true,
-                                query: Proto.str(opts[:query]), brief: !!opts[:brief]}
+                                query: Proto.str(opts[:query]),
+                                brief: !!opts[:brief]}
     with {:ok, %V1.ListFilesResponse{entries: entries}} <- call(cluster_id(inst), :list_files, req),
       do: {:ok, Enum.map(entries, &file_entry/1)}
   end

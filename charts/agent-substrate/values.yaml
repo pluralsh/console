@@ -393,8 +393,11 @@ zerofs:
     # -- Each staged home's config, removed when the home is unstaged, and every home's cache, on the node's data
     # disk.
     stateDir: /var/lib/ate/zerofs
-    # -- Each home's writer caches this much on disk and in memory. Both are per staged home, not per node.
+    # -- Each home's writer caches cacheDiskPercent of the home's size on disk, at least cacheDiskGB and at most
+    # cacheDiskMaxGB (0 is no cap), and cacheMemoryGB in memory. All are per staged home, not per node.
+    cacheDiskPercent: 50
     cacheDiskGB: 10
+    cacheDiskMaxGB: 100
     cacheMemoryGB: 0.25
     # -- The disk, in GB, that the caches of homes no longer staged on the node may hold in all, so a home that
     # resumes there starts with what it read before rather than from the bucket. The least recently suspended

@@ -68,7 +68,8 @@ func (m *matches) offerPath(abs string, typ devboxv1.FileType, repository string
 		return
 	}
 	rel = strings.ToLower(filepath.ToSlash(rel))
-	if !m.hidden && (strings.HasPrefix(rel, ".") || strings.Contains(rel, "/.")) {
+	// A checkout's dot paths git doesn't ignore, like .github, are part of the project.
+	if !m.hidden && repository == "" && (strings.HasPrefix(rel, ".") || strings.Contains(rel, "/.")) {
 		return
 	}
 	score := matchScore([]byte(rel), strings.LastIndex(rel, "/")+1, m.q)
@@ -210,7 +211,7 @@ func (s *Service) searchDisk(ctx context.Context, m *matches, dir string) {
 
 func hasGitDir(des []os.DirEntry) bool {
 	for _, de := range des {
-		if de.Name() == ".git" {
+		if de.Name() == gitDir {
 			return true
 		}
 	}

@@ -117,6 +117,32 @@ func TestListingTheHomeSkipsCheckoutStatus(t *testing.T) {
 	}
 }
 
+func TestListingShowsDotEntriesOnlyInCheckouts(t *testing.T) {
+	t.Setenv("GIT_CONFIG_GLOBAL", "/dev/null")
+	home := t.TempDir()
+	api := gittest.Repo(t, filepath.Join(home, "api"), map[string]string{"README.md": "one\n", ".github/workflows/ci.yaml": "on: push\n"})
+	gittest.Write(t, home, map[string]string{".config/app.toml": "x\n"})
+	s := &Service{Home: home, Checkouts: checkouts{api}}
+
+	names := func(path string) []string {
+		resp, err := s.List(context.Background(), &devboxv1.ListFilesRequest{Path: path, Brief: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var out []string
+		for _, e := range resp.GetEntries() {
+			out = append(out, e.GetName())
+		}
+		return out
+	}
+	if got := strings.Join(names("~"), ","); got != "api" {
+		t.Fatalf("home listing %s", got)
+	}
+	if got := strings.Join(names("~/api"), ","); got != ".github,README.md" {
+		t.Fatalf("checkout listing %s", got)
+	}
+}
+
 func sum(b []byte) string {
 	h := sha256.Sum256(b)
 	return hex.EncodeToString(h[:])

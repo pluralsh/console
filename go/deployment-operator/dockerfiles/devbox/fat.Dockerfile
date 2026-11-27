@@ -267,7 +267,9 @@ RUN set -eux; \
 # containers run without cgroups. Containers share the box's network unless
 # given one (compose projects get theirs via pasta, with aardvark-dns resolving
 # service names); either way traffic leaves through the box's egress policy.
-# Images live under /home/dev/.local/share/containers, cached across snapshots.
+# Images, containers and volumes live on the box's root filesystem, not the home: a ZeroFS home turns every fsync
+# into an object-storage flush, which databases in compose stacks issue per commit. Snapshots still carry them
+# across suspends, but a new image starts them empty.
 # hadolint ignore=DL3008
 RUN set -eux; \
     apt-get update; \
@@ -284,8 +286,9 @@ RUN set -eux; \
       'driver = "vfs"' \
       'runroot = "/run/containers/storage"' \
       'graphroot = "/var/lib/containers/storage"' \
-      'rootless_storage_path = "/home/dev/.local/share/containers/storage"' \
+      'rootless_storage_path = "/var/lib/devbox-containers/storage"' \
       > /etc/containers/storage.conf; \
+    install -d -o 1000 -g 1000 -m 0700 /var/lib/devbox-containers; \
     mkdir -p /etc/containers/containers.conf.d; \
     printf '%s\n' \
       '[containers]' \

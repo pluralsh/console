@@ -813,6 +813,33 @@ func TestSilentStreamToAHealthyDaemonIsNotSuspended(t *testing.T) {
 	})
 }
 
+func TestSilentStreamWithAHungHomeRemountsIt(t *testing.T) {
+	fastProbes(t)
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.daemon.mu.Lock()
+	h.daemon.homeError = "a write to the home hasn't returned in 2m0s"
+	h.daemon.mu.Unlock()
+	h.clock.advance(10 * time.Minute)
+	h.g.backstops(context.Background())
+	h.eventually("suspended and resumed", func() bool {
+		inst.mu.Lock()
+		defer inst.mu.Unlock()
+		return !inst.homeRemounted.IsZero() && inst.rec.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING
+	})
+	h.ingest.mu.Lock()
+	defer h.ingest.mu.Unlock()
+	reasons := []devboxv1.SuspendReason{}
+	for _, s := range h.ingest.statuses {
+		if s.GetStatus() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+			reasons = append(reasons, s.GetSuspendReason())
+		}
+	}
+	if len(reasons) != 1 || reasons[0] != devboxv1.SuspendReason_SUSPEND_REASON_HOME_UNAVAILABLE {
+		t.Fatalf("suspend reasons = %v", reasons)
+	}
+}
+
 func TestCrashDuringSuspendReportsLostWork(t *testing.T) {
 	h := newHarness(t, nil)
 	inst := h.running("inst-1")

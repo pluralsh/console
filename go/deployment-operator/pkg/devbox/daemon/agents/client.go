@@ -210,6 +210,7 @@ func (m *Manager) createClientTerminal(p acp.Object) (any, *acp.RequestError) {
 	if err := proc.Start(cmd, cmd.Start); err != nil {
 		return nil, internalError(err)
 	}
+	_ = proc.Deprioritize(cmd.Process.Pid)
 	m.termMu.Lock()
 	if m.terms == nil {
 		m.terms = map[string]*clientTerminal{}

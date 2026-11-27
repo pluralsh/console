@@ -80,6 +80,19 @@ func TestDevboxInstanceCapacity(t *testing.T) {
 		g.Expect(c.PerWorker).To(Equal(int64(4)), "160Gi over 36Gi")
 	})
 
+	t.Run("a ZeroFS home's cache is budgeted at the home's size", func(t *testing.T) {
+		g := NewWithT(t)
+		runner := capacityRunner("64", "256Gi", lo.ToPtr("200Gi"))
+		runner.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeZeroFS)}
+		c, err := devboxInstanceCapacity(runner, v1alpha1.DevboxSandboxGVisor)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(c.PerWorker).To(Equal(int64(5)), "160Gi over the default 20Gi home plus 8Gi of snapshots")
+		runner.Spec.Home.Size = lo.ToPtr(resource.MustParse("50Gi"))
+		c, err = devboxInstanceCapacity(runner, v1alpha1.DevboxSandboxGVisor)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(c.PerWorker).To(Equal(int64(2)), "160Gi over 58Gi")
+	})
+
 	t.Run("microVM memory bookings include VMM overhead", func(t *testing.T) {
 		g := NewWithT(t)
 		c, err := devboxInstanceCapacity(capacityRunner("64", "32Gi", nil), v1alpha1.DevboxSandboxMicroVM)
