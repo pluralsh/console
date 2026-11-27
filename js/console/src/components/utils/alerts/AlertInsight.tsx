@@ -3,11 +3,11 @@ import {
   ButtonProps,
   EmptyState,
   Flex,
+  IconFrame,
   ReturnIcon,
 } from '@pluralsh/design-system'
 import { useAiInsightQuery } from 'generated/graphql'
 import { Link, useParams } from 'react-router-dom'
-import { fromNow } from 'utils/datetime'
 
 import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix'
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay'
@@ -28,7 +28,6 @@ import {
 } from 'routes/cdRoutesConsts'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
-import { StretchedFlex } from '../StretchedFlex'
 
 export function AlertInsight({
   type,
@@ -71,20 +70,6 @@ export function AlertInsight({
     }
   }, [pageHeaderCtx, backButtonPath])
 
-  const alertSummary = (
-    <StackedText
-      truncate
-      css={{
-        maxWidth: '50%',
-        marginRight: type === 'service' ? 'auto' : undefined,
-      }}
-      first={alert?.title}
-      firstPartialType="body1Bold"
-      firstColor="text"
-      second={alert?.message}
-      loading={!data && loading}
-    />
-  )
   if (error && !error?.message?.includes('could not find resource'))
     return <GqlError error={error} />
   if (!(data || loading))
@@ -100,33 +85,32 @@ export function AlertInsight({
       gap="large"
       height="100%"
     >
-      {type !== 'service' && (
-        <StretchedFlex>
-          <BackButton path={backButtonPath} />
-          {alertSummary}
-        </StretchedFlex>
-      )}
       <Flex
         gap="small"
         align="center"
         css={{ whiteSpace: 'nowrap' }}
       >
-        {type === 'service' ? (
-          alertSummary
-        ) : (
-          <StackedText
-            first="Insight"
-            firstPartialType="body1Bold"
-            firstColor="text"
-            second={
-              insight?.updatedAt && `Last updated ${fromNow(insight.updatedAt)}`
-            }
-            css={{ flex: 1 }}
+        {type !== 'service' && (
+          <IconFrame
+            clickable
+            as={Link}
+            to={backButtonPath}
+            type="secondary"
+            size="large"
+            tooltip="Back to alerts"
+            textValue="Back to alerts"
+            icon={<ReturnIcon />}
+            css={{ flexShrink: 0 }}
           />
         )}
-        <IconFrameRefreshButton
-          loading={loading}
-          refetch={refetch}
+        <StackedText
+          truncate
+          css={{ flex: 1, minWidth: 0 }}
+          first={alert?.title}
+          firstPartialType="body1Bold"
+          firstColor="text"
+          second={alert?.message}
+          loading={!data && loading}
         />
         {(type !== 'flow' || flowId) && (
           <SendInsightToWorkbenchButton
@@ -144,6 +128,13 @@ export function AlertInsight({
         insight={insight}
         kind="alert"
         loading={loading}
+        headerActions={
+          <IconFrameRefreshButton
+            size="medium"
+            loading={loading}
+            refetch={refetch}
+          />
+        }
       />
     </Flex>
   )
