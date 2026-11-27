@@ -1,0 +1,67 @@
+# Builds Agent Substrate's Azure Blob objectstore plugin, which upstream doesn't publish, into the image the
+# agent-substrate chart defaults to (objectStore.azureBlob.image.repository). Upstream has no versions, so the image is
+# tagged with the commit it was built from (sha-<short sha>); bump PLUGIN_REF to pick up an upstream change, or pass
+# another ref to a manual run for a one-off build.
+name: CD / Publish objectstore-azure-blob
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Upstream ref to build (defaults to the pinned PLUGIN_REF)
+        required: false
+        type: string
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/objectstore-azure-blob.yaml
+  pull_request:
+    paths:
+      - .github/workflows/objectstore-azure-blob.yaml
+
+permissions:
+  contents: read
+
+env:
+  PLUGIN_REPOSITORY: agent-substrate-plugins/objectstore-azure-blob
+  PLUGIN_REF: ${{ inputs.ref || 'd960af490bc8a3a72902543a420d0f857f4633d3' }}
+  KO_DOCKER_REPO: ghcr.io/pluralsh/objectstore-azure-blob
+
+jobs:
+  publish:
+    name: Build and push
+    # fork PRs get no packages: write token
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.PLUGIN_REPOSITORY }}
+          ref: ${{ env.PLUGIN_REF }}
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # upstream's .ko.yaml pins the base image and builds linux/amd64 and linux/arm64; --bare keeps the image at
+      # KO_DOCKER_REPO itself (upstream's Makefile appends the import path)
+      - name: Build and push
+        run: |
+          sha=$(git rev-parse HEAD)
+          go run github.com/google/ko@v0.19.1 build --bare \
+            --tags "sha-${sha:0:7}" \
+            --image-label "org.opencontainers.image.source=https://github.com/${PLUGIN_REPOSITORY}" \
+            --image-label "org.opencontainers.image.revision=${sha}" \
+            --image-refs image.txt \
+            ./cmd/azure-blob-objectstore-plugin
+          echo "Pushed $(cat image.txt)" >> "$GITHUB_STEP_SUMMARY"
