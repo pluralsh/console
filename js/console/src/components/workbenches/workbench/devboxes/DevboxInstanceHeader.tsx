@@ -300,7 +300,7 @@ export function DevboxInstanceHeader({
             })}
           </DetailsSC>
         )}
-        {(!!badges.length || updateStatus) && (
+        {!!badges.length && (
           <Flex
             gap="xsmall"
             align="center"
@@ -315,19 +315,6 @@ export function DevboxInstanceHeader({
                 {badge}
               </Chip>
             ))}
-            {updateStatus && (
-              <Tooltip
-                label={updateStatus.tooltip}
-                placement="bottom"
-              >
-                <Chip
-                  size="small"
-                  severity={updateStatus.severity}
-                >
-                  {updateStatus.label}
-                </Chip>
-              </Tooltip>
-            )}
           </Flex>
         )}
       </Flex>
@@ -347,6 +334,19 @@ export function DevboxInstanceHeader({
           >
             Resume
           </Button>
+        )}
+        {updateStatus && (
+          <Tooltip
+            label={updateStatus.tooltip}
+            placement="bottom"
+          >
+            <Chip
+              size="small"
+              severity={updateStatus.severity}
+            >
+              {updateStatus.label}
+            </Chip>
+          </Tooltip>
         )}
         {!!actions.length && (
           <MoreMenu
