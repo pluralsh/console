@@ -11,11 +11,16 @@ defmodule Console.AI.Tools.Workbench.Filesystem.Write do
     field :content,   :string
   end
 
+  # One cast, so empty_values: [] applies to validate_required. A later cast
+  # merges back onto the first changeset and restores empty_values to [""],
+  # which rejects an empty file body as blank.
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:path])
-    |> cast(attrs, [:content], empty_values: [])
+    |> cast(attrs, [:path, :content], empty_values: [])
     |> validate_required([:path, :content])
+    |> validate_change(:path, fn :path, path ->
+      if String.trim(path) == "", do: [path: "can't be blank"], else: []
+    end)
   end
 
   @json_schema Console.priv_file!("tools/workbench/filesystem/write.json") |> Jason.decode!()
