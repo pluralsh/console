@@ -37,9 +37,9 @@ var workerPoolGVK = schema.GroupVersionKind{Group: "ate.dev", Version: "v1", Kin
 
 // devboxCapabilities are added to the devbox container's capability set. The box runs as dev (non-root), so its
 // processes hold none of them; they only bound what setuid-root helpers gain. newuidmap/newgidmap need SETUID,
-// SETGID and (to map uid 0) SETFCAP to give rootless Podman its subuid/subgid ranges; without them the kernel
-// refuses the multi-range uid_map and `docker` fails to start any container.
-var devboxCapabilities = []string{"SETUID", "SETGID", "SETFCAP"}
+// SETGID and (to map uid 0) SETFCAP to give rootless containers their subuid/subgid ranges, and DAC_OVERRIDE to open
+// /proc/<pid>/uid_map, which gVisor leaves owned by dev; without them `docker` fails to start any container.
+var devboxCapabilities = []string{"SETUID", "SETGID", "SETFCAP", "DAC_OVERRIDE"}
 
 // workerPodAnnotations keep node autoscalers from evicting workers: a worker's boxes run outside any pod, so a
 // node with only a worker on it looks underused, and evicting the worker kills every box on it unsaved.

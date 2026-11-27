@@ -6,7 +6,7 @@ Dockerfiles for the devbox sandbox and gateway images (DBX-49). All builds use
 | Image | Dockerfile | Contents |
 |---|---|---|
 | `ghcr.io/pluralsh/devbox-minimal` | `minimal.Dockerfile` | `devbox-daemon` (PID 1), every harness and ACP adapter, Node, Chromium, Xvfb, voxl, Playwright MCP, shell tools, `mise` |
-| `ghcr.io/pluralsh/devbox-fat` | `fat.Dockerfile` | `devbox-minimal` plus language toolchains, DevOps tools, cloud CLIs and rootless Podman (`docker` and `docker compose` map onto it) |
+| `ghcr.io/pluralsh/devbox-fat` | `fat.Dockerfile` | `devbox-minimal` plus language toolchains, DevOps tools, cloud CLIs, the Bitbucket CLI `bkt` (`gh` and `glab` come from `devbox-minimal`) and rootless Podman (`docker` and `docker compose` map onto it) |
 | `ghcr.io/pluralsh/devbox-gateway` | `gateway.Dockerfile` | `devbox-gateway` on distroless |
 | `ghcr.io/pluralsh/devbox-voxl` | `voxl.Dockerfile` | a statically linked `voxl` at `/voxl` (amd64, arm64), which `devbox-minimal` copies |
 

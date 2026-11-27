@@ -64,6 +64,8 @@ ARG YQ_VERSION=4.54.3
 ARG CRANE_VERSION=0.22.1
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
 ARG PLURAL_VERSION=0.12.69
+# renovate: datasource=github-releases depName=avivsinai/bitbucket-cli
+ARG BKT_VERSION=0.41.1
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -103,6 +105,8 @@ RUN set -eux; \
     curl -fsSLO "${base}/${f}"; verify "${f}" "${base}/checksums.txt"; mkdir crane; tar -xzf "${f}" -C crane; install -m 0755 crane/crane /out/crane; \
     f="plural-cli_${PLURAL_VERSION}_Linux_${arch}.tar.gz"; base="https://github.com/pluralsh/plural-cli/releases/download/v${PLURAL_VERSION}"; \
     curl -fsSLO "${base}/${f}"; verify "${f}" "${base}/checksums.txt"; mkdir plural; tar -xzf "${f}" -C plural; install -m 0755 plural/plural /out/plural; \
+    f="bkt_${BKT_VERSION}_linux_${carch}.tar.gz"; base="https://github.com/avivsinai/bitbucket-cli/releases/download/v${BKT_VERSION}"; \
+    curl -fsSLO "${base}/${f}"; verify "${f}" "${base}/checksums.txt"; mkdir bkt; tar -xzf "${f}" -C bkt; install -m 0755 bkt/bkt /out/bkt; \
     rm -rf /dl/*
 
 # ---------------------------------------------------------------------------
@@ -264,9 +268,11 @@ RUN set -eux; \
 # Containers: rootless Podman as dev, with `docker`, `docker compose` and
 # `docker-compose` mapped onto it. The sandbox (gVisor by default) gives no overlay mounts in a user
 # namespace, FUSE or cgroup delegation, so images use the vfs driver and
-# containers run without cgroups. Containers share the box's network unless
-# given one (compose projects get theirs via pasta, with aardvark-dns resolving
-# service names); either way traffic leaves through the box's egress policy.
+# containers run without cgroups. Containers share the box's network: gVisor
+# can't bind-mount network namespaces, so podman can't create per-project
+# networks, and /usr/local/bin/podman-compose runs every compose service on the
+# box's network with service names resolving to 127.0.0.1. Traffic leaves
+# through the box's egress policy.
 # Images, containers and volumes live on the box's root filesystem, not the home: a ZeroFS home turns every fsync
 # into an object-storage flush, which databases in compose stacks issue per commit. Snapshots still carry them
 # across suspends, but a new image starts them empty.
@@ -280,7 +286,7 @@ RUN set -eux; \
     echo "dev:100000:65536" > /etc/subuid; \
     echo "dev:100000:65536" > /etc/subgid; \
     touch /etc/containers/nodocker; \
-    ln -s /usr/bin/podman-compose /usr/local/bin/docker-compose; \
+    ln -s /usr/local/bin/podman-compose /usr/local/bin/docker-compose; \
     printf '%s\n' \
       '[storage]' \
       'driver = "vfs"' \
@@ -298,6 +304,7 @@ RUN set -eux; \
       '' \
       '[engine]' \
       'compose_warning_logs = false' \
+      'compose_providers = ["/usr/local/bin/podman-compose"]' \
       'cgroup_manager = "cgroupfs"' \
       'events_logger = "file"' \
       'runtime = "crun"' \

@@ -64,7 +64,7 @@ export function useDevboxTimelineStore(instanceId: Nullable<string>) {
             instanceId,
             sessionId,
             limit: PAGE_SIZE,
-            ...(before != null ? { before } : {}),
+            ...(before != null ? { before: String(before) } : {}),
           },
           fetchPolicy: 'network-only',
         })

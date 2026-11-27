@@ -300,6 +300,22 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert term["terminal"] == %{"command" => "mix", "exitCode" => 0}
     end
 
+    test "it pages backwards from a position given as a number or a string" do
+      user = insert(:user)
+      inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+      expect(Control.Test, :get_timeline, 2, fn _, "s", %{before: 12} ->
+        {:ok, %{delta_offset: 0, seq: 0, stream: "", has_more: false, entities: []}}
+      end)
+
+      for before <- [12, "12"] do
+        {:ok, %{data: %{"devboxTimeline" => %{"hasMore" => false}}}} = run_query("""
+          query Timeline($id: ID!, $before: Long) {
+            devboxTimeline(instanceId: $id, sessionId: "s", before: $before) { hasMore }
+          }
+        """, %{"id" => inst.id, "before" => before}, %{current_user: user})
+      end
+    end
+
     test "it returns a typed error when the cluster is offline" do
       user = insert(:user)
       inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))

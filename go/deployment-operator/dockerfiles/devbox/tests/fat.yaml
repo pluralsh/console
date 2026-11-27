@@ -196,10 +196,14 @@ commandTests:
     command: docker-compose
     args: ["--version"]
     expectedOutput: ["podman-compose version"]
-  - name: docker compose runs podman-compose without the provider banner
+  - name: docker compose runs the host-network podman-compose wrapper without the provider banner
     command: cat
     args: ["/etc/containers/containers.conf.d/devbox.conf"]
-    expectedOutput: ["compose_warning_logs = false"]
+    expectedOutput: ["compose_warning_logs = false", 'compose_providers = \["/usr/local/bin/podman-compose"\]']
+  - name: podman-compose and docker-compose resolve to the host-network wrapper
+    command: sh
+    args: ["-c", "command -v podman-compose; readlink /usr/local/bin/docker-compose; head -1 /usr/local/bin/podman-compose"]
+    expectedOutput: ["(?m)^/usr/local/bin/podman-compose\n/usr/local/bin/podman-compose\n#!/usr/bin/python3$"]
   - name: rootless podman stores images with vfs off the home directory
     command: cat
     args: ["/etc/containers/storage.conf"]
@@ -212,6 +216,10 @@ commandTests:
     command: grep
     args: ["^dev:", "/etc/subuid", "/etc/subgid"]
     expectedOutput: ["/etc/subuid:dev:100000:65536", "/etc/subgid:dev:100000:65536"]
+  - name: bkt (Bitbucket CLI)
+    command: bkt
+    args: ["--version"]
+    expectedOutput: ["bkt version 0\\.41\\.1"]
   - name: crane
     command: crane
     args: ["version"]

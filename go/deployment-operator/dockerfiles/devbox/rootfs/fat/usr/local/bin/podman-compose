@@ -1,0 +1,57 @@
+#!/usr/bin/python3
+# podman-compose for the devbox sandbox. gVisor can't bind-mount network namespaces, so podman can't create the
+# networks or pods a compose project asks for. Every service joins the box's own network instead, and each service
+# name, container name, hostname and network alias resolves to 127.0.0.1, so `db:5432` still reaches the db service.
+# Services share one port space: each listens on its own container port, and published port remaps don't apply.
+import sys
+
+import podman_compose as pc
+
+missing = [h for h in ("assert_cnt_nets", "get_net_args", "main") if not hasattr(pc, h)]
+missing += [h for h in ("resolve_in_pod", "_parse_compose_file") if not hasattr(pc.PodmanCompose, h)]
+if missing:
+    sys.exit(f"podman-compose {getattr(pc, '__version__', '?')} lacks {', '.join(missing)}; "
+             "update /usr/local/bin/podman-compose")
+
+
+async def no_networks(compose, cnt):
+    return None
+
+
+def host_network(compose, cnt):
+    return ["--network=host"]
+
+
+def as_host_list(extra_hosts):
+    if isinstance(extra_hosts, dict):
+        return [f"{name}:{addr}" for name, addr in extra_hosts.items()]
+    return list(extra_hosts or [])
+
+
+parse = pc.PodmanCompose._parse_compose_file
+
+
+def parse_on_host_network(self):
+    parse(self)
+    names = set(self.container_names_by_service)
+    for cnt in self.containers:
+        names.add(cnt["name"])
+        names.update(cnt.get("_aliases") or [])
+        if cnt.get("hostname"):
+            names.add(cnt["hostname"])
+        networks = cnt.get("networks")
+        if isinstance(networks, dict):
+            for net in networks.values():
+                names.update((net or {}).get("aliases") or [])
+    hosts = [f"{name}:127.0.0.1" for name in sorted(names)]
+    for cnt in self.containers:
+        cnt["extra_hosts"] = as_host_list(cnt.get("extra_hosts")) + hosts
+
+
+pc.assert_cnt_nets = no_networks
+pc.get_net_args = host_network
+pc.PodmanCompose.resolve_in_pod = lambda self: False
+pc.PodmanCompose._parse_compose_file = parse_on_host_network
+
+if __name__ == "__main__":
+    sys.exit(pc.main())

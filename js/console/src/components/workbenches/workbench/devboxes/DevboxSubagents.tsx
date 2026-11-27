@@ -1,5 +1,6 @@
 import { AgentLoadingIcon, CaretDownIcon } from '@pluralsh/design-system'
 import {
+  isCmdToolKind,
   resolveToolCallKind,
   toolCallTitle,
 } from 'components/ai/chatbot/toolCallDisplay'
@@ -137,7 +138,11 @@ function LatestTool({ toolCall }: { toolCall: DevboxToolCallFragment }) {
   const title = toolCall.title || toolCallTitle({ name, kind, args })
   return (
     <LatestToolSC title={title}>
-      <ToolCallKindIcon kind={kind} />
+      {isCmdToolKind(kind) ? (
+        <PromptSC aria-hidden>$</PromptSC>
+      ) : (
+        <ToolCallKindIcon kind={kind} />
+      )}
       <Body2P
         as="span"
         $color="text-disabled"
@@ -225,6 +230,13 @@ const ApprovalSC = styled.div<{ $indent: boolean }>(({ theme, $indent }) => ({
   ...($indent && {
     paddingLeft: `calc(${STATUS_ICON_SIZE}px + ${theme.spacing.xsmall})`,
   }),
+}))
+
+const PromptSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.body2,
+  flexShrink: 0,
+  fontFamily: theme.fontFamilies.mono,
+  color: theme.colors['text-disabled'],
 }))
 
 const LatestToolSC = styled.span(({ theme }) => ({
