@@ -34,6 +34,10 @@ type Terragrunt struct {
 	// Default: true
 	refresh *bool
 
+	// env is the stack run environment. The harness's own terragrunt calls need it like the run steps do, since
+	// providers may take their credentials from it (e.g. ARM_* variables on Azure).
+	env []string
+
 	// runAll runs terragrunt across every unit under dir.
 	runAll bool
 

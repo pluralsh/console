@@ -8,6 +8,9 @@ import (
 
 	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/stretchr/testify/assert"
+
+	stackrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 )
 
 const mockTerraformOutputEnv = "MOCK_TERRAFORM_OUTPUT"
@@ -237,4 +240,33 @@ func TestStateUsesCachedJSON(t *testing.T) {
 	second, err := tf.state()
 	assert.NoError(t, err)
 	assert.Equal(t, "aws_s3_bucket.example", second.Values.RootModule.Resources[0].Address)
+}
+
+// Providers may take their credentials from the stack environment (ARM_* on Azure), so the harness's own
+// terraform show must get it like the run steps do, or the run stores no state and no outputs.
+func TestOutputUsesStackEnvironment(t *testing.T) {
+	bin := t.TempDir()
+	script := `#!/bin/sh
+if [ "$ARM_USE_OIDC" != "true" ]; then
+  echo "Error building ARM Config: launching Azure CLI" >&2
+  exit 1
+fi
+echo '{"format_version":"1.0","values":{"outputs":{"snapshot_location":{"value":"azblob://snapshots/","type":"string"}}}}'
+`
+	if err := os.WriteFile(filepath.Join(bin, "terraform"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	tf := New(v1.Config{
+		ExecDir: t.TempDir(),
+		Run:     &stackrunv1.StackRun{},
+		Env:     []string{"ARM_USE_OIDC=true"},
+	})
+
+	output, err := tf.Output()
+	assert.NoError(t, err)
+	assert.Len(t, output, 1)
+	assert.Equal(t, "snapshot_location", output[0].Name)
+	assert.Equal(t, "azblob://snapshots/", output[0].Value)
 }

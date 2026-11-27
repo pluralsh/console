@@ -263,3 +263,30 @@ func readFile(t *testing.T, path string) string {
 	require.NoError(t, err)
 	return string(raw)
 }
+
+// Providers may take their credentials from the stack environment (ARM_* on Azure), so the harness's own
+// terragrunt show must get it like the run steps do, or the run stores no state and no outputs.
+func TestOutputUsesStackEnvironment(t *testing.T) {
+	bin := t.TempDir()
+	script := `#!/bin/sh
+if [ "$ARM_USE_OIDC" != "true" ]; then
+  echo "Error building ARM Config: launching Azure CLI" >&2
+  exit 1
+fi
+echo '{"format_version":"1.0","values":{"outputs":{"snapshot_location":{"value":"azblob://snapshots/","type":"string"}}}}'
+`
+	require.NoError(t, os.WriteFile(filepath.Join(bin, "terragrunt"), []byte(script), 0755))
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	tg := New(toolv1.Config{
+		ExecDir: t.TempDir(),
+		Run:     &stackrunv1.StackRun{},
+		Env:     []string{"ARM_USE_OIDC=true"},
+	})
+
+	output, err := tg.Output()
+	require.NoError(t, err)
+	require.Len(t, output, 1)
+	assert.Equal(t, "snapshot_location", output[0].Name)
+	assert.Equal(t, "azblob://snapshots/", output[0].Value)
+}

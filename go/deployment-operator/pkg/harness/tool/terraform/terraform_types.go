@@ -35,6 +35,10 @@ type Terraform struct {
 	// Default: true
 	refresh *bool
 
+	// env is the stack run environment. The harness's own terraform calls need it like the run steps do, since
+	// providers may take their credentials from it (e.g. ARM_* variables on Azure).
+	env []string
+
 	// stateCache stores the parsed state for the lifetime of a harness run.
 	stateCache *tfjson.State
 

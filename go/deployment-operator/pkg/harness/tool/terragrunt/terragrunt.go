@@ -145,6 +145,7 @@ func (in *Terragrunt) state() (*tfjson.State, error) {
 		"terragrunt",
 		exec.WithArgs([]string{"show", "-json"}),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return state, fmt.Errorf("failed executing terragrunt show -json: %s: %w", string(output), err)
@@ -236,6 +237,7 @@ func (in *Terragrunt) plan() (string, error) {
 		"terragrunt",
 		exec.WithArgs([]string{"show", in.planFileName}),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return "", fmt.Errorf("failed executing terragrunt show: %s: %w", string(output), err)
@@ -269,6 +271,7 @@ func (in *Terragrunt) planJSON() (*tfjson.Plan, error) {
 		"terragrunt",
 		exec.WithArgs([]string{"show", "-json", in.planFileName}),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed executing terragrunt show -json: %s: %w", string(output), err)
@@ -392,6 +395,7 @@ func New(config v1.Config) v1.Tool {
 		variables:   config.Variables,
 		parallelism: config.Run.Parallelism,
 		refresh:     config.Run.Refresh,
+		env:         config.Env,
 		runAll:      runAll,
 	}).init()
 }
