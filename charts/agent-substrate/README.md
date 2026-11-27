@@ -178,7 +178,7 @@ already have the roles and schema `ate-setup`'s bootstrap creates.
 | Extra ext_proc filter | `atenet.egress.additionalExtprocService` (e.g. `plrl-deploy-operator/devbox-egress-authz:50053`), spliced into the egress Envoy config at Substrate's `#ATE_MITM_EXTPROC_*` markers like `ate-setup` does |
 | SPIFFE IDs | `atenet.router.ingressAllowedSPIFFEIDs`, `auth.egressGatewayExtraSPIFFEIDs` (e.g. `spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway`) |
 | Route timeout | `atenet.router.routeTimeout` |
-| Preview gates | `previewGates`, passed as `--preview=` to every Substrate container |
+| Preview gates | `previewGates`, passed as `--preview=` to every Substrate container. Devbox runners with `bootstrapScript`, `mise` or `repositories` need `GoldenEgressPolicy`; JuiceFS and ZeroFS homes need `ExternalVolumes`, which the chart adds itself |
 | Dataplane | `atenet.dataplane: envoy` |
 | System-infra scheduling | `systemInfra.*` (`cordon` applies ate-setup's `--cordon-system-infra-components`) |
 | Telemetry | `otel.endpoint` (empty disables export), `logLevel` and per-component `logLevel` |

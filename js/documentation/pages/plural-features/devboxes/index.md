@@ -30,3 +30,20 @@ spec:
 The deployment operator delivers the devbox daemon and the agents with each release, independently of the environment image. Existing instances move to new versions in place, keeping their home directory and agent threads: by default when they next resume, or when an update is triggered from Plural. See [How devbox updates work](/plural-features/devboxes/updates).
 
 See [Environment images](/plural-features/devboxes/environment-images) for building your own image, and the [Agent API reference](/api-reference/kubernetes/agent-api-reference#devboxrunner) for every `DevboxRunner` field.
+
+## Cluster setup
+
+Devboxes run on Agent Substrate, which the `agent-substrate` Helm chart installs. Some runner fields use Substrate preview features, which are off unless the chart's `previewGates` turns them on:
+
+| Runner fields | Preview gate | How to enable it |
+|---|---|---|
+| `spec.bootstrapScript`, `spec.mise`, `spec.repositories` | `GoldenEgressPolicy`: the golden boot reaches the network to clone repositories and install tools | Add `GoldenEgressPolicy` to `previewGates` |
+| `spec.home.storage: JuiceFS` or `ZeroFS` | `ExternalVolumes`: the home is a volume of its own | Nothing extra: the chart adds it with `juicefs.enabled` or `zerofs.enabled` |
+
+```yaml
+# agent-substrate chart values
+previewGates:
+  - GoldenEgressPolicy
+```
+
+Without `GoldenEgressPolicy`, a runner that sets any of those fields gets no new revision. Its `TemplateReady` condition reports `actor_template.golden_egress_policy: Forbidden`, and instances keep using the previous revision. Gate names must match exactly: Substrate doesn't start with a gate it doesn't know.
