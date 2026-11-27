@@ -272,6 +272,32 @@ func (h *harness) allow(host string) {
 	runners[testRunner] = &edited
 }
 
+func TestPublicEgressOpensEveryHostWithoutShadowingInjection(t *testing.T) {
+	runner := RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{AllowPublicEgress: new(true)}})
+	policy := egress.BuildPolicy(egress.InstanceInfo{
+		InstanceID: "i-1", ConsoleHost: "console.example.com", SCMHosts: []string{"github.com"},
+		HTTPAllowlist: runner.HTTPAllowlist,
+	})
+	var passthrough, http, injected bool
+	for _, r := range policy.Rules {
+		switch {
+		case r.Host == "*" && r.Port == 443:
+			passthrough = r.Scheme == egress.SchemeTLSPassthrough
+		case r.Host == "*" && r.Port == 80:
+			http = r.Scheme == egress.SchemeHTTP
+		case r.Host == "console.example.com":
+			injected = r.Scheme == egress.SchemeHTTPS && r.SecretURI != ""
+		}
+	}
+	if !passthrough || !http || !injected {
+		t.Fatalf("want * tunneled on 443 and plain on 80, and console still injected; got %+v", policy.Rules)
+	}
+
+	if off := RunnerFromCRD(&v1alpha1.DevboxRunner{}); slices.ContainsFunc(off.HTTPAllowlist, func(e egress.AllowEntry) bool { return e.Host == "*" }) {
+		t.Fatalf("public egress is off by default: %+v", off.HTTPAllowlist)
+	}
+}
+
 func TestRunningBoxesPickUpAllowlistEdits(t *testing.T) {
 	h := newHarness(t, nil)
 	h.running("inst-1")

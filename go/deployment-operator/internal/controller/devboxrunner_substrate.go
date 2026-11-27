@@ -589,6 +589,15 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 		}
 		https[port] = append(https[port], entry.Host)
 	}
+	if runner.Spec.PublicEgress() {
+		passthrough = append(passthrough,
+			&ateapi.EgressRule{TlsPassthrough: &ateapi.TlsPassthroughRule{
+				Hostnames: []string{v1alpha1.PublicEgressHost}, Ports: &ateapi.Ports{Numbers: []int32{443}},
+			}},
+			&ateapi.EgressRule{Http: &ateapi.HttpRule{
+				Hostnames: []string{v1alpha1.PublicEgressHost}, Ports: &ateapi.Ports{Numbers: []int32{80}},
+			}})
+	}
 
 	ports := lo.Keys(https)
 	sort.Slice(ports, func(i, j int) bool { return ports[i] < ports[j] })

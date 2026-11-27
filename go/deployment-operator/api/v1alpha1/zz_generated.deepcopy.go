@@ -2189,6 +2189,11 @@ func (in *DevboxRunnerSpec) DeepCopyInto(out *DevboxRunnerSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.AllowPublicEgress != nil {
+		in, out := &in.AllowPublicEgress, &out.AllowPublicEgress
+		*out = new(bool)
+		**out = **in
+	}
 	if in.PackageServers != nil {
 		in, out := &in.PackageServers, &out.PackageServers
 		*out = new(DevboxPackageServers)

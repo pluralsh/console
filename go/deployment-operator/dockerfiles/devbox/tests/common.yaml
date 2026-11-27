@@ -264,6 +264,10 @@ commandTests:
     command: sh
     args: ["-c", "chromium --headless --no-sandbox --disable-gpu --dump-dom 'data:text/html,<p>devbox-ok</p>' 2>/dev/null"]
     expectedOutput: ["devbox-ok"]
+  - name: certutil, which trusts the egress CA in chromium's NSS database
+    command: which
+    args: ["certutil"]
+    exitCode: 0
   - name: Xvfb and voxl
     command: which
     args: ["Xvfb", "voxl"]

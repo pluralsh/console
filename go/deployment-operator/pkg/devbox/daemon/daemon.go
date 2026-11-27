@@ -189,7 +189,7 @@ func New(cfg Config) (*Daemon, error) {
 		Log: d.log.With("component", "terminal")})
 	d.browser = browser.New(browser.Options{Chromium: cfg.Chromium, Xvfb: cfg.Xvfb, X11VNC: cfg.X11VNC, Voxl: cfg.Voxl,
 		Display: cfg.Display, CDPPort: cfg.CDPPort, VNCPort: cfg.VNCPort, VoxlPort: cfg.VoxlPort, ProfileDir: filepath.Join(cfg.StateDir, "browser"),
-		IdleTimeout: cfg.BrowserIdle, Env: d.baseEnv, Supervisor: d.sup, Clock: cfg.Clock,
+		IdleTimeout: cfg.BrowserIdle, Env: d.baseEnv, Supervisor: d.sup, Clock: cfg.Clock, Prepare: d.trustBrowser,
 		Log: d.log.With("component", "browser")})
 	d.creds = creds.New(creds.Options{Home: cfg.Home, IdentityDir: cfg.IdentityDir, AgentAuthDir: cfg.AgentAuthDir,
 		Client: d.sandboxCredentials, InstanceID: d.instanceID, Clock: cfg.Clock,
@@ -584,6 +584,25 @@ func (d *Daemon) importJavaTrust() {
 	if n > 0 {
 		d.log.Info("imported egress CA into java truststore", "certs", n, "store", store)
 	}
+}
+
+// trustBrowser adds the egress CA(s) to the NSS database Chromium reads, before each start since it lives in the
+// home, which may have been remounted since boot.
+func (d *Daemon) trustBrowser(ctx context.Context) error {
+	certutil := trust.Certutil()
+	if certutil == "" {
+		d.log.Warn("no certutil; the browser won't trust the egress CA, so intercepted HTTPS sites fail")
+		return nil
+	}
+	dir := trust.NSSDir(d.cfg.Home)
+	n, err := trust.ImportNSS(ctx, certutil, dir, trust.Certificates(d.cfg.EgressCAGlobs))
+	if err != nil {
+		return fmt.Errorf("browser trust store: %w", err)
+	}
+	if n > 0 {
+		d.log.Info("imported egress CA into the browser's trust store", "certs", n, "db", dir)
+	}
+	return nil
 }
 
 func (d *Daemon) loginLoop(ctx context.Context) {

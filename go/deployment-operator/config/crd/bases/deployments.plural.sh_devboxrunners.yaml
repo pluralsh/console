@@ -111,6 +111,20 @@ spec:
                 x-kubernetes-validations:
                 - message: exactly one agent must be marked default
                   rule: self.filter(a, has(a.default) && a.default).size() == 1
+              allowPublicEgress:
+                description: |-
+                  AllowPublicEgress lets instances (and the golden boot) reach any host on ports 443 and 80, instead of only
+                  the allowlist and presets. HTTPS to hosts no other rule names is tunneled without interception, so those
+                  sites see their real certificates; the hosts egress injects credentials for (SCM, console, cloud identity,
+                  subscription billing) keep their specific rules, so credentials are still only sent where they belong.
+
+                  Security: this removes egress as a guardrail against exfiltration. An agent, a compromised dependency or a
+                  prompt injection in a page the agent reads can send workspace code, environment secrets and anything else in
+                  the box to an arbitrary server. Wildcard rules match names, not addresses, so names that resolve inside the
+                  cluster or private network (e.g. <svc>.<ns>.svc.cluster.local, internal DNS zones) become reachable on these
+                  ports too, subject only to your NetworkPolicies. Only enable it where boxes run code and agents you trust
+                  with that reach: sandboxed clusters with no sensitive internal services, demo or personal environments.
+                type: boolean
               allowedRepositories:
                 description: |-
                   AllowedRepositories the git repositories allowed to be used with this devbox,

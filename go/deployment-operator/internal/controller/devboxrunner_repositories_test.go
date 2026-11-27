@@ -57,6 +57,16 @@ func TestDevboxGoldenEgressPolicy(t *testing.T) {
 	g.Expect(scm.Https.Effects.ReplaceHeaders).To(HaveLen(2))
 	g.Expect(scm.Https.Effects.ReplaceHeaders[0].CredentialUri).To(Equal("ate-secret://plural.sh/instances/golden.platform/scm/github.com"))
 	g.Expect(scm.Https.Effects.ReplaceHeaders[1].CredentialUri).To(Equal("ate-secret://plural.sh/instances/golden.platform/scm-token/github.com"))
+
+	runner.Spec.AllowPublicEgress = lo.ToPtr(true)
+	policy = devboxGoldenEgressPolicy(runner)
+	g.Expect(policy.Rules).To(ContainElements(
+		&ateapi.EgressRule{TlsPassthrough: &ateapi.TlsPassthroughRule{Hostnames: []string{"*"}, Ports: &ateapi.Ports{Numbers: []int32{443}}}},
+		&ateapi.EgressRule{Http: &ateapi.HttpRule{Hostnames: []string{"*"}, Ports: &ateapi.Ports{Numbers: []int32{80}}}},
+	))
+	g.Expect(lo.ContainsBy(policy.Rules, func(r *ateapi.EgressRule) bool {
+		return lo.Contains(r.GetHttps().GetHostnames(), "github.com") && r.GetHttps().GetEffects() != nil
+	})).To(BeTrue(), "the SCM rule still injects credentials")
 }
 
 func TestDevboxGoldenBootTimeout(t *testing.T) {

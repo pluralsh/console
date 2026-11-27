@@ -33,3 +33,20 @@ func TestDevboxAttributesCreateBindings(t *testing.T) {
 		{GroupName: lo.ToPtr("platform")},
 	}))
 }
+
+func TestDevboxAttributesShowPublicEgress(t *testing.T) {
+	g := NewWithT(t)
+	r := &DevboxRunnerReconciler{}
+	runner := &v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{
+		Agents:            []v1alpha1.DevboxAgent{{Type: v1alpha1.DevboxAgentClaude, Default: lo.ToPtr(true)}},
+		AllowPublicEgress: lo.ToPtr(true),
+	}}
+	runner.Name = "platform"
+
+	attrs, err := r.devboxAttributes(runner, nil)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(attrs.HTTPAllowlist).To(ContainElements(
+		&console.DevboxHTTPAllowAttributes{Host: "*", Port: lo.ToPtr(int64(443)), Passthrough: lo.ToPtr(true)},
+		&console.DevboxHTTPAllowAttributes{Host: "*", Port: lo.ToPtr(int64(80))},
+	))
+}

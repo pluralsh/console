@@ -59,11 +59,13 @@ type Options struct {
 	Display  string
 	// CDPPort is the localhost port agents connect to; the daemon proxies it to Chromium's own port (CDPPort+1)
 	// so the first connection can start the browser.
-	CDPPort     int
-	VNCPort     int
-	VoxlPort    int
-	ProfileDir  string
-	ExtraFlags  []string
+	CDPPort    int
+	VNCPort    int
+	VoxlPort   int
+	ProfileDir string
+	ExtraFlags []string
+	// Prepare runs before each Chromium start, e.g. to trust the egress CA; a failure is logged, not fatal.
+	Prepare     func(ctx context.Context) error
 	IdleTimeout time.Duration
 	Env         func() []string
 	Supervisor  *proc.Supervisor
@@ -312,6 +314,14 @@ func (b *Browser) start(width, height int32, url string) error {
 	}
 	_ = os.MkdirAll(profile, 0o700)
 	_ = os.Remove(filepath.Join(profile, "SingletonLock"))
+	if b.opts.Prepare != nil {
+		pctx, cancel := context.WithDeadline(context.Background(), deadline)
+		err := b.opts.Prepare(pctx)
+		cancel()
+		if err != nil {
+			b.log.Warn("preparing the browser", "err", err)
+		}
+	}
 	args := make([]string, 0, 14+len(b.opts.ExtraFlags))
 	// The box's sandbox (gVisor) is the isolation boundary, and Chromium's own sandbox can't start inside it.
 	// The window is a pixel past the screen, which Chromium would otherwise fall a pixel short of (fitWindows).

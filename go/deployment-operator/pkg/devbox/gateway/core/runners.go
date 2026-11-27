@@ -262,6 +262,11 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 	for _, h := range obj.Spec.EgressPresetHosts() {
 		r.HTTPAllowlist = append(r.HTTPAllowlist, egress.AllowEntry{Host: h, Port: 443})
 	}
+	if obj.Spec.PublicEgress() {
+		r.HTTPAllowlist = append(r.HTTPAllowlist,
+			egress.AllowEntry{Host: v1alpha1.PublicEgressHost, Port: 443, Passthrough: true},
+			egress.AllowEntry{Host: v1alpha1.PublicEgressHost, Port: 80, Cleartext: true})
+	}
 	for _, ci := range obj.Spec.CloudIdentities {
 		id := &devboxv1.CloudIdentity{Name: ci.Name, IsDefault: ci.Default != nil && *ci.Default}
 		switch {

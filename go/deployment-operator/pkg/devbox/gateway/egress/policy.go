@@ -80,7 +80,8 @@ func SecretURI(instanceID, kind, host string) string { return rules.SecretURI(in
 //   - subscription billing: api.anthropic.com with Authorization from .../claude-oauth for Claude, and
 //     chatgpt.com and auth.openai.com without injection for Codex (the bundle lives in the sandbox);
 //   - cloud identity token-exchange and API hosts, without injection;
-//   - the runner allowlist: https, or tls_passthrough where flagged.
+//   - the runner allowlist: https, or tls_passthrough or http where flagged. Public egress is "*" here, which
+//     Substrate ranks below every exact host, so it never shadows an injecting rule.
 func BuildPolicy(info InstanceInfo) Policy {
 	b := &rules.Builder{}
 	id := info.InstanceID
@@ -140,7 +141,10 @@ func BuildPolicy(info InstanceInfo) Policy {
 
 	for _, e := range info.HTTPAllowlist {
 		scheme := SchemeHTTPS
-		if e.Passthrough {
+		switch {
+		case e.Cleartext:
+			scheme = SchemeHTTP
+		case e.Passthrough:
 			scheme = SchemeTLSPassthrough
 		}
 		b.Add(Rule{Host: normalizeHost(e.Host), Port: e.Port, Scheme: scheme})

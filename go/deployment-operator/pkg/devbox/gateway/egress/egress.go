@@ -72,6 +72,8 @@ type AllowEntry struct {
 	Port int32
 	// Passthrough forwards TLS undecrypted (tls_passthrough). Such hosts get no credential injection.
 	Passthrough bool
+	// Cleartext allows plain HTTP instead (Port then defaults to 80).
+	Cleartext bool
 }
 
 // ActorResolver maps a Substrate actor to the devbox instance it runs. Implemented by the gateway core.

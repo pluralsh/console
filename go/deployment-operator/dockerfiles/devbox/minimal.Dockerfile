@@ -189,7 +189,7 @@ RUN apt-get update && \
       build-essential pkg-config \
       unzip zip xz-utils bzip2 tzdata \
       libatomic1 \
-      chromium xvfb xauth \
+      chromium libnss3-tools xvfb xauth \
       fonts-liberation fonts-dejavu-core fonts-noto-color-emoji && \
     ln -s /usr/bin/fdfind /usr/local/bin/fd && \
     git lfs install --system && \

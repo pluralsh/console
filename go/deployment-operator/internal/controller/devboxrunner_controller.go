@@ -427,9 +427,9 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 		Agents:              devboxAgentAttributes(runner, catalog),
 		HTTPAllowlist: append(lo.Map(runner.Spec.HTTPAllowlist, func(e v1alpha1.DevboxHTTPAllowlistEntry, _ int) *console.DevboxHTTPAllowAttributes {
 			return &console.DevboxHTTPAllowAttributes{Host: e.Host, Port: lo.ToPtr(int64(lo.FromPtrOr(e.Port, 443))), Passthrough: e.Passthrough}
-		}), lo.Map(runner.Spec.EgressPresetHosts(), func(h string, _ int) *console.DevboxHTTPAllowAttributes {
+		}), append(lo.Map(runner.Spec.EgressPresetHosts(), func(h string, _ int) *console.DevboxHTTPAllowAttributes {
 			return &console.DevboxHTTPAllowAttributes{Host: h, Port: lo.ToPtr(int64(443))}
-		})...),
+		}), publicEgressAttributes(runner)...)...),
 		IdlePolicy: devboxIdlePolicyAttributes(runner.Spec.IdlePolicy),
 		Autonomy:   devboxAutonomyAttributes(runner),
 	}
@@ -522,6 +522,17 @@ func devboxAutonomyAttributes(runner *v1alpha1.DevboxRunner) *console.DevboxAuto
 	return &console.DevboxAutonomyAttributes{
 		Default: lo.ToPtr(console.DevboxAutonomy(strings.ToUpper(string(def)))),
 		Max:     lo.ToPtr(console.DevboxAutonomy(strings.ToUpper(string(maxLevel)))),
+	}
+}
+
+// publicEgressAttributes are the allowlist entries spec.allowPublicEgress opens, so console shows them.
+func publicEgressAttributes(runner *v1alpha1.DevboxRunner) []*console.DevboxHTTPAllowAttributes {
+	if !runner.Spec.PublicEgress() {
+		return nil
+	}
+	return []*console.DevboxHTTPAllowAttributes{
+		{Host: v1alpha1.PublicEgressHost, Port: lo.ToPtr(int64(443)), Passthrough: lo.ToPtr(true)},
+		{Host: v1alpha1.PublicEgressHost, Port: lo.ToPtr(int64(80))},
 	}
 }
 

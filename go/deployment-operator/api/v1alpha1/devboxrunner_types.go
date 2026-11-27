@@ -170,6 +170,20 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:MaxItems=256
 	HTTPAllowlist []DevboxHTTPAllowlistEntry `json:"httpAllowlist,omitempty"`
 
+	// AllowPublicEgress lets instances (and the golden boot) reach any host on ports 443 and 80, instead of only
+	// the allowlist and presets. HTTPS to hosts no other rule names is tunneled without interception, so those
+	// sites see their real certificates; the hosts egress injects credentials for (SCM, console, cloud identity,
+	// subscription billing) keep their specific rules, so credentials are still only sent where they belong.
+	//
+	// Security: this removes egress as a guardrail against exfiltration. An agent, a compromised dependency or a
+	// prompt injection in a page the agent reads can send workspace code, environment secrets and anything else in
+	// the box to an arbitrary server. Wildcard rules match names, not addresses, so names that resolve inside the
+	// cluster or private network (e.g. <svc>.<ns>.svc.cluster.local, internal DNS zones) become reachable on these
+	// ports too, subject only to your NetworkPolicies. Only enable it where boxes run code and agents you trust
+	// with that reach: sandboxed clusters with no sensitive internal services, demo or personal environments.
+	// +kubebuilder:validation:Optional
+	AllowPublicEgress *bool `json:"allowPublicEgress,omitempty"`
+
 	// PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir
 	// and Python are on unless set to false.
 	// +kubebuilder:validation:Optional
@@ -1259,6 +1273,14 @@ func (in *DevboxRunnerSpec) CloudProviderHosts() []string {
 		}
 	}
 	return out
+}
+
+// PublicEgressHost is the hostname pattern AllowPublicEgress opens; Substrate matches every name with it.
+const PublicEgressHost = "*"
+
+// PublicEgress reports whether spec.allowPublicEgress opens 443 and 80 to every host.
+func (in *DevboxRunnerSpec) PublicEgress() bool {
+	return in.AllowPublicEgress != nil && *in.AllowPublicEgress
 }
 
 // EgressPresetHosts are every host the runner's presets open on 443: package servers, cloud providers, OCI
