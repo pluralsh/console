@@ -62,6 +62,8 @@ const columns = [
   columnHelper.accessor((box) => box.name, {
     id: 'name',
     header: 'Devbox',
+    // fills the row, so a hovered row highlights to the table's edge
+    meta: { gridTemplate: 'minmax(0, 1fr)' },
     cell: ({ row: { original: box } }) => (
       <StackedText
         first={box.name}

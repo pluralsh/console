@@ -85,14 +85,18 @@ export function updateChip(i: UpdatableInstance): Nullable<UpdateChip> {
   return null
 }
 
-// "devbox-daemon 0.12.0 → 0.12.1" when the daemon is what changed, else that the image did
+// "devbox-daemon 0.12.0 → 0.12.1" when the daemon is what changed, else the revision the box moved to: its image,
+// agents or settings changed
 export function versionChange(i: UpdatableInstance): string {
   const [from, to] = [i.daemonVersion, i.devbox?.daemonVersion]
   if (to && from !== to)
     return from
       ? `devbox-daemon ${from} → ${to}`
       : `A newer devbox runtime (devbox-daemon ${to}) is available`
-  return "The box's image changed since this instance started"
+  const revision = i.devbox?.revision
+  return revision
+    ? `The box's image, agents or settings changed: revision ${i.templateRevision} → ${revision}`
+    : "The box's image, agents or settings changed since this instance started"
 }
 
 export function updateConfirmText(i: Pick<UpdatableInstance, 'status'>) {

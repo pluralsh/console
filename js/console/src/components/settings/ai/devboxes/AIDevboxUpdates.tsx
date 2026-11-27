@@ -94,7 +94,7 @@ export function AIDevboxUpdates({ devboxId }: { devboxId: string }) {
           </Prop>
           <Prop
             label="Outdated instances"
-            hint="Live instances on an older image or daemon than the box serves."
+            hint="Live instances on an older revision than the box serves: its image, agents, daemon or settings changed."
           >
             {supported ? outdated : '—'}
           </Prop>

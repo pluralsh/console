@@ -103,11 +103,13 @@ describe('versionChange', () => {
     )
   })
 
-  it('says the image changed otherwise', () => {
-    expect(versionChange(instance({ daemonVersion: '0.12.1' }))).toMatch(
-      /image changed/
+  it('says the box changed otherwise, with the revisions when it knows them', () => {
+    expect(versionChange(instance({ daemonVersion: '0.12.1' }))).toBe(
+      "The box's image, agents or settings changed: revision 2 → 3"
     )
-    expect(versionChange(instance({ devbox: null }))).toMatch(/image changed/)
+    expect(versionChange(instance({ devbox: null }))).toMatch(
+      /image, agents or settings changed since/
+    )
   })
 })
 
