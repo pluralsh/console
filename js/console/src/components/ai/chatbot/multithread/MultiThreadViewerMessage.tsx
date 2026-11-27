@@ -12,14 +12,32 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2P, shimmerWithinCss } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil } from 'lodash'
-import { ComponentProps, memo, ReactElement, ReactNode, useState } from 'react'
+import {
+  ComponentProps,
+  memo,
+  ReactElement,
+  ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 import { chatHeadingText, chatListCss } from '../ChatMarkdown'
-import { ToolCallContent, useQuietToolCodeCss } from '../ToolCallContent'
+import {
+  EXPANDED_PREVIEW_LINES,
+  previewFadeCss,
+  ShowMoreSC,
+  ToolCallContent,
+  toolOutputTextCss,
+  toolSurfaceCss,
+  useCanExpand,
+  useExpandedFor,
+  useQuietToolCodeCss,
+} from '../ToolCallContent'
 import {
   getCommand,
   getPython,
@@ -191,19 +209,11 @@ export function SimpleToolCall({
           {standaloneCommand && commandIcon && (
             <CommandIconSC>{commandIcon}</CommandIconSC>
           )}
-          <Code
-            language="bash"
-            showHeader={false}
-            fillLevel={0}
-            css={{
-              ...codeCss,
-              backgroundColor: 'transparent',
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-            }}
-          >
-            {`$ ${command}`}
-          </Code>
+          <ShellCommandPreview
+            command={command}
+            shimmer={showShimmer}
+            reserveIconSpace={standaloneCommand && !!commandIcon}
+          />
           <ToolCallContent
             content={content ?? ''}
             attributes={attributes}
@@ -553,6 +563,82 @@ const ToolCallLineSC = styled.span(({ theme }) => ({
   '.runtime': {
     flexShrink: 0,
   },
+}))
+
+/** Long commands wrap rather than scroll sideways, then fold like tool output. */
+function ShellCommandPreview({
+  command,
+  shimmer,
+  reserveIconSpace,
+}: {
+  command: string
+  shimmer: boolean
+  reserveIconSpace: boolean
+}) {
+  const theme = useTheme()
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const preRef = useRef<HTMLPreElement | null>(null)
+  const [expanded, toggleExpanded] = useExpandedFor(command)
+
+  useLayoutEffect(() => {
+    preRef.current = wrapperRef.current?.querySelector('pre') ?? null
+  })
+
+  const canExpand = useCanExpand({
+    ref: preRef,
+    contentKey: command,
+    expanded,
+  })
+
+  return (
+    <CommandBoxSC ref={wrapperRef}>
+      <Code
+        language="bash"
+        showHeader={false}
+        fillLevel={0}
+        css={{
+          '&&': {
+            border: 'none',
+            borderRadius: 0,
+            backgroundColor: 'transparent',
+          },
+          '& pre': {
+            ...toolOutputTextCss(theme),
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'anywhere',
+            maxHeight: `${expanded ? EXPANDED_PREVIEW_LINES : COMMAND_COLLAPSED_LINES}lh`,
+            overflow: expanded ? 'auto' : 'hidden',
+            ...(reserveIconSpace && { paddingRight: theme.spacing.large }),
+            ...(canExpand && !expanded && previewFadeCss),
+          },
+          ...(shimmer && shimmerWithinCss(theme)),
+        }}
+      >
+        {`$ ${command}`}
+      </Code>
+      {canExpand && (
+        <ShowMoreSC
+          type="button"
+          aria-expanded={expanded}
+          onClick={toggleExpanded}
+        >
+          {expanded ? 'Show less' : 'Show more'}
+        </ShowMoreSC>
+      )}
+    </CommandBoxSC>
+  )
+}
+
+const COMMAND_COLLAPSED_LINES = 4
+
+const CommandBoxSC = styled.div(({ theme }) => ({
+  ...toolSurfaceCss(theme),
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+  overflow: 'hidden',
+  borderTopLeftRadius: theme.borderRadiuses.large,
+  borderTopRightRadius: theme.borderRadiuses.large,
 }))
 
 const ShellCommandBodySC = styled.div<{ $hasHeader: boolean }>(
