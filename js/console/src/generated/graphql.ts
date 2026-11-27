@@ -21050,6 +21050,7 @@ export enum WorkbenchToolCategory {
   Chat = 'CHAT',
   Coding = 'CODING',
   ErrorTracking = 'ERROR_TRACKING',
+  Filesystem = 'FILESYSTEM',
   Function = 'FUNCTION',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',

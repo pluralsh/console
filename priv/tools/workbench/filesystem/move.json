@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "File or directory to move. Use a sandbox path under /workbench."
+    },
+    "target": {
+      "type": "string",
+      "description": "Destination path. Use a sandbox path under /workbench."
+    }
+  },
+  "required": ["source", "target"]
+}

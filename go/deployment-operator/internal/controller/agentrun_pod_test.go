@@ -467,7 +467,7 @@ func TestBuildAgentRunPod_WorkbenchMCPUpstreamIsSidecarOnly(t *testing.T) {
 	mcp := requireContainer(t, pod.Spec.InitContainers, mcpServerContainerName)
 	assert.Contains(t, mcp.Env, corev1.EnvVar{
 		Name:  EnvWorkbenchMCPURL,
-		Value: "https://console.example/mcp/workbench/workbench-id?categories=metrics%2Clogs%2Ctraces%2Cticketing%2Csearch%2Cscm%2Cinfrastructure",
+		Value: "https://console.example/mcp/workbench/workbench-id?categories=metrics%2Clogs%2Ctraces%2Cticketing%2Csearch%2Cscm%2Cinfrastructure%2Cfilesystem",
 	})
 
 	bootstrap := requireContainer(t, pod.Spec.InitContainers, agentBootstrapContainerName)

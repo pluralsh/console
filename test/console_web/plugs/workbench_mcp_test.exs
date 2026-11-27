@@ -1,8 +1,10 @@
 defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
   use ConsoleWeb.ConnCase, async: false
   use Mimic
+  alias Console.PseudoFS
   alias Console.Schema.WorkbenchTool.Configuration
   alias Console.Schema.WorkbenchTool.Configuration.HttpConfiguration
+  alias Pseudofs.V1.StatResponse
 
   # anubis runs tool calls in its own process, so stubs have to be global to reach them
   setup :set_mimic_global
@@ -304,6 +306,173 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
 
       assert error["message"] =~ "not bound"
       refute owner.id == other.id
+    end
+  end
+
+  describe "filesystem tools" do
+    setup do
+      stub(PseudoFS, :enabled?, fn -> true end)
+      :ok
+    end
+
+    @read_tools ~w(workbench_list_files workbench_stat_file workbench_read_file workbench_glob_files workbench_grep_files)
+    @write_tools ~w(workbench_write_file workbench_mkdir workbench_move_file workbench_delete_file)
+
+    test "readers can list and read, and do not see write tools" do
+      user = insert(:user)
+      bench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      post = http_tool(bench, :post)
+      wid = bench.id
+
+      expect(PseudoFS, :iterdir, fn ^wid, "/reports" ->
+        {:ok, [%{path: "/reports/a.md", name: "a.md", kind: :file}]}
+      end)
+      expect(PseudoFS, :stat, fn ^wid, "/reports/a.md" ->
+        {:ok, %StatResponse{kind: :FILE, size: 5}}
+      end)
+      expect(PseudoFS, :read_text, fn ^wid, "/reports/a.md" -> {:ok, "hello"} end)
+      expect(PseudoFS, :glob, fn ^wid, "/**/*.md", 0 ->
+        {:ok, [%{path: "/reports/a.md", name: "a.md", kind: :file}]}
+      end)
+      expect(PseudoFS, :grep, fn ^wid, "/", "hello", _ ->
+        {:ok, [%{
+          path: "/reports/a.md",
+          line_number: 2,
+          line: "hello",
+          before: [%{line_number: 1, text: "prev"}],
+          after: [%{line_number: 3, text: "next"}]
+        }]}
+      end)
+
+      {user, bench, session} = handshake(user, bench)
+      %{"result" => %{"tools" => tools}} = call(user, bench, session, "tools/list", %{})
+      names = Enum.map(tools, & &1["name"])
+
+      assert Enum.all?(@read_tools, &(&1 in names))
+      refute Enum.any?(@write_tools, &(&1 in names))
+      refute "http_integration_#{post.name}" in names
+      assert Enum.find(tools, & &1["name"] == "workbench_read_file")["annotations"]["readOnlyHint"]
+
+      %{"result" => list} = call(user, bench, session, "tools/call", %{
+        "name" => "workbench_list_files",
+        "arguments" => %{"path" => "/workbench/reports"}
+      })
+      refute list["isError"]
+      assert hd(list["content"])["text"] =~ "/workbench/reports/a.md"
+
+      %{"result" => read} = call(user, bench, session, "tools/call", %{
+        "name" => "workbench_read_file",
+        "arguments" => %{"path" => "/workbench/reports/a.md"}
+      })
+      refute read["isError"]
+      assert hd(read["content"])["text"] == "hello"
+
+      %{"result" => glob} = call(user, bench, session, "tools/call", %{
+        "name" => "workbench_glob_files",
+        "arguments" => %{"pattern" => "/workbench/**/*.md"}
+      })
+      assert hd(glob["content"])["text"] =~ "/workbench/reports/a.md"
+
+      %{"result" => grep} = call(user, bench, session, "tools/call", %{
+        "name" => "workbench_grep_files",
+        "arguments" => %{"pattern" => "hello"}
+      })
+      assert hd(grep["content"])["text"] ==
+        "/workbench/reports/a.md-1-prev\n/workbench/reports/a.md:2:hello\n/workbench/reports/a.md-3-next"
+    end
+
+    test "a file larger than the inline cap returns a download url" do
+      user = insert(:user)
+      bench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      wid = bench.id
+
+      expect(PseudoFS, :stat, fn ^wid, "/reports/big.txt" ->
+        {:ok, %StatResponse{kind: :FILE, size: 60_000}}
+      end)
+
+      {user, bench, session} = handshake(user, bench)
+      %{"result" => read} = call(user, bench, session, "tools/call", %{
+        "name" => "workbench_read_file",
+        "arguments" => %{"path" => "/workbench/reports/big.txt"}
+      })
+
+      refute read["isError"]
+      assert hd(read["content"])["text"] =~ "/v1/workbenches/files/download?token="
+    end
+
+    test "writers can create a file and readers cannot call write tools" do
+      writer = insert(:user)
+      reader = insert(:user)
+      bench = insert(:workbench, write_bindings: [%{user_id: writer.id}], read_bindings: [%{user_id: reader.id}])
+      post = http_tool(bench, :post)
+      wid = bench.id
+
+      expect(PseudoFS, :write_file, fn ^wid, "/notes/a.md", ["hello"] -> {:ok, 5} end)
+      expect(PseudoFS, :write_file, fn ^wid, "/notes/empty.md", [""] -> {:ok, 0} end)
+      expect(PseudoFS, :mkdir, fn ^wid, "/notes", [parents: true, exist_ok: true] -> :ok end)
+      expect(PseudoFS, :rename, fn ^wid, "/notes/a.md", "/notes/b.md" -> {:ok, "/notes/b.md"} end)
+      expect(PseudoFS, :delete, fn ^wid, "/notes/b.md" -> :ok end)
+      stub(PseudoFS, :stat, fn
+        ^wid, "/notes/a.md" -> {:ok, %StatResponse{kind: :FILE, size: 5}}
+        ^wid, "/notes/empty.md" -> {:ok, %StatResponse{kind: :FILE, size: 0}}
+        ^wid, "/notes" -> {:ok, %StatResponse{kind: :DIRECTORY, size: 0}}
+        ^wid, "/notes/b.md" -> {:ok, %StatResponse{kind: :FILE, size: 5}}
+      end)
+
+      {writer, bench, session} = handshake(writer, bench)
+      %{"result" => %{"tools" => tools}} = call(writer, bench, session, "tools/list", %{})
+      names = Enum.map(tools, & &1["name"])
+      assert Enum.all?(@write_tools, &(&1 in names))
+      refute "http_integration_#{post.name}" in names
+      refute Enum.find(tools, & &1["name"] == "workbench_write_file")["annotations"]["readOnlyHint"]
+
+      %{"result" => written} = call(writer, bench, session, "tools/call", %{
+        "name" => "workbench_write_file",
+        "arguments" => %{"path" => "/workbench/notes/a.md", "content" => "hello"}
+      })
+      refute written["isError"]
+      assert hd(written["content"])["text"] =~ "/workbench/notes/a.md"
+
+      %{"result" => cleared} = call(writer, bench, session, "tools/call", %{
+        "name" => "workbench_write_file",
+        "arguments" => %{"path" => "/workbench/notes/empty.md", "content" => ""}
+      })
+      refute cleared["isError"]
+      assert hd(cleared["content"])["text"] =~ "/workbench/notes/empty.md"
+
+      for {name, args} <- [
+        {"workbench_mkdir", %{"path" => "/workbench/notes"}},
+        {"workbench_move_file", %{"source" => "/workbench/notes/a.md", "target" => "/workbench/notes/b.md"}},
+        {"workbench_delete_file", %{"path" => "/workbench/notes/b.md"}}
+      ] do
+        %{"result" => result} = call(writer, bench, session, "tools/call", %{"name" => name, "arguments" => args})
+        refute result["isError"]
+      end
+
+      {reader, bench, reader_session} = handshake(reader, bench)
+      %{"result" => %{"tools" => reader_tools}} = call(reader, bench, reader_session, "tools/list", %{})
+      refute "workbench_write_file" in Enum.map(reader_tools, & &1["name"])
+
+      %{"error" => error} = call(reader, bench, reader_session, "tools/call", %{
+        "name" => "workbench_write_file",
+        "arguments" => %{"path" => "/workbench/notes/a.md", "content" => "nope"}
+      })
+      assert error["message"] == "Invalid params"
+      assert String.downcase(error["data"]["message"]) =~ "tool not found"
+    end
+
+    test "the filesystem category returns only file tools" do
+      user = admin()
+      bench = insert(:workbench)
+      http = http_tool(bench, :get)
+
+      {user, bench, session} = handshake(user, bench, "?categories=filesystem")
+      %{"result" => %{"tools" => tools}} =
+        call(user, bench, session, "tools/list", %{}, "?categories=filesystem")
+
+      names = Enum.map(tools, & &1["name"])
+      assert Enum.all?(@read_tools ++ @write_tools, &(&1 in names))
+      refute "http_integration_#{http.name}" in names
     end
   end
 

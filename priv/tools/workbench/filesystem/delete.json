@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "File or directory to delete. A directory is removed with everything beneath it. Use a sandbox path under /workbench."
+    }
+  },
+  "required": ["path"]
+}

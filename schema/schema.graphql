@@ -4914,6 +4914,7 @@ enum WorkbenchToolCategory {
   CODING
   VERIFICATION
   OBSERVABILITY
+  FILESYSTEM
 }
 
 enum WorkbenchToolHttpMethod {
