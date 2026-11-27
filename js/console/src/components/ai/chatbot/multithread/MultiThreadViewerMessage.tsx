@@ -101,7 +101,9 @@ export function SimpleToolCall({
   customResultBody,
   customLabel,
   customTitle,
+  customSubtitle,
   leadingIcon,
+  commandIcon,
   shimmer = false,
   standaloneCommand = false,
 }: {
@@ -112,7 +114,10 @@ export function SimpleToolCall({
   customResultBody?: ReactNode
   customLabel?: ReactNode
   customTitle?: string
+  customSubtitle?: string
   leadingIcon?: ReactNode
+  /** Pinned to the corner of a standalone command, which has no label to carry a leading icon. */
+  commandIcon?: ReactNode
   /** Sweep loading text inside code and log boxes without treating the call as pending. */
   shimmer?: boolean
   /** Render shell commands without the surrounding tool label/accordion. */
@@ -140,7 +145,8 @@ export function SimpleToolCall({
   const title =
     customTitle ??
     toolCallTitle({ name: toolName, kind, args, pending: isPending })
-  const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
+  const subtitle =
+    customSubtitle ?? toolCallDisplaySubtitle(kind, toolName, args, content)
   const resolvedLeadingIcon =
     leadingIcon ??
     (isPending && kind === 'subagent' ? (
@@ -182,6 +188,9 @@ export function SimpleToolCall({
       )
       const commandBody = (
         <ShellCommandBodySC $hasHeader={standaloneCommand || !!description}>
+          {standaloneCommand && commandIcon && (
+            <CommandIconSC>{commandIcon}</CommandIconSC>
+          )}
           <Code
             language="bash"
             showHeader={false}
@@ -556,8 +565,18 @@ const ShellCommandBodySC = styled.div<{ $hasHeader: boolean }>(
     marginTop: $hasHeader ? 0 : theme.spacing.small,
     boxSizing: 'border-box',
     backgroundColor: 'transparent',
+    position: 'relative',
   })
 )
+
+const CommandIconSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing.small,
+  right: theme.spacing.small,
+  zIndex: 1,
+  display: 'flex',
+  pointerEvents: 'none',
+}))
 
 export const ClickableLabelSC = styled.button(() => ({
   background: 'none',

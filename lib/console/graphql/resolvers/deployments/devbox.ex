@@ -3,13 +3,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   alias Console.Devboxes
   alias Console.Devboxes.{AgentCredentials, Billing, Ingest, Threads, Workspace}
   alias Console.WorkloadIdentity.Snippets
+  alias Console.AI.Workbench.MCP.Toolset
   alias Console.Schema.{
+    CloudConnection,
     Devbox,
     DevboxInstance,
     DevboxInstanceSession,
     DevboxInstanceInteraction,
     DevboxSnapshot,
-    User
+    User,
+    Workbench,
+    WorkbenchTool
   }
 
   def resolve_devbox(%{id: id}, ctx) when is_binary(id), do: Devboxes.fetch_devbox(id, actor(ctx))
@@ -167,6 +171,28 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   def devbox_viewer_count(_, _, _), do: {:ok, 0}
 
   def devbox_leases(%DevboxInstance{} = inst, _, _), do: {:ok, Devboxes.leases(inst)}
+
+  def devbox_mcp_tools(%DevboxInstance{} = inst, _, %{context: %{current_user: %User{} = user}}) do
+    case Console.Repo.preload(inst, :workbench) do
+      %DevboxInstance{workbench: %Workbench{} = bench} ->
+        Toolset.integrations(bench, user)
+        |> Enum.map(fn {name, %WorkbenchTool{} = tool} ->
+          %{
+            name: name,
+            tool_type: tool.tool,
+            provider: cloud_provider(tool),
+            workbench_tool_id: tool.id,
+            workbench_tool_name: tool.name
+          }
+        end)
+        |> ok()
+      _ -> {:ok, []}
+    end
+  end
+  def devbox_mcp_tools(_, _, _), do: {:ok, []}
+
+  defp cloud_provider(%WorkbenchTool{cloud_connection: %CloudConnection{provider: provider}}), do: provider
+  defp cloud_provider(_), do: nil
 
   def devbox_thread_title(%DevboxInstanceSession{} = thread, _, _), do: {:ok, DevboxInstanceSession.display_title(thread)}
   def devbox_thread_model(%DevboxInstanceSession{} = thread, _, _), do: {:ok, DevboxInstanceSession.model(thread)}

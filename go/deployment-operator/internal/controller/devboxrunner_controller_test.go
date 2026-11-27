@@ -45,8 +45,8 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zerofs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zerofs"
 )
 
 const (

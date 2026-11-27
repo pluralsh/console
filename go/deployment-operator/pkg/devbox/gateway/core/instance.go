@@ -92,6 +92,9 @@ type Instance struct {
 	sharedSnap bool
 	// scmHosts are the hosts of the box's SCM connections as console reports them; nil until fetched.
 	scmHosts []string
+	// egressApplied is egressInputs of the runner the actor's egress policy was last applied from; nil until this
+	// gateway applies one, since the actor may hold a policy from an older runner or gateway.
+	egressApplied any
 }
 
 func newInstance(rec Record) *Instance {

@@ -228,6 +228,7 @@ export { WorkbenchDevboxInstancesDocument as WorkbenchDevboxInstances } from './
 export { WorkbenchDevboxSnapshotsDocument as WorkbenchDevboxSnapshots } from './graphql-documents'
 export { WorkbenchDevboxInboxDocument as WorkbenchDevboxInbox } from './graphql-documents'
 export { DevboxInstanceDocument as DevboxInstance } from './graphql-documents'
+export { DevboxMcpToolsDocument as DevboxMcpTools } from './graphql-documents'
 export { DevboxThreadDocument as DevboxThread } from './graphql-documents'
 export { DevboxInstanceCommandsDocument as DevboxInstanceCommands } from './graphql-documents'
 export { DevboxRepositoriesDocument as DevboxRepositories } from './graphql-documents'

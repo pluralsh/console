@@ -286,6 +286,50 @@ func TestRunningBoxesPickUpAllowlistEdits(t *testing.T) {
 	})
 }
 
+func TestAllowlistEditsSurviveARunnerRefreshWithoutEgress(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+
+	h.allow("oidc.plural.sh")
+	h.g.refreshRunner(context.Background(), inst) // as a wake does before Initialize
+	h.g.backstops(context.Background())
+	h.eventually("the edited allowlist applied", func() bool {
+		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
+	})
+}
+
+func TestAdoptedBoxesPickUpAllowlistEditsMadeBeforeTheRestart(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	h.allow("oidc.plural.sh")
+
+	g2, err := New(h.g.cfg, h.g.deps)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g2.Shutdown()
+	h.ingest.mu.Lock()
+	h.ingest.register = &devboxv1.RegisterGatewayResponse{ClusterId: "cluster-9", HeartbeatIntervalSeconds: 1, Instances: []*devboxv1.InstanceSummary{
+		{InstanceId: "inst-1", Status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING},
+	}}
+	h.ingest.mu.Unlock()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go g2.runIngest(ctx)
+	h.eventually("adopted", func() bool {
+		inst := g2.get("inst-1")
+		return inst != nil && inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING
+	})
+	if slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh") {
+		t.Fatal("the host is allowed before the new gateway re-applied egress")
+	}
+
+	g2.backstops(context.Background())
+	h.eventually("the edited allowlist applied", func() bool {
+		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
+	})
+}
+
 func TestResumedBoxesPickUpAllowlistEdits(t *testing.T) {
 	h := newHarness(t, nil)
 	h.running("inst-1")

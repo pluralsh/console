@@ -4197,6 +4197,15 @@ export const DevboxPullRequestFragmentDoc = /*#__PURE__*/ gql`
   }
 }
     ${PullRequestBasicFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestFragment, unknown>;
+export const DevboxMcpToolFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxMcpTool on DevboxMcpTool {
+  name
+  toolType
+  provider
+  workbenchToolId
+  workbenchToolName
+}
+    ` as unknown as DocumentNode<Types.DevboxMcpToolFragment, unknown>;
 export const DevboxPullRequestJobFragmentDoc = /*#__PURE__*/ gql`
     fragment DevboxPullRequestJob on DevboxPullRequestJob {
   id
@@ -9839,6 +9848,16 @@ export const DevboxInstanceDocument = /*#__PURE__*/ gql`
   }
 }
     ${DevboxInstanceFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceQuery, Types.DevboxInstanceQueryVariables>;
+export const DevboxMcpToolsDocument = /*#__PURE__*/ gql`
+    query DevboxMcpTools($id: ID!) {
+  devboxInstance(id: $id) {
+    id
+    mcpTools {
+      ...DevboxMcpTool
+    }
+  }
+}
+    ${DevboxMcpToolFragmentDoc}` as unknown as DocumentNode<Types.DevboxMcpToolsQuery, Types.DevboxMcpToolsQueryVariables>;
 export const DevboxThreadDocument = /*#__PURE__*/ gql`
     query DevboxThread($id: ID!) {
   devboxThread(id: $id) {

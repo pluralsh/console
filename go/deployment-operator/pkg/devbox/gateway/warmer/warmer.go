@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -120,9 +121,16 @@ func (w *Warmer) Run(ctx context.Context) error {
 	}
 }
 
-// pass warms every ready runner's current template on the nodes it hasn't been on. The first pass only records
-// the nodes that already exist. Every pass first deletes the warm actors left behind, by a previous gateway or by
-// a delete that failed.
+// revision is a runner revision to warm.
+type revision struct {
+	runner, template, goldenTag string
+	external                    bool
+}
+
+// pass warms, on the nodes they haven't been on, every ready runner's current template and the older revisions
+// its instances still run: an instance keeps its revision until it's recreated, so after an image bump a resume on
+// a new node would otherwise unpack the old image cold. The first pass only records the nodes that already exist.
+// Every pass first deletes the warm actors left behind, by a previous gateway or by a delete that failed.
 func (w *Warmer) pass(ctx context.Context) error {
 	workers, err := w.deps.Actors.ListWorkers(ctx)
 	if err != nil {
@@ -138,33 +146,35 @@ func (w *Warmer) pass(ctx context.Context) error {
 		if r.Atespace == "" || r.Template == "" || r.GoldenTag == "" {
 			continue
 		}
-		key := r.Atespace + "/" + r.Template
-		tmpl, err := w.template(ctx, key, r)
-		if err != nil {
-			w.deps.Log.Info("can't read the template to warm", "runner", r.Name, "template", r.Template, "error", err.Error())
-			continue
-		}
-		seen[key] = true
 		list, ok := listed[r.Atespace]
 		if !ok {
 			list = w.sweep(ctx, r.Atespace)
 			listed[r.Atespace] = list
 		}
-		nodes := tmpl.nodesWithRoom(workers)
-		if !w.seeded {
+		for _, rev := range revisionsToWarm(r, list) {
+			key := r.Atespace + "/" + rev.template
+			tmpl, err := w.template(ctx, key, r.Atespace, rev.template)
+			if err != nil {
+				w.deps.Log.Info("can't read the template to warm", "runner", r.Name, "template", rev.template, "error", err.Error())
+				continue
+			}
+			seen[key] = true
+			nodes := tmpl.nodesWithRoom(workers)
+			if !w.seeded {
+				for n := range nodes {
+					tmpl.warm[n] = true
+				}
+				continue
+			}
+			cold := map[string]bool{}
 			for n := range nodes {
-				tmpl.warm[n] = true
+				if !tmpl.warm[n] {
+					cold[n] = true
+				}
 			}
-			continue
-		}
-		cold := map[string]bool{}
-		for n := range nodes {
-			if !tmpl.warm[n] {
-				cold[n] = true
+			if len(cold) > 0 {
+				w.warmRevision(ctx, rev, r.Atespace, tmpl, cold, list)
 			}
-		}
-		if len(cold) > 0 {
-			w.warmRunner(ctx, r, tmpl, cold, list)
 		}
 	}
 	for key := range w.templates {
@@ -176,11 +186,46 @@ func (w *Warmer) pass(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (w *Warmer) template(ctx context.Context, key string, r *core.Runner) (*template, error) {
+// revisionsToWarm are r's revisions that actors in list (its atespace's instances) run, most used first, then its
+// current revision if none does.
+func revisionsToWarm(r *core.Runner, list []*ateapi.Actor) []revision {
+	byTemplate := map[string]revision{}
+	for _, rev := range r.Revisions {
+		if rev.Template != "" && rev.GoldenTag != "" {
+			byTemplate[rev.Template] = revision{runner: r.Name, template: rev.Template, goldenTag: rev.GoldenTag, external: rev.HomeStorage.External()}
+		}
+	}
+	byTemplate[r.Template] = revision{runner: r.Name, template: r.Template, goldenTag: r.GoldenTag, external: r.HomeStorage.External()}
+
+	uses := map[string]int{}
+	for _, a := range list {
+		if t := a.GetActorTemplate().GetName(); t != "" {
+			if _, ok := byTemplate[t]; ok {
+				uses[t]++
+			}
+		}
+	}
+	var out []revision
+	for t := range uses {
+		out = append(out, byTemplate[t])
+	}
+	slices.SortFunc(out, func(a, b revision) int {
+		if d := uses[b.template] - uses[a.template]; d != 0 {
+			return d
+		}
+		return strings.Compare(a.template, b.template)
+	})
+	if uses[r.Template] == 0 {
+		out = append(out, byTemplate[r.Template])
+	}
+	return out
+}
+
+func (w *Warmer) template(ctx context.Context, key, atespace, name string) (*template, error) {
 	if t, ok := w.templates[key]; ok {
 		return t, nil
 	}
-	at, err := w.deps.Actors.GetActorTemplate(ctx, actors.Ref{Atespace: r.Atespace, Name: r.Template})
+	at, err := w.deps.Actors.GetActorTemplate(ctx, actors.Ref{Atespace: atespace, Name: name})
 	if err != nil {
 		return nil, err
 	}
@@ -225,12 +270,12 @@ func hasRoom(st *ateapi.WorkerStatus, limits *ateapi.Resources) bool {
 	return true
 }
 
-// warmRunner boots warm actors of r's template until each cold node hosted one or ran out of attempts. list is
-// the atespace's actors.
-func (w *Warmer) warmRunner(ctx context.Context, r *core.Runner, tmpl *template, cold map[string]bool, list []*ateapi.Actor) {
-	log := w.deps.Log.WithValues("runner", r.Name, "template", r.Template)
+// warmRevision boots warm actors of rev's template until each cold node hosted one or ran out of attempts. list
+// is the atespace's actors.
+func (w *Warmer) warmRevision(ctx context.Context, rev revision, atespace string, tmpl *template, cold map[string]bool, list []*ateapi.Actor) {
+	log := w.deps.Log.WithValues("runner", rev.runner, "template", rev.template)
 	for _, a := range list {
-		if a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_RUNNING && a.GetActorTemplate().GetName() == r.Template {
+		if a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_RUNNING && a.GetActorTemplate().GetName() == rev.template {
 			node := a.GetStatus().GetWorkerAssignment().GetNodeName()
 			tmpl.warm[node] = true
 			delete(cold, node)
@@ -238,7 +283,7 @@ func (w *Warmer) warmRunner(ctx context.Context, r *core.Runner, tmpl *template,
 	}
 
 	for len(cold) > 0 && ctx.Err() == nil {
-		node, err := w.boot(ctx, r)
+		node, err := w.boot(ctx, rev, atespace)
 		for n := range cold {
 			tmpl.tries[n]++
 		}
@@ -263,11 +308,11 @@ func (w *Warmer) warmRunner(ctx context.Context, r *core.Runner, tmpl *template,
 	}
 }
 
-// boot runs one warm actor of r's template from its golden tag and returns the node it ran on. The actor has no
-// egress policy, so it can't reach anything, and is always deleted.
-func (w *Warmer) boot(ctx context.Context, r *core.Runner) (string, error) {
+// boot runs one warm actor of rev's template from its golden tag and returns the node it ran on. The actor has
+// no egress policy, so it can't reach anything, and is always deleted.
+func (w *Warmer) boot(ctx context.Context, rev revision, atespace string) (string, error) {
 	w.seq++
-	ref := actors.Ref{Atespace: r.Atespace, Name: fmt.Sprintf("%s%x-%d", substrate.WarmActorPrefix, w.deps.Now().Unix(), w.seq)}
+	ref := actors.Ref{Atespace: atespace, Name: fmt.Sprintf("%s%x-%d", substrate.WarmActorPrefix, w.deps.Now().Unix(), w.seq)}
 	ctx, cancel := context.WithTimeout(ctx, w.cfg.AttemptTimeout)
 	defer cancel()
 	defer func() {
@@ -278,8 +323,8 @@ func (w *Warmer) boot(ctx context.Context, r *core.Runner) (string, error) {
 		}
 	}()
 
-	spec := actors.Spec{Ref: ref, Template: r.Template, SourceTag: r.GoldenTag}
-	if r.HomeStorage.External() {
+	spec := actors.Spec{Ref: ref, Template: rev.template, SourceTag: rev.goldenTag}
+	if rev.external {
 		spec.SourceTag, spec.Preview = "", true
 	}
 	if _, err := w.deps.Actors.CreateActor(ctx, spec); err != nil {

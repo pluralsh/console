@@ -47,6 +47,7 @@ import { DevboxAgentIcon, DevboxAgentLabel } from './DevboxChips'
 import { DevboxComposer } from './DevboxComposer'
 import { useDevboxPanel } from './DevboxControlPanel'
 import { describeThreadError } from './devboxErrors'
+import { McpToolIndexContext, useMcpToolIndex } from './devboxIntegrations'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import {
   DevboxInlineApproval,
@@ -207,6 +208,7 @@ export function DevboxThreadPane({
   const { listFiles, searchFiles, openStream } = useDevboxWorkspaceApi(
     live ? instance.id : null
   )
+  const mcpTools = useMcpToolIndex(instance.id)
 
   const sessionError = sessionId ? timeline.errors[sessionId] : undefined
   const { openFile, isOpen, tab, browserToMain } = useDevboxPanel()
@@ -262,50 +264,54 @@ export function DevboxThreadPane({
                 Load earlier messages
               </Button>
             )}
-            <DevboxTranscript
-              entities={entities}
-              terminal={(id) => selectTerminalOutput(session, id)}
-              approvalFor={(id) => {
-                const interaction = inlineApprovals.get(id)
-                return interaction ? (
-                  <DevboxInlineApproval interaction={interaction} />
-                ) : null
-              }}
-              subagents={subagents}
-              complete={!!session?.loaded && !session.hasMore}
-              running={thread.foregroundState === DevboxForegroundState.Running}
-              renderSubagent={(s, spawner) => (
-                <SubagentCard
-                  subagent={s}
-                  spawner={spawner}
-                  timeline={timeline}
-                  ended={ended}
-                  interactions={interactions}
-                  toolCall={toolCall}
-                  onOpen={() => openThread(s.id)}
-                />
-              )}
-              empty={
-                <CaptionP $color="text-xlight">
-                  {ended
-                    ? "This instance has ended, so its transcript isn't available anymore."
-                    : session?.loaded || !sessionId
-                      ? 'Nothing here yet. Send a prompt to get started.'
-                      : 'Loading transcript…'}
-                </CaptionP>
-              }
-              renderUnplaced={(placed) =>
-                unplacedInteractions(placed).map((interaction) => (
-                  <DevboxInteraction
-                    key={interaction.id}
-                    interaction={interaction}
-                    toolCall={
-                      toolCall(interaction.toolCallId) ?? interaction.toolCall
-                    }
+            <McpToolIndexContext value={mcpTools}>
+              <DevboxTranscript
+                entities={entities}
+                terminal={(id) => selectTerminalOutput(session, id)}
+                approvalFor={(id) => {
+                  const interaction = inlineApprovals.get(id)
+                  return interaction ? (
+                    <DevboxInlineApproval interaction={interaction} />
+                  ) : null
+                }}
+                subagents={subagents}
+                complete={!!session?.loaded && !session.hasMore}
+                running={
+                  thread.foregroundState === DevboxForegroundState.Running
+                }
+                renderSubagent={(s, spawner) => (
+                  <SubagentCard
+                    subagent={s}
+                    spawner={spawner}
+                    timeline={timeline}
+                    ended={ended}
+                    interactions={interactions}
+                    toolCall={toolCall}
+                    onOpen={() => openThread(s.id)}
                   />
-                ))
-              }
-            />
+                )}
+                empty={
+                  <CaptionP $color="text-xlight">
+                    {ended
+                      ? "This instance has ended, so its transcript isn't available anymore."
+                      : session?.loaded || !sessionId
+                        ? 'Nothing here yet. Send a prompt to get started.'
+                        : 'Loading transcript…'}
+                  </CaptionP>
+                }
+                renderUnplaced={(placed) =>
+                  unplacedInteractions(placed).map((interaction) => (
+                    <DevboxInteraction
+                      key={interaction.id}
+                      interaction={interaction}
+                      toolCall={
+                        toolCall(interaction.toolCallId) ?? interaction.toolCall
+                      }
+                    />
+                  ))
+                }
+              />
+            </McpToolIndexContext>
           </ContentSC>
         </ScrollSC>
       </DevboxFileOpenContext>

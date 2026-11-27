@@ -231,6 +231,38 @@ func TestWarmsANewTemplateOnExistingNodes(t *testing.T) {
 	}
 }
 
+func TestWarmsOlderRevisionsInstancesStillRunFirst(t *testing.T) {
+	f := &fakeActors{workers: []*ateapi.Worker{worker("node-a", 0, large)}, selector: large}
+	r := runner("devbox-large-r7")
+	r.HomeStorage = v1alpha1.DevboxHomeZeroFS
+	r.Revisions = map[int64]core.RunnerRevision{
+		5: {Template: "devbox-large-r5", GoldenTag: "devbox-large-r5-golden"},
+		6: {Template: "devbox-large-r6", GoldenTag: "devbox-large-r6-golden", HomeStorage: v1alpha1.DevboxHomeZeroFS},
+		7: {Template: "devbox-large-r7", GoldenTag: "devbox-large-r7-golden", HomeStorage: v1alpha1.DevboxHomeZeroFS},
+	}
+	f.existing = []*ateapi.Actor{{
+		Metadata:      &ateapi.ResourceMetadata{Name: "dbx-instance"},
+		ActorTemplate: &ateapi.ObjectRef{Name: "devbox-large-r6"},
+		Status:        &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDED},
+	}}
+	w := newWarmer(f, r)
+	mustPass(t, w)
+
+	f.workers = append(f.workers, worker("node-b", 0, large))
+	f.place = func(int) string { return "node-b" }
+	mustPass(t, w)
+	var templates []string
+	for _, b := range f.boots {
+		templates = append(templates, b.Template)
+	}
+	if !slices.Equal(templates, []string{"devbox-large-r6", "devbox-large-r7"}) {
+		t.Fatalf("warmed %v, want the revision the suspended instance runs, then the current one, and not r5", templates)
+	}
+	if !f.boots[0].Preview || f.boots[0].SourceTag != "" {
+		t.Fatalf("an external-home revision boots its default golden tag under preview, got %+v", f.boots[0])
+	}
+}
+
 func TestRetriesAFailedBootNextPass(t *testing.T) {
 	f := &fakeActors{workers: []*ateapi.Worker{worker("node-a", 0, large)}, selector: large}
 	w := newWarmer(f, runner("devbox-large-r2"))

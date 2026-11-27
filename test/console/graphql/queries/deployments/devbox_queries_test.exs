@@ -80,6 +80,31 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert iid == interaction.id
     end
 
+    test "it maps the workbench MCP's tool names to their integrations" do
+      user = insert(:user)
+      bench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      github = insert(:workbench_tool, tool: :github, name: "gh", categories: [:scm],
+        configuration: %{github: %{access_token: "token"}})
+      slack = insert(:workbench_tool, tool: :slack, name: "chat", categories: [:chat],
+        configuration: %{slack: %{bot_token: "xoxb-test"}})
+      insert(:workbench_tool_association, workbench: bench, tool: github)
+      insert(:workbench_tool_association, workbench: bench, tool: slack)
+      inst = insert(:devbox_instance, workbench: bench)
+
+      {:ok, %{data: %{"devboxInstance" => %{"mcpTools" => tools}}}} = run_query("""
+        query Instance($id: ID!) {
+          devboxInstance(id: $id) { mcpTools { name toolType provider workbenchToolId workbenchToolName } }
+        }
+      """, %{"id" => inst.id}, %{current_user: user})
+
+      by_name = Map.new(tools, &{&1["name"], &1})
+      assert %{"toolType" => "GITHUB", "workbenchToolId" => gid, "workbenchToolName" => "gh", "provider" => nil} =
+        by_name["github_gh_close_pull_request"]
+      assert gid == github.id
+      assert Enum.any?(tools, &(&1["toolType"] == "SLACK" && &1["workbenchToolId"] == slack.id))
+      assert Enum.all?(tools, &(&1["toolType"] in ["GITHUB", "SLACK"]))
+    end
+
     test "it lists subagents with the threads that spawned them" do
       user = insert(:user)
       inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))

@@ -189,8 +189,16 @@ func (g *Gateway) applyEgress(ctx context.Context, inst *Instance) error {
 	if err != nil {
 		return err
 	}
+	inst.mu.Lock()
+	runner := inst.runner
+	inst.mu.Unlock()
 	if err := g.deps.Actors.ApplyEgressPolicy(ctx, inst.ref(), actors.EgressRules(egress.BuildPolicy(*info))); err != nil {
 		return fmt.Errorf("applying egress policy: %w", err)
+	}
+	if runner != nil {
+		inst.mu.Lock()
+		inst.egressApplied = egressInputs(runner)
+		inst.mu.Unlock()
 	}
 	if g.deps.Egress != nil {
 		g.deps.Egress.Invalidate(inst.ID)
@@ -199,23 +207,23 @@ func (g *Gateway) applyEgress(ctx context.Context, inst *Instance) error {
 }
 
 // refreshEgress re-reads inst's runner and re-applies its egress policy when the runner's allowlist, presets,
-// cloud identities or repositories changed since the policy was built, so live and suspended boxes pick up
-// runner edits. Callers hold inst.op.
+// cloud identities or repositories differ from what the actor's policy was built from, so live and suspended
+// boxes pick up runner edits. It compares against the applied policy rather than inst.runner, which adoption and
+// wakes refresh without re-applying; after a gateway restart that means one re-apply per box. Callers hold
+// inst.op.
 func (g *Gateway) refreshEgress(ctx context.Context, inst *Instance) error {
 	runner, err := g.deps.Runners.Get(ctx, inst.record().Runner)
 	if err != nil {
 		return err
 	}
 	inst.mu.Lock()
-	cur := inst.runner
-	inst.mu.Unlock()
-	if cur != nil && reflect.DeepEqual(egressInputs(cur), egressInputs(runner)) {
-		return nil
-	}
-	inst.mu.Lock()
+	applied := inst.egressApplied
 	inst.runner = runner
 	inst.mu.Unlock()
-	g.log.Info("re-applying egress policy after a runner change", "instance", inst.ID, "runner", runner.Name)
+	if applied != nil && reflect.DeepEqual(applied, egressInputs(runner)) {
+		return nil
+	}
+	g.log.Info("re-applying egress policy", "instance", inst.ID, "runner", runner.Name, "firstSinceStart", applied == nil)
 	return g.applyEgress(ctx, inst)
 }
 

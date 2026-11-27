@@ -147,6 +147,42 @@ describe('approvalPreview', () => {
     ).toMatchObject({ kind: 'command', command: 'git push' })
   })
 
+  it('shows Codex MCP calls, from their input or a workbench title alone', () => {
+    expect(
+      approvalPreview(
+        call({
+          title: 'plural-workbench.github_gh_get_tag',
+          rawInput: {
+            server: 'plural-workbench',
+            tool: 'github_gh_get_tag',
+            arguments: { tag: 'v1' },
+          },
+        })
+      )
+    ).toEqual({
+      kind: 'mcp',
+      server: 'plural-workbench',
+      tool: 'github_gh_get_tag',
+      args: { tag: 'v1' },
+    })
+    expect(
+      approvalPreview(
+        call({
+          title: 'plural-workbench.github_gh_get_tag',
+          rawInput: { tag: 'v1' },
+        })
+      )
+    ).toEqual({
+      kind: 'mcp',
+      server: 'plural-workbench',
+      tool: 'github_gh_get_tag',
+      args: { tag: 'v1' },
+    })
+    expect(
+      approvalPreview(call({ title: 'README.md', rawInput: { tag: 'v1' } }))
+    ).toEqual({ kind: 'generic', input: { tag: 'v1' } })
+  })
+
   it('shows an MCP call as its server, tool and arguments', () => {
     expect(
       approvalPreview(

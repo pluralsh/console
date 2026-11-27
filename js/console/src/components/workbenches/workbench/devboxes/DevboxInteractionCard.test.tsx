@@ -6,6 +6,7 @@ import {
   DevboxInteractionKind,
   DevboxInteractionState,
   DevboxToolCallFragment,
+  WorkbenchToolType,
 } from 'generated/graphql'
 import { ThemeProvider } from 'styled-components'
 import { describe, expect, it, vi } from 'vitest'
@@ -15,6 +16,7 @@ import {
   elicitationContent,
   validateElicitation,
 } from './DevboxInteractionCard'
+import { McpToolIndexContext, mcpToolIndex } from './devboxIntegrations'
 
 const interaction = (
   i: Partial<DevboxInteractionFragment>
@@ -54,6 +56,47 @@ const schema = {
 }
 
 describe('DevboxInteractionCard', () => {
+  it('names the integration a workbench MCP permission request would reach', () => {
+    const call: DevboxToolCallFragment = {
+      toolCallId: 'tc-mcp',
+      title: 'mcp__plural-workbench__github_gh_close_pull_request',
+      rawInput: { pull_request: 3 },
+    }
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <McpToolIndexContext
+          value={mcpToolIndex([
+            {
+              name: 'github_gh_close_pull_request',
+              toolType: WorkbenchToolType.Github,
+              workbenchToolId: 'wt-gh',
+              workbenchToolName: 'gh',
+            },
+          ])}
+        >
+          <DevboxInteractionCard
+            interaction={interaction({ title: 'Allow tool' })}
+            toolCall={call}
+            onRespond={vi.fn()}
+          />
+        </McpToolIndexContext>
+      </ThemeProvider>
+    )
+    const title = screen.getByText('close pull request').closest('p')
+    expect(title?.textContent).toContain('on GitHub (gh)')
+  })
+
+  it('names the MCP server for tools without an integration', () => {
+    renderCard(interaction({ title: 'Allow tool' }), {
+      toolCallId: 'tc-mcp',
+      title: 'mcp__devbox__list_pull_requests',
+      rawInput: {},
+    })
+    expect(
+      screen.getByText('list_pull_requests').closest('p')?.textContent
+    ).toContain('on the devbox MCP server')
+  })
+
   it('shows the command a permission request would run', () => {
     renderCard(interaction({ title: 'Run command' }), {
       toolCallId: 'tc-1',

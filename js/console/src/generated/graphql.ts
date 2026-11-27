@@ -5371,6 +5371,8 @@ export type DevboxInstance = {
   lastActivityAt?: Maybe<Scalars['DateTime']['output']>;
   leases?: Maybe<Array<Maybe<DevboxLease>>>;
   maxRunningThreads?: Maybe<Scalars['Int']['output']>;
+  /** the workbench MCP's integration tools, by the name agents call them */
+  mcpTools?: Maybe<Array<Maybe<DevboxMcpTool>>>;
   name?: Maybe<Scalars['String']['output']>;
   repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   requestedModel?: Maybe<Scalars['String']['output']>;
@@ -5534,6 +5536,18 @@ export enum DevboxLeaseKind {
   Deferral = 'DEFERRAL',
   Viewer = 'VIEWER'
 }
+
+export type DevboxMcpTool = {
+  __typename?: 'DevboxMcpTool';
+  /** the tool's name on the plural-workbench MCP server */
+  name: Scalars['String']['output'];
+  /** the cloud provider, for cloud tools */
+  provider?: Maybe<Provider>;
+  /** the integration it calls */
+  toolType: WorkbenchToolType;
+  workbenchToolId: Scalars['ID']['output'];
+  workbenchToolName: Scalars['String']['output'];
+};
 
 export type DevboxMessageEntity = {
   __typename?: 'DevboxMessageEntity';
@@ -24423,6 +24437,15 @@ export type DevboxInstanceQuery = { __typename?: 'RootQueryType', devboxInstance
           | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
          | null> | null } | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
 
+export type DevboxMcpToolFragment = { __typename?: 'DevboxMcpTool', name: string, toolType: WorkbenchToolType, provider?: Provider | null, workbenchToolId: string, workbenchToolName: string };
+
+export type DevboxMcpToolsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxMcpToolsQuery = { __typename?: 'RootQueryType', devboxInstance?: { __typename?: 'DevboxInstance', id: string, mcpTools?: Array<{ __typename?: 'DevboxMcpTool', name: string, toolType: WorkbenchToolType, provider?: Provider | null, workbenchToolId: string, workbenchToolName: string } | null> | null } | null };
+
 export type DevboxThreadQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -35429,6 +35452,42 @@ export type DevboxInstanceQueryHookResult = ReturnType<typeof useDevboxInstanceQ
 export type DevboxInstanceLazyQueryHookResult = ReturnType<typeof useDevboxInstanceLazyQuery>;
 export type DevboxInstanceSuspenseQueryHookResult = ReturnType<typeof useDevboxInstanceSuspenseQuery>;
 export type DevboxInstanceQueryResult = Apollo.QueryResult<DevboxInstanceQuery, DevboxInstanceQueryVariables>;
+
+/**
+ * __useDevboxMcpToolsQuery__
+ *
+ * To run a query within a React component, call `useDevboxMcpToolsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxMcpToolsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxMcpToolsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDevboxMcpToolsQuery(baseOptions: Apollo.QueryHookOptions<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables> & ({ variables: DevboxMcpToolsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>(Operations.DevboxMcpTools, options);
+      }
+export function useDevboxMcpToolsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>(Operations.DevboxMcpTools, options);
+        }
+// @ts-ignore
+export function useDevboxMcpToolsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>;
+export function useDevboxMcpToolsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxMcpToolsQuery | undefined, DevboxMcpToolsQueryVariables>;
+export function useDevboxMcpToolsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>(Operations.DevboxMcpTools, options);
+        }
+export type DevboxMcpToolsQueryHookResult = ReturnType<typeof useDevboxMcpToolsQuery>;
+export type DevboxMcpToolsLazyQueryHookResult = ReturnType<typeof useDevboxMcpToolsLazyQuery>;
+export type DevboxMcpToolsSuspenseQueryHookResult = ReturnType<typeof useDevboxMcpToolsSuspenseQuery>;
+export type DevboxMcpToolsQueryResult = Apollo.QueryResult<DevboxMcpToolsQuery, DevboxMcpToolsQueryVariables>;
 
 /**
  * __useDevboxThreadQuery__
@@ -46769,6 +46828,7 @@ export const namedOperations = {
     WorkbenchDevboxSnapshots: 'WorkbenchDevboxSnapshots',
     WorkbenchDevboxInbox: 'WorkbenchDevboxInbox',
     DevboxInstance: 'DevboxInstance',
+    DevboxMcpTools: 'DevboxMcpTools',
     DevboxThread: 'DevboxThread',
     DevboxInstanceCommands: 'DevboxInstanceCommands',
     DevboxRepositories: 'DevboxRepositories',
@@ -47411,6 +47471,7 @@ export const namedOperations = {
     DevboxEntity: 'DevboxEntity',
     DevboxEntityChange: 'DevboxEntityChange',
     DevboxPullRequest: 'DevboxPullRequest',
+    DevboxMcpTool: 'DevboxMcpTool',
     DevboxPullRequestJob: 'DevboxPullRequestJob',
     ClusterRegistration: 'ClusterRegistration',
     Tag: 'Tag',

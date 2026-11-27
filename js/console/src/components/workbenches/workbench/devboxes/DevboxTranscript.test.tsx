@@ -5,6 +5,7 @@ import {
   DevboxEntityFragment,
   DevboxEntityType,
   DevboxToolCallContentType,
+  WorkbenchToolType,
 } from 'generated/graphql'
 import { ReactNode } from 'react'
 import { ThemeProvider } from 'styled-components'
@@ -15,6 +16,7 @@ import {
   thoughtDuration,
   TranscriptPlacement,
 } from './DevboxTranscript'
+import { McpToolIndexContext, mcpToolIndex } from './devboxIntegrations'
 import { acpContentBlock, acpToolCallContent } from './devboxTimeline'
 
 vi.mock('components/ai/chatbot/ChatMarkdown', async (importOriginal) => ({
@@ -390,6 +392,43 @@ describe('DevboxTranscript', () => {
     expect(screen.getByText('Not approved by Codex reviewer')).toBeTruthy()
     expect(screen.queryByText('Guardian Review')).toBeNull()
     expect(screen.queryByText('think')).toBeNull()
+  })
+
+  it('labels a workbench MCP call with its integration and action', () => {
+    renderTranscript(
+      <McpToolIndexContext
+        value={mcpToolIndex([
+          {
+            name: 'github_gh_close_pull_request',
+            toolType: WorkbenchToolType.Github,
+            workbenchToolId: 'wt-gh',
+            workbenchToolName: 'gh',
+          },
+        ])}
+      >
+        <DevboxTranscript
+          entities={[
+            entity({
+              type: DevboxEntityType.ToolCall,
+              position: 1,
+              toolCall: {
+                toolCallId: 'toolu_1',
+                title: 'mcp__plural-workbench__github_gh_close_pull_request',
+                kind: 'other',
+                status: 'completed',
+                rawInput: { pull_request: 3 },
+                content: [],
+              },
+            }),
+          ]}
+        />
+      </McpToolIndexContext>
+    )
+    expect(screen.getByText('GitHub')).toBeTruthy()
+    expect(screen.getByText('close pull request')).toBeTruthy()
+    expect(
+      screen.queryByText(/mcp__plural-workbench__github_gh_close_pull_request/)
+    ).toBeNull()
   })
 
   it('puts a subagent in place of the tool call that spawned it', () => {

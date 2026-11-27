@@ -3046,6 +3046,9 @@ type DevboxInstance {
 
   agentBilling: [DevboxAgentBilling]
 
+  "the workbench MCP's integration tools, by the name agents call them"
+  mcpTools: [DevboxMcpTool]
+
   workbench: Workbench
 
   devbox: Devbox
@@ -3069,6 +3072,21 @@ type DevboxInstance {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type DevboxMcpTool {
+  "the tool's name on the plural-workbench MCP server"
+  name: String!
+
+  "the integration it calls"
+  toolType: WorkbenchToolType!
+
+  "the cloud provider, for cloud tools"
+  provider: Provider
+
+  workbenchToolId: ID!
+
+  workbenchToolName: String!
 }
 
 type DevboxAgentConnection {
