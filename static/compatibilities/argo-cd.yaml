@@ -4,22 +4,26 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.6.2
+- version: 3.6.3
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: [No Helm chart changelog was provided in the notes you shared;
-        this summary only covers Argo CD application (upstream) changes between v3.6.0
-        and v3.6.2.]
-    features: ['No new features are introduced in v3.6.2 relative to v3.6.0; v3.6.2
-        is a patch release focused on fixes, docs, and dependency/security updates.']
-    breaking_changes: [No breaking changes are called out in the v3.6.2 release notes
-        you provided (patch release).]
-  chart_version: 10.18.3
+    chart_updates: []
+    features: ['Security hardening in 3.6.3: fixes 7 advisories including permission
+        bypasses, an unauthenticated API-server crash, stored XSS in app details,
+        ApplicationSet namespace enforcement issues, Bitbucket webhook credential
+        exfiltration risk, Helm templating info disclosure, and Dex secret file permissions.',
+      "Operational/behavior change: Helm release names are now treated as literal\
+        \ strings (not templates) and must conform to Helm\u2019s naming rules (lowercase\
+        \ alnum, `-`/`.`, <=53 chars)."]
+    breaking_changes: ['Potentially breaking: Applications with `spec.source.helm.releaseName`
+        (or `.argocd-source.yaml`) that used templating or do not meet Helm release-name
+        validation will fail manifest generation after upgrading to 3.6.3.']
+  chart_version: 10.20.0
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
-    'quay.io/argoproj/argocd:v3.6.2']
+    'quay.io/argoproj/argocd:v3.6.3']
 - version: 3.6.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

@@ -1351,8 +1351,36 @@ versions:
         alerting rules are configured.']
   chart_version: 0.27.9
   images: ['victoriametrics/operator:v0.39.3']
-- version: 0.39.0
+- version: 0.39.2
   kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Improved StatefulSet update behavior: compares differences in
+        `claimTemplates` metadata correctly, sorts StatefulSet pods by ordinal for
+        deterministic rolling updates, and optimizes StatefulSet update logic to avoid
+        unnecessary operations.', 'Removed redundant `operator.victoriametrics/last-applied-spec`
+        annotation from generated workloads (e.g., vmstorage StatefulSet).', Fixed
+        PVC resize logic for StatefulSets with multiple PVCs to prevent incorrect
+        sizing updates., Fixed RBAC/API group for EndpointSlice access so vmagent
+        can read EndpointSlices with the default RBAC., Set sane default resources
+        for init container used for configuration download., Fixed handling of custom
+        config-reloader image flags and ensured the init container uses the correct
+        config-reloader image (vmauth/vmagent).]
+    features: [Adds `useStrictSecurity` toggle for all components to allow migrating
+        from insecure to strict security settings per component without an immediate
+        breaking change., Adds support for providing a license key for VictoriaMetrics
+        enterprise components via the operator., 'Extends VMUser with `retry_status_codes`,
+        `max_concurrent_requests`, and `response_headers` (requires vmauth >= v1.94.0).',
+      'Updates defaults and improves reliability/efficiency of StatefulSet updates
+        (better claimTemplate diffing, deterministic pod update ordering, fewer unnecessary
+        reconciliations).']
+    breaking_changes: []
+  chart_version: 0.27.5
+  images: ['victoriametrics/operator:v0.39.2']
+- version: 0.39.0
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:

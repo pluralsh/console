@@ -596,7 +596,7 @@ versions:
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.1', 'openpolicyagent/gatekeeper:v3.14.1']
   eolAt: '2024-05-09'
 - version: 3.14.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -632,22 +632,6 @@ versions:
   chart_version: 3.14.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.0', 'openpolicyagent/gatekeeper:v3.14.0']
   eolAt: '2024-05-09'
-- version: 3.13.4
-  kube: ['1.28', '1.27', '1.26']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: [Pub/Sub support for audit was introduced in 3.13.0., ExpansionTemplates
-        that validate workload resources graduated to beta in 3.13.0., An experimental
-        ValidatingAdmissionPolicy (VAP) driver was added in 3.13.0., Support for an
-        External Data Provider audit response cache was added in 3.13.0., 'New observability
-        statistics for admission, audit, and the gator CLI were added in 3.13.0.']
-    breaking_changes: []
-  chart_version: 3.13.4
-  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.4', 'openpolicyagent/gatekeeper:v3.13.4']
-  eolAt: '2024-02-05'
 - version: 3.13.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []

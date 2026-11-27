@@ -665,8 +665,65 @@ versions:
     breaking_changes: []
   chart_version: 1.16.5
   images: []
-- version: 1.16.0
+- version: 1.16.2
   kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **Continuous Scanning:** enable/configure the new Continuous
+      Scanning capability (new values likely introduced by chart changes in PR #323).
+
+      - **NetworkPolicies:** chart now supports/ships NetworkPolicy resources; review
+      any new `networkPolicy`-related values and ensure they align with your cluster
+      CNI expectations (PR #326).
+
+      - **Node-agent security context:** the node-agent Pod no longer uses `privileged:
+      true`; verify your cluster/PSA/SELinux/AppArmor expectations and any capabilities
+      that were previously assumed (PR #306).
+
+      - **VEX support:** new values/options for VEX integration added; configure only
+      if you plan to consume VEX data (PR #309).
+
+      - **AKS user-assigned identity:** additional values to support AKS user-assigned
+      cluster identity; applicable only on AKS (PR #317).
+
+      - **serviceMonitor scrape settings:** new options to customize ServiceMonitor
+      `interval`/scrape timing; update Prometheus Operator settings if you need non-default
+      scrape cadence (PR #319).
+
+      - **busybox image:** busybox image is now sourced from values; ensure your internal
+      registry/mirroring policy is reflected in the new/updated value (PR #321).
+
+      - **Resource/limit fixes:** resource limits/requests were adjusted/fixed (PR
+      #328) and discovery job now has resources (PR #313); review any overrides you
+      have for compatibility.'
+    chart_updates: ['Support for Continuous Scanning capability (PR #323).', 'Added
+        NetworkPolicy resources/support (PR #326).', 'Removed `privileged` flag from
+        node-agent Pod (PR #306).', 'Added VEX support to the chart (PR #309).', 'Added
+        support for AKS user-assigned cluster identity (PR #317).', 'Fixed/adjusted
+        resource limits and added resources to discovery job (PRs #328, #313).', 'Busybox
+        image now configurable via values (PR #321).', 'Ensured docker.io registry
+        prefix where missing (PR #311).', 'ServiceMonitor can now customize scrape
+        interval/timing (PR #319).', 'Misc chart note/templating updates (NOTES.txt)
+        and other fixes (PRs #330, #327).']
+    features: ['Continuous Scanning support is now available via the Helm chart, enabling
+        ongoing scanning workflows beyond one-time assessments.', Optional NetworkPolicy
+        resources can now be deployed with the chart to restrict traffic to/from Kubescape
+        components., 'VEX (Vulnerability Exploitability eXchange) support was added,
+        enabling integration/consumption of VEX-related data where supported.', AKS
+        user-assigned identity/cluster support was added to better integrate with
+        Azure-managed identity setups., 'ServiceMonitor scrape interval can be customized,
+        improving observability tuning with Prometheus Operator.']
+    breaking_changes: ['Node-agent is no longer deployed as `privileged`, which may
+        break clusters/configurations that implicitly relied on privileged access
+        for certain host interactions; validate node-agent behavior post-upgrade.',
+      'If NetworkPolicies are enabled by default in your environment (or you choose
+        to enable them), they can inadvertently block traffic unless your CNI/namespace
+        policies are aligned; test connectivity between components.']
+  chart_version: 1.16.2
+  images: []
+- version: 1.16.0
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
