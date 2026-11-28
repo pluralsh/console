@@ -1,0 +1,8 @@
+#!/bin/sh
+# podman and docker (a symlink to this). Containers are only supported on microVM boxes; the operator sets
+# DEVBOX_SANDBOX_CLASS on every box.
+if [ "${DEVBOX_SANDBOX_CLASS:-}" = gvisor ]; then
+  echo "$(basename "$0"): containers need a microVM devbox; this runner's workerPool.sandboxClass is gvisor (set it to microvm)" >&2
+  exit 125
+fi
+exec "/usr/bin/$(basename "$0")" "$@"

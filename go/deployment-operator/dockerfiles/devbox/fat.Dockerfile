@@ -266,18 +266,23 @@ RUN set -eux; \
     aws --version; gcloud --version > /dev/null; az version --output none
 
 # Containers: rootless Podman as dev, with `docker`, `docker compose` and
-# `docker-compose` mapped onto it. The sandbox (gVisor by default) gives no overlay mounts in a user
-# namespace, FUSE or cgroup delegation, so images use the vfs driver and
-# containers run without cgroups. Containers share the box's network: gVisor
-# can't bind-mount network namespaces, so podman can't create per-project
-# networks, and /usr/local/bin/podman-compose runs every compose service on the
-# box's network with service names resolving to 127.0.0.1. Traffic leaves
-# through the box's egress policy.
+# `docker-compose` mapped onto it, on microVM boxes only (/usr/local/bin/podman
+# refuses on gVisor). The microVM guest's filesystems are virtio-fs, which
+# overlayfs can't use as an upper layer, and it has no /dev/fuse, so images use
+# the vfs driver. It has no /dev/net/tun for pasta either, so containers share
+# the box's network: /usr/local/bin/podman-compose runs every compose service on
+# it with service names resolving to 127.0.0.1, and traffic leaves through the
+# box's egress policy. The guest masks parts of /proc, so a container can't
+# mount a fresh procfs; containers share the box's PID namespace, where crun
+# bind-mounts the box's /proc instead, and Podman requires cgroups for that
+# (it finds no cgroup mount and runs without limits).
+# newuidmap and newgidmap are diverted to /usr/local/libexec/devbox/idmap.
 # Images, containers and volumes live on the box's root filesystem by default, not the home: a ZeroFS home turns
 # every fsync into an object-storage flush, which databases in compose stacks issue per commit. Every snapshot
 # carries the root filesystem, so they also grow each suspend and resume, and a new image starts them empty.
 # With a Block home the operator points CONTAINERS_STORAGE_CONF at storage.home.conf, which keeps them on the
 # home's cloud disk instead: snapshots stay small and they survive new images.
+COPY --chmod=0755 deployment-operator/dockerfiles/devbox/rootfs/fat/usr/local/libexec/devbox/ /usr/local/libexec/devbox/
 # hadolint ignore=DL3008
 RUN set -eux; \
     apt-get update; \
@@ -285,9 +290,15 @@ RUN set -eux; \
       podman podman-docker podman-compose uidmap crun catatonit \
       netavark aardvark-dns passt nftables; \
     rm -rf /var/lib/apt/lists/*; \
+    for tool in newuidmap newgidmap; do \
+      dpkg-divert --local --rename --divert "/usr/local/libexec/devbox/${tool}" --add "/usr/bin/${tool}"; \
+      chmod 0755 "/usr/local/libexec/devbox/${tool}"; \
+      ln -s /usr/local/libexec/devbox/idmap "/usr/bin/${tool}"; \
+    done; \
     echo "dev:100000:65536" > /etc/subuid; \
     echo "dev:100000:65536" > /etc/subgid; \
     touch /etc/containers/nodocker; \
+    ln -s podman /usr/local/bin/docker; \
     ln -s /usr/local/bin/podman-compose /usr/local/bin/docker-compose; \
     printf '%s\n' \
       '[storage]' \
@@ -303,7 +314,8 @@ RUN set -eux; \
     printf '%s\n' \
       '[containers]' \
       'netns = "host"' \
-      'cgroups = "disabled"' \
+      'pidns = "host"' \
+      'cgroups = "enabled"' \
       'log_driver = "k8s-file"' \
       '' \
       '[engine]' \
@@ -341,6 +353,7 @@ ENV HOME=/home/dev \
     AWS_PAGER="" \
     MISE_ERLANG_COMPILE=false \
     MISE_ERLANG_PRECOMPILED_OS=ubuntu-24.04 \
+    PODMAN_IGNORE_CGROUPSV1_WARNING=1 \
     PATH=/home/dev/.local/share/mise/shims:/home/dev/.local/bin:/home/dev/go/bin:/home/dev/.cargo/bin:/home/dev/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/local/cargo/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 USER 1000:1000

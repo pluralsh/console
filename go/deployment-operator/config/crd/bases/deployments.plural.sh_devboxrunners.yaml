@@ -1077,8 +1077,9 @@ spec:
                     type: object
                   sandboxClass:
                     default: gvisor
-                    description: SandboxClass is the isolation technology. Immutable
-                      once the WorkerPool exists.
+                    description: |-
+                      SandboxClass is the isolation technology. Immutable once the WorkerPool exists. Docker and Podman in the
+                      devbox-fat image only run on microvm.
                     enum:
                     - gvisor
                     - microvm

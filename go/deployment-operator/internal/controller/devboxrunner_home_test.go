@@ -91,7 +91,7 @@ func TestDevboxSystemEnv(t *testing.T) {
 			if onHome {
 				g.Expect(env).To(ContainElement(storageConf), "a Block home keeps container storage out of snapshots")
 			} else {
-				g.Expect(env).To(HaveLen(1), "container storage stays on the root filesystem")
+				g.Expect(env).NotTo(ContainElement(HaveField("Name", "CONTAINERS_STORAGE_CONF")), "container storage stays on the root filesystem")
 			}
 		})
 	}
@@ -100,9 +100,25 @@ func TestDevboxSystemEnv(t *testing.T) {
 		g := NewWithT(t)
 		runner := &v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{
 			Home: &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeBlock)},
-			Env:  []v1alpha1.DevboxEnvVar{{Name: "CONTAINERS_STORAGE_CONF", Value: lo.ToPtr("/etc/containers/storage.conf")}},
+			Env: []v1alpha1.DevboxEnvVar{
+				{Name: "CONTAINERS_STORAGE_CONF", Value: lo.ToPtr("/etc/containers/storage.conf")},
+				{Name: devboxSandboxClassEnv, Value: lo.ToPtr("microvm")},
+			},
 		}}
 		g.Expect(devboxSystemEnv(runner, "{}")).To(HaveLen(1))
+	})
+
+	t.Run("names the sandbox class for the podman and docker wrappers", func(t *testing.T) {
+		g := NewWithT(t)
+		classEnv := func(runner *v1alpha1.DevboxRunner) *ateapi.EnvVar {
+			env, _ := lo.Find(devboxSystemEnv(runner, "{}"), func(e *ateapi.EnvVar) bool { return e.GetName() == devboxSandboxClassEnv })
+			return env
+		}
+		g.Expect(classEnv(&v1alpha1.DevboxRunner{}).GetValue()).To(Equal("gvisor"))
+		microvm := &v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{WorkerPool: &v1alpha1.DevboxWorkerPool{
+			SandboxClass: lo.ToPtr(v1alpha1.DevboxSandboxMicroVM),
+		}}}
+		g.Expect(classEnv(microvm).GetValue()).To(Equal("microvm"))
 	})
 }
 

@@ -184,6 +184,30 @@ commandTests:
     command: docker
     args: ["--version"]
     expectedOutput: ["podman version"]
+  - name: podman refuses on gVisor boxes
+    command: podman
+    args: ["--version"]
+    envVars:
+      - key: DEVBOX_SANDBOX_CLASS
+        value: gvisor
+    exitCode: 125
+    expectedError: ["podman: containers need a microVM devbox"]
+  - name: docker refuses on gVisor boxes
+    command: docker
+    args: ["--version"]
+    envVars:
+      - key: DEVBOX_SANDBOX_CLASS
+        value: gvisor
+    exitCode: 125
+    expectedError: ["docker: containers need a microVM devbox"]
+  - name: podman and docker resolve to the sandbox class wrapper
+    command: sh
+    args: ["-c", "command -v podman; command -v docker; readlink /usr/local/bin/docker"]
+    expectedOutput: ["(?m)^/usr/local/bin/podman\n/usr/local/bin/docker\npodman$"]
+  - name: newuidmap and newgidmap run shadow's unprivileged copies as dev
+    command: sh
+    args: ["-c", "readlink /usr/bin/newuidmap /usr/bin/newgidmap; stat -c '%a %n' /usr/local/libexec/devbox/newuidmap /usr/local/libexec/devbox/newgidmap; dpkg-divert --list /usr/bin/newuidmap"]
+    expectedOutput: ["(?m)^/usr/local/libexec/devbox/idmap\n/usr/local/libexec/devbox/idmap$", "755 /usr/local/libexec/devbox/newuidmap", "755 /usr/local/libexec/devbox/newgidmap", "diversion of /usr/bin/newuidmap to /usr/local/libexec/devbox/newuidmap"]
   - name: podman-compose
     command: podman-compose
     args: ["--version"]
@@ -200,6 +224,10 @@ commandTests:
     command: cat
     args: ["/etc/containers/containers.conf.d/devbox.conf"]
     expectedOutput: ["compose_warning_logs = false", 'compose_providers = \["/usr/local/bin/podman-compose"\]']
+  - name: containers share the box's network and PID namespace
+    command: cat
+    args: ["/etc/containers/containers.conf.d/devbox.conf"]
+    expectedOutput: ['netns = "host"', 'pidns = "host"', 'cgroups = "enabled"']
   - name: podman-compose and docker-compose resolve to the host-network wrapper
     command: sh
     args: ["-c", "command -v podman-compose; readlink /usr/local/bin/docker-compose; head -1 /usr/local/bin/podman-compose"]

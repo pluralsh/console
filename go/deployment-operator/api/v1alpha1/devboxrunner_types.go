@@ -567,7 +567,8 @@ type DevboxWorkerPool struct {
 	// +kubebuilder:validation:Minimum=1
 	MaxInstances *int32 `json:"maxInstances,omitempty"`
 
-	// SandboxClass is the isolation technology. Immutable once the WorkerPool exists.
+	// SandboxClass is the isolation technology. Immutable once the WorkerPool exists. Docker and Podman in the
+	// devbox-fat image only run on microvm.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=gvisor
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="sandboxClass is immutable"

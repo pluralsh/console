@@ -282,7 +282,8 @@ it. Homes only grow; lowering `spec.home.size` affects new homes only.
 
 ### Container storage
 
-gVisor checkpoints a box's whole root filesystem into every snapshot, and the devbox images keep Podman's images,
+Substrate carries a box's root filesystem changes in every snapshot (on microVM, as a tar of the rootfs upper
+layer), and the devbox images keep Podman's images,
 containers and volumes there by default, with the `vfs` driver, which stores every layer as a full copy. A few
 compose stacks can make every suspend and resume carry gigabytes. With a Block home, the operator sets
 `CONTAINERS_STORAGE_CONF=/etc/containers/storage.home.conf`, which keeps that storage at

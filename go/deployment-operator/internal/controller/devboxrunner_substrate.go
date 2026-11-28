@@ -37,9 +37,10 @@ import (
 var workerPoolGVK = schema.GroupVersionKind{Group: "ate.dev", Version: "v1", Kind: "WorkerPool"}
 
 // devboxCapabilities are added to the devbox container's capability set. The box runs as dev (non-root), so its
-// processes hold none of them; they only bound what setuid-root helpers gain. newuidmap/newgidmap need SETUID,
-// SETGID and (to map uid 0) SETFCAP to give rootless containers their subuid/subgid ranges, and DAC_OVERRIDE to open
-// /proc/<pid>/uid_map, which gVisor leaves owned by dev; without them `docker` fails to start any container.
+// processes hold none of them; they only bound what setuid-root helpers (sudo) gain. newuidmap/newgidmap need SETUID,
+// SETGID and (to map uid 0) SETFCAP to give rootless containers their subuid/subgid ranges; without them `docker`
+// fails to start any container. Substrate doesn't let a box add SYS_ADMIN, so the devbox images run them as dev.
+// DAC_OVERRIDE lets root under sudo open files dev owns.
 var devboxCapabilities = []string{"SETUID", "SETGID", "SETFCAP", "DAC_OVERRIDE"}
 
 // workerPodAnnotations keep node autoscalers from evicting workers: a worker's boxes run outside any pod, so a
@@ -128,6 +129,10 @@ func devboxWorkerSelector(runner *v1alpha1.DevboxRunner) map[string]string {
 }
 
 func (r *DevboxRunnerReconciler) sandboxClass(runner *v1alpha1.DevboxRunner) v1alpha1.DevboxSandboxClass {
+	return devboxSandboxClass(runner)
+}
+
+func devboxSandboxClass(runner *v1alpha1.DevboxRunner) v1alpha1.DevboxSandboxClass {
 	if wp := runner.Spec.WorkerPool; wp != nil && wp.SandboxClass != nil {
 		return *wp.SandboxClass
 	}
@@ -584,13 +589,19 @@ func validateDevboxRepositories(runner *v1alpha1.DevboxRunner) error {
 // on the home rather than the root filesystem every snapshot carries.
 const devboxContainerStorageConf = "/etc/containers/storage.home.conf"
 
+const devboxSandboxClassEnv = "DEVBOX_SANDBOX_CLASS"
+
 // devboxSystemEnv is the env the operator sets on a box. Substrate passes duplicate names through and processes
-// take the first, so names spec.env sets are left out. Only a Block home takes container storage: ZeroFS and JuiceFS
-// make fsyncs object-storage round trips, and a Snapshot home is snapshotted with the root filesystem anyway.
+// take the first, so names spec.env sets are left out. DEVBOX_SANDBOX_CLASS tells the devbox images' podman and
+// docker wrappers to refuse on gVisor. Only a Block home takes container storage: ZeroFS and JuiceFS make fsyncs
+// object-storage round trips, and a Snapshot home is snapshotted with the root filesystem anyway.
 func devboxSystemEnv(runner *v1alpha1.DevboxRunner, guestJSON string) []*ateapi.EnvVar {
 	env := []*ateapi.EnvVar{{Name: guest.EnvVar, Value: guestJSON}}
 	userSet := func(name string) bool {
 		return lo.ContainsBy(runner.Spec.Env, func(e v1alpha1.DevboxEnvVar) bool { return e.Name == name })
+	}
+	if !userSet(devboxSandboxClassEnv) {
+		env = append(env, &ateapi.EnvVar{Name: devboxSandboxClassEnv, Value: string(devboxSandboxClass(runner))})
 	}
 	if runner.Spec.HomeStorage() == v1alpha1.DevboxHomeBlock && !userSet("CONTAINERS_STORAGE_CONF") {
 		env = append(env, &ateapi.EnvVar{Name: "CONTAINERS_STORAGE_CONF", Value: devboxContainerStorageConf})
