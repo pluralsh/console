@@ -333,17 +333,19 @@ end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
   alias Console.Repo
-  alias Console.Schema.Alert
+  alias Console.Schema.{Alert, Service, FlowWorkbench}
   alias Console.Deployments.Workbenches
   require EEx
 
   def process(%@for{item: %Alert{state: :firing, state_changed: true, workbench_id: wid, id: id} = alert}) when is_binary(wid) do
     Console.debounce({:alert_created, wid, id}, fn ->
-      alert = Repo.preload(alert, [:tags, :workbench_webhook, monitor: [user: :groups]])
-      attrs = %{
-        prompt: String.trim(prompt(alert: alert)),
-        alert_id: id,
-      }
+      alert = Repo.preload(alert, [:tags, :service, :workbench_webhook, monitor: [user: :groups]])
+      attrs =
+        %{
+          prompt: String.trim(prompt(alert: alert)),
+          alert_id: id,
+        }
+        |> maybe_flow(alert.service, wid)
 
       case alert.monitor || alert.workbench_webhook do
         nil ->
@@ -355,6 +357,15 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
     end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok
+
+  # only attach the flow when the workbench is associated with it, otherwise the job's policy check would reject it
+  defp maybe_flow(attrs, %Service{flow_id: fid}, wid) when is_binary(fid) do
+    case Workbenches.flow_association(fid, wid) do
+      %FlowWorkbench{} -> Map.put(attrs, :flow_id, fid)
+      _ -> attrs
+    end
+  end
+  defp maybe_flow(attrs, _, _), do: attrs
 
   EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/alert.md.eex", [:assigns])
 end
