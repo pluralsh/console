@@ -542,10 +542,16 @@ sandboxConfigs:
     specOverrides: {}
   microvm:
     # -- Install the microvm SandboxConfig. Its assets must be staged at
-    # <scheme>://<bucket>/microvm-assets/<arch>/<sha256>: either with
-    # assetStaging below, or ate-setup's `deploy sandboxconfig` (GCS/Kind only).
+    # <bucket>/microvm-assets/<arch>/<sha256>: either with assetStaging below,
+    # or ate-setup's `deploy sandboxconfig` (GCS/Kind only).
     enabled: false
+    # -- s3, gs or azblob; must match objectStore.backend, whose plugin atelet
+    # fetches the assets through. Defaults to the backend's.
     assetScheme: ""
+    # -- The bucket (Azure: blob container in objectStore.azureBlob.accountUrl)
+    # the assets are staged in. Defaults to objectStore.snapshotLocation's; the
+    # assets sit beside the snapshots under microvm-assets/. On Azure the chart
+    # adds it to the node plugin's asset containers.
     assetBucket: ""
     specOverrides: {}
   # -- Install the sandboxconfig-assets ValidatingAdmissionPolicy.
@@ -702,10 +708,10 @@ assetStaging:
   enabled: false
   # -- An image that ships /usr/local/bin/microvm-assets. The deployment-operator
   # image does, so installs that already vendor it need nothing extra. Each deployment-operator release's
-  # agent-substrate PR pins it.
-  image: ghcr.io/pluralsh/deployment-operator:latest
-  # -- gocloud.dev blob URL. Defaults to <assetScheme>://<assetBucket>; set it
-  # for options like s3://bucket?region=us-east-1.
+  # agent-substrate PR pins it; until a release has the binary, it's the master build that added it.
+  image: ghcr.io/pluralsh/deployment-operator:sha-deb4c4a
+  # -- gocloud.dev blob URL. Defaults to <assetScheme>://<assetBucket> (Azure:
+  # azblob://<container>?storage_account=<account from accountUrl>).
   bucketUrl: ""
   arches: [amd64]
   activeDeadlineSeconds: 1800
@@ -713,7 +719,8 @@ assetStaging:
   workSize: 6Gi
   resources: {}
   extraArgs: []
-  # -- e.g. AWS_REGION, which the s3 driver needs when the pod has none.
+  # -- Extra env for the Job. On S3 it already gets objectStore.s3's region,
+  # endpoint and credentials.
   extraEnv: []
 
 # The CloudNativePG operator. Disable where it already runs: it's cluster-wide,

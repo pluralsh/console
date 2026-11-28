@@ -1940,6 +1940,11 @@ func (in *DevboxPackageServers) DeepCopyInto(out *DevboxPackageServers) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.Terraform != nil {
+		in, out := &in.Terraform, &out.Terraform
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Mise != nil {
 		in, out := &in.Mise, &out.Mise
 		*out = new(bool)

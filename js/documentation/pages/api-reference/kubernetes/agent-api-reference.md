@@ -957,10 +957,14 @@ _Appears in:_
 
 DevboxHome selects how instances store /home/dev.
 
-With JuiceFS, ZeroFS or Block, an instance's home is seeded from the golden boot's, so what the bootstrap script
-and mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
-ZeroFS and Block snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for any
-of them: Substrate can't restore a tag of a template with external volumes.
+With Block, each instance's home is its own cloud disk from the agent-substrate chart's block driver
+(block.enabled), which needs the cloud's disk CSI driver and VolumeSnapshots. A home is seeded from the golden
+boot's, so what the bootstrap script and mise installed is there from the start. Snapshots don't save the home
+yet, and starting an instance from a snapshot isn't supported: Substrate can't restore a tag of a template with
+external volumes.
+
+With Snapshot, the home stays on the instance's node and rides in every snapshot, which needs no storage beyond
+the node's, e.g. on machines without cloud disks.
 
 
 
@@ -969,19 +973,20 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS ZeroFS Block] <br />Optional: \{\} <br /> |
-| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS, ZeroFS or Block home may hold: a JuiceFS quota, the size of the ZeroFS block<br />device, or the size of the cloud disk. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
-| `storageClassName` _string_ | StorageClassName is the JuiceFS, ZeroFS or Block StorageClass. Defaults to the agent-substrate chart's<br />devbox-juicefs, devbox-zerofs or devbox-block. |  | Optional: \{\} <br /> |
+| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Block. Changing it rolls a new revision, and instances moved to it start with a fresh home. | Block | Enum: [Block Snapshot] <br />Optional: \{\} <br /> |
+| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the size of each Block home's cloud disk. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
+| `storageClassName` _string_ | StorageClassName is the block driver's StorageClass for Block homes. Defaults to the agent-substrate chart's<br />devbox-block. |  | Optional: \{\} <br /> |
 
 
 #### DevboxHomeStorage
 
 _Underlying type:_ _string_
 
-DevboxHomeStorage is where an instance's /home/dev lives.
+DevboxHomeStorage is where an instance's /home/dev lives. The API accepts Block and Snapshot; the operator keeps
+serving JuiceFS and ZeroFS homes so they can come back.
 
 _Validation:_
-- Enum: [Snapshot JuiceFS ZeroFS Block]
+- Enum: [Block Snapshot]
 
 _Appears in:_
 - [DevboxHome](#devboxhome)
@@ -1117,6 +1122,7 @@ _Appears in:_
 | `ruby` _boolean_ | Ruby: rubygems.org and Ruby releases. | true | Optional: \{\} <br /> |
 | `php` _boolean_ | PHP: Packagist and Composer. | true | Optional: \{\} <br /> |
 | `dotnet` _boolean_ | Dotnet: NuGet and .NET releases. | true | Optional: \{\} <br /> |
+| `terraform` _boolean_ | Terraform: the Terraform Registry and HashiCorp releases, where `terraform init` resolves every provider and<br />downloads HashiCorp's own (aws, google, azurerm, kubernetes, helm, ...) and where Terraform itself is<br />released. Partner and community providers and registry modules download from GitHub: Mise opens it on boxes<br />without a GitHub SCM connection, and with one the provider's repository has to be allowed. | true | Optional: \{\} <br /> |
 | `mise` _boolean_ | Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java<br />metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes<br />without a GitHub SCM connection this opens github.com unauthenticated. | false | Optional: \{\} <br /> |
 
 
@@ -1175,7 +1181,7 @@ _Appears in:_
 | `image` _string_ |  |  |  |
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
-| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS ZeroFS Block] <br />Optional: \{\} <br /> |
+| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Block Snapshot] <br />Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
 | `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
 
@@ -1261,7 +1267,7 @@ _Appears in:_
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this devbox,<br />with the same semantics as AgentRuntime.spec.allowedRepositories. |  | Optional: \{\} <br /> |
 | `httpAllowlist` _[DevboxHTTPAllowlistEntry](#devboxhttpallowlistentry) array_ | HTTPAllowlist are extra hosts instances may reach, on top of the built-in ones. |  | MaxItems: 256 <br />Optional: \{\} <br /> |
 | `allowPublicEgress` _boolean_ | AllowPublicEgress lets instances (and the golden boot) reach any host on ports 443 and 80, instead of only<br />the allowlist and presets. HTTPS to hosts no other rule names is tunneled without interception, so those<br />sites see their real certificates; the hosts egress injects credentials for (SCM, console, cloud identity,<br />subscription billing) keep their specific rules, so credentials are still only sent where they belong.<br />Security: this removes egress as a guardrail against exfiltration. An agent, a compromised dependency or a<br />prompt injection in a page the agent reads can send workspace code, environment secrets and anything else in<br />the box to an arbitrary server. Wildcard rules match names, not addresses, so names that resolve inside the<br />cluster or private network (e.g. <svc>.<ns>.svc.cluster.local, internal DNS zones) become reachable on these<br />ports too, subject only to your NetworkPolicies. Only enable it where boxes run code and agents you trust<br />with that reach: sandboxed clusters with no sensitive internal services, demo or personal environments. |  | Optional: \{\} <br /> |
-| `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. All but Mise are on unless set to<br />false. | \{  \} | Optional: \{\} <br /> |
 | `cloudProviders` _[DevboxCloudProviders](#devboxcloudproviders)_ | CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud<br />identity for it, unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `ociRegistries` _[DevboxOCIRegistries](#devboxociregistries)_ | OCIRegistries opens egress to public container registries, for pulling images with podman, docker,<br />crane or helm. Docker Hub and GitHub Container Registry are on unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `oauthProviders` _[DevboxOAuthProviders](#devboxoauthproviders)_ | OAuthProviders opens egress to identity providers' sign-in pages, token endpoints and the assets their<br />login flows load, so apps under development can sign in through the box's browser. All are off unless<br />set to true. |  | Optional: \{\} <br /> |

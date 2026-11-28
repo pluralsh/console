@@ -2,7 +2,8 @@
 Stages the microvm sandbox binaries into the asset bucket at
 microvm-assets/<arch>/<sha256> (what `ate-setup deploy sandboxconfig` does on
 GCS/Kind), so atelet can fetch them. Backend-agnostic: it uploads through
-gocloud.dev blob, so S3, GCS and Azure Blob all work. The pinned digests come
+gocloud.dev blob, so S3, GCS and Azure Blob all work (on S3 with the same
+region, endpoint and credentials as the objectstore plugin). The pinned digests come
 from the microvm SandboxConfig rendered below, and the Job fails if the
 upstream releases don't match them. Idempotent: existing objects are skipped.
 Runs as ate-api-server, so its object store access (apiServer.serviceAccount
@@ -16,7 +17,8 @@ staging too and there is a single identity to grant bucket access to.
 {{- if and $m.enabled $a.enabled }}
 {{- $ns := include "substrate.namespace" . -}}
 {{- $name := "agent-substrate-microvm-assets" -}}
-{{- $bucketUrl := $a.bucketUrl | default (printf "%s://%s" $m.assetScheme $m.assetBucket) -}}
+{{- $bucketUrl := (include "substrate.microvmAssets" . | fromJson).stagingUrl -}}
+{{- $s3 := eq $os.backend "s3" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -74,8 +76,11 @@ spec:
             {{- with $a.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or $azure $a.extraEnv }}
+          {{- if or $azure $s3 $a.extraEnv }}
           env:
+            {{- if $s3 }}
+            {{- include "substrate.objectstoreBackendEnv" . | nindent 12 }}
+            {{- end }}
             {{- if $azure }}
             - name: AZURE_CLIENT_ID
               value: {{ $os.azureBlob.controlClientId | quote }}

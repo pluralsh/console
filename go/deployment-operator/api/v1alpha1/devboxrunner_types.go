@@ -184,8 +184,8 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	AllowPublicEgress *bool `json:"allowPublicEgress,omitempty"`
 
-	// PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir
-	// and Python are on unless set to false.
+	// PackageServers opens egress to public package registries by ecosystem. All but Mise are on unless set to
+	// false.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={}
 	PackageServers *DevboxPackageServers `json:"packageServers,omitempty"`
@@ -863,6 +863,14 @@ type DevboxPackageServers struct {
 	// +kubebuilder:default=true
 	Dotnet *bool `json:"dotnet,omitempty"`
 
+	// Terraform: the Terraform Registry and HashiCorp releases, where `terraform init` resolves every provider and
+	// downloads HashiCorp's own (aws, google, azurerm, kubernetes, helm, ...) and where Terraform itself is
+	// released. Partner and community providers and registry modules download from GitHub: Mise opens it on boxes
+	// without a GitHub SCM connection, and with one the provider's repository has to be allowed.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	Terraform *bool `json:"terraform,omitempty"`
+
 	// Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java
 	// metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes
 	// without a GitHub SCM connection this opens github.com unauthenticated.
@@ -1266,7 +1274,10 @@ var packageServerHosts = map[string][]string{
 	"ruby":   {"rubygems.org", "index.rubygems.org", "cache.ruby-lang.org"},
 	"php":    {"packagist.org", "repo.packagist.org", "getcomposer.org"},
 	"dotnet": {"api.nuget.org", "globalcdn.nuget.org", "builds.dotnet.microsoft.com", "dot.net"},
-	"mise":   MiseHosts,
+	// registry.terraform.io answers provider lookups with download URLs on releases.hashicorp.com for HashiCorp's
+	// providers; checkpoint-api.hashicorp.com is Terraform's version check
+	"terraform": {"registry.terraform.io", "releases.hashicorp.com", "checkpoint-api.hashicorp.com"},
+	"mise":      MiseHosts,
 }
 
 // MiseHosts are what mise installs from beyond the ecosystems' own hosts: its version, Java and download
@@ -1307,6 +1318,7 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 		{"ruby", on(ps.Ruby, true)},
 		{"php", on(ps.PHP, true)},
 		{"dotnet", on(ps.Dotnet, true)},
+		{"terraform", on(ps.Terraform, true)},
 		{"mise", on(ps.Mise, false)},
 	} {
 		if !eco.enabled {

@@ -183,7 +183,7 @@ describe('DevboxInteractionCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expect(onRespond).toHaveBeenCalledWith({
       action: DevboxElicitationAction.Accept,
-      content: { name: 'Ada', count: 3, confirm: true },
+      content: JSON.stringify({ name: 'Ada', count: 3, confirm: true }),
     })
   })
 

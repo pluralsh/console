@@ -378,7 +378,8 @@ function ElicitationForm({
     if (invalid) return
     onRespond({
       action: DevboxElicitationAction.Accept,
-      content: elicitationContent(schema, values),
+      // the Json scalar only parses JSON-encoded strings
+      content: JSON.stringify(elicitationContent(schema, values)),
     })
   }
 

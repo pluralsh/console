@@ -192,7 +192,12 @@
 {{- end -}}
 
 {{- if .Values.sandboxConfigs.microvm.enabled -}}
-{{- if not (and .Values.sandboxConfigs.microvm.assetScheme .Values.sandboxConfigs.microvm.assetBucket) -}}
-{{- fail "sandboxConfigs.microvm needs assetScheme (s3, gs or https) and assetBucket, where the microVM assets are staged" -}}
+{{- $assets := include "substrate.microvmAssets" . | fromJson -}}
+{{- $want := get (dict "s3" "s3" "gcs" "gs" "azureBlob" "azblob") $os.backend -}}
+{{- if ne $assets.scheme $want -}}
+{{- fail (printf "sandboxConfigs.microvm.assetScheme must be %s with objectStore.backend %s: atelet fetches the assets through that backend's plugin" $want $os.backend) -}}
+{{- end -}}
+{{- if not $assets.bucket -}}
+{{- fail "sandboxConfigs.microvm needs assetBucket (the bucket, or Azure blob container, the microVM assets are staged in) when objectStore.snapshotLocation doesn't name one" -}}
 {{- end -}}
 {{- end -}}

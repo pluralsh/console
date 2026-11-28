@@ -568,8 +568,8 @@ spec:
               packageServers:
                 default: {}
                 description: |-
-                  PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir
-                  and Python are on unless set to false.
+                  PackageServers opens egress to public package registries by ecosystem. All but Mise are on unless set to
+                  false.
                 properties:
                   dotnet:
                     default: true
@@ -616,6 +616,14 @@ spec:
                   rust:
                     default: true
                     description: 'Rust: crates.io and rustup.'
+                    type: boolean
+                  terraform:
+                    default: true
+                    description: |-
+                      Terraform: the Terraform Registry and HashiCorp releases, where `terraform init` resolves every provider and
+                      downloads HashiCorp's own (aws, google, azurerm, kubernetes, helm, ...) and where Terraform itself is
+                      released. Partner and community providers and registry modules download from GitHub: Mise opens it on boxes
+                      without a GitHub SCM connection, and with one the provider's repository has to be allowed.
                     type: boolean
                 type: object
               repositories:

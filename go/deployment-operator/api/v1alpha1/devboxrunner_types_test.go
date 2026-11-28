@@ -65,7 +65,8 @@ func TestPackageServerHostsCoverEveryEcosystemByDefault(t *testing.T) {
 	// one host per ecosystem, plus the redirect targets a registry alone wouldn't reach
 	for _, h := range []string{
 		"proxy.golang.org", "storage.googleapis.com", "static.crates.io", "registry.npmjs.org", "plugins-artifacts.gradle.org",
-		"repo.hex.pm", "files.pythonhosted.org", "rubygems.org", "repo.packagist.org", "api.nuget.org",
+		"repo.hex.pm", "files.pythonhosted.org", "rubygems.org", "repo.packagist.org", "api.nuget.org", "registry.terraform.io",
+		"releases.hashicorp.com",
 	} {
 		if !slices.Contains(got, h) {
 			t.Errorf("PackageServerHosts() = %v, missing %s", got, h)

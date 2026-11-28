@@ -103,9 +103,16 @@ Call with (dict "ctx" $ "mode" "control").
       value: {{ $az.tenantId | quote }}
     - name: AZURE_FEDERATED_TOKEN_FILE
       value: /var/run/secrets/azure/tokens/azure-identity-token
-    {{- if and (eq $mode "node") $az.assetContainers }}
+    {{- $assetContainers := $az.assetContainers | default list -}}
+    {{- if $ctx.Values.sandboxConfigs.microvm.enabled -}}
+    {{- $assets := include "substrate.microvmAssets" $ctx | fromJson -}}
+    {{- if eq $assets.scheme "azblob" -}}
+    {{- $assetContainers = append $assetContainers $assets.bucket | uniq -}}
+    {{- end -}}
+    {{- end }}
+    {{- if and (eq $mode "node") $assetContainers }}
     - name: AZURE_STORAGE_ASSET_CONTAINERS
-      value: {{ join "," $az.assetContainers | quote }}
+      value: {{ join "," $assetContainers | quote }}
     {{- end }}
     {{- end }}
   envFrom:

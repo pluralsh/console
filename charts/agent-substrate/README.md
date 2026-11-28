@@ -403,7 +403,8 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 | `devboxes.{enabled,gatewayNamespace,routeTimeout,operatorServiceAccount}` | `false`, `plrl-deploy-operator`, `1h`, `plrl-deploy-operator/deployment-operator` | [devboxes preset](#devboxes) |
 | `k8sCredentialProvider.namespacePolicies` | `[]` | atespace allow-list |
 | `podCertificateController.*` | | namespace, workers, QPS/burst |
-| `sandboxConfigs.gvisor.enabled` / `.microvm.*` | `true` / `false` | SandboxConfigs (microVM assets must already be staged) |
+| `sandboxConfigs.gvisor.enabled` / `.microvm.*` | `true` / `false` | SandboxConfigs; microVM assets default to `<snapshot bucket>/microvm-assets/` in the backend's scheme (on Azure, the blob's https URL in `accountUrl`) |
+| `assetStaging.*` | disabled | post-install/upgrade Job that stages the microVM assets on any backend |
 | `networkPolicies.enabled` | `true` | NetworkPolicies |
 | `postgres.mode` | `cnpg` | `cnpg` or `external` |
 | `postgres.cnpg.{instances,storage,walStorage,preset,resources,parameters,affinity,backup,keepOnUninstall}` | 1 instance, 20Gi | CNPG Cluster |
@@ -422,7 +423,8 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 - The API config and env ConfigMaps are Helm-rendered; the authentication config is written by the
   secrets hook (it needs the cluster's discovered issuer).
 - Only the Envoy dataplane is implemented; `atenet.dataplane: agentgateway` fails to render.
-- `microvm` SandboxConfig assets aren't staged by the chart (`ate-setup deploy sandboxconfig` does).
+- `microvm` SandboxConfig assets are staged by the chart's `assetStaging` Job, on S3, GCS or Azure Blob,
+  instead of `ate-setup deploy sandboxconfig` (GCS/Kind only).
 - `size10` pool parameters are added to CNPG DSNs only; external DSNs are used as given.
 - The `acr` preset reads the node's `/etc/kubernetes/azure.json`; verify it on your AKS node image.
 - CNPG backups use the in-tree `barmanObjectStore`, deprecated upstream in favour of the Barman
