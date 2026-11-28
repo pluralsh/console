@@ -5798,6 +5798,15 @@
   publisher: eks
 - name: chainguard_aws-ebs-csi-driver-fips
   versions:
+  - version: v2.68.10001020261126-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v2.68.10001020261123-eksbuild.1
     compatibilities:
     - '1.37'
@@ -6034,6 +6043,15 @@
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
+  - version: v4.6.10000020261124-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v4.6.10000020261121-eksbuild.1
     compatibilities:
     - '1.37'
@@ -6617,6 +6635,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.50.10008020261125-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
   - version: v1.50.10008020261123-eksbuild.1
     compatibilities:
     - '1.37'
