@@ -142,6 +142,9 @@ message HealthResponse {
   // A memory restore was detected since the previous probe; activity timers were reset.
   bool restored = 5;
   bool workspace_hydrated = 6;
+  // As DaemonHeartbeat.home_error. A hung workspace volume can wedge the event stream that carries heartbeats
+  // while Health still answers.
+  string home_error = 7;
 }
 
 // HarnessEndpoints are the URLs harnesses are configured with. All are reached through atenet-egress, which
@@ -299,6 +302,9 @@ message DaemonCondition {
 message DaemonHeartbeat {
   uint64 head_offset = 1;
   IdleState idle = 2;
+  // Set while writes to the workspace volume fail or hang. Heartbeats bypass the event log, which lives on that
+  // volume. The gateway suspends and resumes the instance, which remounts it.
+  string home_error = 3;
 }
 
 message AckEventsRequest {

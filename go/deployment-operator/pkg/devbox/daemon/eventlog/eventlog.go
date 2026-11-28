@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -63,10 +64,14 @@ type Log struct {
 	segments []*segment
 	active   *os.File
 	head     uint64
+	// headSnap mirrors head so Head never waits behind a write or fsync holding mu on a hung disk.
+	headSnap atomic.Uint64
 	acked    uint64
-	notify   chan struct{}
-	closed   bool
-	dirty    bool
+	// ackedSnap mirrors acked for the same reason.
+	ackedSnap atomic.Uint64
+	notify    chan struct{}
+	closed    bool
+	dirty     bool
 }
 
 // Option configures a Log.
@@ -89,6 +94,7 @@ func Open(dir string, opts ...Option) (*Log, error) {
 		return nil, err
 	}
 	l.acked = st.Acked
+	l.ackedSnap.Store(st.Acked)
 	l.head = max(st.Floor, st.Acked)
 
 	entries, err := os.ReadDir(dir)
@@ -120,6 +126,7 @@ func Open(dir string, opts ...Option) (*Log, error) {
 	if err := l.openActive(); err != nil {
 		return nil, err
 	}
+	l.headSnap.Store(l.head)
 	return l, nil
 }
 
@@ -197,13 +204,19 @@ func (l *Log) Append(ev *devboxv1.DaemonEvent) (uint64, error) {
 	var hdr [binary.MaxVarintLen64]byte
 	n := binary.PutUvarint(hdr[:], uint64(len(data)))
 	rec := append(hdr[:n:n], data...)
+	s := l.segments[len(l.segments)-1]
 	if _, err := l.active.Write(rec); err != nil {
+		// A short write (e.g. ENOSPC) leaves a torn record that later O_APPEND writes would land behind,
+		// corrupting the segment for readers and for recovery.
+		if terr := l.active.Truncate(s.size); terr != nil {
+			return 0, errors.Join(err, terr)
+		}
 		return 0, err
 	}
-	s := l.segments[len(l.segments)-1]
 	s.size += int64(len(rec))
 	s.last = offset
 	l.head = offset
+	l.headSnap.Store(offset)
 	l.dirty = true
 	if s.size >= l.segmentBytes {
 		if err := l.openActive(); err != nil {
@@ -217,16 +230,12 @@ func (l *Log) Append(ev *devboxv1.DaemonEvent) (uint64, error) {
 
 // Head is the latest offset written.
 func (l *Log) Head() uint64 {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	return l.head
+	return l.headSnap.Load()
 }
 
 // Acked is the latest offset the gateway acknowledged.
 func (l *Log) Acked() uint64 {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	return l.acked
+	return l.ackedSnap.Load()
 }
 
 // Ack records that everything up to offset reached console and deletes fully acknowledged segments. Offsets
@@ -242,6 +251,7 @@ func (l *Log) Ack(offset uint64) (uint64, error) {
 		return l.acked, nil
 	}
 	l.acked = offset
+	l.ackedSnap.Store(offset)
 	if err := l.saveStateLocked(); err != nil {
 		return l.acked, err
 	}
@@ -255,6 +265,7 @@ func (l *Log) Reset() error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.acked = l.head
+	l.ackedSnap.Store(l.head)
 	if err := l.saveStateLocked(); err != nil {
 		return err
 	}

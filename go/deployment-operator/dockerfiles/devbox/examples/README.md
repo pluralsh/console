@@ -50,8 +50,11 @@ condition if one fails:
   root's npm, pip or dotnet caches land, root-owned, in the home directory.
 - Add CAs with `update-ca-certificates`. The daemon combines the system store
   with the egress gateway's CA into `/var/lib/devbox/trust/ca-bundle.pem`, which
-  `SSL_CERT_FILE`, `NODE_EXTRA_CA_CERTS`, `REQUESTS_CA_BUNDLE`, `GIT_SSL_CAINFO`
-  and friends point at.
+  `SSL_CERT_FILE`, `NODE_EXTRA_CA_CERTS`, `REQUESTS_CA_BUNDLE`, `HEX_CACERTS_PATH`
+  and the other package managers' CA variables point at.
+  `/etc/ssl/certs/ca-certificates.crt` links to the same bundle for tools that
+  only read the system store; a hook in `/etc/ca-certificates/update.d` keeps
+  the link when `update-ca-certificates` runs.
 - Never bake secrets into the image. SCM, AI proxy and console credentials are
   injected by the egress gateway; cloud access uses federated tokens.
 - Small additions (a CLI, a mise tool) can go in the runner's bootstrap script or

@@ -33,11 +33,16 @@ import {
   DevboxThreadFragment,
   DevboxToolCallFragment,
 } from 'generated/graphql'
-import { ReactNode, useState } from 'react'
+import {
+  getWorkbenchToolLabel,
+  WorkbenchToolIcon,
+} from 'components/workbenches/tools/workbenchToolsUtils'
+import { ReactNode, use, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isFileEditToolCall, toolCallDiffs } from './devboxApprovals'
 import { DevboxFileDiff } from './DevboxFileDiff'
+import { McpToolIndexContext, toolIntegration } from './devboxIntegrations'
 import { DevboxContentBlock, DevboxToolCallContent } from './devboxTimeline'
 import { subagentsBySpawner } from './devboxSubagentState'
 
@@ -288,13 +293,28 @@ export function DevboxEntityView({
         >
           <AccordionSection
             label={
-              <Body2P
-                as="span"
-                $color="text-xlight"
-                $shimmer={streaming}
-              >
-                Thinking
-              </Body2P>
+              streaming ? (
+                <Body2P
+                  as="span"
+                  $color="text-xlight"
+                  $shimmer
+                >
+                  Thinking
+                </Body2P>
+              ) : (
+                <Body2P
+                  as="span"
+                  $color="text-light"
+                >
+                  Thought{' '}
+                  <Body2P
+                    as="span"
+                    $color="text-input-disabled"
+                  >
+                    {thoughtDuration(entity)}
+                  </Body2P>
+                </Body2P>
+              )
             }
           >
             <SimplifiedMarkdown
@@ -600,6 +620,7 @@ function ToolCallView({
   terminal: TerminalLookup
 }) {
   const { spacing } = useTheme()
+  const mcpTools = use(McpToolIndexContext)
   const toolCall = entity.toolCall
   if (!toolCall) return null
   const content = (toolCall.content ?? []).filter(isNonNullable)
@@ -616,6 +637,20 @@ function ToolCallView({
         c.content?.__typename === 'DevboxTextContent'
       )
   )
+  const integration = review ? null : toolIntegration(toolCall, mcpTools)
+  const integrationIcon = integration && (
+    <WorkbenchToolIcon
+      type={integration.type}
+      provider={integration.provider}
+      size={14}
+      css={{ flexShrink: 0 }}
+    />
+  )
+  const integrationTitle =
+    integration?.action != null
+      ? (getWorkbenchToolLabel(integration.type, integration.provider) ??
+        integration.workbenchToolName)
+      : undefined
   const diffs =
     !review && isFileEditToolCall(toolCall) ? toolCallDiffs(toolCall) : []
   if (diffs.length)
@@ -652,18 +687,21 @@ function ToolCallView({
         customTitle={
           review
             ? GUARDIAN_REVIEW_TITLE[status]
-            : kind === 'generic'
-              ? (toolCall.title ?? undefined)
-              : undefined
+            : (integrationTitle ??
+              (kind === 'generic' ? (toolCall.title ?? undefined) : undefined))
         }
+        customSubtitle={integrationTitle ? integration?.action : undefined}
         leadingIcon={
           status === 'failed' ? (
             <FailedFilledIcon
               size={12}
               color="icon-danger"
             />
-          ) : undefined
+          ) : (
+            (integrationIcon ?? undefined)
+          )
         }
+        commandIcon={integrationIcon ?? undefined}
         customResultBody={
           rich.length || (edit && output) ? (
             <Flex
@@ -796,6 +834,23 @@ function PlanView({
       </AccordionSection>
     </div>
   )
+}
+
+// thinking shorter than this reads as "briefly" rather than a count of seconds
+const BRIEF_THOUGHT_MS = 2000
+
+// how long a finished thought took, from its first chunk to its last
+export function thoughtDuration({
+  createdAt,
+  updatedAt,
+}: Pick<DevboxEntityFragment, 'createdAt' | 'updatedAt'>) {
+  const ms = Date.parse(updatedAt ?? '') - Date.parse(createdAt ?? '')
+  if (Number.isNaN(ms)) return null
+  if (ms < BRIEF_THOUGHT_MS) return 'briefly'
+  const secs = Math.round(ms / 1000)
+  if (secs < 60) return `${secs}s`
+  const rem = secs % 60
+  return rem ? `${Math.floor(secs / 60)}m ${rem}s` : `${secs / 60}m`
 }
 
 const ThoughtSC = styled.div<{ $streaming: boolean }>(

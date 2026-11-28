@@ -31,6 +31,8 @@ defmodule Console.Devboxes.Control.Grpc do
   @timeout :timer.seconds(30)
   # the box writes, commits and pushes, and the writer may be an agent CLI
   @prepare_timeout :timer.minutes(6)
+  # a new thread gets a worktree of every repository before the agent's session/new
+  @thread_timeout :timer.minutes(2)
   @unavailable GRPC.Status.unavailable()
   @unimplemented GRPC.Status.unimplemented()
   @internal GRPC.Status.internal()
@@ -140,10 +142,13 @@ defmodule Console.Devboxes.Control.Grpc do
       resume_if_suspended: true
     }
 
-    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :create_thread, req),
-         session_id = session && Proto.to_map(session.session_id),
-         :ok <- first_prompt(inst, %{thread | acp_session_id: session_id}, opts) do
-      {:ok, %{session_id: session_id}}
+    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :create_thread, req, @thread_timeout) do
+      session_id = session && Proto.to_map(session.session_id)
+      case first_prompt(inst, %{thread | acp_session_id: session_id}, opts) do
+        :ok -> {:ok, %{session_id: session_id}}
+        # the session exists either way, so the thread must keep it
+        err -> {:ok, %{session_id: session_id, prompt_error: err}}
+      end
     end
   end
 
@@ -200,7 +205,7 @@ defmodule Console.Devboxes.Control.Grpc do
       title: Proto.str(target.user_title),
       resume_if_suspended: true
     }
-    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :fork_thread, req),
+    with {:ok, %V1.ThreadResponse{session: session}} <- call(cluster_id(inst), :fork_thread, req, @thread_timeout),
       do: {:ok, %{session_id: session && Proto.to_map(session.session_id)}}
   end
 
@@ -324,8 +329,10 @@ defmodule Console.Devboxes.Control.Grpc do
 
   @impl true
   def list_files(inst, path, opts) do
+    # the daemon shows dot entries inside checkouts (.github) and hides the home's own (.config, .plural)
     req = %V1.ListFilesRequest{instance_id: inst.id, path: Proto.str(path), depth: 1, respect_gitignore: true,
-                                query: Proto.str(opts[:query]), brief: !!opts[:brief]}
+                                query: Proto.str(opts[:query]),
+                                brief: !!opts[:brief]}
     with {:ok, %V1.ListFilesResponse{entries: entries}} <- call(cluster_id(inst), :list_files, req),
       do: {:ok, Enum.map(entries, &file_entry/1)}
   end
@@ -450,7 +457,14 @@ defmodule Console.Devboxes.Control.Grpc do
   @doc false
   def result({:ok, resp}), do: {:ok, resp}
   def result({:ok, resp, _}), do: {:ok, resp}
-  def result({:error, %GRPC.RPCError{} = err}), do: rpc_error(err, error_detail(err))
+  def result({:error, %GRPC.RPCError{} = err}) do
+    case rpc_error(err, error_detail(err)) do
+      {:error, reason} = res when reason in [:suspended, :starting] -> res
+      res ->
+        Logger.info("devbox control call failed: #{inspect(err)}")
+        res
+    end
+  end
   def result({:error, :not_connected}), do: {:error, :not_connected}
   def result({:error, err}) do
     Logger.info("devbox control call failed: #{inspect(err)}")
@@ -465,6 +479,8 @@ defmodule Console.Devboxes.Control.Grpc do
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_UNSUPPORTED}), do: {:error, :unsupported}
   # an UNAVAILABLE that explains itself (e.g. credentials) is that failure, not an unreachable cluster
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
+  # the gun adapter's report of the connection to kas closing under the call
+  defp rpc_error(%GRPC.RPCError{status: @unavailable, message: "connection_error: " <> _}, _), do: {:error, :interrupted}
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, _), do: {:error, :not_connected}
   defp rpc_error(%GRPC.RPCError{status: @unimplemented}, _), do: {:error, :unsupported}
   # the call ran out of time on the way (here or in kas); the gateway may still be working on it
@@ -473,6 +489,9 @@ defmodule Console.Devboxes.Control.Grpc do
   defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: :closed"}, _), do: {:error, :interrupted}
   defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:closed" <> _}, _), do: {:error, :interrupted}
   defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:goaway" <> _}, _), do: {:error, :interrupted}
+  # kas or the gateway reset the stream (its upstream went away), or refused it before doing anything
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:stream_error, :cancel" <> _}, _), do: {:error, :interrupted}
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:stream_error, :refused_stream" <> _}, _), do: {:error, :interrupted}
   defp rpc_error(_, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
   defp rpc_error(%GRPC.RPCError{message: msg}, _), do: {:error, msg}
 

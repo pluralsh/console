@@ -170,8 +170,22 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:MaxItems=256
 	HTTPAllowlist []DevboxHTTPAllowlistEntry `json:"httpAllowlist,omitempty"`
 
-	// PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir
-	// and Python are on unless set to false.
+	// AllowPublicEgress lets instances (and the golden boot) reach any host on ports 443 and 80, instead of only
+	// the allowlist and presets. HTTPS to hosts no other rule names is tunneled without interception, so those
+	// sites see their real certificates; the hosts egress injects credentials for (SCM, console, cloud identity,
+	// subscription billing) keep their specific rules, so credentials are still only sent where they belong.
+	//
+	// Security: this removes egress as a guardrail against exfiltration. An agent, a compromised dependency or a
+	// prompt injection in a page the agent reads can send workspace code, environment secrets and anything else in
+	// the box to an arbitrary server. Wildcard rules match names, not addresses, so names that resolve inside the
+	// cluster or private network (e.g. <svc>.<ns>.svc.cluster.local, internal DNS zones) become reachable on these
+	// ports too, subject only to your NetworkPolicies. Only enable it where boxes run code and agents you trust
+	// with that reach: sandboxed clusters with no sensitive internal services, demo or personal environments.
+	// +kubebuilder:validation:Optional
+	AllowPublicEgress *bool `json:"allowPublicEgress,omitempty"`
+
+	// PackageServers opens egress to public package registries by ecosystem. All but Mise are on unless set to
+	// false.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={}
 	PackageServers *DevboxPackageServers `json:"packageServers,omitempty"`
@@ -187,6 +201,12 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={}
 	OCIRegistries *DevboxOCIRegistries `json:"ociRegistries,omitempty"`
+
+	// OAuthProviders opens egress to identity providers' sign-in pages, token endpoints and the assets their
+	// login flows load, so apps under development can sign in through the box's browser. All are off unless
+	// set to true.
+	// +kubebuilder:validation:Optional
+	OAuthProviders *DevboxOAuthProviders `json:"oauthProviders,omitempty"`
 
 	// Env are environment variables for every process the box starts: agents, terminals and git. Plain values
 	// are part of the template, so changing them rolls a new revision. Secret values are read when an instance
@@ -364,8 +384,9 @@ func (s *DevboxRunnerSpec) HasGoldenBootWork() bool {
 		(s.Mise != nil && s.Mise.Config != nil && *s.Mise.Config != "")
 }
 
-// DevboxHomeStorage is where an instance's /home/dev lives.
-// +kubebuilder:validation:Enum=Snapshot;JuiceFS;ZeroFS
+// DevboxHomeStorage is where an instance's /home/dev lives. The API accepts Block and Snapshot; the operator keeps
+// serving JuiceFS and ZeroFS homes so they can come back.
+// +kubebuilder:validation:Enum=Block;Snapshot
 type DevboxHomeStorage string
 
 const (
@@ -378,33 +399,42 @@ const (
 	// chart's ZeroFS driver (zerofs.enabled): an ext4 block device that follows the instance from node to node, with
 	// no metadata database. Snapshots carry only memory.
 	DevboxHomeZeroFS DevboxHomeStorage = "ZeroFS"
+	// DevboxHomeBlock keeps each home on its own cloud disk, from the agent-substrate chart's block driver
+	// (block.enabled), formatted ext4 and mounted by the node's kernel. A disk lives in one zone, so each instance
+	// stays in its home's zone, and the runner runs a WorkerPool per zone (see spec.workerPool.zones). Snapshots
+	// carry only memory.
+	DevboxHomeBlock DevboxHomeStorage = "Block"
 
 	// DevboxDefaultJuiceFSStorageClass is the agent-substrate chart's juicefs.storageClassName default.
 	DevboxDefaultJuiceFSStorageClass = "devbox-juicefs"
 	// DevboxDefaultZeroFSStorageClass is the agent-substrate chart's zerofs.storageClassName default.
 	DevboxDefaultZeroFSStorageClass = "devbox-zerofs"
+	// DevboxDefaultBlockStorageClass is the agent-substrate chart's block.storageClassName default.
+	DevboxDefaultBlockStorageClass = "devbox-block"
 )
 
 // DevboxHome selects how instances store /home/dev.
 //
-// With JuiceFS or ZeroFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and
-// mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
-// ZeroFS snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for either:
-// Substrate can't restore a tag of a template with external volumes.
+// With Block, each instance's home is its own cloud disk from the agent-substrate chart's block driver
+// (block.enabled), which needs the cloud's disk CSI driver and VolumeSnapshots. A home is seeded from the golden
+// boot's, so what the bootstrap script and mise installed is there from the start. Snapshots don't save the home
+// yet, and starting an instance from a snapshot isn't supported: Substrate can't restore a tag of a template with
+// external volumes.
+//
+// With Snapshot, the home stays on the instance's node and rides in every snapshot, which needs no storage beyond
+// the node's, e.g. on machines without cloud disks.
 type DevboxHome struct {
-	// Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
-	// home.
+	// Storage defaults to Block. Changing it rolls a new revision, and instances moved to it start with a fresh home.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=Snapshot
+	// +kubebuilder:default=Block
 	Storage *DevboxHomeStorage `json:"storage,omitempty"`
 
-	// Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.
-	// Defaults to spec.resources.disk.
+	// Size is the size of each Block home's cloud disk. Defaults to spec.resources.disk.
 	// +kubebuilder:validation:Optional
 	Size *resource.Quantity `json:"size,omitempty"`
 
-	// StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's
-	// devbox-juicefs or devbox-zerofs.
+	// StorageClassName is the block driver's StorageClass for Block homes. Defaults to the agent-substrate chart's
+	// devbox-block.
 	// +kubebuilder:validation:Optional
 	StorageClassName *string `json:"storageClassName,omitempty"`
 }
@@ -412,14 +442,19 @@ type DevboxHome struct {
 // HomeStorage is where instances keep /home/dev.
 func (s *DevboxRunnerSpec) HomeStorage() DevboxHomeStorage {
 	if s.Home == nil || s.Home.Storage == nil {
-		return DevboxHomeSnapshot
+		return DevboxHomeBlock
 	}
 	return *s.Home.Storage
 }
 
 // External reports whether homes are volumes outside the instance's snapshots, served by a CSI driver.
 func (s DevboxHomeStorage) External() bool {
-	return s == DevboxHomeJuiceFS || s == DevboxHomeZeroFS
+	return s == DevboxHomeJuiceFS || s == DevboxHomeZeroFS || s == DevboxHomeBlock
+}
+
+// Zonal reports whether homes live in one zone, so each instance must stay in its home's zone.
+func (s DevboxHomeStorage) Zonal() bool {
+	return s == DevboxHomeBlock
 }
 
 // HomeSize is the most an instance's home may hold.
@@ -433,15 +468,35 @@ func (s *DevboxRunnerSpec) HomeSize() resource.Quantity {
 	return resource.MustParse("20Gi")
 }
 
-// HomeStorageClass is the StorageClass of a JuiceFS or ZeroFS home.
+// HomeStorageClass is the StorageClass of a JuiceFS, ZeroFS or Block home.
 func (s *DevboxRunnerSpec) HomeStorageClass() string {
 	if s.Home != nil && s.Home.StorageClassName != nil && *s.Home.StorageClassName != "" {
 		return *s.Home.StorageClassName
 	}
-	if s.HomeStorage() == DevboxHomeZeroFS {
+	switch s.HomeStorage() {
+	case DevboxHomeZeroFS:
 		return DevboxDefaultZeroFSStorageClass
+	case DevboxHomeBlock:
+		return DevboxDefaultBlockStorageClass
 	}
 	return DevboxDefaultJuiceFSStorageClass
+}
+
+// WorkerZones are the zones spec.workerPool.zones lists.
+func (s *DevboxRunnerSpec) WorkerZones() []string {
+	if s.WorkerPool == nil {
+		return nil
+	}
+	return s.WorkerPool.Zones
+}
+
+// Zones are the zones the runner runs one WorkerPool in and places new instances in, empty for a single pool:
+// status.zones once the operator has set it, else spec.workerPool.zones.
+func (r *DevboxRunner) Zones() []string {
+	if len(r.Status.Zones) > 0 {
+		return r.Status.Zones
+	}
+	return r.Spec.WorkerZones()
 }
 
 // DevboxWorkerPool is the Substrate WorkerPool the operator runs for the runner. Each worker is expected to have a
@@ -495,12 +550,25 @@ type DevboxWorkerPool struct {
 	// +listMapKey=namespace
 	AdditionalPools []DevboxWorkerPoolRef `json:"additionalPools,omitempty"`
 
+	// Zones runs one WorkerPool per zone instead of one pool, each pinned to its zone's nodes with
+	// topology.kubernetes.io/zone. Block homes run that way without it too, in the zones of the nodes matching
+	// NodeSelector (or of every node, before any matches): a home's disk lives in one zone, and the gateway keeps
+	// each instance in its home's zone, packing new instances into the zone that already holds the most. Set it
+	// to choose the zones instead. Replicas and Autoscaling are totals across the zones: the minimum and the spare
+	// instance slots go only to zones holding homes, not to every zone.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=6
+	// +listType=set
+	// +kubebuilder:validation:items:Pattern=`^[a-z0-9]([-a-z0-9]{0,30}[a-z0-9])?$`
+	Zones []string `json:"zones,omitempty"`
+
 	// MaxInstances caps concurrently running instances in console. Unset means unlimited.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Minimum=1
 	MaxInstances *int32 `json:"maxInstances,omitempty"`
 
-	// SandboxClass is the isolation technology. Immutable once the WorkerPool exists.
+	// SandboxClass is the isolation technology. Immutable once the WorkerPool exists. Docker and Podman in the
+	// devbox-fat image only run on microvm.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=gvisor
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="sandboxClass is immutable"
@@ -609,6 +677,34 @@ type DevboxCapacityStatus struct {
 
 	// +kubebuilder:validation:Optional
 	LastScaleTime *metav1.Time `json:"lastScaleTime,omitempty"`
+
+	// Zones breaks the autoscaler's view down by zone when the runner runs a pool per zone; the fields above are
+	// totals.
+	// +kubebuilder:validation:Optional
+	// +listType=map
+	// +listMapKey=zone
+	Zones []DevboxZoneCapacity `json:"zones,omitempty"`
+}
+
+// DevboxZoneCapacity is one zone's WorkerPool as the autoscaler sees it.
+type DevboxZoneCapacity struct {
+	Zone string `json:"zone"`
+	// Workers are the zone's schedulable workers, DesiredWorkers the autoscaler's target for them.
+	Workers        int32 `json:"workers"`
+	DesiredWorkers int32 `json:"desiredWorkers"`
+	// Homes are the instances whose home lives in the zone, RunningInstances those running there, and
+	// WaitingInstances those waiting for a worker there.
+	Homes            int32 `json:"homes"`
+	RunningInstances int32 `json:"runningInstances"`
+	// +kubebuilder:validation:Optional
+	WaitingInstances int32 `json:"waitingInstances,omitempty"`
+}
+
+// DevboxWorkerPoolZone is the WorkerPool of one zone.
+type DevboxWorkerPoolZone struct {
+	Zone string `json:"zone"`
+	// WorkerPool is the pool's namespace/name.
+	WorkerPool string `json:"workerPool"`
 }
 
 type DevboxHTTPAllowlistEntry struct {
@@ -677,6 +773,39 @@ type DevboxOCIRegistries struct {
 	ECR *DevboxECRRegistries `json:"ecr,omitempty"`
 }
 
+// DevboxOAuthProviders enables egress to each identity provider's login flow (see OAuthProviderHosts).
+type DevboxOAuthProviders struct {
+	// Google: Google sign-in, its OAuth and OpenID Connect endpoints, and the scripts, fonts and avatars its
+	// pages load.
+	// +kubebuilder:validation:Optional
+	Google *bool `json:"google,omitempty"`
+
+	// GitHub: github.com sign-in and OAuth apps, the API, and the assets and avatars its pages load.
+	// +kubebuilder:validation:Optional
+	GitHub *bool `json:"github,omitempty"`
+
+	// Microsoft: Entra ID (work and school accounts), personal Microsoft accounts, Microsoft Graph and the CDNs
+	// their sign-in pages load from.
+	// +kubebuilder:validation:Optional
+	Microsoft *bool `json:"microsoft,omitempty"`
+
+	// GitLab: gitlab.com sign-in and OAuth applications, and its asset hosts.
+	// +kubebuilder:validation:Optional
+	GitLab *bool `json:"gitlab,omitempty"`
+
+	// Apple: Sign in with Apple.
+	// +kubebuilder:validation:Optional
+	Apple *bool `json:"apple,omitempty"`
+
+	// Okta: any Okta or Okta Workforce tenant and Okta's CDN. Custom sign-in domains need httpAllowlist entries.
+	// +kubebuilder:validation:Optional
+	Okta *bool `json:"okta,omitempty"`
+
+	// Auth0: any Auth0 tenant, in every region, and Auth0's CDN. Custom domains need httpAllowlist entries.
+	// +kubebuilder:validation:Optional
+	Auth0 *bool `json:"auth0,omitempty"`
+}
+
 // DevboxECRRegistries enables egress to private Amazon ECR registries. ECR hosts are regional, so each region
 // is listed. Pulling still needs credentials, such as an AWS cloud identity and `aws ecr get-login-password`.
 type DevboxECRRegistries struct {
@@ -734,6 +863,14 @@ type DevboxPackageServers struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Dotnet *bool `json:"dotnet,omitempty"`
+
+	// Terraform: the Terraform Registry and HashiCorp releases, where `terraform init` resolves every provider and
+	// downloads HashiCorp's own (aws, google, azurerm, kubernetes, helm, ...) and where Terraform itself is
+	// released. Partner and community providers and registry modules download from GitHub: Mise opens it on boxes
+	// without a GitHub SCM connection, and with one the provider's repository has to be allowed.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	Terraform *bool `json:"terraform,omitempty"`
 
 	// Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java
 	// metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes
@@ -945,9 +1082,21 @@ type DevboxRunnerStatus struct {
 	// +kubebuilder:validation:Optional
 	Atespace *string `json:"atespace,omitempty"`
 
-	// WorkerPool is the namespaced name of the Substrate WorkerPool.
+	// WorkerPool is the namespaced name of the Substrate WorkerPool, unset when the runner runs a pool per zone.
 	// +kubebuilder:validation:Optional
 	WorkerPool *string `json:"workerPool,omitempty"`
+
+	// Zones are the zones the runner runs a WorkerPool in and places new instances in: spec.workerPool.zones, or
+	// for Block homes without them, the zones the operator found the runner's nodes in.
+	// +kubebuilder:validation:Optional
+	Zones []string `json:"zones,omitempty"`
+
+	// WorkerPoolZones are the runner's WorkerPools when it runs one per zone, including pools of zones dropped
+	// from Zones that still hold instances' homes.
+	// +kubebuilder:validation:Optional
+	// +listType=map
+	// +listMapKey=zone
+	WorkerPoolZones []DevboxWorkerPoolZone `json:"workerPoolZones,omitempty"`
 
 	// AdditionalWorkerPools are the namespace/name of the AdditionalPools carrying the runner's worker selector.
 	// +kubebuilder:validation:Optional
@@ -1126,7 +1275,10 @@ var packageServerHosts = map[string][]string{
 	"ruby":   {"rubygems.org", "index.rubygems.org", "cache.ruby-lang.org"},
 	"php":    {"packagist.org", "repo.packagist.org", "getcomposer.org"},
 	"dotnet": {"api.nuget.org", "globalcdn.nuget.org", "builds.dotnet.microsoft.com", "dot.net"},
-	"mise":   MiseHosts,
+	// registry.terraform.io answers provider lookups with download URLs on releases.hashicorp.com for HashiCorp's
+	// providers; checkpoint-api.hashicorp.com is Terraform's version check
+	"terraform": {"registry.terraform.io", "releases.hashicorp.com", "checkpoint-api.hashicorp.com"},
+	"mise":      MiseHosts,
 }
 
 // MiseHosts are what mise installs from beyond the ecosystems' own hosts: its version, Java and download
@@ -1167,6 +1319,7 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 		{"ruby", on(ps.Ruby, true)},
 		{"php", on(ps.PHP, true)},
 		{"dotnet", on(ps.Dotnet, true)},
+		{"terraform", on(ps.Terraform, true)},
 		{"mise", on(ps.Mise, false)},
 	} {
 		if !eco.enabled {
@@ -1222,10 +1375,86 @@ func (in *DevboxRunnerSpec) CloudProviderHosts() []string {
 	return out
 }
 
-// EgressPresetHosts are every host the runner's presets open on 443: package servers, cloud providers and OCI
-// registries.
+// PublicEgressHost is the hostname pattern AllowPublicEgress opens; Substrate matches every name with it.
+const PublicEgressHost = "*"
+
+// PublicEgress reports whether spec.allowPublicEgress opens 443 and 80 to every host.
+func (in *DevboxRunnerSpec) PublicEgress() bool {
+	return in.AllowPublicEgress != nil && *in.AllowPublicEgress
+}
+
+// EgressPresetHosts are every host the runner's presets open on 443: package servers, cloud providers, OCI
+// registries and OAuth providers, in a stable order without duplicates.
 func (in *DevboxRunnerSpec) EgressPresetHosts() []string {
-	return append(append(in.PackageServerHosts(), in.CloudProviderHosts()...), in.OCIRegistryHosts()...)
+	var out []string
+	seen := map[string]bool{}
+	for _, hosts := range [][]string{in.PackageServerHosts(), in.CloudProviderHosts(), in.OCIRegistryHosts(), in.OAuthProviderHosts()} {
+		for _, h := range hosts {
+			if !seen[h] {
+				seen[h] = true
+				out = append(out, h)
+			}
+		}
+	}
+	return out
+}
+
+// oauthProviderHosts are the hosts each provider's browser sign-in touches, all on 443. Substrate wildcards
+// cover exactly one label, so Auth0's regional tenants are listed by region.
+var oauthProviderHosts = map[string][]string{
+	"google": {
+		"accounts.google.com", "oauth2.googleapis.com", "openidconnect.googleapis.com", "www.googleapis.com",
+		"apis.google.com", "www.gstatic.com", "ssl.gstatic.com", "fonts.gstatic.com", "fonts.googleapis.com",
+		"lh3.googleusercontent.com", "play.google.com",
+	},
+	"github": {
+		"github.com", "api.github.com", "github.githubassets.com", "avatars.githubusercontent.com",
+	},
+	"microsoft": {
+		"login.microsoftonline.com", "login.microsoft.com", "login.live.com", "account.live.com",
+		"graph.microsoft.com", "aadcdn.msauth.net", "aadcdn.msftauth.net", "logincdn.msauth.net",
+		"logincdn.msftauth.net", "login.windows.net",
+	},
+	"gitlab": {"gitlab.com", "assets.gitlab-static.net"},
+	"apple":  {"appleid.apple.com", "appleid.cdn-apple.com", "idmsa.apple.com"},
+	"okta":   {"*.okta.com", "*.okta-emea.com", "*.oktapreview.com", "*.oktacdn.com"},
+	"auth0": {
+		"*.auth0.com", "*.us.auth0.com", "*.eu.auth0.com", "*.au.auth0.com", "*.jp.auth0.com",
+		"*.ca.auth0.com", "*.uk.auth0.com",
+	},
+}
+
+// OAuthProviderHosts returns the hosts the enabled OAuth providers need, in a stable order without duplicates.
+func (in *DevboxRunnerSpec) OAuthProviderHosts() []string {
+	o := in.OAuthProviders
+	if o == nil {
+		return nil
+	}
+	var out []string
+	seen := map[string]bool{}
+	for _, provider := range []struct {
+		name    string
+		enabled *bool
+	}{
+		{"google", o.Google},
+		{"github", o.GitHub},
+		{"microsoft", o.Microsoft},
+		{"gitlab", o.GitLab},
+		{"apple", o.Apple},
+		{"okta", o.Okta},
+		{"auth0", o.Auth0},
+	} {
+		if provider.enabled == nil || !*provider.enabled {
+			continue
+		}
+		for _, h := range oauthProviderHosts[provider.name] {
+			if !seen[h] {
+				seen[h] = true
+				out = append(out, h)
+			}
+		}
+	}
+	return out
 }
 
 // ociRegistryHosts are the API and blob hosts each registry's pulls touch, all on 443. Substrate wildcards

@@ -93,6 +93,7 @@ type Daemon struct {
 	idle       *idle.Detector
 	creds      *creds.Manager
 	verifier   *authn.Verifier
+	home       homeCheck
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -186,9 +187,9 @@ func New(cfg Config) (*Daemon, error) {
 		ChangesCache: files.NewChangesCache(d.log.With("component", "changes"))}
 	d.terms = terminal.New(terminal.Options{Home: cfg.Home, Shell: cfg.Shell, Env: d.baseEnv, Clock: cfg.Clock,
 		Log: d.log.With("component", "terminal")})
-	d.browser = browser.New(browser.Options{Chromium: cfg.Chromium, Xvfb: cfg.Xvfb, X11VNC: cfg.X11VNC,
-		Display: cfg.Display, CDPPort: cfg.CDPPort, VNCPort: cfg.VNCPort, ProfileDir: filepath.Join(cfg.StateDir, "browser"),
-		IdleTimeout: cfg.BrowserIdle, Env: d.baseEnv, Supervisor: d.sup, Clock: cfg.Clock,
+	d.browser = browser.New(browser.Options{Chromium: cfg.Chromium, Xvfb: cfg.Xvfb, X11VNC: cfg.X11VNC, Voxl: cfg.Voxl,
+		Display: cfg.Display, CDPPort: cfg.CDPPort, VNCPort: cfg.VNCPort, VoxlPort: cfg.VoxlPort, ProfileDir: filepath.Join(cfg.StateDir, "browser"),
+		IdleTimeout: cfg.BrowserIdle, Env: d.baseEnv, Supervisor: d.sup, Clock: cfg.Clock, Prepare: d.trustBrowser,
 		Log: d.log.With("component", "browser")})
 	d.creds = creds.New(creds.Options{Home: cfg.Home, IdentityDir: cfg.IdentityDir, AgentAuthDir: cfg.AgentAuthDir,
 		Client: d.sandboxCredentials, InstanceID: d.instanceID, Clock: cfg.Clock,
@@ -240,7 +241,8 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	if err := d.agents.Start(); err != nil {
 		d.log.Error("agents start", "err", err)
 	}
-	d.bg.Go(func() { d.events.SyncEvery(d.ctx, time.Second) })
+	// Matches ext4's journal commit interval; each sync of the home is a ZeroFS flush.
+	d.bg.Go(func() { d.events.SyncEvery(d.ctx, 5*time.Second) })
 	d.bg.Go(func() { d.ws.Watch(d.ctx) })
 	d.bg.Go(func() { d.files.ChangesCache.Run(d.ctx) })
 	d.files.ChangesCache.Warm(d.ctx, d.ws.Checkouts())
@@ -254,6 +256,8 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	d.bg.Go(func() { d.creds.RunOIDC(d.ctx) })
 	d.bg.Go(func() { d.idleLoop(d.ctx) })
 	d.bg.Go(func() { d.restoreLoop(d.ctx) })
+	d.bg.Go(func() { d.homeLoop(d.ctx) })
+	d.bg.Go(func() { d.toolPriorityLoop(d.ctx) })
 	d.bg.Go(func() { d.loginLoop(d.ctx) })
 	d.bg.Go(d.importJavaTrust)
 
@@ -416,7 +420,7 @@ func (d *Daemon) baseEnv() []string {
 		set[k] = harness.PlaceholderKey
 	}
 	if d.trustOK {
-		for _, k := range append(trust.EnvVars, "PIP_CERT", "CARGO_HTTP_CAINFO", "CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE") {
+		for _, k := range trust.EnvVars {
 			set[k] = d.cfg.TrustBundle()
 		}
 	}
@@ -545,6 +549,7 @@ func (d *Daemon) restoreLoop(ctx context.Context) {
 func (d *Daemon) onRestore(skew time.Duration) {
 	d.log.Info("memory restore detected", "skew", skew.String())
 	d.idle.Reset()
+	d.home.reset(d.cfg.Clock.Now())
 	d.mu.Lock()
 	d.restored = true
 	d.mu.Unlock()
@@ -581,6 +586,25 @@ func (d *Daemon) importJavaTrust() {
 	if n > 0 {
 		d.log.Info("imported egress CA into java truststore", "certs", n, "store", store)
 	}
+}
+
+// trustBrowser adds the egress CA(s) to the NSS database Chromium reads, before each start since it lives in the
+// home, which may have been remounted since boot.
+func (d *Daemon) trustBrowser(ctx context.Context) error {
+	certutil := trust.Certutil()
+	if certutil == "" {
+		d.log.Warn("no certutil; the browser won't trust the egress CA, so intercepted HTTPS sites fail")
+		return nil
+	}
+	dir := trust.NSSDir(d.cfg.Home)
+	n, err := trust.ImportNSS(ctx, certutil, dir, trust.Certificates(d.cfg.EgressCAGlobs))
+	if err != nil {
+		return fmt.Errorf("browser trust store: %w", err)
+	}
+	if n > 0 {
+		d.log.Info("imported egress CA into the browser's trust store", "certs", n, "db", dir)
+	}
+	return nil
 }
 
 func (d *Daemon) loginLoop(ctx context.Context) {
@@ -733,7 +757,7 @@ func (d *Daemon) setStatus(s string) {
 func (d *Daemon) health() *devboxv1.HealthResponse {
 	d.mu.Lock()
 	resp := &devboxv1.HealthResponse{Status: d.status, Version: d.cfg.Version, BootId: d.bootID,
-		Restored: d.restored, WorkspaceHydrated: d.ws.Hydrated()}
+		Restored: d.restored, WorkspaceHydrated: d.ws.Hydrated(), HomeError: d.home.error()}
 	resp.Ready = d.status == StatusReady || d.status == StatusDegraded
 	d.restored = false
 	scrubbed := d.scrubbed

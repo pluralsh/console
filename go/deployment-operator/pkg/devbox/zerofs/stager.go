@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -33,9 +34,11 @@ const (
 
 	configFile = "config.toml"
 	deviceFile = "device"
-	cacheDir   = "cache"
 	// stoppedFile marks a volume whose writer flushed and exited cleanly when the plugin shut down.
 	stoppedFile = "stopped"
+	// writerOOMScoreAdj has the kernel kill nearly anything else on the node before a writer: a killed writer
+	// loses the writes it acknowledged but hadn't flushed, which the box's page cache believes are on disk.
+	writerOOMScoreAdj = -900
 )
 
 var nbdDevice = regexp.MustCompile(`^/dev/nbd[0-9]+$`)
@@ -54,13 +57,16 @@ type Manager struct {
 	Storage        Storage
 	// ObjectStoreOptions are object_store settings for every writer, such as allow_http for an in-cluster endpoint.
 	ObjectStoreOptions map[string]string
-	// StateRoot holds each volume's config, cache and attached device, on the node's disk.
+	// StateRoot holds each volume's config and attached device, and the caches, on the node's disk.
 	StateRoot string
 	// SocketDir holds each writer's sockets and the device-creation mount. It must not propagate to the host,
 	// and its paths must fit a Unix socket address.
 	SocketDir string
 	Cache     CacheConfig
-	// MountOptions are the ext4 mount's data options, such as discard, which returns freed blocks to the bucket.
+	// ParkedCacheBytes bounds the disk the caches of volumes no longer staged here may hold, so a home staged
+	// here again starts with what it read last time. The least recently unstaged go first; 0 keeps none.
+	ParkedCacheBytes int64
+	// MountOptions are the ext4 mount's data options. Unstage trims free blocks, so discard isn't needed.
 	MountOptions string
 	Mountinfo    string
 	SysBlock     string
@@ -70,6 +76,10 @@ type Manager struct {
 	writers map[string]*process
 	// attach serializes choosing a free NBD device and connecting it.
 	attach sync.Mutex
+	// writerExits counts writers that exited without being stopped.
+	writerExits atomic.Int64
+	// caches serializes evicting parked caches with a stage claiming its cache.
+	caches sync.Mutex
 }
 
 type process struct {
@@ -113,7 +123,7 @@ func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err erro
 			}
 		}
 	}()
-	sockets, err := m.startWriter(ctx, v.ID)
+	sockets, err := m.startWriter(ctx, v.ID, v.CapacityBytes)
 	if err != nil {
 		return err
 	}
@@ -144,18 +154,31 @@ func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err erro
 			return err
 		}
 	}
-	m.Log.Info("serving volume", "volume", v.ID, "device", dev, "formatted", formatted, "grown", grown)
+	if err := removeEmptyLostFound(staging); err != nil {
+		m.Log.Error(err, "removing lost+found from the home", "volume", v.ID)
+	}
+	m.Log.Info("serving volume", "volume", v.ID, "device", dev, "formatted", formatted, "grown", grown,
+		"cacheDiskGB", m.Cache.diskGB(v.CapacityBytes))
 	return nil
 }
 
 // Unstage stops serving a volume so another node can open it, in the reverse order of Stage: unmount, which
 // writes back the page cache to the device; flush the writer to object storage; disconnect the device; stop the
 // writer. Every step must succeed before the next, and the volume's state is only removed once the writer has
-// exited cleanly, so a failed Unstage leaves everything in place for a retry.
+// exited cleanly, so a failed Unstage leaves everything in place for a retry. The home's free blocks are trimmed
+// first, in one pass rather than on every delete as the discard mount option would.
 func (m *Manager) Unstage(ctx context.Context, id, staging string) error {
 	if ok, err := m.Mounted(staging); err != nil {
 		return err
 	} else if ok {
+		if p := m.writer(id); p != nil && !p.exited() {
+			start := time.Now()
+			if err := trim(staging); err != nil {
+				m.Log.Error(err, "trimming the home's free blocks", "volume", id)
+			} else {
+				m.Log.Info("trimmed the home's free blocks", "volume", id, "took", time.Since(start))
+			}
+		}
 		if err := unmount(staging); err != nil {
 			return fmt.Errorf("unmounting %s: %w", staging, err)
 		}
@@ -187,7 +210,7 @@ func (m *Manager) closeVolume(ctx context.Context, id string) error {
 			return os.RemoveAll(m.socketDir(id))
 		}
 		if exists(filepath.Join(m.stateDir(id), stoppedFile)) {
-			return errors.Join(os.RemoveAll(m.stateDir(id)), os.RemoveAll(m.socketDir(id)))
+			return errors.Join(m.removeState(id), os.RemoveAll(m.socketDir(id)))
 		}
 		// The writer died, or an earlier stop failed: reopen the database and close it cleanly. Whatever the dead
 		// writer hadn't flushed is lost, but the next node opens what it did.
@@ -195,7 +218,7 @@ func (m *Manager) closeVolume(ctx context.Context, id string) error {
 		if p != nil {
 			m.forgetWriter(id, p)
 		}
-		if _, err := m.startWriter(ctx, id); err != nil {
+		if _, err := m.startWriter(ctx, id, 0); err != nil {
 			return fmt.Errorf("restarting the writer to recover: %w", err)
 		}
 		p = m.writer(id)
@@ -209,7 +232,7 @@ func (m *Manager) closeVolume(ctx context.Context, id string) error {
 	if err := m.stopWriter(id, p); err != nil {
 		return err
 	}
-	return errors.Join(os.RemoveAll(m.stateDir(id)), os.RemoveAll(m.socketDir(id)))
+	return errors.Join(m.removeState(id), os.RemoveAll(m.socketDir(id)))
 }
 
 // flush makes the writer persist everything it acknowledged to object storage.
@@ -246,7 +269,9 @@ func (m *Manager) Mounted(path string) (bool, error) {
 
 type writerSockets struct{ nbd, ninep, rpc string }
 
-func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, error) {
+// startWriter starts a volume's writer with its cache sized for capacity. A capacity of 0 reuses the config the
+// volume was last staged with, falling back to the smallest cache.
+func (m *Manager) startWriter(ctx context.Context, id string, capacity int64) (writerSockets, error) {
 	state, sock := m.stateDir(id), m.socketDir(id)
 	s := writerSockets{
 		nbd:   filepath.Join(sock, "nbd.sock"),
@@ -261,18 +286,20 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 	if err := os.RemoveAll(sock); err != nil {
 		return s, err
 	}
-	for _, dir := range []string{filepath.Join(state, cacheDir), sock} {
-		if err := os.MkdirAll(dir, 0o700); err != nil {
-			return s, err
-		}
+	if err := m.claimCache(id); err != nil {
+		return s, err
+	}
+	if err := os.MkdirAll(sock, 0o700); err != nil {
+		return s, err
 	}
 	if err := os.Remove(filepath.Join(state, stoppedFile)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return s, err
 	}
 	cfg := writerConfig{
 		StorageURL: m.Storage.VolumeURL(id),
-		CacheDir:   filepath.Join(state, cacheDir),
-		Cache:      m.Cache,
+		CacheDir:   m.cacheDir(id),
+		DiskGB:     m.Cache.diskGB(capacity),
+		MemoryGB:   m.Cache.MemoryGB,
 		NBDSocket:  s.nbd,
 		NinePSock:  s.ninep,
 		RPCSocket:  s.rpc,
@@ -280,8 +307,10 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 		Options:    m.ObjectStoreOptions,
 	}
 	path := filepath.Join(state, configFile)
-	if err := os.WriteFile(path, []byte(cfg.render()), 0o600); err != nil {
-		return s, fmt.Errorf("writing the writer config: %w", err)
+	if capacity > 0 || !exists(path) {
+		if err := os.WriteFile(path, []byte(cfg.render()), 0o600); err != nil {
+			return s, fmt.Errorf("writing the writer config: %w", err)
+		}
 	}
 
 	// The writer outlives this call, so it can't be bound to the request's context.
@@ -289,6 +318,9 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 	cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
 	if err := cmd.Start(); err != nil {
 		return s, fmt.Errorf("starting the writer: %w", err)
+	}
+	if err := setOOMScoreAdj(cmd.Process.Pid, writerOOMScoreAdj); err != nil {
+		m.Log.Info("couldn't lower the writer's OOM priority", "volume", id, "error", err.Error())
 	}
 	p := &process{cmd: cmd, done: make(chan struct{})}
 	m.mu.Lock()
@@ -304,7 +336,8 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 		m.mu.Unlock()
 		close(p.done)
 		if !stopping {
-			m.Log.Error(p.err, "writer exited while serving a volume", "volume", id)
+			m.writerExits.Add(1)
+			m.Log.Error(p.err, "writer exited while serving a volume; the box sees I/O errors until it's suspended", "volume", id)
 		}
 	}()
 
@@ -516,6 +549,7 @@ func (m *Manager) DetachStale(ctx context.Context, root string) error {
 		})
 	}
 	wg.Wait()
+	m.evictCaches()
 	return errors.Join(errs...)
 }
 
@@ -615,6 +649,24 @@ func (o Owner) apply(root string) error {
 		}
 	}
 	return nil
+}
+
+// removeEmptyLostFound removes the root-only lost+found mkfs.ext4 leaves at the root of the filesystem, which is
+// the home itself. ext4 doesn't need it; e2fsck recreates it if it has orphans to place, and then it isn't empty
+// and stays. Anything else by that name is the user's and is left alone.
+func removeEmptyLostFound(root string) error {
+	path := filepath.Join(root, "lost+found")
+	if fi, err := os.Lstat(path); err != nil || !fi.IsDir() {
+		if err == nil || errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	err := os.Remove(path)
+	if err == nil || errors.Is(err, fs.ErrNotExist) || errors.Is(err, syscall.ENOTEMPTY) || errors.Is(err, syscall.EEXIST) {
+		return nil
+	}
+	return err
 }
 
 // waitFor polls cond until it holds, the process exits, or the timeout passes.

@@ -73,6 +73,10 @@ commandTests:
     command: yarn
     args: ["--version"]
     expectedOutput: ["1\\.22\\.22"]
+  - name: yarn 4 accepts the image's environment
+    command: sh
+    args: ["-c", "cd \"$(mktemp -d)\" && echo '{\"packageManager\":\"yarn@4.18.1\"}' > package.json && yarn config get enableStrictSsl"]
+    expectedOutput: ["^true"]
   - name: rust
     command: rustc
     args: ["--version"]
@@ -180,11 +184,39 @@ commandTests:
     command: docker
     args: ["--version"]
     expectedOutput: ["podman version"]
+  - name: podman refuses on gVisor boxes
+    command: podman
+    args: ["--version"]
+    envVars:
+      - key: DEVBOX_SANDBOX_CLASS
+        value: gvisor
+    exitCode: 125
+    expectedError: ["podman: containers need a microVM devbox"]
+  - name: docker refuses on gVisor boxes
+    command: docker
+    args: ["--version"]
+    envVars:
+      - key: DEVBOX_SANDBOX_CLASS
+        value: gvisor
+    exitCode: 125
+    expectedError: ["docker: containers need a microVM devbox"]
+  - name: podman and docker resolve to the sandbox class wrapper
+    command: sh
+    args: ["-c", "command -v podman; command -v docker; readlink /usr/local/bin/docker"]
+    expectedOutput: ["(?m)^/usr/local/bin/podman\n/usr/local/bin/docker\npodman$"]
+  - name: podman runs as root in the box's container user namespace
+    command: sh
+    args: ["-c", "grep -c 'sudo -n -E /usr/local/libexec/devbox/userns' /usr/local/bin/podman; stat -c '%a %n' /usr/local/libexec/devbox/userns; grep -o \"printf '0 0 [0-9]*\" /usr/local/libexec/devbox/userns | sort -u"]
+    expectedOutput: ["(?m)^1\n755 /usr/local/libexec/devbox/userns\nprintf '0 0 4294967294$"]
+  - name: build steps use chroot isolation
+    command: grep
+    args: ["BUILDAH_ISOLATION", "/usr/local/libexec/devbox/userns"]
+    expectedOutput: ['BUILDAH_ISOLATION:-chroot']
   - name: podman-compose
     command: podman-compose
     args: ["--version"]
     expectedOutput: ["podman-compose version"]
-  - name: rootless container networks (pasta, netavark, aardvark-dns, nft)
+  - name: container networks (pasta, netavark, aardvark-dns, nft)
     command: sh
     args: ["-c", "command -v pasta && command -v nft && ls /usr/lib/podman/netavark /usr/lib/podman/aardvark-dns"]
     expectedOutput: ["pasta", "nft", "netavark", "aardvark-dns"]
@@ -192,18 +224,37 @@ commandTests:
     command: docker-compose
     args: ["--version"]
     expectedOutput: ["podman-compose version"]
-  - name: docker compose runs podman-compose without the provider banner
+  - name: docker compose runs the host-network podman-compose wrapper without the provider banner
     command: cat
     args: ["/etc/containers/containers.conf.d/devbox.conf"]
-    expectedOutput: ["compose_warning_logs = false"]
-  - name: rootless podman stores images with vfs in the home directory
+    expectedOutput: ["compose_warning_logs = false", 'compose_providers = \["/usr/local/bin/podman-compose"\]']
+  - name: containers share the box's network and bind its /proc without cgroups
+    command: cat
+    args: ["/etc/containers/containers.conf.d/devbox.conf"]
+    expectedOutput: ['netns = "host"', 'cgroups = "disabled"', 'mounts = \["type=bind,source=/proc,destination=/proc"\]']
+    excludedOutput: ['pidns']
+  - name: podman-compose and docker-compose resolve to the host-network wrapper
+    command: sh
+    args: ["-c", "command -v podman-compose; readlink /usr/local/bin/docker-compose; head -1 /usr/local/bin/podman-compose"]
+    expectedOutput: ["(?m)^/usr/local/bin/podman-compose\n/usr/local/bin/podman-compose\n#!/usr/bin/python3$"]
+  - name: podman stores images with vfs off the home directory
     command: cat
     args: ["/etc/containers/storage.conf"]
-    expectedOutput: ['driver = "vfs"', 'rootless_storage_path = "/home/dev/.local/share/containers/storage"']
-  - name: dev has subordinate ids for rootless containers
-    command: grep
-    args: ["^dev:", "/etc/subuid", "/etc/subgid"]
-    expectedOutput: ["/etc/subuid:dev:100000:65536", "/etc/subgid:dev:100000:65536"]
+    expectedOutput: ['driver = "vfs"', 'graphroot = "/var/lib/containers/storage"']
+    excludedOutput: ['rootless_storage_path']
+  - name: Block homes keep podman storage on the home with vfs
+    command: cat
+    args: ["/etc/containers/storage.home.conf"]
+    expectedOutput: ['driver = "vfs"', 'runroot = "/run/containers/storage"', 'graphroot = "/home/dev/\.local/share/containers/rootful"']
+  - name: no rootless id mapping helpers
+    command: sh
+    args: ["-c", "ls /usr/local/libexec/devbox/idmap 2>&1; dpkg-divert --list /usr/bin/newuidmap"]
+    expectedOutput: ["No such file or directory"]
+    excludedOutput: ["diversion of"]
+  - name: bkt (Bitbucket CLI)
+    command: bkt
+    args: ["--version"]
+    expectedOutput: ["bkt version 0\\.41\\.1"]
   - name: crane
     command: crane
     args: ["version"]

@@ -1,0 +1,387 @@
+{{- if .Values.block.enabled }}
+{{- $ns := include "substrate.namespace" . -}}
+{{- $b := .Values.block -}}
+{{- $driver := include "substrate.block.driverName" . -}}
+{{- $anchorTemplate := include "substrate.block.anchorTemplate" . -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: devbox-block-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: devbox-block-node
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+automountServiceAccountToken: false
+---
+# Anchor pods' own identity, with no API access, for policies that refuse the
+# default ServiceAccount.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: devbox-block-anchor
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+automountServiceAccountToken: false
+---
+# Merged over anchor pods' defaults by the controller.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devbox-block-anchor-template
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  anchor.yaml: |
+    {{- $anchorTemplate | nindent 4 }}
+---
+# Each home's and seed's record is a ConfigMap in this namespace, and each disk
+# is a claim, with an anchor pod per attachment and VolumeSnapshots for seeds
+# and moves.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: devbox-block-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: [configmaps]
+    verbs: [get, list, create, update, delete]
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims]
+    verbs: [get, create, patch, delete]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, create, delete]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshots]
+    verbs: [get, create, delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: devbox-block-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: devbox-block-controller
+subjects:
+  - kind: ServiceAccount
+    name: devbox-block-controller
+    namespace: {{ $ns }}
+---
+# The controller checks the provider (its CSIDriver, which nodes run it, a
+# VolumeSnapshotClass for it), creates a StorageClass of the provider per set of
+# parameters, matches disks' volumes to nodes, waits for detaches, collects
+# seeds no StorageClass names, and reports the preflight on its own StorageClass.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: devbox-block-controller
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: [nodes, persistentvolumes]
+    verbs: [get]
+  - apiGroups: [storage.k8s.io]
+    resources: [csidrivers]
+    verbs: [get]
+  - apiGroups: [storage.k8s.io]
+    resources: [csinodes]
+    verbs: [get, list]
+  - apiGroups: [storage.k8s.io]
+    resources: [volumeattachments]
+    verbs: [get, list]
+  - apiGroups: [storage.k8s.io]
+    resources: [storageclasses]
+    verbs: [list, create]
+  - apiGroups: [storage.k8s.io]
+    resources: [storageclasses]
+    resourceNames: [{{ $b.storageClassName }}]
+    verbs: [patch]
+  - apiGroups: [snapshot.storage.k8s.io]
+    resources: [volumesnapshotclasses]
+    verbs: [list, create]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: devbox-block-controller
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: devbox-block-controller
+subjects:
+  - kind: ServiceAccount
+    name: devbox-block-controller
+    namespace: {{ $ns }}
+---
+# Created before the controller's pods: the servicedns signer only issues a
+# serving certificate to a pod some Service selects.
+apiVersion: v1
+kind: Service
+metadata:
+  name: devbox-block
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: devbox-block-controller
+  ports:
+    - name: grpc
+      port: 9830
+      targetPort: grpc
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $b.storageClassName }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+provisioner: {{ $driver }}
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  uid: {{ $b.home.uid | toString | quote }}
+  gid: {{ $b.home.gid | toString | quote }}
+  mode: {{ $b.home.mode | toString | quote }}
+  {{- range $k, $v := $b.parameters }}
+  {{ $k }}: {{ $v | toString | quote }}
+  {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devbox-block-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: devbox-block-controller
+  template:
+    metadata:
+      labels:
+        app: devbox-block-controller
+        app.kubernetes.io/name: devbox-block
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/part-of: agent-substrate
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+        {{- with $b.controller.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/anchor-template: {{ $anchorTemplate | sha256sum }}
+        {{- with $b.controller.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: devbox-block-controller
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          image: {{ include "substrate.block.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --mode=controller
+            {{- with $b.provider }}
+            - --provider={{ . }}
+            {{- end }}
+            - --storage-class={{ $b.storageClassName }}
+            - --default-capacity={{ mul $b.defaultCapacityGiB 1073741824 }}
+            - --allowed-clients={{ include "substrate.block.allowedClients" . }}
+            - --anchor-image={{ include "substrate.block.image" . }}
+            - --anchor-template=/etc/devbox-block/anchor.yaml
+            - --detach-delay={{ $b.detachDelay }}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: grpc
+              containerPort: 9830
+            - name: healthz
+              containerPort: 9831
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: healthz
+            periodSeconds: 20
+          {{- with $b.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            runAsNonRoot: true
+            privileged: false
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: anchor-template
+              mountPath: /etc/devbox-block
+              readOnly: true
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+              readOnly: true
+            - name: podidentity-ca
+              mountPath: /run/podidentity.podcert.ate.dev
+              readOnly: true
+      volumes:
+        - name: anchor-template
+          configMap:
+            name: devbox-block-anchor-template
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns" "signer" "servicedns") | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity-ca" "signer" "podidentity" "caOnly" true) | nindent 8 }}
+---
+# One per devbox node, scheduled like atelet so no other node pays for it. The
+# provider mounts each home's disk for its anchor pod under the kubelet's
+# directory; this plugin bind-mounts that mount to atelet's staging and target
+# paths, and gives a freshly formatted home to its owner.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: devbox-block-node
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: devbox-block-node
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 10%
+  template:
+    metadata:
+      labels:
+        app: devbox-block-node
+        app.kubernetes.io/name: devbox-block
+        app.kubernetes.io/component: node
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/part-of: agent-substrate
+        {{- with $b.node.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $b.node.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: devbox-block-node
+      automountServiceAccountToken: false
+      priorityClassName: {{ $b.node.priorityClassName }}
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- with $b.node.nodeSelector | default .Values.atelet.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $b.node.tolerations | default .Values.atelet.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $b.node.affinity | default .Values.atelet.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: node
+          image: {{ include "substrate.block.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --mode=node
+            - --endpoint=/csi/csi.sock
+            - --target-root=/var/lib/ate
+            - --kubelet-root=/var/lib/kubelet
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - name: healthz
+              containerPort: 9831
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: healthz
+            periodSeconds: 20
+          {{- with $b.node.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # Mounting needs CAP_SYS_ADMIN, and Bidirectional propagation a
+          # privileged container.
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: ate-base
+              mountPath: /var/lib/ate
+              mountPropagation: Bidirectional
+            - name: kubelet
+              mountPath: /var/lib/kubelet
+              mountPropagation: HostToContainer
+            - name: plugin-dir
+              mountPath: /csi
+      volumes:
+        - name: ate-base
+          hostPath:
+            path: /var/lib/ate
+            type: DirectoryOrCreate
+        - name: kubelet
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/{{ $driver }}
+            type: DirectoryOrCreate
+{{- if include "substrate.csiDriverConfigCRDServed" . }}
+---
+{{ include "substrate.block.csiDriverConfig" . }}
+{{- end }}
+{{- end }}

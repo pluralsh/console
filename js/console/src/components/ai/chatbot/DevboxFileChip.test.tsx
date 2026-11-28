@@ -8,6 +8,7 @@ import { ChatMarkdown } from './ChatMarkdown'
 import {
   DevboxFileOpenContext,
   devboxLinkPath,
+  devboxLocalUrl,
   withSlashCommandChip,
 } from './DevboxFileChip'
 
@@ -56,6 +57,32 @@ describe('DevboxFileChip', () => {
       'see <plrl-devbox-file path="/home/devbox/main.go"></plrl-devbox-file>'
     )
     expect(screen.getByText('main.go')).toBeTruthy()
+    expect(screen.queryByRole('button')).toBeNull()
+  })
+})
+
+describe('DevboxElementChip', () => {
+  const tag =
+    '<plrl-devbox-element url="http://localhost:3000/settings" selector="button[data-testid=&quot;save&quot;]" tag="button" text="Save changes" html="&lt;button&gt;Save changes&lt;/button&gt;"></plrl-devbox-element>'
+
+  it('renders picked elements as chips that open their page', () => {
+    const openUrl = vi.fn()
+    render(
+      <MemoryRouter>
+        <ThemeProvider theme={styledThemeDark}>
+          <DevboxFileOpenContext value={{ openFile: vi.fn(), openUrl }}>
+            <ChatMarkdown text={`make ${tag} blue`} />
+          </DevboxFileOpenContext>
+        </ThemeProvider>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('<button> Save changes'))
+    expect(openUrl).toHaveBeenCalledWith('http://localhost:3000/settings')
+  })
+
+  it('renders a plain chip without a browser', () => {
+    renderMarkdown(`make ${tag} blue`)
+    expect(screen.getByText('<button> Save changes')).toBeTruthy()
     expect(screen.queryByRole('button')).toBeNull()
   })
 })
@@ -118,5 +145,58 @@ describe('DevboxMarkdownLink', () => {
   it('renders relative links as plain links outside a devbox', () => {
     renderMarkdown('see [main.go](src/main.go)')
     expect(screen.getByText('main.go').getAttribute('target')).toBe('_blank')
+  })
+
+  it("opens the box's own servers in its browser", () => {
+    const openFile = vi.fn()
+    const openUrl = vi.fn()
+    render(
+      <MemoryRouter>
+        <ThemeProvider theme={styledThemeDark}>
+          <DevboxFileOpenContext value={{ openFile, openUrl }}>
+            <ChatMarkdown text="running at http://localhost:3000/login and [docs](https://plural.sh)" />
+          </DevboxFileOpenContext>
+        </ThemeProvider>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('http://localhost:3000/login'))
+    expect(openUrl).toHaveBeenCalledWith('http://localhost:3000/login')
+    fireEvent.click(screen.getByText('docs'))
+    expect(openUrl).toHaveBeenCalledTimes(1)
+    expect(openFile).not.toHaveBeenCalled()
+  })
+
+  it('keeps localhost links plain when the box has no browser', () => {
+    renderMarkdown('[app](http://localhost:3000)', vi.fn())
+    expect(screen.getByText('app').getAttribute('target')).toBe('_blank')
+  })
+})
+
+describe('devboxLocalUrl', () => {
+  it('recognizes loopback servers', () => {
+    expect(devboxLocalUrl('http://localhost:3000/a?b=1')).toBe(
+      'http://localhost:3000/a?b=1'
+    )
+    expect(devboxLocalUrl('https://app.localhost:8443')).toBe(
+      'https://app.localhost:8443/'
+    )
+    expect(devboxLocalUrl('http://127.0.0.1:8080')).toBe(
+      'http://127.0.0.1:8080/'
+    )
+    expect(devboxLocalUrl('http://[::1]:5173/')).toBe('http://[::1]:5173/')
+    expect(devboxLocalUrl('http://0.0.0.0:4000/x')).toBe(
+      'http://localhost:4000/x'
+    )
+  })
+
+  it('leaves other links alone', () => {
+    for (const href of [
+      'https://plural.sh',
+      'http://localhost.example.com',
+      'ftp://localhost/x',
+      'src/main.go',
+      '',
+    ])
+      expect(devboxLocalUrl(href)).toBeNull()
   })
 })

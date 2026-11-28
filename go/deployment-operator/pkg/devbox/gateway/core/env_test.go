@@ -111,7 +111,7 @@ func TestRunnerFromCRDPackageServers(t *testing.T) {
 	defaults := hosts(RunnerFromCRD(&v1alpha1.DevboxRunner{}))
 	for _, h := range []string{
 		"proxy.golang.org", "storage.googleapis.com", "index.crates.io", "registry.npmjs.org", "repo.maven.apache.org", "repo.hex.pm",
-		"files.pythonhosted.org", "rubygems.org", "packagist.org", "api.nuget.org",
+		"files.pythonhosted.org", "rubygems.org", "packagist.org", "api.nuget.org", "registry.terraform.io",
 	} {
 		if !slices.Contains(defaults, h) {
 			t.Errorf("default allowlist missing %s: %v", h, defaults)
@@ -138,7 +138,8 @@ func TestRunnerFromCRDPackageServers(t *testing.T) {
 var (
 	noRegistries = &v1alpha1.DevboxOCIRegistries{DockerHub: ptr.To(false), GitHub: ptr.To(false)}
 	noPackages   = &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
-		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false), Ruby: ptr.To(false), PHP: ptr.To(false), Dotnet: ptr.To(false)}
+		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false), Ruby: ptr.To(false), PHP: ptr.To(false), Dotnet: ptr.To(false),
+		Terraform: ptr.To(false)}
 )
 
 func TestRunnerFromCRDOCIRegistries(t *testing.T) {

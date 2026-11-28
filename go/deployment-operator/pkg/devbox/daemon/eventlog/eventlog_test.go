@@ -3,6 +3,9 @@ package eventlog
 import (
 	"context"
 	"errors"
+	"os/signal"
+	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -132,6 +135,86 @@ func TestResetKeepsOffsetsMonotonic(t *testing.T) {
 	}
 	if got := collect(t, l, 0, 1); !equal(got, []uint64{4}) {
 		t.Fatalf("old instance's records replayed: %v", got)
+	}
+}
+
+func TestHeadDoesNotWaitForDiskWork(t *testing.T) {
+	dir := t.TempDir()
+	l, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 2 {
+		_, _ = l.Append(cond("x"))
+	}
+	l.Close()
+	if l, err = Open(dir); err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	if l.Head() != 2 {
+		t.Fatalf("recovered head %d", l.Head())
+	}
+
+	l.mu.Lock() // a Sync or Append stuck in fsync on a hung home
+	got := make(chan uint64, 1)
+	go func() { got <- l.Head() }()
+	select {
+	case h := <-got:
+		if h != 2 {
+			t.Fatalf("head %d", h)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Head waited for the log lock")
+	}
+	l.mu.Unlock()
+}
+
+func TestFailedAppendLeavesNoTornRecord(t *testing.T) {
+	dir := t.TempDir()
+	l, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := l.Append(cond("ok")); err != nil {
+		t.Fatal(err)
+	}
+	size := l.segments[0].size
+
+	// Cap the file size just past the first record so the next append is a short write, like ENOSPC.
+	signal.Ignore(syscall.SIGXFSZ)
+	defer signal.Reset(syscall.SIGXFSZ)
+	var old syscall.Rlimit
+	if err := syscall.Getrlimit(syscall.RLIMIT_FSIZE, &old); err != nil {
+		t.Fatal(err)
+	}
+	lim := old
+	lim.Cur = uint64(size) + 8
+	if err := syscall.Setrlimit(syscall.RLIMIT_FSIZE, &lim); err != nil {
+		t.Fatal(err)
+	}
+	_, appendErr := l.Append(cond(strings.Repeat("x", 64)))
+	if err := syscall.Setrlimit(syscall.RLIMIT_FSIZE, &old); err != nil {
+		t.Fatal(err)
+	}
+	if appendErr == nil {
+		t.Fatal("append past the file size limit succeeded")
+	}
+
+	off, err := l.Append(cond("after"))
+	if err != nil || off != 2 {
+		t.Fatalf("append after failure: offset %d err %v", off, err)
+	}
+	if got := collect(t, l, 0, 2); !equal(got, []uint64{1, 2}) {
+		t.Fatalf("replay after failed append: %v", got)
+	}
+	l.Close()
+	if l, err = Open(dir); err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	if l.Head() != 2 {
+		t.Fatalf("recovered head %d", l.Head())
 	}
 }
 

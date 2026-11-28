@@ -6330,10 +6330,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xterm/xterm@npm:5.5.0":
-  version: 5.5.0
-  resolution: "@xterm/xterm@npm:5.5.0"
-  checksum: 10/d4cdc402de81a83a3e0ef93f38072cb8f54abe4d65865f2e29b92cbc2593f86d052f6b993895c9e5dec97f47548f504e90bcea0aad6845917c09b03f2f3a4629
+"@xterm/addon-webgl@npm:0.19.0":
+  version: 0.19.0
+  resolution: "@xterm/addon-webgl@npm:0.19.0"
+  checksum: 10/5580d9142e61d3de79231c52ae29d7b8954733852f252d67fe390ddd956e4f503ae02c1008e60d1977dc8f70856a30aaef1d4bfcf9a57cc87c8cb4bb9c272a9d
+  languageName: node
+  linkType: hard
+
+"@xterm/xterm@npm:6.0.0":
+  version: 6.0.0
+  resolution: "@xterm/xterm@npm:6.0.0"
+  checksum: 10/2e9aef4770ce4778f4823f261491ade3863fa2141ff4607785a4c22cb6948bb0897e21581536ab1a3327a7ee59467e3549c09b61278b07a558f03ff14ba45bc4
   languageName: node
   linkType: hard
 
@@ -7270,7 +7277,8 @@ __metadata:
     "@vitejs/plugin-react": "npm:6.1.2"
     "@vitest/ui": "npm:5.0.5"
     "@xterm/addon-fit": "npm:0.11.0"
-    "@xterm/xterm": "npm:5.5.0"
+    "@xterm/addon-webgl": "npm:0.19.0"
+    "@xterm/xterm": "npm:6.0.0"
     "@xyflow/react": "npm:12.12.0"
     algoliasearch: "npm:5.60.0"
     anser: "npm:2.3.5"

@@ -29,6 +29,7 @@ func (d *Daemon) Handler() http.Handler {
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("ok\n")) })
 	mux.HandleFunc("/terminals/", d.httpAuth(d.terms.ServeWS))
 	mux.HandleFunc(browser.VNCPath, d.httpAuth(d.browser.ServeVNC))
+	mux.HandleFunc(browser.StreamPath, d.httpAuth(d.browser.ServeStream))
 	mux.Handle("/preview/", d.httpAuth((&browser.PreviewProxy{Deny: d.reservedPorts(), Activity: d.browser}).ServeHTTP))
 	mux.HandleFunc("PUT "+BundlePath+"{name}", d.httpAuth(d.putBundle))
 
@@ -42,7 +43,7 @@ func (d *Daemon) Handler() http.Handler {
 }
 
 func (d *Daemon) reservedPorts() map[int]bool {
-	deny := map[int]bool{d.cfg.CDPPort: true, d.cfg.CDPPort + 1: true, d.cfg.VNCPort: true}
+	deny := map[int]bool{d.cfg.CDPPort: true, d.cfg.CDPPort + 1: true, d.cfg.VNCPort: true, d.cfg.VoxlPort: true}
 	if _, port, err := net.SplitHostPort(d.cfg.ListenAddr); err == nil {
 		if p, err := strconv.Atoi(port); err == nil {
 			deny[p] = true

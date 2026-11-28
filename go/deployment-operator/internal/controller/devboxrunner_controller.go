@@ -13,6 +13,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -149,6 +150,11 @@ func (r *DevboxRunnerReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		r.markReady(runner)
 		r.trySyncConsole(ctx, runner)
 		return jitterRequeue(requeueDevboxRunnerError, jitter), nil
+	}
+	if usesZeroFS(runner) {
+		if err := r.rollZeroFSNodes(ctx, api); err != nil {
+			logger.Error(err, "unable to roll the ZeroFS node plugin")
+		}
 	}
 
 	// The probe request carries the console ID, so the Devbox must exist before revisions advance.
@@ -399,8 +405,12 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 	}
 
 	res := lo.FromPtr(runner.Spec.Resources)
+	disk := res.Disk
+	if runner.Spec.HomeStorage().External() {
+		disk = lo.ToPtr(runner.Spec.HomeSize())
+	}
 	resources := map[string]string{}
-	for k, q := range map[string]*resource.Quantity{"cpu": res.CPU, "memory": res.Memory, "disk": res.Disk} {
+	for k, q := range map[string]*resource.Quantity{"cpu": res.CPU, "memory": res.Memory, "disk": disk} {
 		if q != nil {
 			resources[k] = q.String()
 		}
@@ -422,9 +432,9 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 		Agents:              devboxAgentAttributes(runner, catalog),
 		HTTPAllowlist: append(lo.Map(runner.Spec.HTTPAllowlist, func(e v1alpha1.DevboxHTTPAllowlistEntry, _ int) *console.DevboxHTTPAllowAttributes {
 			return &console.DevboxHTTPAllowAttributes{Host: e.Host, Port: lo.ToPtr(int64(lo.FromPtrOr(e.Port, 443))), Passthrough: e.Passthrough}
-		}), lo.Map(runner.Spec.EgressPresetHosts(), func(h string, _ int) *console.DevboxHTTPAllowAttributes {
+		}), append(lo.Map(runner.Spec.EgressPresetHosts(), func(h string, _ int) *console.DevboxHTTPAllowAttributes {
 			return &console.DevboxHTTPAllowAttributes{Host: h, Port: lo.ToPtr(int64(443))}
-		})...),
+		}), publicEgressAttributes(runner)...)...),
 		IdlePolicy: devboxIdlePolicyAttributes(runner.Spec.IdlePolicy),
 		Autonomy:   devboxAutonomyAttributes(runner),
 	}
@@ -517,6 +527,17 @@ func devboxAutonomyAttributes(runner *v1alpha1.DevboxRunner) *console.DevboxAuto
 	return &console.DevboxAutonomyAttributes{
 		Default: lo.ToPtr(console.DevboxAutonomy(strings.ToUpper(string(def)))),
 		Max:     lo.ToPtr(console.DevboxAutonomy(strings.ToUpper(string(maxLevel)))),
+	}
+}
+
+// publicEgressAttributes are the allowlist entries spec.allowPublicEgress opens, so console shows them.
+func publicEgressAttributes(runner *v1alpha1.DevboxRunner) []*console.DevboxHTTPAllowAttributes {
+	if !runner.Spec.PublicEgress() {
+		return nil
+	}
+	return []*console.DevboxHTTPAllowAttributes{
+		{Host: v1alpha1.PublicEgressHost, Port: lo.ToPtr(int64(443)), Passthrough: lo.ToPtr(true)},
+		{Host: v1alpha1.PublicEgressHost, Port: lo.ToPtr(int64(80))},
 	}
 }
 
@@ -683,7 +704,9 @@ func (r *DevboxRunnerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1alpha1.DevboxRunner{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Watches(&appsv1.Deployment{}, handler.EnqueueRequestsFromMapFunc(r.allRunners), builder.WithPredicates(predicate.NewPredicateFuncs(func(obj client.Object) bool {
 			return obj.GetLabels()[devboxGatewayManagedLabel] == stringTrue
-		})))
+		}))).
+		// Nodes coming, going or relabelled can change the zones Block runners find; status heartbeats can't.
+		Watches(&corev1.Node{}, handler.EnqueueRequestsFromMapFunc(r.zoneChangedRunners), builder.WithPredicates(predicate.LabelChangedPredicate{}))
 
 	if r.WatchWorkerPools {
 		pool := &unstructured.Unstructured{}

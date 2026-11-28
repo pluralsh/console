@@ -210,6 +210,7 @@ func (s *Server) UpdateActor(_ context.Context, req *ateapi.UpdateActorRequest) 
 		return nil, status.Error(codes.NotFound, "actor not found")
 	}
 	a.ActorTemplate = req.GetActor().GetActorTemplate()
+	a.WorkerSelector = req.GetActor().GetWorkerSelector()
 	return proto.Clone(a).(*ateapi.Actor), nil
 }
 

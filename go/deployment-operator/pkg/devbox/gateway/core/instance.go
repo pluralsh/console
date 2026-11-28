@@ -26,6 +26,8 @@ type Record struct {
 	Template         string `json:"template,omitempty"`
 	TemplateRevision int64  `json:"templateRevision,omitempty"`
 	ImageDigest      string `json:"imageDigest,omitempty"`
+	// Zone is the zone the actor is pinned to, where its home lives.
+	Zone string `json:"zone,omitempty"`
 
 	Status          string    `json:"status"`
 	SuspendReason   string    `json:"suspendReason,omitempty"`
@@ -85,11 +87,16 @@ type Instance struct {
 	suspending  bool
 	// probing is set while confirmUnresponsive checks a silent daemon.
 	probing bool
+	// homeRemounted is when remountHome last resumed the instance.
+	homeRemounted time.Time
 	// waking is the resume in flight, shared by every caller that needs the instance running.
 	waking     *wakeOp
 	sharedSnap bool
 	// scmHosts are the hosts of the box's SCM connections as console reports them; nil until fetched.
 	scmHosts []string
+	// egressApplied is egressInputs of the runner the actor's egress policy was last applied from; nil until this
+	// gateway applies one, since the actor may hold a policy from an older runner or gateway.
+	egressApplied any
 }
 
 func newInstance(rec Record) *Instance {

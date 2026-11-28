@@ -1,0 +1,46 @@
+#!/bin/sh
+# Runs a command as root in the box's container user namespace, creating it on first use; /usr/local/bin/podman runs
+# Podman here through dev's passwordless sudo. Substrate never grants a box CAP_SYS_ADMIN, which rootful Podman needs
+# to mount, but root holds every capability in a user namespace it creates. This one maps every id onto itself, so
+# files keep their real owners: on a microVM box every filesystem is virtio-fs, and virtiofsd serves a request as the
+# caller's uid with no capabilities unless that uid is 0, so rootless Podman (whose root is dev) couldn't unpack a
+# layer into a directory it doesn't own. A sleeping process holds the namespace and its mount namespace so every
+# podman call, and the containers each one starts, share them.
+# The map stops one id short of the full range (4294967295 is (uid_t)-1, which no file can have): crun takes a full
+# map for the initial namespace and mounts a fresh sysfs, which the box can't, instead of binding the box's /sys.
+set -eu
+[ "$(id -u)" = 0 ] || { echo "$(basename "$0"): run as root" >&2; exit 1; }
+[ $# -gt 0 ] || { echo "usage: $(basename "$0") <command> [args...]" >&2; exit 1; }
+unset XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS
+if [ -n "${DEVBOX_USERNS:-}" ]; then
+  exec "$@"
+fi
+self=$(readlink /proc/self/ns/user)
+state=/run/devbox-userns
+mkdir -p "${state}"
+exec 9>"${state}/lock"
+flock 9
+pid=$(cat "${state}/pid" 2>/dev/null || true)
+ns=""
+if [ -n "${pid}" ]; then ns=$(readlink "/proc/${pid}/ns/user" 2>/dev/null || true); fi
+if [ -z "${ns}" ] || [ "${ns}" = "${self}" ]; then
+  setsid unshare --user --mount sleep infinity < /dev/null > /dev/null 2>&1 9>&- &
+  pid=$!
+  until [ "$(readlink "/proc/${pid}/ns/user")" != "${self}" ]; do sleep 0.01; done
+  printf '0 0 4294967294\n' > "/proc/${pid}/uid_map"
+  printf '0 0 4294967294\n' > "/proc/${pid}/gid_map"
+  echo "${pid}" > "${state}/pid"
+fi
+# Rootful Podman raises a container's process and open-file limits past the box's, which takes CAP_SYS_RESOURCE.
+limit() { [ "$1" = unlimited ] && echo -1 || echo "$1"; }
+if [ -z "${CONTAINERS_CONF_OVERRIDE:-}" ]; then
+  # shellcheck disable=SC3045 # /bin/sh is dash, whose ulimit takes -H
+  nproc=$(limit "$(ulimit -Hp)") nofile=$(limit "$(ulimit -Hn)")
+  printf '[containers]\ndefault_ulimits = ["nproc=%s:%s", "nofile=%s:%s"]\n' "${nproc}" "${nproc}" "${nofile}" "${nofile}" \
+    > "${state}/ulimits.conf"
+  export CONTAINERS_CONF_OVERRIDE="${state}/ulimits.conf"
+fi
+exec 9>&-
+# Build steps can't mount a fresh /proc either, and buildah ignores containers.conf's mounts.
+export BUILDAH_ISOLATION="${BUILDAH_ISOLATION:-chroot}"
+DEVBOX_USERNS=1 exec nsenter --target "${pid}" --user --mount --wd="$(pwd)" -- "$@"

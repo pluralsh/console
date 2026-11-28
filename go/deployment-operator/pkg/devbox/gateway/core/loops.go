@@ -219,6 +219,9 @@ func (g *Gateway) backstops(ctx context.Context) {
 		awakeSince, lastContact, suspendedAt := inst.awakeSince, inst.lastContact, inst.rec.SuspendedAt
 		inst.mu.Unlock()
 
+		if st == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING || st == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+			g.refreshEgressInBackground(inst)
+		}
 		switch st {
 		case devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING:
 			maxAwake := policyDuration(policy, (*devboxv1.IdlePolicy).GetMaxContinuousAwake)
@@ -239,6 +242,20 @@ func (g *Gateway) backstops(ctx context.Context) {
 			}
 		}
 	}
+}
+
+// refreshEgressInBackground runs refreshEgress unless a lifecycle operation holds the instance; a resume
+// refreshes egress itself, and anything else is caught on the next backstop.
+func (g *Gateway) refreshEgressInBackground(inst *Instance) {
+	if !inst.op.TryLock() {
+		return
+	}
+	g.goBackground(func(ctx context.Context) {
+		defer inst.op.Unlock()
+		if err := g.refreshEgress(ctx, inst); err != nil {
+			g.log.Error(err, "refreshing egress policy", "instance", inst.ID)
+		}
+	})
 }
 
 // unresponsiveProbes is how many Health calls, unresponsiveProbeInterval apart, a daemon whose event stream went
@@ -266,19 +283,30 @@ func (g *Gateway) confirmUnresponsive(inst *Instance) {
 			inst.mu.Unlock()
 		}()
 		daemon := g.deps.Router.Daemon(inst.ActorID())
+		var health *devboxv1.HealthResponse
 		var err error
 		for i := range unresponsiveProbes {
 			if i > 0 && !sleep(ctx, unresponsiveProbeInterval) {
 				return
 			}
 			hctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-			_, err = daemon.Health(hctx, &devboxv1.HealthRequest{})
+			health, err = daemon.Health(hctx, &devboxv1.HealthRequest{})
 			cancel()
 			if err == nil {
 				break
 			}
 		}
 		if inst.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+			return
+		}
+		if msg := health.GetHomeError(); err == nil && msg != "" {
+			// A hung home blocks the daemon's event log, so a new stream would go silent too.
+			g.log.Info("daemon answers but its event stream went silent while its home is hung", "instance", inst.ID, "why", msg)
+			inst.mu.Lock()
+			inst.lastContact = g.now()
+			inst.conditions[homeCondition] = homeConditionDetail(msg)
+			inst.mu.Unlock()
+			g.remountHome(inst, msg)
 			return
 		}
 		if err == nil {

@@ -7,6 +7,7 @@ import {
   ReturnIcon,
 } from '@pluralsh/design-system'
 import { DevboxFileOpenContext } from 'components/ai/chatbot/DevboxFileChip'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -28,7 +29,7 @@ import {
   usePromptDevboxThreadMutation,
   useSetDevboxThreadConfigOptionMutation,
 } from 'generated/graphql'
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_DEVBOX_POSITION_QUERY_PARAM,
@@ -46,6 +47,7 @@ import { DevboxAgentIcon, DevboxAgentLabel } from './DevboxChips'
 import { DevboxComposer } from './DevboxComposer'
 import { useDevboxPanel } from './DevboxControlPanel'
 import { describeThreadError } from './devboxErrors'
+import { McpToolIndexContext, useMcpToolIndex } from './devboxIntegrations'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import {
   DevboxInlineApproval,
@@ -203,12 +205,28 @@ export function DevboxThreadPane({
     thread.status === DevboxThreadStatus.Closed ||
     thread.status === DevboxThreadStatus.Deleted
   const subagent = thread.kind === DevboxThreadKind.Subagent
-  const { listFiles, searchFiles } = useDevboxWorkspaceApi(
+  const { listFiles, searchFiles, openStream } = useDevboxWorkspaceApi(
     live ? instance.id : null
   )
+  const mcpTools = useMcpToolIndex(instance.id)
 
   const sessionError = sessionId ? timeline.errors[sessionId] : undefined
-  const { openFile } = useDevboxPanel()
+  const { openFile, isOpen, tab, browserToMain } = useDevboxPanel()
+  const { featureFlags } = use(FeatureFlagContext)
+  // a vnc ticket with a url opens it in the box's browser, which is then shown
+  // where it already is, or in the main view
+  const openUrl =
+    featureFlags.DevboxBrowser && instance.devbox?.browser && openStream
+      ? (url: string) => {
+          openStream({ kind: 'vnc', url }).catch((e) =>
+            popToast({
+              content: `Couldn't open ${url}: ${(e as Error).message}`,
+              severity: 'danger',
+            })
+          )
+          if (!(isOpen && tab === 'browser')) browserToMain()
+        }
+      : undefined
 
   return (
     <PaneSC>
@@ -230,7 +248,7 @@ export function DevboxThreadPane({
         </Flex>
       )}
       <DevboxFileOpenContext
-        value={live ? { openFile, cwd: thread.cwd } : null}
+        value={live ? { openFile, cwd: thread.cwd, openUrl } : null}
       >
         <ScrollSC ref={scrollRef}>
           <ContentSC ref={contentRef}>
@@ -246,50 +264,54 @@ export function DevboxThreadPane({
                 Load earlier messages
               </Button>
             )}
-            <DevboxTranscript
-              entities={entities}
-              terminal={(id) => selectTerminalOutput(session, id)}
-              approvalFor={(id) => {
-                const interaction = inlineApprovals.get(id)
-                return interaction ? (
-                  <DevboxInlineApproval interaction={interaction} />
-                ) : null
-              }}
-              subagents={subagents}
-              complete={!!session?.loaded && !session.hasMore}
-              running={thread.foregroundState === DevboxForegroundState.Running}
-              renderSubagent={(s, spawner) => (
-                <SubagentCard
-                  subagent={s}
-                  spawner={spawner}
-                  timeline={timeline}
-                  ended={ended}
-                  interactions={interactions}
-                  toolCall={toolCall}
-                  onOpen={() => openThread(s.id)}
-                />
-              )}
-              empty={
-                <CaptionP $color="text-xlight">
-                  {ended
-                    ? "This instance has ended, so its transcript isn't available anymore."
-                    : session?.loaded || !sessionId
-                      ? 'Nothing here yet. Send a prompt to get started.'
-                      : 'Loading transcript…'}
-                </CaptionP>
-              }
-              renderUnplaced={(placed) =>
-                unplacedInteractions(placed).map((interaction) => (
-                  <DevboxInteraction
-                    key={interaction.id}
-                    interaction={interaction}
-                    toolCall={
-                      toolCall(interaction.toolCallId) ?? interaction.toolCall
-                    }
+            <McpToolIndexContext value={mcpTools}>
+              <DevboxTranscript
+                entities={entities}
+                terminal={(id) => selectTerminalOutput(session, id)}
+                approvalFor={(id) => {
+                  const interaction = inlineApprovals.get(id)
+                  return interaction ? (
+                    <DevboxInlineApproval interaction={interaction} />
+                  ) : null
+                }}
+                subagents={subagents}
+                complete={!!session?.loaded && !session.hasMore}
+                running={
+                  thread.foregroundState === DevboxForegroundState.Running
+                }
+                renderSubagent={(s, spawner) => (
+                  <SubagentCard
+                    subagent={s}
+                    spawner={spawner}
+                    timeline={timeline}
+                    ended={ended}
+                    interactions={interactions}
+                    toolCall={toolCall}
+                    onOpen={() => openThread(s.id)}
                   />
-                ))
-              }
-            />
+                )}
+                empty={
+                  <CaptionP $color="text-xlight">
+                    {ended
+                      ? "This instance has ended, so its transcript isn't available anymore."
+                      : session?.loaded || !sessionId
+                        ? 'Nothing here yet. Send a prompt to get started.'
+                        : 'Loading transcript…'}
+                  </CaptionP>
+                }
+                renderUnplaced={(placed) =>
+                  unplacedInteractions(placed).map((interaction) => (
+                    <DevboxInteraction
+                      key={interaction.id}
+                      interaction={interaction}
+                      toolCall={
+                        toolCall(interaction.toolCallId) ?? interaction.toolCall
+                      }
+                    />
+                  ))
+                }
+              />
+            </McpToolIndexContext>
           </ContentSC>
         </ScrollSC>
       </DevboxFileOpenContext>
@@ -305,6 +327,8 @@ export function DevboxThreadPane({
             running={thread.foregroundState === DevboxForegroundState.Running}
           />
           <DevboxComposer
+            draftKey={thread.id}
+            insertsFor={live ? instance.id : null}
             commands={commands}
             configOptions={thread.configOptions}
             autonomyPolicy={instance.devbox?.autonomy}
@@ -515,15 +539,19 @@ const ComposerStackSC = styled.div({
   flexDirection: 'column',
 })
 
+// Runs on through the pane's gap so text scrolls right up to the composer instead of vanishing above it; the
+// content's bottom padding keeps that gap under the last entry.
 const ScrollSC = styled.div(({ theme }) => ({
   flex: 1,
   minHeight: 0,
   overflowY: 'auto',
   paddingRight: theme.spacing.small,
+  marginBottom: `-${theme.spacing.medium}`,
 }))
 
 const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  paddingBottom: theme.spacing.medium,
 }))

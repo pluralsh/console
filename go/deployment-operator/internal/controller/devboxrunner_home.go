@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"strconv"
 
 	storagev1 "k8s.io/api/storage/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -12,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/block"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zerofs"
@@ -36,8 +38,11 @@ func devboxHomeStorageClassName(atespace, template string) string {
 // devboxHomeDriver is the CSI driver serving a kind of external home, and the agent-substrate chart value that
 // installs it.
 func devboxHomeDriver(storage v1alpha1.DevboxHomeStorage) (driver, seedParam, chartValue string) {
-	if storage == v1alpha1.DevboxHomeZeroFS {
+	switch storage {
+	case v1alpha1.DevboxHomeZeroFS:
 		return zerofs.DriverName, zerofs.ParamSeed, "zerofs"
+	case v1alpha1.DevboxHomeBlock:
+		return block.DriverName, block.ParamSeed, "block"
 	}
 	return juicefs.DriverName, juicefs.ParamSeed, "juicefs"
 }
@@ -62,12 +67,24 @@ func (r *DevboxRunnerReconciler) ensureHomeStorageClass(ctx context.Context, run
 	if base.Provisioner != driver {
 		return fmt.Errorf("StorageClass %s is provisioned by %s, not %s", base.Name, base.Provisioner, driver)
 	}
+	if storage == v1alpha1.DevboxHomeBlock {
+		if err := blockPreflight(base); err != nil {
+			return err
+		}
+	}
 
 	params := maps.Clone(base.Parameters)
 	if params == nil {
 		params = map[string]string{}
 	}
 	params[seedParam] = devboxHomeSeed(atespace, name)
+	if storage == v1alpha1.DevboxHomeBlock {
+		// Substrate never resizes a volume, so the driver grows a home's disk at attach to the largest size any
+		// live revision of the runner asks for.
+		size := runner.Spec.HomeSize()
+		params[block.ParamGroup] = atespace
+		params[block.ParamSize] = strconv.FormatInt(size.Value(), 10)
+	}
 	sc := &storagev1.StorageClass{
 		ObjectMeta:    metav1.ObjectMeta{Name: devboxHomeStorageClassName(atespace, name), Labels: map[string]string{v1alpha1.DevboxRunnerNameLabel: runner.Name}},
 		Provisioner:   base.Provisioner,
@@ -87,6 +104,18 @@ func (r *DevboxRunnerReconciler) ensureHomeStorageClass(ctx context.Context, run
 		}
 	}
 	return nil
+}
+
+// blockPreflight reads the block driver's check of its provider off its StorageClass.
+func blockPreflight(sc *storagev1.StorageClass) error {
+	provider, preflight := sc.Annotations[block.AnnotationProvider], sc.Annotations[block.AnnotationPreflight]
+	switch preflight {
+	case block.PreflightOK:
+		return nil
+	case "":
+		return fmt.Errorf("the block driver hasn't checked its provider yet (no %s annotation on StorageClass %s); check the devbox-block-controller pods", block.AnnotationPreflight, sc.Name)
+	}
+	return fmt.Errorf("block storage provider %s can't serve homes: %s", provider, preflight)
 }
 
 // deleteHomeStorageClass removes a collected revision's StorageClass.

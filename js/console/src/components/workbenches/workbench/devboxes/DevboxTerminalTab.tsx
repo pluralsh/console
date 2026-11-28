@@ -13,6 +13,7 @@ import { Terminal } from '@xterm/xterm'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
 import TerminalThemeContext from 'components/terminal/TerminalThemeContext'
 import { normalizedThemes } from 'components/terminal/themes'
+import { loadWebglRenderer } from 'components/terminal/webgl'
 import { debounce } from 'lodash'
 import { use, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -374,6 +375,7 @@ function startDevboxTerminal(
   const fit = new FitAddon()
   xterm.loadAddon(fit)
   xterm.open(el)
+  loadWebglRenderer(xterm)
   fit.fit()
 
   const encoder = new TextEncoder()

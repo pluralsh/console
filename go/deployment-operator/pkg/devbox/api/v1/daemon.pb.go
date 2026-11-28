@@ -85,8 +85,11 @@ type HealthResponse struct {
 	// A memory restore was detected since the previous probe; activity timers were reset.
 	Restored          bool `protobuf:"varint,5,opt,name=restored,proto3" json:"restored,omitempty"`
 	WorkspaceHydrated bool `protobuf:"varint,6,opt,name=workspace_hydrated,json=workspaceHydrated,proto3" json:"workspace_hydrated,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// As DaemonHeartbeat.home_error. A hung workspace volume can wedge the event stream that carries heartbeats
+	// while Health still answers.
+	HomeError     string `protobuf:"bytes,7,opt,name=home_error,json=homeError,proto3" json:"home_error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HealthResponse) Reset() {
@@ -159,6 +162,13 @@ func (x *HealthResponse) GetWorkspaceHydrated() bool {
 		return x.WorkspaceHydrated
 	}
 	return false
+}
+
+func (x *HealthResponse) GetHomeError() string {
+	if x != nil {
+		return x.HomeError
+	}
+	return ""
 }
 
 // HarnessEndpoints are the URLs harnesses are configured with. All are reached through atenet-egress, which
@@ -1341,9 +1351,12 @@ func (x *DaemonCondition) GetActive() bool {
 }
 
 type DaemonHeartbeat struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	HeadOffset    uint64                 `protobuf:"varint,1,opt,name=head_offset,json=headOffset,proto3" json:"head_offset,omitempty"`
-	Idle          *IdleState             `protobuf:"bytes,2,opt,name=idle,proto3" json:"idle,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	HeadOffset uint64                 `protobuf:"varint,1,opt,name=head_offset,json=headOffset,proto3" json:"head_offset,omitempty"`
+	Idle       *IdleState             `protobuf:"bytes,2,opt,name=idle,proto3" json:"idle,omitempty"`
+	// Set while writes to the workspace volume fail or hang. Heartbeats bypass the event log, which lives on that
+	// volume. The gateway suspends and resumes the instance, which remounts it.
+	HomeError     string `protobuf:"bytes,3,opt,name=home_error,json=homeError,proto3" json:"home_error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1390,6 +1403,13 @@ func (x *DaemonHeartbeat) GetIdle() *IdleState {
 		return x.Idle
 	}
 	return nil
+}
+
+func (x *DaemonHeartbeat) GetHomeError() string {
+	if x != nil {
+		return x.HomeError
+	}
+	return ""
 }
 
 type AckEventsRequest struct {
@@ -1609,14 +1629,16 @@ var File_devbox_v1_daemon_proto protoreflect.FileDescriptor
 const file_devbox_v1_daemon_proto_rawDesc = "" +
 	"\n" +
 	"\x16devbox/v1/daemon.proto\x12\tdevbox.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16devbox/v1/common.proto\x1a\x13devbox/v1/acp.proto\x1a\x17devbox/v1/control.proto\x1a\x1bdevbox/v1/credentials.proto\x1a\x16devbox/v1/ingest.proto\x1a\x19devbox/v1/workspace.proto\"\x0f\n" +
-	"\rHealthRequest\"\xbc\x01\n" +
+	"\rHealthRequest\"\xdb\x01\n" +
 	"\x0eHealthResponse\x12\x14\n" +
 	"\x05ready\x18\x01 \x01(\bR\x05ready\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x18\n" +
 	"\aversion\x18\x03 \x01(\tR\aversion\x12\x17\n" +
 	"\aboot_id\x18\x04 \x01(\tR\x06bootId\x12\x1a\n" +
 	"\brestored\x18\x05 \x01(\bR\brestored\x12-\n" +
-	"\x12workspace_hydrated\x18\x06 \x01(\bR\x11workspaceHydrated\"\xdf\x01\n" +
+	"\x12workspace_hydrated\x18\x06 \x01(\bR\x11workspaceHydrated\x12\x1d\n" +
+	"\n" +
+	"home_error\x18\a \x01(\tR\thomeError\"\xdf\x01\n" +
 	"\x10HarnessEndpoints\x12\x1f\n" +
 	"\vconsole_url\x18\x01 \x01(\tR\n" +
 	"consoleUrl\x12 \n" +
@@ -1720,11 +1742,13 @@ const file_devbox_v1_daemon_proto_rawDesc = "" +
 	"\bseverity\x18\x02 \x01(\tR\bseverity\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12,\n" +
 	"\x05error\x18\x04 \x01(\v2\x16.devbox.v1.ErrorDetailR\x05error\x12\x16\n" +
-	"\x06active\x18\x05 \x01(\bR\x06active\"\\\n" +
+	"\x06active\x18\x05 \x01(\bR\x06active\"{\n" +
 	"\x0fDaemonHeartbeat\x12\x1f\n" +
 	"\vhead_offset\x18\x01 \x01(\x04R\n" +
 	"headOffset\x12(\n" +
-	"\x04idle\x18\x02 \x01(\v2\x14.devbox.v1.IdleStateR\x04idle\"*\n" +
+	"\x04idle\x18\x02 \x01(\v2\x14.devbox.v1.IdleStateR\x04idle\x12\x1d\n" +
+	"\n" +
+	"home_error\x18\x03 \x01(\tR\thomeError\"*\n" +
 	"\x10AckEventsRequest\x12\x16\n" +
 	"\x06offset\x18\x01 \x01(\x04R\x06offset\"6\n" +
 	"\x11AckEventsResponse\x12!\n" +

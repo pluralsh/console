@@ -3,6 +3,7 @@ package actors_test
 import (
 	"context"
 	"slices"
+	"sync"
 	"testing"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors/actorstest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/zones"
 )
 
 func newClient(t *testing.T) (*actors.Client, *actorstest.Server) {
@@ -167,6 +169,92 @@ func TestResumeRetriesAnOperationInFlight(t *testing.T) {
 	}
 	if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
 		t.Fatalf("state = %s", got)
+	}
+}
+
+func TestResumeWaitsBrieflyForAWorkerWithRoom(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	c, fake := newClient(t)
+	ref := actors.Ref{Atespace: "rs-1", Name: "i-abc"}
+	if _, err := c.CreateActor(ctx, actors.Spec{Ref: ref, Template: "t"}); err != nil {
+		t.Fatal(err)
+	}
+	fake.FailResume = status.Error(codes.ResourceExhausted, "no worker that meets the constraints has room")
+	fake.FailResumeTimes = 2
+	if err := c.Resume(ctx, ref); err != nil {
+		t.Fatal(err)
+	}
+	if got := fake.State(ref.Atespace, ref.Name); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("state = %s", got)
+	}
+
+	fake.SetState(ref.Atespace, ref.Name, ateapi.ActorState_ACTOR_STATE_SUSPENDED, "")
+	fake.FailResume, fake.FailResumeTimes = status.Error(codes.ResourceExhausted, "no worker that meets the constraints has room"), 0
+	if err := c.WithCapacityWait(30*time.Millisecond).Resume(ctx, ref); status.Code(err) != codes.ResourceExhausted {
+		t.Fatalf("resume with the pool full past the wait = %v", err)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("resume kept waiting past the capacity wait")
+	}
+}
+
+type recordedDemand struct {
+	mu    sync.Mutex
+	wants []string
+	done  []string
+}
+
+func (d *recordedDemand) Want(_ context.Context, atespace, actor, zone string) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.wants = append(d.wants, atespace+"/"+actor+"@"+zone)
+	return nil
+}
+
+func (d *recordedDemand) Done(_ context.Context, atespace, actor string) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.done = append(d.done, atespace+"/"+actor)
+	return nil
+}
+
+func TestResumeOfAZonalActorWaitsForItsZoneAsDemand(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	c, fake := newClient(t)
+	demand := &recordedDemand{}
+	c.WithDemand(demand).WithCapacityWait(time.Millisecond)
+	ref := actors.Ref{Atespace: "rs-1", Name: "i-abc"}
+	a, err := c.CreateActor(ctx, actors.Spec{Ref: ref, Template: "t", Zone: "us-east-2b"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := zones.OfActor(a); got != "us-east-2b" {
+		t.Fatalf("actor zone = %q", got)
+	}
+
+	fake.FailResume = status.Error(codes.ResourceExhausted, "no worker that meets the constraints has room")
+	fake.FailResumeTimes = 3
+	if err := c.Resume(ctx, ref); err != nil {
+		t.Fatalf("a zonal resume waits past the capacity wait for its zone's worker: %v", err)
+	}
+	if len(demand.wants) == 0 || demand.wants[0] != "rs-1/i-abc@us-east-2b" {
+		t.Fatalf("demand wants = %v", demand.wants)
+	}
+	if !slices.Equal(demand.done, []string{"rs-1/i-abc"}) {
+		t.Fatalf("demand done = %v", demand.done)
+	}
+
+	fake.SetState(ref.Atespace, ref.Name, ateapi.ActorState_ACTOR_STATE_SUSPENDED, "")
+	fake.FailResume, fake.FailResumeTimes = status.Error(codes.ResourceExhausted, "no worker that meets the constraints has room"), 0
+	short, cancelShort := context.WithTimeout(ctx, 100*time.Millisecond)
+	defer cancelShort()
+	if err := c.Resume(short, ref); status.Code(err) != codes.ResourceExhausted {
+		t.Fatalf("a zonal resume out of time reports no capacity, got %v", err)
+	}
+	if len(demand.done) != 2 {
+		t.Fatalf("demand done = %v, want it cleared when the wait ends", demand.done)
 	}
 }
 

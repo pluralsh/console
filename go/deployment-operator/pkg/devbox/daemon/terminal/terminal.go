@@ -159,6 +159,7 @@ func (m *Manager) Create(req *devboxv1.CreateTerminalRequest) (*devboxv1.Termina
 	if err != nil {
 		return nil, derr.New(codes.InvalidArgument, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, fmt.Sprintf("start terminal: %v", err), nil)
 	}
+	_ = proc.Deprioritize(cmd.Process.Pid)
 	now := m.opts.Clock.Now()
 	t := &Terminal{
 		m: m, id: id, cmd: cmd, ptmx: ptmx, changed: make(chan struct{}), lastIO: now,

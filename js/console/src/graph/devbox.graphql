@@ -785,6 +785,23 @@ query DevboxInstance($id: ID!) {
   }
 }
 
+fragment DevboxMcpTool on DevboxMcpTool {
+  name
+  toolType
+  provider
+  workbenchToolId
+  workbenchToolName
+}
+
+query DevboxMcpTools($id: ID!) {
+  devboxInstance(id: $id) {
+    id
+    mcpTools {
+      ...DevboxMcpTool
+    }
+  }
+}
+
 query DevboxThread($id: ID!) {
   devboxThread(id: $id) {
     ...DevboxThread
@@ -1234,6 +1251,17 @@ subscription DevboxInstanceStatusDelta($id: ID, $workbenchId: ID) {
     delta
     payload {
       ...DevboxInstanceTiny
+      agentConnections {
+        agent
+        protocolVersion
+        adapterName
+        adapterVersion
+        capabilities
+        billing
+      }
+      checkouts {
+        ...DevboxCheckout
+      }
       idleState {
         idle
         idleSince

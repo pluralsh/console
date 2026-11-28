@@ -17,6 +17,12 @@ vi.mock('@xterm/xterm', () => ({
     dispose() {}
   },
 }))
+vi.mock('@xterm/addon-webgl', () => ({
+  WebglAddon: class {
+    onContextLoss() {}
+    dispose() {}
+  },
+}))
 vi.mock('@xterm/addon-fit', () => ({
   FitAddon: class {
     fit() {}

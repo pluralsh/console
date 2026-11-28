@@ -1,8 +1,9 @@
-import { DEVBOX_FILE_TAG } from 'components/ai/chatbot/DevboxFileChip'
 import {
-  CHIP_ATTR_PREFIX,
-  CHIP_DATA_ATTR,
-  CHIP_TAG_ATTR,
+  DEVBOX_ELEMENT_TAG,
+  DEVBOX_FILE_TAG,
+} from 'components/ai/chatbot/devboxChips'
+import {
+  buildChipFromAttrs,
   insertChipAtRange,
   serializeEditableDiv,
   serializeRange,
@@ -10,6 +11,7 @@ import {
 import Fuse from 'fuse.js'
 import { useEffect, useState } from 'react'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
+import type { VoxlPickedElement as DevboxPickedElement } from './voxlClient'
 
 export type DevboxMentionQuery = {
   start: number
@@ -116,19 +118,18 @@ function textCaret(range: Range): Nullable<{ node: Text; offset: number }> {
 
 // an inline chip serializing to a file tag with the absolute path, which agents
 // resolve regardless of their working directory
-export function fileMentionChip(path: string): HTMLElement {
-  const chip = document.createElement('span')
-  chip.setAttribute(CHIP_DATA_ATTR, 'true')
-  chip.setAttribute(CHIP_TAG_ATTR, DEVBOX_FILE_TAG)
-  chip.setAttribute(`${CHIP_ATTR_PREFIX}path`, path)
-  chip.setAttribute('contenteditable', 'false')
-  chip.title = path
-  const label = document.createElement('span')
-  const name = path.replace(/\/$/, '').split('/').pop() || path
-  label.textContent = path.endsWith('/') ? `${name}/` : name
-  chip.appendChild(label)
-  return chip
-}
+export const fileMentionChip = (path: string): HTMLElement =>
+  buildChipFromAttrs(DEVBOX_FILE_TAG, { path })
+
+// an inline chip serializing to an element picked in the box's browser
+export const elementMentionChip = (el: DevboxPickedElement): HTMLElement =>
+  buildChipFromAttrs(DEVBOX_ELEMENT_TAG, {
+    url: el.url,
+    selector: el.selector,
+    tag: el.tag,
+    text: el.text,
+    html: el.html,
+  })
 
 // a path as typed after the `@`: relative to the directory being completed
 // when it's beneath it, else absolute
@@ -227,9 +228,7 @@ export function useDevboxFileSearch(
 // lists the directory being completed afresh each time it comes up, showing
 // its last listing meanwhile
 export function useDevboxDirectory(
-  listFiles: Nullable<
-    (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
-  >,
+  listFiles: Nullable<(path: string) => Promise<DevboxFileEntry[]>>,
   dir: Nullable<string>
 ): { entries: DevboxFileEntry[]; loading: boolean; error: boolean } {
   const [listings, setListings] = useState<Record<string, Listing>>({})
@@ -237,7 +236,7 @@ export function useDevboxDirectory(
 
   useEffect(() => {
     if (!listFiles || !key) return
-    listFiles(key, { brief: true }).then(
+    listFiles(key).then(
       (entries) => setListings((cur) => settled(cur, key, { entries })),
       () =>
         setListings((cur) => settled(cur, key, { entries: [], error: true }))

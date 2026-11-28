@@ -12,14 +12,31 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2P, shimmerWithinCss } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil } from 'lodash'
-import { ComponentProps, memo, ReactElement, ReactNode, useState } from 'react'
+import {
+  ComponentProps,
+  memo,
+  ReactElement,
+  ReactNode,
+  useRef,
+  useState,
+} from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
 import { chatHeadingText, chatListCss } from '../ChatMarkdown'
-import { ToolCallContent, useQuietToolCodeCss } from '../ToolCallContent'
+import {
+  EXPANDED_PREVIEW_LINES,
+  previewFadeCss,
+  ShowMoreSC,
+  ToolCallContent,
+  toolOutputTextCss,
+  toolSurfaceCss,
+  useCanExpand,
+  useExpandedFor,
+  useQuietToolCodeCss,
+} from '../ToolCallContent'
 import {
   getCommand,
   getPython,
@@ -101,7 +118,9 @@ export function SimpleToolCall({
   customResultBody,
   customLabel,
   customTitle,
+  customSubtitle,
   leadingIcon,
+  commandIcon,
   shimmer = false,
   standaloneCommand = false,
 }: {
@@ -112,7 +131,10 @@ export function SimpleToolCall({
   customResultBody?: ReactNode
   customLabel?: ReactNode
   customTitle?: string
+  customSubtitle?: string
   leadingIcon?: ReactNode
+  /** Pinned to the corner of a standalone command, which has no label to carry a leading icon. */
+  commandIcon?: ReactNode
   /** Sweep loading text inside code and log boxes without treating the call as pending. */
   shimmer?: boolean
   /** Render shell commands without the surrounding tool label/accordion. */
@@ -140,7 +162,8 @@ export function SimpleToolCall({
   const title =
     customTitle ??
     toolCallTitle({ name: toolName, kind, args, pending: isPending })
-  const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
+  const subtitle =
+    customSubtitle ?? toolCallDisplaySubtitle(kind, toolName, args, content)
   const resolvedLeadingIcon =
     leadingIcon ??
     (isPending && kind === 'subagent' ? (
@@ -182,19 +205,14 @@ export function SimpleToolCall({
       )
       const commandBody = (
         <ShellCommandBodySC $hasHeader={standaloneCommand || !!description}>
-          <Code
-            language="bash"
-            showHeader={false}
-            fillLevel={0}
-            css={{
-              ...codeCss,
-              backgroundColor: 'transparent',
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-            }}
-          >
-            {`$ ${command}`}
-          </Code>
+          {standaloneCommand && commandIcon && (
+            <CommandIconSC>{commandIcon}</CommandIconSC>
+          )}
+          <ShellCommandPreview
+            command={command}
+            shimmer={showShimmer}
+            reserveIconSpace={standaloneCommand && !!commandIcon}
+          />
           <ToolCallContent
             content={content ?? ''}
             attributes={attributes}
@@ -546,6 +564,92 @@ const ToolCallLineSC = styled.span(({ theme }) => ({
   },
 }))
 
+/** Long commands wrap rather than scroll sideways, then fold like tool output. */
+function ShellCommandPreview({
+  command,
+  shimmer,
+  reserveIconSpace,
+}: {
+  command: string
+  shimmer: boolean
+  reserveIconSpace: boolean
+}) {
+  const theme = useTheme()
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [expanded, toggleExpanded] = useExpandedFor(command)
+
+  const canExpand = useCanExpand({
+    ref: scrollRef,
+    contentKey: command,
+    expanded,
+  })
+
+  return (
+    <CommandBoxSC>
+      {/* The shimmer's background-clip: text breaks on a scrolling element, so a plain div scrolls, not the pre. */}
+      <CommandScrollSC
+        ref={scrollRef}
+        $expanded={expanded}
+        $fade={canExpand && !expanded}
+      >
+        <Code
+          language="bash"
+          showHeader={false}
+          fillLevel={0}
+          css={{
+            '&&': {
+              border: 'none',
+              borderRadius: 0,
+              backgroundColor: 'transparent',
+            },
+            '& pre': {
+              ...toolOutputTextCss(theme),
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'anywhere',
+              ...(reserveIconSpace && { paddingRight: theme.spacing.large }),
+            },
+            ...(shimmer && shimmerWithinCss(theme)),
+          }}
+        >
+          {`$ ${command}`}
+        </Code>
+      </CommandScrollSC>
+      {canExpand && (
+        <ShowMoreSC
+          type="button"
+          aria-expanded={expanded}
+          onClick={toggleExpanded}
+        >
+          {expanded ? 'Show less' : 'Show more'}
+        </ShowMoreSC>
+      )}
+    </CommandBoxSC>
+  )
+}
+
+const COMMAND_COLLAPSED_LINES = 4
+
+const CommandScrollSC = styled.div<{ $expanded: boolean; $fade: boolean }>(
+  ({ theme, $expanded, $fade }) => ({
+    minHeight: 0,
+    lineHeight: toolOutputTextCss(theme).lineHeight,
+    // Code pads its content by spacing.small on each side.
+    maxHeight: `calc(${$expanded ? EXPANDED_PREVIEW_LINES : COMMAND_COLLAPSED_LINES}lh + 2 * ${theme.spacing.small}px)`,
+    overflow: $expanded ? 'auto' : 'hidden',
+    ...($fade && previewFadeCss),
+  })
+)
+
+const CommandBoxSC = styled.div(({ theme }) => ({
+  ...toolSurfaceCss(theme),
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+  overflow: 'hidden',
+  borderTopLeftRadius: theme.borderRadiuses.large,
+  borderTopRightRadius: theme.borderRadiuses.large,
+}))
+
 const ShellCommandBodySC = styled.div<{ $hasHeader: boolean }>(
   ({ theme, $hasHeader }) => ({
     display: 'flex',
@@ -556,8 +660,18 @@ const ShellCommandBodySC = styled.div<{ $hasHeader: boolean }>(
     marginTop: $hasHeader ? 0 : theme.spacing.small,
     boxSizing: 'border-box',
     backgroundColor: 'transparent',
+    position: 'relative',
   })
 )
+
+const CommandIconSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing.small,
+  right: theme.spacing.small,
+  zIndex: 1,
+  display: 'flex',
+  pointerEvents: 'none',
+}))
 
 export const ClickableLabelSC = styled.button(() => ({
   background: 'none',

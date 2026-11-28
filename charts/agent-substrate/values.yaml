@@ -280,7 +280,8 @@ devboxes:
 # Opt-in JuiceFS devbox homes: a CSI driver (the deployment-operator's devbox-juicefs) that serves each actor's
 # home as a directory of one shared JuiceFS filesystem, its metadata in the chart's Postgres and its data in the
 # snapshot bucket, so a home follows its box from node to node without riding in the checkpoint. DevboxRunners
-# opt in with spec.home.storage: JuiceFS. Enabling it adds the ExternalVolumes preview gate.
+# no longer accept spec.home.storage: JuiceFS (only Block or Snapshot); the driver stays for a return. Enabling it adds the
+# ExternalVolumes preview gate.
 juicefs:
   enabled: false
   image:
@@ -352,7 +353,8 @@ juicefs:
 
 # ZeroFS devbox homes: each home is its own ZeroFS filesystem in the bucket, served on the node its box runs on as
 # an ext4 block device. No metadata database. Each revision's homes start from its golden boot's home; snapshots
-# don't save homes yet.
+# don't save homes yet. DevboxRunners no longer accept spec.home.storage: ZeroFS (only Block or Snapshot); the driver
+# stays for a return.
 zerofs:
   enabled: false
   image:
@@ -390,11 +392,19 @@ zerofs:
   controller:
     resources: {}
   node:
-    # -- Each staged home's config and cache, on the node's data disk. Removed when the home is unstaged.
+    # -- Each staged home's config, removed when the home is unstaged, and every home's cache, on the node's data
+    # disk.
     stateDir: /var/lib/ate/zerofs
-    # -- Each home's writer caches this much on disk and in memory. Both are per staged home, not per node.
+    # -- Each home's writer caches cacheDiskPercent of the home's size on disk, at least cacheDiskGB and at most
+    # cacheDiskMaxGB (0 is no cap), and cacheMemoryGB in memory. All are per staged home, not per node.
+    cacheDiskPercent: 50
     cacheDiskGB: 10
+    cacheDiskMaxGB: 100
     cacheMemoryGB: 0.25
+    # -- The disk, in GB, that the caches of homes no longer staged on the node may hold in all, so a home that
+    # resumes there starts with what it read before rather than from the bucket. The least recently suspended
+    # go first; 0 keeps none. Counted as allocated blocks: a cache is sparse, often a third of its size.
+    parkedCacheGB: 20
     # -- NBD devices to ask for when the plugin loads the nbd module: the most homes one node can stage.
     nbdsMax: 128
     # -- nbd-client flags for every device.
@@ -405,8 +415,9 @@ zerofs:
       - "600"
       - -block-size
       - "4096"
-    # -- ext4 mount options. discard returns freed blocks to the bucket as they're freed.
-    mountOptions: discard
+    # -- ext4 mount options. Unstaging trims free blocks back from the bucket in one pass, which is much cheaper
+    # than discard trimming on every delete.
+    mountOptions: ""
     # -- Extra object_store options for every writer, e.g. {region: us-east-2}. allow_http is set for RustFS and
     # http:// S3 endpoints.
     objectStoreOptions: {}
@@ -417,6 +428,93 @@ zerofs:
         cpu: 100m
         memory: 256Mi
     terminationGracePeriodSeconds: 120
+    # -- Defaults to atelet's scheduling, since homes are mounted wherever atelet runs actors.
+    tolerations: []
+    nodeSelector: {}
+    affinity: {}
+    priorityClassName: system-node-critical
+
+# Block storage devbox homes: one disk per home, formatted ext4 and mounted by the node's kernel. The disks come
+# from the CSI driver for disks the cluster already runs (the provider: the AWS EBS, GCP PD or Azure Disk CSI driver,
+# or any other that attaches disks and snapshots them), which the deployment-operator's devbox-block drives through
+# Kubernetes: a claim per disk and a pod that keeps it attached to its node. A disk is created on its home's first
+# attach, in that node's zone, and the gateway keeps each box in its home's zone. DevboxRunners' homes are Block
+# unless spec.home.storage is Snapshot, so turn it on with devboxes.enabled; the cluster also needs the
+# VolumeSnapshot CRDs, the snapshot controller and a VolumeSnapshotClass for the provider.
+block:
+  enabled: false
+  image:
+    repository: ghcr.io/pluralsh/devbox-block
+    # -- The deployment-operator release; each release's agent-substrate PR pins it. Required unless digest is set.
+    tag: ""
+    digest: ""
+  # -- The provider, by CSI driver name, e.g. ebs.csi.aws.com. Empty: the provisioner of the cluster's default
+  # StorageClass (in-tree names map to their CSI driver). The controller checks the provider's CSIDriver, the
+  # snapshot API and a VolumeSnapshotClass for it, and reports the result on the StorageClass, where DevboxRunners
+  # read it.
+  provider: ""
+  # -- The StorageClass DevboxRunners name (provisioner block.devbox.plural.sh).
+  storageClassName: devbox-block
+  # -- The provider's StorageClass parameters for each disk, e.g. type, iops, throughput, or on EBS
+  # volumeInitializationRate (MiB/s) to hydrate homes created from the golden snapshot at a known speed.
+  parameters: {}
+  # -- The size of a home created without one.
+  defaultCapacityGiB: 20
+  # -- How long a suspended box's disk stays attached to its node, so resuming there skips the detach and attach
+  # (10-20s each on EBS). Its anchor stays on the node meanwhile. "0s" detaches at suspend.
+  detachDelay: 10m
+  # Owner and mode of a new, empty home: the devbox images' dev user.
+  home:
+    uid: 1000
+    gid: 1000
+    mode: "0755"
+  # -- SPIFFE IDs allowed to call the controller. Empty: ate-api-server.
+  allowedClients: []
+  # The driver's pods request and limit CPU and memory, have liveness and readiness probes, and run as non-root with
+  # a read-only root filesystem where they can, so common admission policies pass them. The node plugin has to be
+  # privileged to mount homes, as the ZeroFS and JuiceFS node plugins are, so policies need an exception for it.
+  controller:
+    podLabels: {}
+    podAnnotations: {}
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+  # The pod that keeps each attached home's disk attached to and mounted on its node, one per running box and per box
+  # suspended within detachDelay. It does
+  # nothing, but counts against the node's pod limit. Its defaults pass the restricted Pod Security Standard and
+  # common admission policies: non-root, read-only root filesystem, no capabilities, no host namespaces, CPU and
+  # memory requests and limits (5m/16Mi, 50m/32Mi), probes, its own ServiceAccount without a token.
+  anchor:
+    podLabels: {}
+    podAnnotations: {}
+    # -- Evicting an anchor detaches its box's home, so it gets the node's own priority by default.
+    priorityClassName: system-node-critical
+    # -- Runs anchors on the host network, so they take no pod IP. Useful where pod IPs are scarce (the AWS VPC CNI
+    # without prefix delegation), but policies that forbid host namespaces will refuse it.
+    hostNetwork: false
+    # -- Merged over the defaults.
+    resources: {}
+    # -- Empty: every taint, since an anchor goes wherever Substrate put its box.
+    tolerations: []
+    # -- A partial Pod merged over everything above, for what has no value of its own, e.g. spec.securityContext.
+    # Maps merge; a list replaces the chart's. The pod's name, node, image, args and home volume are always the
+    # controller's. Don't set spec.securityContext.fsGroup: the kubelet would change the group of every file in
+    # the home each time it's mounted.
+    overrides: {}
+  node:
+    podLabels: {}
+    podAnnotations: {}
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
     # -- Defaults to atelet's scheduling, since homes are mounted wherever atelet runs actors.
     tolerations: []
     nodeSelector: {}
@@ -448,10 +546,16 @@ sandboxConfigs:
     specOverrides: {}
   microvm:
     # -- Install the microvm SandboxConfig. Its assets must be staged at
-    # <scheme>://<bucket>/microvm-assets/<arch>/<sha256>: either with
-    # assetStaging below, or ate-setup's `deploy sandboxconfig` (GCS/Kind only).
+    # <bucket>/microvm-assets/<arch>/<sha256>: either with assetStaging below,
+    # or ate-setup's `deploy sandboxconfig` (GCS/Kind only).
     enabled: false
+    # -- s3, gs or azblob; must match objectStore.backend, whose plugin atelet
+    # fetches the assets through. Defaults to the backend's.
     assetScheme: ""
+    # -- The bucket (Azure: blob container in objectStore.azureBlob.accountUrl)
+    # the assets are staged in. Defaults to objectStore.snapshotLocation's; the
+    # assets sit beside the snapshots under microvm-assets/. On Azure the chart
+    # adds it to the node plugin's asset containers.
     assetBucket: ""
     specOverrides: {}
   # -- Install the sandboxconfig-assets ValidatingAdmissionPolicy.
@@ -608,10 +712,10 @@ assetStaging:
   enabled: false
   # -- An image that ships /usr/local/bin/microvm-assets. The deployment-operator
   # image does, so installs that already vendor it need nothing extra. Each deployment-operator release's
-  # agent-substrate PR pins it.
-  image: ghcr.io/pluralsh/deployment-operator:latest
-  # -- gocloud.dev blob URL. Defaults to <assetScheme>://<assetBucket>; set it
-  # for options like s3://bucket?region=us-east-1.
+  # agent-substrate PR pins it; until a release has the binary, it's the master build that added it.
+  image: ghcr.io/pluralsh/deployment-operator:sha-deb4c4a
+  # -- gocloud.dev blob URL. Defaults to <assetScheme>://<assetBucket> (Azure:
+  # azblob://<container>?storage_account=<account from accountUrl>).
   bucketUrl: ""
   arches: [amd64]
   activeDeadlineSeconds: 1800
@@ -619,7 +723,8 @@ assetStaging:
   workSize: 6Gi
   resources: {}
   extraArgs: []
-  # -- e.g. AWS_REGION, which the s3 driver needs when the pod has none.
+  # -- Extra env for the Job. On S3 it already gets objectStore.s3's region,
+  # endpoint and credentials.
   extraEnv: []
 
 # The CloudNativePG operator. Disable where it already runs: it's cluster-wide,

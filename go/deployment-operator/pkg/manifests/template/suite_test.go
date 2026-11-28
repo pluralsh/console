@@ -19,6 +19,8 @@ package template
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -113,6 +115,19 @@ users:
 	).Start(context.Background())
 	Expect(err).NotTo(HaveOccurred())
 })
+
+// serve binds srv's address before returning so specs never dial a port
+// that isn't listening yet.
+func serve(srv *http.Server) {
+	ln, err := net.Listen("tcp", srv.Addr)
+	Expect(err).NotTo(HaveOccurred())
+	go func() {
+		defer GinkgoRecover()
+		if err := srv.Serve(ln); err != nil && err != http.ErrServerClosed {
+			Expect(err).NotTo(HaveOccurred())
+		}
+	}()
+}
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")

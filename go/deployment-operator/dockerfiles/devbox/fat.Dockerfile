@@ -64,6 +64,8 @@ ARG YQ_VERSION=4.54.3
 ARG CRANE_VERSION=0.22.1
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
 ARG PLURAL_VERSION=0.12.69
+# renovate: datasource=github-releases depName=avivsinai/bitbucket-cli
+ARG BKT_VERSION=0.41.1
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -103,6 +105,8 @@ RUN set -eux; \
     curl -fsSLO "${base}/${f}"; verify "${f}" "${base}/checksums.txt"; mkdir crane; tar -xzf "${f}" -C crane; install -m 0755 crane/crane /out/crane; \
     f="plural-cli_${PLURAL_VERSION}_Linux_${arch}.tar.gz"; base="https://github.com/pluralsh/plural-cli/releases/download/v${PLURAL_VERSION}"; \
     curl -fsSLO "${base}/${f}"; verify "${f}" "${base}/checksums.txt"; mkdir plural; tar -xzf "${f}" -C plural; install -m 0755 plural/plural /out/plural; \
+    f="bkt_${BKT_VERSION}_linux_${carch}.tar.gz"; base="https://github.com/avivsinai/bitbucket-cli/releases/download/v${BKT_VERSION}"; \
+    curl -fsSLO "${base}/${f}"; verify "${f}" "${base}/checksums.txt"; mkdir bkt; tar -xzf "${f}" -C bkt; install -m 0755 bkt/bkt /out/bkt; \
     rm -rf /dl/*
 
 # ---------------------------------------------------------------------------
@@ -261,40 +265,55 @@ RUN set -eux; \
     cd /; rm -rf "${tmp}" /root/.config /root/.cache; \
     aws --version; gcloud --version > /dev/null; az version --output none
 
-# Containers: rootless Podman as dev, with `docker`, `docker compose` and
-# `docker-compose` mapped onto it. The sandbox (gVisor by default) gives no overlay mounts in a user
-# namespace, FUSE or cgroup delegation, so images use the vfs driver and
-# containers run without cgroups. Containers share the box's network unless
-# given one (compose projects get theirs via pasta, with aardvark-dns resolving
-# service names); either way traffic leaves through the box's egress policy.
-# Images live under /home/dev/.local/share/containers, cached across snapshots.
+# Containers: rootful Podman, with `docker`, `docker compose` and `docker-compose`
+# mapped onto it, on microVM boxes only (/usr/local/bin/podman refuses on
+# gVisor). /usr/local/bin/podman runs it as root through sudo in a user
+# namespace that maps every id onto itself (/usr/local/libexec/devbox/userns),
+# since Substrate never grants a box CAP_SYS_ADMIN. The microVM guest's
+# filesystems are virtio-fs, which overlayfs can't use as an upper layer, and it
+# has no /dev/fuse, so images use the vfs driver. It has no /dev/net/tun or
+# NET_ADMIN either, so containers share the box's network:
+# /usr/local/bin/podman-compose runs every compose service on it with service
+# names resolving to 127.0.0.1, and traffic leaves through the box's egress
+# policy. The guest masks parts of /proc and has no cgroup mount, so a container
+# can't mount a fresh procfs or get cgroups: containers bind-mount the box's
+# /proc in their own PID namespace and run without limits, and build steps use
+# buildah's chroot isolation.
+# Images, containers and volumes live on the box's root filesystem by default, not the home: a ZeroFS home turns
+# every fsync into an object-storage flush, which databases in compose stacks issue per commit. Every snapshot
+# carries the root filesystem, so they also grow each suspend and resume, and a new image starts them empty.
+# With a Block home the operator points CONTAINERS_STORAGE_CONF at storage.home.conf, which keeps them on the
+# home's cloud disk instead: snapshots stay small and they survive new images.
+COPY --chmod=0755 deployment-operator/dockerfiles/devbox/rootfs/fat/usr/local/libexec/devbox/ /usr/local/libexec/devbox/
 # hadolint ignore=DL3008
 RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      podman podman-docker podman-compose uidmap crun catatonit \
+      podman podman-docker podman-compose crun catatonit \
       netavark aardvark-dns passt nftables; \
     rm -rf /var/lib/apt/lists/*; \
-    echo "dev:100000:65536" > /etc/subuid; \
-    echo "dev:100000:65536" > /etc/subgid; \
     touch /etc/containers/nodocker; \
-    ln -s /usr/bin/podman-compose /usr/local/bin/docker-compose; \
+    ln -s podman /usr/local/bin/docker; \
+    ln -s /usr/local/bin/podman-compose /usr/local/bin/docker-compose; \
     printf '%s\n' \
       '[storage]' \
       'driver = "vfs"' \
       'runroot = "/run/containers/storage"' \
       'graphroot = "/var/lib/containers/storage"' \
-      'rootless_storage_path = "/home/dev/.local/share/containers/storage"' \
       > /etc/containers/storage.conf; \
+    sed 's|^graphroot = .*|graphroot = "/home/dev/.local/share/containers/rootful"|' \
+      /etc/containers/storage.conf > /etc/containers/storage.home.conf; \
     mkdir -p /etc/containers/containers.conf.d; \
     printf '%s\n' \
       '[containers]' \
       'netns = "host"' \
       'cgroups = "disabled"' \
+      'mounts = ["type=bind,source=/proc,destination=/proc"]' \
       'log_driver = "k8s-file"' \
       '' \
       '[engine]' \
       'compose_warning_logs = false' \
+      'compose_providers = ["/usr/local/bin/podman-compose"]' \
       'cgroup_manager = "cgroupfs"' \
       'events_logger = "file"' \
       'runtime = "crun"' \
@@ -327,6 +346,7 @@ ENV HOME=/home/dev \
     AWS_PAGER="" \
     MISE_ERLANG_COMPILE=false \
     MISE_ERLANG_PRECOMPILED_OS=ubuntu-24.04 \
+    PODMAN_IGNORE_CGROUPSV1_WARNING=1 \
     PATH=/home/dev/.local/share/mise/shims:/home/dev/.local/bin:/home/dev/go/bin:/home/dev/.cargo/bin:/home/dev/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/local/cargo/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 USER 1000:1000

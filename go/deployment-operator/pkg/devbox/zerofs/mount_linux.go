@@ -4,12 +4,41 @@ package zerofs
 
 import (
 	"errors"
+	"math"
 	"os"
+	"strconv"
 	"syscall"
+	"unsafe"
+
+	"golang.org/x/sys/unix"
 )
 
 func mountExt4(dev, target, options string) error {
 	return syscall.Mount(dev, target, "ext4", syscall.MS_NOATIME, options)
+}
+
+// fitrim is FITRIM, _IOWR('X', 121, struct fstrim_range), which x/sys/unix doesn't define.
+const fitrim = 0xc0185879
+
+type fstrimRange struct{ start, len, minlen uint64 }
+
+func setOOMScoreAdj(pid, adj int) error {
+	return os.WriteFile("/proc/"+strconv.Itoa(pid)+"/oom_score_adj", []byte(strconv.Itoa(adj)), 0)
+}
+
+// trim discards every free block of the filesystem mounted at target (fstrim), so the writer drops what it
+// stores for them.
+func trim(target string) error {
+	fd, err := unix.Open(target, unix.O_RDONLY|unix.O_DIRECTORY|unix.O_CLOEXEC, 0)
+	if err != nil {
+		return err
+	}
+	defer unix.Close(fd)
+	r := fstrimRange{len: math.MaxUint64}
+	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, uintptr(fd), fitrim, uintptr(unsafe.Pointer(&r))); errno != 0 {
+		return errno
+	}
+	return nil
 }
 
 func bindMount(source, target string, readOnly bool) error {

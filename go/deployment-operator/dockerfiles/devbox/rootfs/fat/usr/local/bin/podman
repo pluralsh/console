@@ -1,0 +1,13 @@
+#!/bin/sh
+# podman and docker (a symlink to this). Containers are only supported on microVM boxes; the operator sets
+# DEVBOX_SANDBOX_CLASS on every box. Podman runs rootful in the box's container user namespace
+# (/usr/local/libexec/devbox/userns), as root through dev's passwordless sudo, keeping the caller's environment.
+if [ "${DEVBOX_SANDBOX_CLASS:-}" = gvisor ]; then
+  echo "$(basename "$0"): containers need a microVM devbox; this runner's workerPool.sandboxClass is gvisor (set it to microvm)" >&2
+  exit 125
+fi
+# Version queries need no namespace, and image builds and tests can't create one.
+case "${DEVBOX_USERNS:+in}:${1:-}" in
+  in:* | :--version | :-v | :version) exec "/usr/bin/$(basename "$0")" "$@" ;;
+esac
+exec sudo -n -E /usr/local/libexec/devbox/userns "/usr/bin/$(basename "$0")" "$@"

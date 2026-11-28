@@ -8,6 +8,10 @@ var errUnsupported = errors.New("serving ZeroFS volumes is only supported on lin
 
 func mountExt4(string, string, string) error { return errUnsupported }
 
+func trim(string) error { return errUnsupported }
+
+func setOOMScoreAdj(int, int) error { return errUnsupported }
+
 func bindMount(string, string, bool) error { return errUnsupported }
 
 func unmount(string) error { return errUnsupported }

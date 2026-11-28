@@ -1,8 +1,8 @@
 import {
+  CliIcon,
   IconProps,
   McpLogoIcon,
   PythonLogoIcon,
-  TerminalIcon,
   ToolsFilledIcon,
 } from '@pluralsh/design-system'
 import { isCmdToolKind, ToolCallKind } from './toolCallDisplay'
@@ -25,7 +25,7 @@ export function ToolCallKindIcon({
   }
 
   const Icon = isCmdToolKind(kind)
-    ? TerminalIcon
+    ? CliIcon
     : kind === 'mcp_tool_call'
       ? McpLogoIcon
       : ToolsFilledIcon

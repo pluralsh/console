@@ -83,6 +83,40 @@ func TestIdleGraceAndSuspendOnce(t *testing.T) {
 	}
 }
 
+// stuckEmitter blocks in IdleState like an event log append on a hung home.
+type stuckEmitter struct{ entered, release chan struct{} }
+
+func (e *stuckEmitter) IdleState(*devboxv1.IdleState) {
+	close(e.entered)
+	<-e.release
+}
+func (e *stuckEmitter) SuspendRequested(*devboxv1.SuspendRequested) {}
+
+func TestStateDoesNotWaitForAStuckEmit(t *testing.T) {
+	f := newFixture()
+	em := &stuckEmitter{entered: make(chan struct{}), release: make(chan struct{})}
+	f.d.emit = em
+	done := make(chan struct{})
+	go func() {
+		f.d.Evaluate()
+		close(done)
+	}()
+	<-em.entered
+
+	got := make(chan *devboxv1.IdleState, 1)
+	go func() { got <- f.d.State() }()
+	select {
+	case st := <-got:
+		if !st.GetIdle() {
+			t.Fatalf("state %v", st)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("State waited for a stuck emit, so heartbeats would stop")
+	}
+	close(em.release)
+	<-done
+}
+
 func TestBusySources(t *testing.T) {
 	f := newFixture()
 	f.agent = []*devboxv1.BusyReason{{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, ThreadId: "t1"}}

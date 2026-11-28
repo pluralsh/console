@@ -221,6 +221,32 @@ spec:
         - protocol: TCP
           port: grpc
 {{- end }}
+{{- if .Values.block.enabled }}
+---
+# The block controller: ate-api-server creates, attaches and deletes homes, and
+# is also checked by its SPIFFE ID.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: devbox-block-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: devbox-block-controller
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ate-api-server
+      ports:
+        - protocol: TCP
+          port: grpc
+{{- end }}
 {{- if eq .Values.postgres.mode "cnpg" }}
 ---
 # CNPG instances: ate-api-server, the other instances (replication) and the

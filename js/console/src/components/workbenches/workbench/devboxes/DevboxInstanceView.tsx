@@ -1,4 +1,5 @@
 import { Button, Callout, Flex, ReloadIcon } from '@pluralsh/design-system'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -12,7 +13,7 @@ import {
   useResumeDevboxInstanceMutation,
   useWorkbenchDevboxesQuery,
 } from 'generated/graphql'
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_DEVBOX_POSITION_QUERY_PARAM,
@@ -21,6 +22,7 @@ import {
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
+import { DevboxBrowserView } from './DevboxBrowserTab'
 import { DevboxPanelRail, useDevboxPanel } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
 import { useDevboxPullRequests } from './devboxPullRequests'
@@ -38,7 +40,9 @@ import { selectedThread } from './devboxThreads'
 import { useSubscriptionRecovery } from 'components/hooks/useSubscriptionRecovery'
 import { useDevboxPresence } from './useDevboxPresence'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
+import { useResumeOnOpen } from './useResumeOnOpen'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
+import { addToPrompt } from './devboxPromptInserts'
 
 export function DevboxInstanceView({
   instanceId,
@@ -91,6 +95,15 @@ export function DevboxInstanceView({
     skip: !instanceId,
     onData: ({ client, data: { data } }) => {
       const payload = data?.devboxInstanceIndexDelta?.payload
+      const foregroundState = payload?.foregroundState
+      if (foregroundState)
+        client.cache.modify({
+          id: client.cache.identify({
+            __typename: 'DevboxInstance',
+            id: instanceId,
+          }),
+          fields: { foregroundState: () => foregroundState },
+        })
       mergePendingInteractions(
         client.cache,
         instanceId,
@@ -114,22 +127,28 @@ export function DevboxInstanceView({
   ].some(Boolean)
 
   const live = isInstanceLive(instance?.status)
-  const { viewedFile, selectFile, change, selectChange, openFile } =
-    useDevboxPanel()
+  const { featureFlags } = use(FeatureFlagContext)
+  const {
+    viewedFile,
+    selectFile,
+    change,
+    selectChange,
+    openFile,
+    browserInMain,
+    browserToPanel,
+  } = useDevboxPanel()
   const api = useDevboxWorkspaceApi(instanceId)
-  useDevboxPresence(instanceId, live)
+  useDevboxPresence(instanceId, instance?.status)
 
-  // opening a suspended instance resumes it
   const [resume, resumeState] = useResumeDevboxInstanceMutation({
     onError: (e) => popToast({ content: e.message, severity: 'danger' }),
   })
-  const autoResumed = useRef<string | null>(null)
   const suspended = instance?.status === DevboxInstanceStatus.Suspended
-  useEffect(() => {
-    if (!suspended || autoResumed.current === instanceId) return
-    autoResumed.current = instanceId
-    resume({ variables: { id: instanceId } })
-  }, [instanceId, resume, suspended])
+  useResumeOnOpen({
+    instanceId,
+    status: loading ? undefined : instance?.status,
+    resume: () => resume({ variables: { id: instanceId } }),
+  })
   const resuming = resumeState.loading || (!!resumeState.data && suspended)
   useStatusFallback(query, {
     settling:
@@ -228,7 +247,22 @@ export function DevboxInstanceView({
             onImportSession={() => setImportOpen(true)}
           />
         </HeaderBarSC>
-        {live && change ? (
+        {live &&
+        browserInMain &&
+        featureFlags.DevboxBrowser &&
+        instance.devbox?.browser ? (
+          <DevboxBrowserView
+            api={api}
+            live={live}
+            placement="main"
+            onMove={browserToPanel}
+            onPick={(element) => {
+              // back beside the conversation, where the prompt takes the element
+              addToPrompt(instance.id, element)
+              browserToPanel()
+            }}
+          />
+        ) : live && change ? (
           <DevboxChangesViewer
             instanceId={instanceId}
             change={change}

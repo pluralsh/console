@@ -823,6 +823,7 @@ _Appears in:_
 | `additionalFreeInstances` _integer_ | AdditionalFreeInstances are the instance slots free on AdditionalPools. |  | Optional: \{\} <br /> |
 | `desiredWorkers` _integer_ | DesiredWorkers is the autoscaler's target for the managed pool. |  | Optional: \{\} <br /> |
 | `lastScaleTime` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
+| `zones` _[DevboxZoneCapacity](#devboxzonecapacity) array_ | Zones breaks the autoscaler's view down by zone when the runner runs a pool per zone; the fields above are<br />totals. |  | Optional: \{\} <br /> |
 
 
 #### DevboxCloudIdentity
@@ -956,10 +957,14 @@ _Appears in:_
 
 DevboxHome selects how instances store /home/dev.
 
-With JuiceFS or ZeroFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and
-mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
-ZeroFS snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for either:
-Substrate can't restore a tag of a template with external volumes.
+With Block, each instance's home is its own cloud disk from the agent-substrate chart's block driver
+(block.enabled), which needs the cloud's disk CSI driver and VolumeSnapshots. A home is seeded from the golden
+boot's, so what the bootstrap script and mise installed is there from the start. Snapshots don't save the home
+yet, and starting an instance from a snapshot isn't supported: Substrate can't restore a tag of a template with
+external volumes.
+
+With Snapshot, the home stays on the instance's node and rides in every snapshot, which needs no storage beyond
+the node's, e.g. on machines without cloud disks.
 
 
 
@@ -968,19 +973,20 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS ZeroFS] <br />Optional: \{\} <br /> |
-| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS or ZeroFS home may hold: a JuiceFS quota, or the size of the ZeroFS block device.<br />Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
-| `storageClassName` _string_ | StorageClassName is the JuiceFS or ZeroFS StorageClass. Defaults to the agent-substrate chart's<br />devbox-juicefs or devbox-zerofs. |  | Optional: \{\} <br /> |
+| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Block. Changing it rolls a new revision, and instances moved to it start with a fresh home. | Block | Enum: [Block Snapshot] <br />Optional: \{\} <br /> |
+| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the size of each Block home's cloud disk. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
+| `storageClassName` _string_ | StorageClassName is the block driver's StorageClass for Block homes. Defaults to the agent-substrate chart's<br />devbox-block. |  | Optional: \{\} <br /> |
 
 
 #### DevboxHomeStorage
 
 _Underlying type:_ _string_
 
-DevboxHomeStorage is where an instance's /home/dev lives.
+DevboxHomeStorage is where an instance's /home/dev lives. The API accepts Block and Snapshot; the operator keeps
+serving JuiceFS and ZeroFS homes so they can come back.
 
 _Validation:_
-- Enum: [Snapshot JuiceFS ZeroFS]
+- Enum: [Block Snapshot]
 
 _Appears in:_
 - [DevboxHome](#devboxhome)
@@ -991,6 +997,7 @@ _Appears in:_
 | `Snapshot` | DevboxHomeSnapshot keeps the home on the instance's node and carries it in every snapshot.<br /> |
 | `JuiceFS` | DevboxHomeJuiceFS keeps the home in the agent-substrate chart's JuiceFS filesystem (juicefs.enabled), mounted<br />wherever the instance runs, so snapshots carry only memory and moving node doesn't copy the home.<br /> |
 | `ZeroFS` | DevboxHomeZeroFS keeps each home in its own ZeroFS filesystem in object storage, from the agent-substrate<br />chart's ZeroFS driver (zerofs.enabled): an ext4 block device that follows the instance from node to node, with<br />no metadata database. Snapshots carry only memory.<br /> |
+| `Block` | DevboxHomeBlock keeps each home on its own cloud disk, from the agent-substrate chart's block driver<br />(block.enabled), formatted ext4 and mounted by the node's kernel. A disk lives in one zone, so each instance<br />stays in its home's zone, and the runner runs a WorkerPool per zone (see spec.workerPool.zones). Snapshots<br />carry only memory.<br /> |
 
 
 #### DevboxIdlePolicy
@@ -1049,6 +1056,28 @@ _Appears in:_
 | `interval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Interval between re-resolutions in poll mode. Defaults to 1h. |  | Optional: \{\} <br /> |
 
 
+#### DevboxOAuthProviders
+
+
+
+DevboxOAuthProviders enables egress to each identity provider's login flow (see OAuthProviderHosts).
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `google` _boolean_ | Google: Google sign-in, its OAuth and OpenID Connect endpoints, and the scripts, fonts and avatars its<br />pages load. |  | Optional: \{\} <br /> |
+| `github` _boolean_ | GitHub: github.com sign-in and OAuth apps, the API, and the assets and avatars its pages load. |  | Optional: \{\} <br /> |
+| `microsoft` _boolean_ | Microsoft: Entra ID (work and school accounts), personal Microsoft accounts, Microsoft Graph and the CDNs<br />their sign-in pages load from. |  | Optional: \{\} <br /> |
+| `gitlab` _boolean_ | GitLab: gitlab.com sign-in and OAuth applications, and its asset hosts. |  | Optional: \{\} <br /> |
+| `apple` _boolean_ | Apple: Sign in with Apple. |  | Optional: \{\} <br /> |
+| `okta` _boolean_ | Okta: any Okta or Okta Workforce tenant and Okta's CDN. Custom sign-in domains need httpAllowlist entries. |  | Optional: \{\} <br /> |
+| `auth0` _boolean_ | Auth0: any Auth0 tenant, in every region, and Auth0's CDN. Custom domains need httpAllowlist entries. |  | Optional: \{\} <br /> |
+
+
 #### DevboxOCIRegistries
 
 
@@ -1093,6 +1122,7 @@ _Appears in:_
 | `ruby` _boolean_ | Ruby: rubygems.org and Ruby releases. | true | Optional: \{\} <br /> |
 | `php` _boolean_ | PHP: Packagist and Composer. | true | Optional: \{\} <br /> |
 | `dotnet` _boolean_ | Dotnet: NuGet and .NET releases. | true | Optional: \{\} <br /> |
+| `terraform` _boolean_ | Terraform: the Terraform Registry and HashiCorp releases, where `terraform init` resolves every provider and<br />downloads HashiCorp's own (aws, google, azurerm, kubernetes, helm, ...) and where Terraform itself is<br />released. Partner and community providers and registry modules download from GitHub: Mise opens it on boxes<br />without a GitHub SCM connection, and with one the provider's repository has to be allowed. | true | Optional: \{\} <br /> |
 | `mise` _boolean_ | Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java<br />metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes<br />without a GitHub SCM connection this opens github.com unauthenticated. | false | Optional: \{\} <br /> |
 
 
@@ -1151,7 +1181,7 @@ _Appears in:_
 | `image` _string_ |  |  |  |
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
-| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS ZeroFS] <br />Optional: \{\} <br /> |
+| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Block Snapshot] <br />Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
 | `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
 
@@ -1236,9 +1266,11 @@ _Appears in:_
 | `bindings` _[DevboxRunnerBindings](#devboxrunnerbindings)_ | Bindings control who can use this devbox in console. |  | Optional: \{\} <br /> |
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this devbox,<br />with the same semantics as AgentRuntime.spec.allowedRepositories. |  | Optional: \{\} <br /> |
 | `httpAllowlist` _[DevboxHTTPAllowlistEntry](#devboxhttpallowlistentry) array_ | HTTPAllowlist are extra hosts instances may reach, on top of the built-in ones. |  | MaxItems: 256 <br />Optional: \{\} <br /> |
-| `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `allowPublicEgress` _boolean_ | AllowPublicEgress lets instances (and the golden boot) reach any host on ports 443 and 80, instead of only<br />the allowlist and presets. HTTPS to hosts no other rule names is tunneled without interception, so those<br />sites see their real certificates; the hosts egress injects credentials for (SCM, console, cloud identity,<br />subscription billing) keep their specific rules, so credentials are still only sent where they belong.<br />Security: this removes egress as a guardrail against exfiltration. An agent, a compromised dependency or a<br />prompt injection in a page the agent reads can send workspace code, environment secrets and anything else in<br />the box to an arbitrary server. Wildcard rules match names, not addresses, so names that resolve inside the<br />cluster or private network (e.g. <svc>.<ns>.svc.cluster.local, internal DNS zones) become reachable on these<br />ports too, subject only to your NetworkPolicies. Only enable it where boxes run code and agents you trust<br />with that reach: sandboxed clusters with no sensitive internal services, demo or personal environments. |  | Optional: \{\} <br /> |
+| `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. All but Mise are on unless set to<br />false. | \{  \} | Optional: \{\} <br /> |
 | `cloudProviders` _[DevboxCloudProviders](#devboxcloudproviders)_ | CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud<br />identity for it, unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `ociRegistries` _[DevboxOCIRegistries](#devboxociregistries)_ | OCIRegistries opens egress to public container registries, for pulling images with podman, docker,<br />crane or helm. Docker Hub and GitHub Container Registry are on unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `oauthProviders` _[DevboxOAuthProviders](#devboxoauthproviders)_ | OAuthProviders opens egress to identity providers' sign-in pages, token endpoints and the assets their<br />login flows load, so apps under development can sign in through the box's browser. All are off unless<br />set to true. |  | Optional: \{\} <br /> |
 | `env` _[DevboxEnvVar](#devboxenvvar) array_ | Env are environment variables for every process the box starts: agents, terminals and git. Plain values<br />are part of the template, so changing them rolls a new revision. Secret values are read when an instance<br />wakes and are never baked into the template, the golden snapshot or the workspace volume. |  | MaxItems: 128 <br />Optional: \{\} <br /> |
 | `browser` _[DevboxBrowser](#devboxbrowser)_ | Browser enables the in-box headless browser. |  | Optional: \{\} <br /> |
 | `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, from the home directory and after repositories are cloned<br />and mise has installed its tools, so its results are baked into the snapshot. It runs with `bash -e` unless<br />it starts with a #! line, and a failure fails the revision; its output is in ~/.plural/golden.log. |  | Optional: \{\} <br /> |
@@ -1351,8 +1383,9 @@ _Appears in:_
 | `diskReservePercent` _integer_ | DiskReservePercent of DiskSize is kept for the image cache and snapshot staging rather than budgeted to<br />instances. | 20 | Maximum: 90 <br />Minimum: 0 <br />Optional: \{\} <br /> |
 | `suspendedSnapshotsPerInstance` _integer_ | SuspendedSnapshotsPerInstance is how many suspended instances' snapshots each instance slot budgets disk<br />for. A suspended instance frees its slot at once, but its snapshot stays on the node until Substrate<br />detaches it (30 minutes by default), so heavy suspend and resume churn stacks snapshots on a full worker. | 1 | Maximum: 10 <br />Minimum: 0 <br />Optional: \{\} <br /> |
 | `additionalPools` _[DevboxWorkerPoolRef](#devboxworkerpoolref) array_ | AdditionalPools are existing Substrate WorkerPools this runner's instances may also run on. The operator<br />labels each with the runner's worker selector and removes the label when the pool leaves this list. They<br />should run the same sandbox class as the runner, and their free capacity counts toward SpareInstances. |  | Optional: \{\} <br /> |
+| `zones` _string array_ | Zones runs one WorkerPool per zone instead of one pool, each pinned to its zone's nodes with<br />topology.kubernetes.io/zone. Block homes run that way without it too, in the zones of the nodes matching<br />NodeSelector (or of every node, before any matches): a home's disk lives in one zone, and the gateway keeps<br />each instance in its home's zone, packing new instances into the zone that already holds the most. Set it<br />to choose the zones instead. Replicas and Autoscaling are totals across the zones: the minimum and the spare<br />instance slots go only to zones holding homes, not to every zone. |  | MaxItems: 6 <br />Optional: \{\} <br />items:Pattern: ^[a-z0-9]([-a-z0-9]\{0,30\}[a-z0-9])?$ <br /> |
 | `maxInstances` _integer_ | MaxInstances caps concurrently running instances in console. Unset means unlimited. |  | Minimum: 1 <br />Optional: \{\} <br /> |
-| `sandboxClass` _[DevboxSandboxClass](#devboxsandboxclass)_ | SandboxClass is the isolation technology. Immutable once the WorkerPool exists. | gvisor | Enum: [gvisor microvm] <br />Optional: \{\} <br /> |
+| `sandboxClass` _[DevboxSandboxClass](#devboxsandboxclass)_ | SandboxClass is the isolation technology. Immutable once the WorkerPool exists. Docker and Podman in the<br />devbox-fat image only run on microvm. | gvisor | Enum: [gvisor microvm] <br />Optional: \{\} <br /> |
 | `sandboxConfig` _string_ | SandboxConfig names a Substrate sandbox class ConfigMap (WorkerPool sandboxClasses[].configRef). |  | Optional: \{\} <br /> |
 | `workerImage` _string_ | WorkerImage overrides the Substrate worker image configured on the operator for the sandbox class. |  | Optional: \{\} <br /> |
 | `resources` _[ResourceRequirements](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core)_ | Resources of each worker pod. |  | Optional: \{\} <br /> |
@@ -1378,6 +1411,44 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
 | `namespace` _string_ | Namespace defaults to the namespace the operator runs devbox WorkerPools in. |  | Optional: \{\} <br /> |
+
+
+#### DevboxWorkerPoolZone
+
+
+
+DevboxWorkerPoolZone is the WorkerPool of one zone.
+
+
+
+_Appears in:_
+- [DevboxRunnerStatus](#devboxrunnerstatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `zone` _string_ |  |  |  |
+| `workerPool` _string_ | WorkerPool is the pool's namespace/name. |  |  |
+
+
+#### DevboxZoneCapacity
+
+
+
+DevboxZoneCapacity is one zone's WorkerPool as the autoscaler sees it.
+
+
+
+_Appears in:_
+- [DevboxCapacityStatus](#devboxcapacitystatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `zone` _string_ |  |  |  |
+| `workers` _integer_ | Workers are the zone's schedulable workers, DesiredWorkers the autoscaler's target for them. |  |  |
+| `desiredWorkers` _integer_ |  |  |  |
+| `homes` _integer_ | Homes are the instances whose home lives in the zone, RunningInstances those running there, and<br />WaitingInstances those waiting for a worker there. |  |  |
+| `runningInstances` _integer_ |  |  |  |
+| `waitingInstances` _integer_ |  |  | Optional: \{\} <br /> |
 
 
 #### ExaConnection

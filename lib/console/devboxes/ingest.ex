@@ -165,9 +165,9 @@ defmodule Console.Devboxes.Ingest do
   defp status_reason(%{error: %{message: msg}}) when is_binary(msg) and byte_size(msg) > 0, do: msg
   defp status_reason(%{message: msg}) when is_binary(msg) and byte_size(msg) > 0, do: msg
   defp status_reason(%{suspend_reason: reason}) when not is_nil(reason) do
-    case enum(reason, "suspend_reason_") do
+    case enum_name(reason, "suspend_reason_") do
       nil -> nil
-      r -> "suspended: #{String.replace(to_string(r), "_", " ")}"
+      r -> "suspended: #{String.replace(r, "_", " ")}"
     end
   end
   defp status_reason(_), do: nil
@@ -215,7 +215,8 @@ defmodule Console.Devboxes.Ingest do
   transaction.  Every row is applied only when its revision is newer than the stored one, and is locked only while
   it is checked and written; the instance row is locked last, for the aggregate.  AI-proxy usage cost deltas are
   charged to the workbench budget in the same transaction, and the changed rows are published on
-  `devboxInstanceIndexDelta` (and thread updates on `devboxThreadDelta`).
+  `devboxInstanceIndexDelta` (thread updates on `devboxThreadDelta`, and the instance on `devboxInstanceStatusDelta`
+  when its thread counts, foreground state, agent connections or checkouts changed).
   """
   @spec upsert_instance_index(map, Cluster.t) :: {:ok, %{sessions_applied: integer, interactions_applied: integer}} | error
   def upsert_instance_index(%{instance_id: id} = attrs, %Cluster{} = cluster) do
@@ -227,7 +228,9 @@ defmodule Console.Devboxes.Ingest do
     |> add_operation(:aggregate, fn _ -> apply_aggregate(id, attrs[:aggregate]) end)
     |> execute()
     |> case do
-      {:ok, %{sessions: sessions, interactions: interactions, aggregate: inst}} ->
+      {:ok, %{sessions: sessions, interactions: interactions, aggregate: aggregate}} ->
+        {inst, changed} = aggregate || {nil, false}
+        if changed, do: Devboxes.notify({:ok, inst}, :update)
         Enum.each(sessions, fn
           {%DevboxInstanceSession{imported: true}, _} -> :ok
           {session, prior} -> Tokens.record_delta(session.usage, prior, %{source: "devbox", agent: session.agent})
@@ -321,7 +324,7 @@ defmodule Console.Devboxes.Ingest do
       kind: enum(attrs[:kind], "session_kind_"),
       parent_acp_session_id: blank(attrs[:parent_session_id]),
       agent: enum(attrs[:agent], "agent_type_"),
-      title: blank(attrs[:title]),
+      title: title(attrs[:title]),
       cwd: blank(attrs[:cwd]) |> relative_cwd(),
       worktree_repos: attrs[:worktree_repos],
       status: enum(attrs[:status], "thread_status_"),
@@ -440,7 +443,7 @@ defmodule Console.Devboxes.Ingest do
       tool_call_id: blank(attrs[:tool_call_id]),
       kind: interaction_kind(attrs[:kind]),
       state: enum(attrs[:state], "interaction_state_"),
-      title: blank(attrs[:title]),
+      title: title(attrs[:title]),
       message: blank(Acp.get(elicitation, :message)),
       requested_schema: mapify(Acp.get(elicitation, :requested_schema)),
       url: blank(Acp.get(elicitation, :url)),
@@ -492,11 +495,13 @@ defmodule Console.Devboxes.Ingest do
   end
   defp apply_aggregate(_, _), do: {:ok, nil}
 
+  # the instance fields clients show; a change to any is broadcast on devboxInstanceStatusDelta
+  @aggregate_fields ~w(foreground_state running_threads waiting_threads agent_connections checkouts)a
+
   defp write_aggregate(inst, %{revision: rev} = agg) do
     case rev > (inst.index_revision || 0) do
       true ->
-        inst
-        |> DevboxInstance.changeset(drop_nils(%{
+        cs = DevboxInstance.changeset(inst, drop_nils(%{
           index_revision: rev,
           foreground_state: enum(agg[:foreground], "foreground_state_kind_"),
           running_threads: agg[:running_threads],
@@ -505,7 +510,9 @@ defmodule Console.Devboxes.Ingest do
           agent_connections: agg[:connections] && Enum.map(agg[:connections], &connection/1),
           checkouts: agg[:checkouts] && Enum.map(agg[:checkouts], &mapify/1)
         }))
-        |> Repo.update()
+        changed = Enum.any?(@aggregate_fields, &Ecto.Changeset.changed?(cs, &1))
+        with {:ok, inst} <- Repo.update(cs),
+          do: {:ok, {inst, changed}}
       false -> {:ok, nil}
     end
   end
@@ -923,6 +930,10 @@ defmodule Console.Devboxes.Ingest do
 
   defp blank(""), do: nil
   defp blank(v), do: v
+
+  # varchar(255) counts codepoints, which can outnumber the graphemes String.slice counts
+  defp title(v) when is_binary(v) and v != "", do: v |> String.codepoints() |> Enum.take(255) |> Enum.join()
+  defp title(_), do: nil
 
   defp drop_nils(map), do: Map.reject(map, fn {_, v} -> is_nil(v) end)
 end

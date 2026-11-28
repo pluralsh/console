@@ -29,6 +29,7 @@ defmodule Console.GraphQl.CustomTypes do
     parse fn
       %Blueprint.Input.String{value: value} ->
         parse_int(value)
+      %Blueprint.Input.Integer{value: value} -> {:ok, value}
       %Blueprint.Input.Null{} -> {:ok, nil}
       _ -> :error
     end

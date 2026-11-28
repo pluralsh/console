@@ -495,6 +495,9 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :viewer_count, :integer, resolve: &Deployments.devbox_viewer_count/3
     field :leases, list_of(:devbox_lease), resolve: &Deployments.devbox_leases/3
     field :agent_billing, list_of(:devbox_agent_billing), resolve: &Deployments.devbox_agent_billing/3
+    field :mcp_tools, list_of(:devbox_mcp_tool),
+      description: "the workbench MCP's integration tools, by the name agents call them",
+      resolve: &Deployments.devbox_mcp_tools/3
 
     field :workbench,     :workbench, resolve: dataloader(Deployments)
     field :devbox,        :devbox, resolve: dataloader(Deployments)
@@ -514,6 +517,14 @@ defmodule Console.GraphQl.Deployments.Devbox do
     end
 
     timestamps()
+  end
+
+  object :devbox_mcp_tool do
+    field :name,                non_null(:string), description: "the tool's name on the plural-workbench MCP server"
+    field :tool_type,           non_null(:workbench_tool_type), description: "the integration it calls"
+    field :provider,            :provider, description: "the cloud provider, for cloud tools"
+    field :workbench_tool_id,   non_null(:id)
+    field :workbench_tool_name, non_null(:string)
   end
 
   object :devbox_agent_connection do

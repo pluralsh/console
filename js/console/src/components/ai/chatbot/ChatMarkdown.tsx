@@ -9,6 +9,8 @@ import styled, { type DefaultTheme } from 'styled-components'
 import {
   DEVBOX_COMMAND_ATTRIBUTES,
   DEVBOX_COMMAND_TAG,
+  DEVBOX_ELEMENT_ATTRIBUTES,
+  DEVBOX_ELEMENT_TAG,
   DEVBOX_FILE_ATTRIBUTES,
   DEVBOX_FILE_TAG,
   DevboxMarkdownLink,
@@ -28,12 +30,14 @@ const chatSanitizeSchema = {
     ...(markdownSanitizeSchema.tagNames ?? []),
     PLRL_FILE_TAG,
     DEVBOX_FILE_TAG,
+    DEVBOX_ELEMENT_TAG,
     DEVBOX_COMMAND_TAG,
   ],
   attributes: {
     ...markdownSanitizeSchema.attributes,
     [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
     [DEVBOX_FILE_TAG]: DEVBOX_FILE_ATTRIBUTES,
+    [DEVBOX_ELEMENT_TAG]: DEVBOX_ELEMENT_ATTRIBUTES,
     [DEVBOX_COMMAND_TAG]: DEVBOX_COMMAND_ATTRIBUTES,
   },
 }

@@ -263,7 +263,7 @@ End to end on a cluster (e.g. `hack/kind-up.sh`), in this order:
 ### JuiceFS homes
 
 `juicefs.enabled: true` (opt-in; `juicefs.image.tag` is pinned to the chart's deployment-operator release) adds a JuiceFS filesystem a
-DevboxRunner can keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`,
+DevboxRunner could keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`, which DevboxRunners no longer accept: homes are [Block](#block-homes) or Snapshot;
 capped at `spec.home.size`, default `spec.resources.disk`). It reuses the chart's Postgres and
 bucket:
 
@@ -299,6 +299,10 @@ home is its own [ZeroFS](https://www.zerofs.net) filesystem under
 `<zerofs.prefix>/homes/<volume>/` in the snapshot bucket (or `zerofs.storageUrl`), encrypted with
 the password in `devbox-zerofs-encryption`. The secrets hook generates that secret once, or you can
 supply your own with `zerofs.encryption.existingSecret`. Losing the password loses every home.
+Both pods reach the bucket as ServiceAccount `devbox-zerofs`. Give it its own workload identity
+with list, get, put and delete on the bucket: an EKS Pod Identity association, or
+`zerofs.serviceAccount.annotations` for IRSA or Workload Identity (`zerofs.azureClientId` for Azure).
+Without one, the pods fall back to the node's credentials, and CreateVolume fails with `AccessDenied`.
 
 - **The controller** (`devbox-zerofs-controller`, unprivileged) passes a home's size and owner to
   the node and deletes the home's objects when Substrate deletes the volume. Only ate-api-server can
@@ -311,15 +315,65 @@ supply your own with `zerofs.encryption.existingSecret`. Losing the password los
   and mounts it at atelet's staging path. Publishing bind-mounts that into the actor. Unstaging
   unmounts the home, disconnects the device and stops the writer, which flushes to the bucket, so
   the home can be staged on any other node. `updateStrategy` is `OnDelete`, because restarting the
-  plugin ends every home on the node.
+  plugin ends every home on the node. While a ZeroFS DevboxRunner exists, the deployment-operator
+  rolls outdated plugin pods one node at a time, idlest first: it drains the node's ZeroFS workers,
+  waits for their devboxes to suspend (at most its drain timeout, 30 minutes by default), deletes the
+  plugin pod, and replaces the drained workers once the new plugin is ready.
 
-A DevboxRunner uses it with `spec.home.storage: ZeroFS`. Each template revision gets a seeded
+A DevboxRunner used it with `spec.home.storage: ZeroFS`, which DevboxRunners no longer accept (homes are Block or Snapshot). Each template revision gets a seeded
 StorageClass as with [JuiceFS](#juicefs-homes). The first home from it is the golden boot's. When
 Substrate deletes it, the controller copies its objects to `<zerofs.prefix>/seeds/<seed>/`, and every
 later home of the revision starts from a server-side copy of that prefix. Snapshots don't save the
 home, and starting from a snapshot fails with `UNSUPPORTED`. CreateVolume with a content source
 fails with `UNIMPLEMENTED`. Homes still count against `spec.resources.disk`, because each writer's
 cache sits on node disk.
+
+### Block homes
+
+`block.enabled: true` (opt-in; `block.image.tag` is pinned to the chart's deployment-operator release)
+adds a third home driver, `block.devbox.plural.sh` (StorageClass `block.storageClassName`): one disk
+per home, formatted ext4 and mounted by the node's kernel, with no userspace server or object store in
+the data path. The disks come from the CSI driver for disks the cluster already runs, the provider:
+`block.provider` (e.g. `ebs.csi.aws.com` or `pd.csi.storage.gke.io`), or by default the provisioner of
+the cluster's default StorageClass. The chart installs no provider and needs no cloud credentials: the
+provider's own install creates, attaches, formats, grows and snapshots the disks, driven through
+Kubernetes objects. The cluster must also serve VolumeSnapshots (the external-snapshotter CRDs and
+snapshot controller). `block.parameters` go to the provider for every disk, e.g. `type`, `iops`,
+`throughput` or `volumeInitializationRate`.
+
+- **The controller** (`devbox-block-controller`) records each home when Substrate creates it and
+  creates its disk on the first attach, as a PersistentVolumeClaim in the release namespace on a
+  StorageClass of the provider it creates, for the node Substrate picked. Substrate creates volumes
+  before it picks a worker, so the node isn't known any earlier. Each attach runs an anchor pod on the
+  node that mounts the claim, so the kubelet and the provider attach and mount the disk as for any pod.
+  An attach returns once the disk's VolumeAttachment is attached, and the node plugin waits for the
+  kubelet's mount; detaching deletes the anchor and waits for the disk's VolumeAttachment to go. An attach to a node in
+  another zone moves the disk there through a VolumeSnapshot. Disks grow, through their claims, to the
+  largest size any revision of their DevboxRunner asks for. The controller checks the provider when it
+  starts and every few minutes (its CSIDriver, the snapshot API and a VolumeSnapshotClass for it,
+  which it creates when there is none) and reports the result on its StorageClass, where the operator
+  reads it before a DevboxRunner uses block homes. Only ate-api-server can call it.
+- **The node plugin** (`devbox-block-node`) runs only where atelet runs. It bind-mounts the anchor's
+  mount of each disk to atelet's staging path, and gives a freshly formatted home to `block.home`'s
+  owner. It's privileged, to mount, and needs no Kubernetes API access. Restarting it doesn't end any
+  home, since the kernel owns the mounts, so it rolls normally.
+
+Anchor pods run one per running box, with `block.anchor.priorityClassName`, and count against each
+node's pod limit. Their defaults pass the restricted Pod Security Standard and the policies admission
+engines commonly ship (requests and limits, probes, non-root, a read-only root filesystem, no
+capabilities or host namespaces, their own token-less ServiceAccount). `block.anchor.podLabels`,
+`podAnnotations`, `resources`, `tolerations` and `hostNetwork` change them, and `block.anchor.overrides`
+merges any other part of the pod; the controller reads them from the `devbox-block-anchor-template`
+ConfigMap and restarts when they change. The controller and node pods take `podLabels`,
+`podAnnotations` and `resources` too, and have probes and CPU and memory limits; the node plugin is
+privileged, so admission policies need an exception for it as for ZeroFS's and JuiceFS's. DevboxRunners keep their homes on block disks by default (`spec.home.storage: Block`; `Snapshot` keeps them on the node instead), so turn on `block.enabled` with `devboxes.enabled`,
+and the operator runs one WorkerPool per zone, in the zones of the nodes its workers select (or
+`spec.workerPool.zones`, to choose them); the gateway keeps each box in its home's zone, moving a box whose
+zone was dropped. Each template revision
+gets a seeded StorageClass as with [JuiceFS](#juicefs-homes). The first home from it is the golden
+boot's; when Substrate deletes it, the controller snapshots its disk, and every later home of the
+revision is created from that snapshot, in any zone. Snapshots of seeds no StorageClass names any more
+are deleted.
 
 ## Values
 
@@ -349,7 +403,8 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 | `devboxes.{enabled,gatewayNamespace,routeTimeout,operatorServiceAccount}` | `false`, `plrl-deploy-operator`, `1h`, `plrl-deploy-operator/deployment-operator` | [devboxes preset](#devboxes) |
 | `k8sCredentialProvider.namespacePolicies` | `[]` | atespace allow-list |
 | `podCertificateController.*` | | namespace, workers, QPS/burst |
-| `sandboxConfigs.gvisor.enabled` / `.microvm.*` | `true` / `false` | SandboxConfigs (microVM assets must already be staged) |
+| `sandboxConfigs.gvisor.enabled` / `.microvm.*` | `true` / `false` | SandboxConfigs; microVM assets default to `<snapshot bucket>/microvm-assets/` in the backend's scheme (on Azure, the blob's https URL in `accountUrl`) |
+| `assetStaging.*` | disabled | post-install/upgrade Job that stages the microVM assets on any backend |
 | `networkPolicies.enabled` | `true` | NetworkPolicies |
 | `postgres.mode` | `cnpg` | `cnpg` or `external` |
 | `postgres.cnpg.{instances,storage,walStorage,preset,resources,parameters,affinity,backup,keepOnUninstall}` | 1 instance, 20Gi | CNPG Cluster |
@@ -368,7 +423,8 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 - The API config and env ConfigMaps are Helm-rendered; the authentication config is written by the
   secrets hook (it needs the cluster's discovered issuer).
 - Only the Envoy dataplane is implemented; `atenet.dataplane: agentgateway` fails to render.
-- `microvm` SandboxConfig assets aren't staged by the chart (`ate-setup deploy sandboxconfig` does).
+- `microvm` SandboxConfig assets are staged by the chart's `assetStaging` Job, on S3, GCS or Azure Blob,
+  instead of `ate-setup deploy sandboxconfig` (GCS/Kind only).
 - `size10` pool parameters are added to CNPG DSNs only; external DSNs are used as given.
 - The `acr` preset reads the node's `/etc/kubernetes/azure.json`; verify it on your AKS node image.
 - CNPG backups use the in-tree `barmanObjectStore`, deprecated upstream in favour of the Barman

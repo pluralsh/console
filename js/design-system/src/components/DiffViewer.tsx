@@ -16,6 +16,11 @@ export type { ReactDiffViewerProps }
 const opacity = (color: string, amount: number) =>
   chroma(color).alpha(amount).hex()
 
+// saturated hues (as in GitHub and Cursor) so tinted rows read as red or green over any fill, with changed
+// words clearly stronger than their row; the palette's own reds and greens go muddy at these opacities
+const DIFF_RED = '#f85149'
+const DIFF_GREEN = '#3fb950'
+
 export type DiffViewerProps = Omit<
   ReactDiffViewerProps,
   'leftTitle' | 'rightTitle'
@@ -34,10 +39,18 @@ export function DiffViewer({
   const theme = useTheme()
 
   const mergedStyles = useMemo(() => {
-    const commonColors = {
+    const colors = {
       diffViewerBackground: 'transparent',
       gutterBackground: 'transparent',
       codeFoldGutterBackground: 'transparent',
+      addedColor: theme.colors.text,
+      removedColor: theme.colors.text,
+      removedBackground: opacity(DIFF_RED, 0.18),
+      removedGutterBackground: opacity(DIFF_RED, 0.18),
+      wordRemovedBackground: opacity(DIFF_RED, 0.4),
+      addedBackground: opacity(DIFF_GREEN, 0.16),
+      addedGutterBackground: opacity(DIFF_GREEN, 0.16),
+      wordAddedBackground: opacity(DIFF_GREEN, 0.4),
     }
 
     return merge(
@@ -69,24 +82,8 @@ export function DiffViewer({
         emptyLine: { backgroundColor: 'transparent' },
         diffContainer: { wordBreak: 'break-word', tabSize: 2, minWidth: 0 },
         variables: {
-          dark: {
-            ...commonColors,
-            removedBackground: opacity(theme.colors.red[800], 0.2),
-            removedGutterBackground: opacity(theme.colors.red[800], 0.2),
-            wordRemovedBackground: opacity(theme.colors.red[500], 0.15),
-            addedBackground: opacity(theme.colors.green[850], 0.2),
-            addedGutterBackground: opacity(theme.colors.green[850], 0.2),
-            wordAddedBackground: opacity(theme.colors.green[600], 0.15),
-          },
-          light: {
-            ...commonColors,
-            removedBackground: opacity(theme.colors.red[100], 0.2),
-            removedGutterBackground: opacity(theme.colors.red[100], 0.2),
-            wordRemovedBackground: opacity(theme.colors.red[500], 0.07),
-            addedBackground: opacity(theme.colors.green[100], 0.2),
-            addedGutterBackground: opacity(theme.colors.green[100], 0.2),
-            wordAddedBackground: opacity(theme.colors.green[600], 0.07),
-          },
+          dark: colors,
+          light: colors,
         },
       },
       styles

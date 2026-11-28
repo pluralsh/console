@@ -60,8 +60,16 @@ func TestFileIndexSearch(t *testing.T) {
 	want := []string{
 		"/home/api/src/components/Button.tsx", "/home/api/docs/buttons.md", "/home/api/src/components/ButtonGroup.tsx",
 	}
-	if got := search("/home", "button", false, 10); !slices.Equal(got, want) {
-		t.Fatalf("name prefixes, shortest first, nothing hidden: %v", got)
+	if got := search("/home/api/src", "button", false, 10); !slices.Equal(got, []string{want[0], want[2]}) {
+		t.Fatalf("name prefixes, shortest first: %v", got)
+	}
+	if got := search("/home", "button", false, 10); !slices.Contains(got, "/home/api/.github/button.yml") {
+		t.Fatalf("a checkout's dot paths are searched: %v", got)
+	}
+	if kids, _ := idx.children("/home/api", false, 10); !slices.ContainsFunc(kids, func(e *devboxv1.FileEntry) bool {
+		return e.GetName() == ".github"
+	}) {
+		t.Fatalf("a checkout's dot directories are listed: %v", kids)
 	}
 	if got := search("/home/api", "btn", false, 10); !slices.Contains(got, "/home/api/src/components/Button.tsx") ||
 		slices.Contains(got, "/home/api/src/utils/bundle.ts") {
@@ -76,10 +84,10 @@ func TestFileIndexSearch(t *testing.T) {
 	if got := search("/home/api/src/utils", "button", false, 10); len(got) != 0 {
 		t.Fatalf("scoped to root: %v", got)
 	}
-	if got, more := best(idx, "/home", "button", false, 1); len(got) != 1 || got[0].GetPath() != want[0] || !more {
+	if got, more := best(idx, "/home/api/src", "button", false, 1); len(got) != 1 || got[0].GetPath() != want[0] || !more {
 		t.Fatalf("limit keeps the best and says there's more: %v %t", paths(got), more)
 	}
-	if _, more := best(idx, "/home", "button", false, 3); more {
+	if _, more := best(idx, "/home", "button", false, 4); more {
 		t.Fatal("exactly the limit isn't more")
 	}
 	found, _ := best(idx, "/home", "components", false, 1)
@@ -92,7 +100,8 @@ func TestFileIndexSearch(t *testing.T) {
 	if idx.Len() != before-3 {
 		t.Fatalf("size %d after removing 3 of %d", idx.Len(), before)
 	}
-	if got := search("/home", "button", false, 10); !slices.Equal(got, []string{"/home/api/docs/buttons.md"}) {
+	if got := search("/home/api/docs", "button", false, 10); !slices.Equal(got, []string{"/home/api/docs/buttons.md"}) ||
+		slices.Contains(search("/home", "button", false, 10), "/home/api/src/components/Button.tsx") {
 		t.Fatalf("after remove: %v", got)
 	}
 	// the removed names no longer count toward the subtree's characters
@@ -208,8 +217,8 @@ func TestSearchServedFromWatchIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := paths(brief.GetEntries()); !slices.Equal(got, []string{filepath.Join(repo, "docs"), filepath.Join(repo, "handler-link"),
-		filepath.Join(repo, "src"), filepath.Join(repo, "yarn.lock")}) {
+	if got := paths(brief.GetEntries()); !slices.Equal(got, []string{filepath.Join(repo, ".gitignore"), filepath.Join(repo, "docs"),
+		filepath.Join(repo, "handler-link"), filepath.Join(repo, "src"), filepath.Join(repo, "yarn.lock")}) {
 		t.Fatalf("brief listing: %v", got)
 	}
 	// hidden from the index but still on disk, so only a disk read would find it
@@ -278,6 +287,7 @@ func TestSearchBeyondTheIndex(t *testing.T) {
 	home := t.TempDir()
 	repo := gittest.Repo(t, filepath.Join(home, "api"), map[string]string{
 		".gitignore": "*.log\n", "src/deep/nested/handler.go": "x", "src/debug.log": "x",
+		".github/workflows/ci.yml": "x",
 	})
 	gittest.Write(t, home, map[string]string{"notes/2026/handler-plan.md": "x", ".hidden/handler.txt": "x"})
 	gittest.Write(t, repo, map[string]string{"src/untracked_handler.go": "x"})
@@ -287,6 +297,9 @@ func TestSearchBeyondTheIndex(t *testing.T) {
 		filepath.Join(repo, "src/deep/nested/handler.go"), filepath.Join(repo, "src/untracked_handler.go"),
 	}) {
 		t.Fatalf("checkout: %v", got)
+	}
+	if got := paths(searchOf(t, s, "", "ci.yml", 0).GetEntries()); !slices.Contains(got, filepath.Join(repo, ".github/workflows/ci.yml")) {
+		t.Fatalf("a checkout's dot paths: %v", got)
 	}
 	if got := paths(searchOf(t, s, filepath.Join(repo, "src"), "debug", 0).GetEntries()); len(got) != 0 {
 		t.Fatalf("ignored file: %v", got)

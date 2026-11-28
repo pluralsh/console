@@ -5,9 +5,15 @@ Dockerfiles for the devbox sandbox and gateway images (DBX-49). All builds use
 
 | Image | Dockerfile | Contents |
 |---|---|---|
-| `ghcr.io/pluralsh/devbox-minimal` | `minimal.Dockerfile` | `devbox-daemon` (PID 1), every harness and ACP adapter, Node, Chromium, Xvfb, x11vnc, Playwright MCP, shell tools, `mise` |
-| `ghcr.io/pluralsh/devbox-fat` | `fat.Dockerfile` | `devbox-minimal` plus language toolchains, DevOps tools, cloud CLIs and rootless Podman (`docker` and `docker compose` map onto it) |
+| `ghcr.io/pluralsh/devbox-minimal` | `minimal.Dockerfile` | `devbox-daemon` (PID 1), every harness and ACP adapter, Node, Chromium, Xvfb, voxl, Playwright MCP, shell tools, `mise` |
+| `ghcr.io/pluralsh/devbox-fat` | `fat.Dockerfile` | `devbox-minimal` plus language toolchains, DevOps tools, cloud CLIs, the Bitbucket CLI `bkt` (`gh` and `glab` come from `devbox-minimal`) and Podman (`docker` and `docker compose` map onto it), which runs rootful in a box-wide user namespace and only on microVM runners |
 | `ghcr.io/pluralsh/devbox-gateway` | `gateway.Dockerfile` | `devbox-gateway` on distroless |
+| `ghcr.io/pluralsh/devbox-voxl` | `voxl.Dockerfile` | a statically linked `voxl` at `/voxl` (amd64, arm64), which `devbox-minimal` copies |
+
+`devbox-voxl` is published by `.github/workflows/devbox-voxl.yaml`, tagged with
+voxl's version, from master (or a pull request that introduces a new version);
+bump `VOXL_IMAGE` in `minimal.Dockerfile` with `VOXL_VERSION`. Its build context
+is `dockerfiles/devbox`.
 
 Published by `.github/workflows/deployment-operator-cd-devbox.yaml` on
 `go/deployment-operator/v*` tags, with `X.Y.Z` and `X.Y` tags, cosign-signed by
@@ -57,5 +63,5 @@ afterwards unless `KEEP_IMAGES=1`.
 | Trust store | `/var/lib/devbox/trust/` (`$DEVBOX_TRUST_DIR`, owned by `dev`). Write `ca-bundle.pem` = `/etc/ssl/certs/ca-certificates.crt` + egress CA, replacing the build-time symlink. In `devbox-fat`, also import the egress CA into `java-cacerts` (PKCS12, password `changeit`) |
 | Identities | `/run/plural/identity/<name>/token` (`$DEVBOX_IDENTITY_DIR`) plus `/run/plural/identity/env`, `KEY=value` lines loaded by shells and the cloud CLI wrappers |
 | Subscription credentials | `/run/plural/agent-auth/` (the daemon's `--agent-auth-dir` default, mode 0700), e.g. `codex/auth.json` |
-| Browser | `$DEVBOX_CHROMIUM` (`/usr/bin/chromium`), `Xvfb`, `x11vnc`, `DISPLAY=:99`, `playwright-mcp` |
+| Browser | `$DEVBOX_CHROMIUM` (`/usr/bin/chromium`), `Xvfb`, `voxl` (streams the display as H.264), `DISPLAY=:99`, `playwright-mcp` |
 | Agents | `/etc/devbox/image.json` (`harness.ImageInfo`): `contract`, `flavor`, `daemonVersion`, `playwrightMcp` (command), and per agent its command, version and ACP command/args |

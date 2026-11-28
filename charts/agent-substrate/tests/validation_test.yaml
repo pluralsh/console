@@ -118,9 +118,17 @@ tests:
       - failedTemplate:
           errorPattern: clusterSize
 
-  - it: microvm needs its asset bucket
+  - it: microvm defaults its asset bucket to the snapshot location's
     set:
       sandboxConfigs.microvm.enabled: true
     asserts:
+      - notFailedTemplate: {}
+
+  - it: microvm needs its asset bucket without a snapshot location
+    set:
+      sandboxConfigs.microvm.enabled: true
+      objectStore.snapshotLocation: ""
+      previewGates: [PerTemplateSnapshotLocation]
+    asserts:
       - failedTemplate:
-          errorPattern: microvm
+          errorPattern: microvm needs assetBucket

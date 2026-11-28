@@ -80,6 +80,31 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert iid == interaction.id
     end
 
+    test "it maps the workbench MCP's tool names to their integrations" do
+      user = insert(:user)
+      bench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      github = insert(:workbench_tool, tool: :github, name: "gh", categories: [:scm],
+        configuration: %{github: %{access_token: "token"}})
+      slack = insert(:workbench_tool, tool: :slack, name: "chat", categories: [:chat],
+        configuration: %{slack: %{bot_token: "xoxb-test"}})
+      insert(:workbench_tool_association, workbench: bench, tool: github)
+      insert(:workbench_tool_association, workbench: bench, tool: slack)
+      inst = insert(:devbox_instance, workbench: bench)
+
+      {:ok, %{data: %{"devboxInstance" => %{"mcpTools" => tools}}}} = run_query("""
+        query Instance($id: ID!) {
+          devboxInstance(id: $id) { mcpTools { name toolType provider workbenchToolId workbenchToolName } }
+        }
+      """, %{"id" => inst.id}, %{current_user: user})
+
+      by_name = Map.new(tools, &{&1["name"], &1})
+      assert %{"toolType" => "GITHUB", "workbenchToolId" => gid, "workbenchToolName" => "gh", "provider" => nil} =
+        by_name["github_gh_close_pull_request"]
+      assert gid == github.id
+      assert Enum.any?(tools, &(&1["toolType"] == "SLACK" && &1["workbenchToolId"] == slack.id))
+      assert Enum.all?(tools, &(&1["toolType"] in ["GITHUB", "SLACK"]))
+    end
+
     test "it lists subagents with the threads that spawned them" do
       user = insert(:user)
       inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
@@ -273,6 +298,22 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert tool["toolCall"]["content"] == [%{"path" => "a.ex", "oldText" => "a", "newText" => "b"}]
       assert tool["toolCall"]["locations"] == [%{"path" => "a.ex", "line" => 3}]
       assert term["terminal"] == %{"command" => "mix", "exitCode" => 0}
+    end
+
+    test "it pages backwards from a position given as a number or a string" do
+      user = insert(:user)
+      inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+      expect(Control.Test, :get_timeline, 2, fn _, "s", %{before: 12} ->
+        {:ok, %{delta_offset: 0, seq: 0, stream: "", has_more: false, entities: []}}
+      end)
+
+      for before <- [12, "12"] do
+        {:ok, %{data: %{"devboxTimeline" => %{"hasMore" => false}}}} = run_query("""
+          query Timeline($id: ID!, $before: Long) {
+            devboxTimeline(instanceId: $id, sessionId: "s", before: $before) { hasMore }
+          }
+        """, %{"id" => inst.id, "before" => before}, %{current_user: user})
+      end
     end
 
     test "it returns a typed error when the cluster is offline" do

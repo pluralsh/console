@@ -33,6 +33,7 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     minWidth: 0,
     display: 'flex',
     overflow: 'hidden',
+    gap: theme.spacing.xxsmall,
 
     '&:hover': {
       backgroundColor: theme.colors['fill-zero-hover'],
@@ -41,6 +42,15 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
       backgroundColor: theme.colors['fill-zero-selected'],
       color: theme.colors.text,
+    },
+  },
+
+  [`& .${treeItemClasses.iconContainer}`]: {
+    width: FILE_TREE_GLYPH_SIZE,
+    color: theme.colors['icon-light'],
+
+    '& svg': {
+      fontSize: FILE_TREE_GLYPH_SIZE,
     },
   },
 

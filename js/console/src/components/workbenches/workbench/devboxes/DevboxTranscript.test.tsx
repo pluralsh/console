@@ -5,12 +5,18 @@ import {
   DevboxEntityFragment,
   DevboxEntityType,
   DevboxToolCallContentType,
+  WorkbenchToolType,
 } from 'generated/graphql'
 import { ReactNode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { DevboxTranscript, TranscriptPlacement } from './DevboxTranscript'
+import {
+  DevboxTranscript,
+  thoughtDuration,
+  TranscriptPlacement,
+} from './DevboxTranscript'
+import { McpToolIndexContext, mcpToolIndex } from './devboxIntegrations'
 import { acpContentBlock, acpToolCallContent } from './devboxTimeline'
 
 vi.mock('components/ai/chatbot/ChatMarkdown', async (importOriginal) => ({
@@ -97,6 +103,60 @@ describe('DevboxTranscript', () => {
       </ThemeProvider>
     )
     expect(thinking(container)).toEqual([false])
+  })
+
+  it('says how long a finished thought took', () => {
+    const at = (s: number) =>
+      new Date(Date.UTC(2026, 0, 1, 0, 0, s)).toISOString()
+    const { container } = renderTranscript(
+      <DevboxTranscript
+        running
+        entities={[
+          entity({
+            type: DevboxEntityType.AgentThought,
+            position: 1,
+            createdAt: at(0),
+            updatedAt: at(4),
+            message: { content: [text('long')] },
+          }),
+          entity({
+            type: DevboxEntityType.AgentThought,
+            position: 2,
+            createdAt: at(10),
+            updatedAt: at(11),
+            message: { content: [text('short')] },
+          }),
+          entity({
+            type: DevboxEntityType.AgentThought,
+            position: 3,
+            createdAt: at(20),
+            updatedAt: at(30),
+            message: { content: [text('ongoing')] },
+          }),
+        ]}
+      />
+    )
+    expect(
+      [...container.querySelectorAll('[data-entity="agent-thought"]')].map(
+        (n) => n.textContent?.replace(/long|short|ongoing/, '').trim()
+      )
+    ).toEqual(['Thought 4s', 'Thought briefly', 'Thinking'])
+  })
+
+  it('formats thought durations', () => {
+    const took = (ms: number) =>
+      thoughtDuration({
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: new Date(
+          Date.parse('2026-01-01T00:00:00.000Z') + ms
+        ).toISOString(),
+      })
+    expect(took(1999)).toBe('briefly')
+    expect(took(2000)).toBe('2s')
+    expect(took(59_400)).toBe('59s')
+    expect(took(65_000)).toBe('1m 5s')
+    expect(took(120_000)).toBe('2m')
+    expect(thoughtDuration({ createdAt: null, updatedAt: null })).toBeNull()
   })
 
   it('renders each known entity kind', () => {
@@ -332,6 +392,43 @@ describe('DevboxTranscript', () => {
     expect(screen.getByText('Not approved by Codex reviewer')).toBeTruthy()
     expect(screen.queryByText('Guardian Review')).toBeNull()
     expect(screen.queryByText('think')).toBeNull()
+  })
+
+  it('labels a workbench MCP call with its integration and action', () => {
+    renderTranscript(
+      <McpToolIndexContext
+        value={mcpToolIndex([
+          {
+            name: 'github_gh_close_pull_request',
+            toolType: WorkbenchToolType.Github,
+            workbenchToolId: 'wt-gh',
+            workbenchToolName: 'gh',
+          },
+        ])}
+      >
+        <DevboxTranscript
+          entities={[
+            entity({
+              type: DevboxEntityType.ToolCall,
+              position: 1,
+              toolCall: {
+                toolCallId: 'toolu_1',
+                title: 'mcp__plural-workbench__github_gh_close_pull_request',
+                kind: 'other',
+                status: 'completed',
+                rawInput: { pull_request: 3 },
+                content: [],
+              },
+            }),
+          ]}
+        />
+      </McpToolIndexContext>
+    )
+    expect(screen.getByText('GitHub')).toBeTruthy()
+    expect(screen.getByText('close pull request')).toBeTruthy()
+    expect(
+      screen.queryByText(/mcp__plural-workbench__github_gh_close_pull_request/)
+    ).toBeNull()
   })
 
   it('puts a subagent in place of the tool call that spawned it', () => {

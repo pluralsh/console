@@ -14,6 +14,7 @@ import isJson from 'is-json'
 import { isEmpty } from 'lodash'
 import {
   ReactNode,
+  type RefObject,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -322,6 +323,59 @@ function AnsiOutput({ text }: { text: string }) {
   )
 }
 
+/** Lines a preview shows when expanded before it scrolls instead. */
+export const EXPANDED_PREVIEW_LINES = 16
+
+/** Whether a line-clamped element overflows its clamp, re-measured on resize. */
+export function useCanExpand({
+  ref,
+  contentKey,
+  expanded,
+  disabled = false,
+}: {
+  ref: RefObject<HTMLElement | null>
+  contentKey: string
+  expanded: boolean
+  disabled?: boolean
+}) {
+  const [canExpand, setCanExpand] = useState(false)
+
+  useLayoutEffect(() => {
+    if (disabled) return
+
+    const element = ref.current
+    if (!element) return
+
+    const updateCanExpand = () => {
+      const nextCanExpand = element.scrollHeight > element.clientHeight + 1
+      setCanExpand((prev) => {
+        // Keep the control visible while expanded even if scrollHeight shrinks to fit.
+        const next = expanded ? prev || nextCanExpand : nextCanExpand
+        return prev === next ? prev : next
+      })
+    }
+
+    updateCanExpand()
+
+    const resizeObserver = new ResizeObserver(updateCanExpand)
+    resizeObserver.observe(element)
+
+    return () => resizeObserver.disconnect()
+  }, [ref, contentKey, expanded, disabled])
+
+  return !disabled && canExpand
+}
+
+/** Expansion that resets whenever the previewed content changes. */
+export function useExpandedFor(contentKey: string) {
+  const [expandedKey, setExpandedKey] = useState<string | null>(null)
+
+  return [
+    expandedKey === contentKey,
+    () => setExpandedKey((key) => (key === contentKey ? null : contentKey)),
+  ] as const
+}
+
 /** Boxed preview panel: content clamps on whole lines; Show more sits inside the box. */
 export function PreviewablePanel({
   children,
@@ -348,37 +402,14 @@ export function PreviewablePanel({
   /** Sweep the loading shimmer across text inside the box, including code. */
   shimmer?: boolean
 }) {
-  const [expandedContentKey, setExpandedContentKey] = useState<string | null>(
-    null
-  )
-  const [canExpand, setCanExpand] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
-  const expanded = expandedContentKey === contentKey
-
-  useLayoutEffect(() => {
-    if (unclamped) return
-
-    const element = contentRef.current
-    if (!element) return
-
-    const updateCanExpand = () => {
-      const nextCanExpand = element.scrollHeight > element.clientHeight + 1
-      setCanExpand((prev) => {
-        // Keep the control visible while expanded even if scrollHeight shrinks to fit.
-        const next = expanded ? prev || nextCanExpand : nextCanExpand
-        return prev === next ? prev : next
-      })
-    }
-
-    updateCanExpand()
-
-    const resizeObserver = new ResizeObserver(updateCanExpand)
-    resizeObserver.observe(element)
-
-    return () => resizeObserver.disconnect()
-  }, [contentKey, expanded, unclamped])
-
-  const showExpand = !unclamped && canExpand
+  const [expanded, toggleExpanded] = useExpandedFor(contentKey)
+  const showExpand = useCanExpand({
+    ref: contentRef,
+    contentKey,
+    expanded,
+    disabled: unclamped,
+  })
 
   return (
     <PreviewBoxSC
@@ -391,7 +422,7 @@ export function PreviewablePanel({
         ref={contentRef}
         $expanded={expanded}
         $flushBottom={showExpand}
-        $fade={!unclamped && !expanded && canExpand}
+        $fade={showExpand && !expanded}
         $collapsedLines={collapsedLines}
         $unclamped={unclamped}
         $shimmer={shimmer}
@@ -402,11 +433,7 @@ export function PreviewablePanel({
         <ShowMoreSC
           type="button"
           aria-expanded={expanded}
-          onClick={() =>
-            setExpandedContentKey((key) =>
-              key === contentKey ? null : contentKey
-            )
-          }
+          onClick={toggleExpanded}
         >
           {expanded ? 'Show less' : 'Show more'}
         </ShowMoreSC>
@@ -488,6 +515,11 @@ const PreviewHeaderSC = styled.div(({ theme }) => ({
   borderBottom: theme.borders['fill-two'],
 }))
 
+export const previewFadeCss = {
+  maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+  WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+}
+
 const PreviewContentSC = styled.div<{
   $expanded: boolean
   $flushBottom: boolean
@@ -514,14 +546,11 @@ const PreviewContentSC = styled.div<{
     maxHeight: $unclamped
       ? 'none'
       : $expanded
-        ? '16lh'
+        ? `${EXPANDED_PREVIEW_LINES}lh`
         : `${$collapsedLines}lh`,
     overflow: $unclamped ? 'visible' : $expanded ? 'auto' : 'hidden',
     color: theme.colors['text-long-form'],
-    ...($fade && {
-      maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
-      WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
-    }),
+    ...($fade && previewFadeCss),
     ...($shimmer && shimmerWithinCss(theme)),
   })
 )

@@ -1,6 +1,7 @@
 import { styledThemeDark } from '@pluralsh/design-system'
 import {
   act,
+  cleanup,
   fireEvent,
   render,
   screen,
@@ -26,6 +27,7 @@ import {
   slashCommandHint,
 } from './devboxSlashCommands'
 import { getMentionQuery } from './devboxFileMentions'
+import { addToPrompt } from './devboxPromptInserts'
 import { serializeEditableDiv } from 'components/utils/contentEditableChips'
 
 const commands = [
@@ -189,7 +191,7 @@ describe('DevboxComposer file mentions', () => {
 
     fireEvent.keyDown(prompt, { key: 'Enter' })
     expect(valueOf(prompt)).toBe('look at @src/')
-    expect(listFiles).toHaveBeenLastCalledWith('src', { brief: true })
+    expect(listFiles).toHaveBeenLastCalledWith('src')
 
     await screen.findByText('main.go')
     fireEvent.keyDown(prompt, { key: 'ArrowDown' })
@@ -297,6 +299,166 @@ describe('DevboxComposer file mentions', () => {
       dir: 'src/',
       leaf: 'ma',
     })
+  })
+})
+
+describe('DevboxComposer picked elements', () => {
+  const element = {
+    url: 'http://localhost:3000/settings',
+    selector: 'button[data-testid="save"]',
+    tag: 'button',
+    text: 'Save changes',
+    html: '<button data-testid="save">Save changes</button>',
+  }
+
+  it('adds an element picked in the browser to the prompt as a chip', () => {
+    const { prompt, onSubmit } = renderComposer({ insertsFor: 'box-1' })
+    type(prompt, 'make this blue')
+    act(() => addToPrompt('box-1', element))
+    expect(prompt.querySelector('[data-chip]')?.textContent).toBe(
+      '<button> Save changes'
+    )
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    expect(onSubmit).toHaveBeenCalledWith(
+      'make this blue <plrl-devbox-element url="http://localhost:3000/settings" selector="button[data-testid=&quot;save&quot;]" tag="button" text="Save changes" html="&lt;button data-testid=&quot;save&quot;&gt;Save changes&lt;/button&gt;"></plrl-devbox-element>',
+      []
+    )
+  })
+
+  it('keeps an element picked before the composer mounts, for its box only', () => {
+    addToPrompt('box-2', element)
+    const { prompt } = renderComposer({ insertsFor: 'box-3' })
+    expect(prompt.querySelector('[data-chip]')).toBeNull()
+    cleanup()
+    const next = renderComposer({ insertsFor: 'box-2' })
+    expect(next.prompt.querySelector('[data-chip]')?.textContent).toBe(
+      '<button> Save changes'
+    )
+  })
+})
+
+describe('DevboxComposer drafts', () => {
+  it('restores the prompt and attachments after the composer unmounts', () => {
+    const key = 'thread-draft'
+    const notes = new File(['x'], 'notes.md', { type: 'text/plain' })
+    const first = render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    const prompt = screen.getByLabelText('Prompt')
+    type(prompt, 'finish the game')
+    fireEvent.paste(prompt, { clipboardData: { files: [notes] } })
+    first.unmount()
+
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    expect(valueOf(screen.getByLabelText('Prompt'))).toBe('finish the game')
+    expect(screen.getByText('notes.md')).toBeTruthy()
+  })
+
+  it('restores file and element chips as chips', () => {
+    const key = 'chip-draft'
+    const first = render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          insertsFor="box-draft"
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    act(() =>
+      addToPrompt('box-draft', {
+        url: 'http://localhost:3000/',
+        selector: '#save',
+        tag: 'button',
+        text: 'Save',
+      })
+    )
+    first.unmount()
+
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    const prompt = screen.getByLabelText('Prompt')
+    expect(prompt.querySelector('[data-chip]')?.textContent).toBe(
+      '<button> Save'
+    )
+    expect(valueOf(prompt)).toContain('<plrl-devbox-element ')
+  })
+
+  it('does not restore a draft into a different session', () => {
+    const first = render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey="thread-a"
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    type(screen.getByLabelText('Prompt'), 'only for a')
+    first.unmount()
+
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey="thread-b"
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    expect(valueOf(screen.getByLabelText('Prompt'))).toBe('')
+  })
+
+  it('forgets the draft once the prompt is sent', () => {
+    const key = 'thread-sent'
+    const onSubmit = vi.fn()
+    const first = render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={onSubmit}
+        />
+      </ThemeProvider>
+    )
+    const prompt = screen.getByLabelText('Prompt')
+    type(prompt, 'ship it')
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    expect(onSubmit).toHaveBeenCalledWith('ship it', [])
+    first.unmount()
+
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxComposer
+          commands={commands}
+          draftKey={key}
+          onSubmit={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    expect(valueOf(screen.getByLabelText('Prompt'))).toBe('')
   })
 })
 

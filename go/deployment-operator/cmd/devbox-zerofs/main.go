@@ -25,6 +25,8 @@ import (
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/go-logr/logr"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/gcsblob"
@@ -71,7 +73,10 @@ type options struct {
 	storeOptions   stringList
 	nbdsMax        int
 	cacheDiskGB    float64
+	cacheDiskPct   float64
+	cacheDiskMaxGB float64
 	cacheMemoryGB  float64
+	parkedCacheGB  float64
 	mountOptions   string
 }
 
@@ -79,7 +84,7 @@ func main() {
 	o := &options{}
 	flag.StringVar(&o.mode, "mode", "", "controller or node")
 	flag.StringVar(&o.storageURL, "storage-url", os.Getenv("ZEROFS_STORAGE_URL"), "where volumes live: s3://, gs:// or azure://<bucket>/<path> (ZEROFS_STORAGE_URL)")
-	flag.StringVar(&o.health, "health-address", ":9821", "where /healthz answers once the plugin can serve")
+	flag.StringVar(&o.health, "health-address", ":9821", "where /healthz answers once the plugin can serve, and the node plugin serves /metrics")
 	flag.StringVar(&o.mountinfo, "mountinfo", "/proc/self/mountinfo", "the mount table to watch")
 
 	flag.StringVar(&o.listen, "listen", ":9820", "controller: the mTLS gRPC address")
@@ -99,9 +104,12 @@ func main() {
 	flag.Var(&o.nbdClientFlags, "nbd-client-flag", "node: an extra nbd-client flag when attaching a device, repeatable")
 	flag.Var(&o.storeOptions, "object-store-option", "node: an object_store `key=value` for every writer, such as allow_http=true, repeatable")
 	flag.IntVar(&o.nbdsMax, "nbds-max", 128, "node: the NBD devices to ask for when loading the nbd module, 0 to leave it alone")
-	flag.Float64Var(&o.cacheDiskGB, "cache-disk-gb", 10, "node: each writer's disk cache")
+	flag.Float64Var(&o.cacheDiskGB, "cache-disk-gb", 10, "node: the smallest disk cache a writer gets")
+	flag.Float64Var(&o.cacheDiskPct, "cache-disk-percent", 50, "node: each writer's disk cache as a percent of its volume's capacity, within --cache-disk-gb and --cache-disk-max-gb")
+	flag.Float64Var(&o.cacheDiskMaxGB, "cache-disk-max-gb", 100, "node: the largest disk cache a writer gets; 0 is no cap")
 	flag.Float64Var(&o.cacheMemoryGB, "cache-memory-gb", 0.25, "node: each writer's memory cache")
-	flag.StringVar(&o.mountOptions, "mount-options", "discard", "node: the ext4 mount's data options")
+	flag.Float64Var(&o.parkedCacheGB, "parked-cache-gb", 20, "node: the disk the caches of volumes no longer staged here may hold in all, so a home staged here again starts warm; 0 keeps none")
+	flag.StringVar(&o.mountOptions, "mount-options", "", "node: the ext4 mount's data options")
 	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
 	if *showVersion {
@@ -216,11 +224,17 @@ func runNode(ctx context.Context, o *options, storage zerofs.Storage, log logr.L
 		ObjectStoreOptions: storeOptions,
 		StateRoot:          o.stateRoot,
 		SocketDir:          o.socketDir,
-		Cache:              zerofs.CacheConfig{DiskGB: o.cacheDiskGB, MemoryGB: o.cacheMemoryGB},
-		MountOptions:       o.mountOptions,
-		Mountinfo:          o.mountinfo,
-		SysBlock:           "/sys/block",
-		Log:                log,
+		Cache: zerofs.CacheConfig{
+			DiskPercent: o.cacheDiskPct,
+			MinDiskGB:   o.cacheDiskGB,
+			MaxDiskGB:   o.cacheDiskMaxGB,
+			MemoryGB:    o.cacheMemoryGB,
+		},
+		ParkedCacheBytes: int64(o.parkedCacheGB * (1 << 30)),
+		MountOptions:     o.mountOptions,
+		Mountinfo:        o.mountinfo,
+		SysBlock:         "/sys/block",
+		Log:              log,
 	}
 	if err := manager.DetachStale(ctx, o.targetRoot); err != nil {
 		log.Error(err, "detaching stale volumes")
@@ -251,8 +265,12 @@ func runNode(ctx context.Context, o *options, storage zerofs.Storage, log logr.L
 	ready.Store(true)
 	log.Info("serving the zerofs node plugin", "endpoint", o.endpoint, "node", o.nodeID)
 
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(manager.Collectors()...)
+	metrics := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
+
 	g, ctx := errgroup.WithContext(ctx)
-	g.Go(func() error { return serveHealthFunc(ctx, o.health, isReady) })
+	g.Go(func() error { return serveHealthFunc(ctx, o.health, isReady, metrics) })
 	g.Go(func() error { return serve(ctx, srv, lis) })
 	err = g.Wait()
 	manager.Shutdown()
@@ -281,11 +299,15 @@ func readiness(ready *atomic.Bool) func() error {
 }
 
 func serveHealth(ctx context.Context, address string, ready *atomic.Bool) error {
-	return serveHealthFunc(ctx, address, readiness(ready))
+	return serveHealthFunc(ctx, address, readiness(ready), nil)
 }
 
-func serveHealthFunc(ctx context.Context, address string, ready func() error) error {
+// serveHealthFunc serves /healthz, and /metrics when metrics isn't nil.
+func serveHealthFunc(ctx context.Context, address string, ready func() error, metrics http.Handler) error {
 	mux := http.NewServeMux()
+	if metrics != nil {
+		mux.Handle("/metrics", metrics)
+	}
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		if err := ready(); err != nil {
 			http.Error(w, err.Error(), http.StatusServiceUnavailable)

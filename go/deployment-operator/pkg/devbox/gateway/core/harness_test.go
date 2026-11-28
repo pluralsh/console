@@ -34,6 +34,9 @@ const (
 type fakeDaemon struct {
 	devboxv1.UnimplementedDaemonServer
 
+	// browserPath is the browser stream path the daemon reports (default /browser/vnc).
+	browserPath string
+
 	mu          sync.Mutex
 	initialized []*devboxv1.InitializeRequest
 	prompts     []*devboxv1.PromptRequest
@@ -49,6 +52,8 @@ type fakeDaemon struct {
 	bootID string
 	// unhealthy makes Health fail, like a wedged box.
 	unhealthy bool
+	// homeError is what Health reports about the workspace volume.
+	homeError string
 	// busy makes PrepareSuspend refuse automatic suspends, as a daemon with an agent turn running does.
 	busy bool
 
@@ -85,7 +90,7 @@ func (d *fakeDaemon) Health(context.Context, *devboxv1.HealthRequest) (*devboxv1
 	if len(d.initialized) == 0 {
 		return &devboxv1.HealthResponse{Status: "booting"}, nil
 	}
-	return &devboxv1.HealthResponse{Ready: true, Status: "ready"}, nil
+	return &devboxv1.HealthResponse{Ready: true, Status: "ready", HomeError: d.homeError}, nil
 }
 
 func (d *fakeDaemon) Initialize(ctx context.Context, req *devboxv1.InitializeRequest) (*devboxv1.InitializeResponse, error) {
@@ -114,6 +119,21 @@ func (d *fakeDaemon) CreateTerminal(_ context.Context, req *devboxv1.CreateTermi
 		id = "t1"
 	}
 	return &devboxv1.TerminalInfo{TerminalId: id}, nil
+}
+
+func (d *fakeDaemon) streamPath() string {
+	if d.browserPath != "" {
+		return d.browserPath
+	}
+	return "/browser/vnc"
+}
+
+func (d *fakeDaemon) GetBrowser(context.Context, *devboxv1.GetBrowserRequest) (*devboxv1.BrowserInfo, error) {
+	return &devboxv1.BrowserInfo{VncPath: d.streamPath()}, nil
+}
+
+func (d *fakeDaemon) StartBrowser(_ context.Context, req *devboxv1.StartBrowserRequest) (*devboxv1.BrowserInfo, error) {
+	return &devboxv1.BrowserInfo{Running: true, VncPath: d.streamPath(), Width: req.GetWidth(), Height: req.GetHeight()}, nil
 }
 
 func (d *fakeDaemon) PrepareSuspend(_ context.Context, req *devboxv1.PrepareSuspendRequest) (*devboxv1.PrepareSuspendResponse, error) {

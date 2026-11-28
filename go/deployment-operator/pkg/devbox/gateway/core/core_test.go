@@ -255,6 +255,123 @@ func TestForwardingAndResumeIfSuspended(t *testing.T) {
 	}
 }
 
+// policyHosts are the https hosts of an instance's applied egress policy.
+func (h *harness) policyHosts(actor string) []string {
+	var hosts []string
+	for _, r := range h.ate.Policy(testAtespace, actor).GetRules() {
+		hosts = append(hosts, r.GetHttps().GetHostnames()...)
+	}
+	return hosts
+}
+
+// allow edits the test runner's allowlist, as an edit to the DevboxRunner would.
+func (h *harness) allow(host string) {
+	runners := h.g.deps.Runners.(StaticRunners)
+	edited := *runners[testRunner]
+	edited.HTTPAllowlist = append(slices.Clone(edited.HTTPAllowlist), egress.AllowEntry{Host: host, Port: 443})
+	runners[testRunner] = &edited
+}
+
+func TestPublicEgressOpensEveryHostWithoutShadowingInjection(t *testing.T) {
+	runner := RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{AllowPublicEgress: new(true)}})
+	policy := egress.BuildPolicy(egress.InstanceInfo{
+		InstanceID: "i-1", ConsoleHost: "console.example.com", SCMHosts: []string{"github.com"},
+		HTTPAllowlist: runner.HTTPAllowlist,
+	})
+	var passthrough, http, injected bool
+	for _, r := range policy.Rules {
+		switch {
+		case r.Host == "*" && r.Port == 443:
+			passthrough = r.Scheme == egress.SchemeTLSPassthrough
+		case r.Host == "*" && r.Port == 80:
+			http = r.Scheme == egress.SchemeHTTP
+		case r.Host == "console.example.com":
+			injected = r.Scheme == egress.SchemeHTTPS && r.SecretURI != ""
+		}
+	}
+	if !passthrough || !http || !injected {
+		t.Fatalf("want * tunneled on 443 and plain on 80, and console still injected; got %+v", policy.Rules)
+	}
+
+	if off := RunnerFromCRD(&v1alpha1.DevboxRunner{}); slices.ContainsFunc(off.HTTPAllowlist, func(e egress.AllowEntry) bool { return e.Host == "*" }) {
+		t.Fatalf("public egress is off by default: %+v", off.HTTPAllowlist)
+	}
+}
+
+func TestRunningBoxesPickUpAllowlistEdits(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh") {
+		t.Fatal("the host is allowed before the edit")
+	}
+
+	h.allow("oidc.plural.sh")
+	h.eventually("the edited allowlist applied", func() bool {
+		h.g.backstops(context.Background()) // skips the box while another operation holds it, as the loop's next pass would retry
+		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
+	})
+}
+
+func TestAllowlistEditsSurviveARunnerRefreshWithoutEgress(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+
+	h.allow("oidc.plural.sh")
+	h.g.refreshRunner(context.Background(), inst) // as a wake does before Initialize
+	h.eventually("the edited allowlist applied", func() bool {
+		h.g.backstops(context.Background()) // skips the box while another operation holds it, as the loop's next pass would retry
+		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
+	})
+}
+
+func TestAdoptedBoxesPickUpAllowlistEditsMadeBeforeTheRestart(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	h.allow("oidc.plural.sh")
+
+	g2, err := New(h.g.cfg, h.g.deps)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer g2.Shutdown()
+	h.ingest.mu.Lock()
+	h.ingest.register = &devboxv1.RegisterGatewayResponse{ClusterId: "cluster-9", HeartbeatIntervalSeconds: 1, Instances: []*devboxv1.InstanceSummary{
+		{InstanceId: "inst-1", Status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING},
+	}}
+	h.ingest.mu.Unlock()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go g2.runIngest(ctx)
+	h.eventually("adopted", func() bool {
+		inst := g2.get("inst-1")
+		return inst != nil && inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING
+	})
+	if slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh") {
+		t.Fatal("the host is allowed before the new gateway re-applied egress")
+	}
+
+	h.eventually("the edited allowlist applied", func() bool {
+		g2.backstops(context.Background()) // adoption may still hold the box's operation lock
+		return slices.Contains(h.policyHosts("dbx-inst-1"), "oidc.plural.sh")
+	})
+}
+
+func TestResumedBoxesPickUpAllowlistEdits(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+
+	h.allow("oidc.plural.sh")
+	if _, err := h.g.ResumeInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if hosts := h.policyHosts("dbx-inst-1"); !slices.Contains(hosts, "oidc.plural.sh") {
+		t.Fatalf("resumed box's egress hosts %v lack the edited allowlist", hosts)
+	}
+}
+
 func TestIdlenessDoesNotOutliveASuspend(t *testing.T) {
 	h := newHarness(t, nil)
 	h.running("inst-1")
@@ -503,6 +620,57 @@ func TestSuspendRequestedEvent(t *testing.T) {
 	}
 }
 
+func TestHomeErrorRemountsTheHome(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	homeSuspends := func() (n int) {
+		h.ingest.mu.Lock()
+		defer h.ingest.mu.Unlock()
+		for _, s := range h.ingest.statuses {
+			if s.GetSuspendReason() == devboxv1.SuspendReason_SUSPEND_REASON_HOME_UNAVAILABLE {
+				n++
+			}
+		}
+		return n
+	}
+	failing := func() {
+		h.daemon.events <- &devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Heartbeat{
+			Heartbeat: &devboxv1.DaemonHeartbeat{HomeError: "writing to the home: input/output error"}}}
+	}
+
+	failing()
+	h.eventually("suspended and resumed", func() bool {
+		inst.mu.Lock()
+		defer inst.mu.Unlock()
+		return !inst.homeRemounted.IsZero() && inst.rec.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING
+	})
+	if n := homeSuspends(); n != 1 {
+		t.Fatalf("home suspends = %d", n)
+	}
+	inst.mu.Lock()
+	cond := inst.conditions[homeCondition]
+	inst.mu.Unlock()
+	if cond.GetMessage() == "" {
+		t.Fatal("no home condition for console")
+	}
+
+	// The error the daemon reported before the suspend, until its next probe clears it.
+	failing()
+	time.Sleep(50 * time.Millisecond)
+	if n := homeSuspends(); n != 1 {
+		t.Fatalf("remounted again within the grace period: %d", n)
+	}
+
+	// Failing again soon after: suspended, not resumed into the same failure.
+	h.clock.advance(homeRemountGrace + time.Minute)
+	failing()
+	h.eventually("suspended", func() bool { return inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED })
+	time.Sleep(50 * time.Millisecond)
+	if st := inst.status(); st != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("status = %s", st)
+	}
+}
+
 func TestEvictionSuspendsSynchronously(t *testing.T) {
 	h := newHarness(t, nil)
 	inst := h.running("inst-1")
@@ -643,6 +811,33 @@ func TestSilentStreamToAHealthyDaemonIsNotSuspended(t *testing.T) {
 		defer h.daemon.mu.Unlock()
 		return h.daemon.acked >= 1
 	})
+}
+
+func TestSilentStreamWithAHungHomeRemountsIt(t *testing.T) {
+	fastProbes(t)
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.daemon.mu.Lock()
+	h.daemon.homeError = "a write to the home hasn't returned in 2m0s"
+	h.daemon.mu.Unlock()
+	h.clock.advance(10 * time.Minute)
+	h.g.backstops(context.Background())
+	h.eventually("suspended and resumed", func() bool {
+		inst.mu.Lock()
+		defer inst.mu.Unlock()
+		return !inst.homeRemounted.IsZero() && inst.rec.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING
+	})
+	h.ingest.mu.Lock()
+	defer h.ingest.mu.Unlock()
+	reasons := []devboxv1.SuspendReason{}
+	for _, s := range h.ingest.statuses {
+		if s.GetStatus() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+			reasons = append(reasons, s.GetSuspendReason())
+		}
+	}
+	if len(reasons) != 1 || reasons[0] != devboxv1.SuspendReason_SUSPEND_REASON_HOME_UNAVAILABLE {
+		t.Fatalf("suspend reasons = %v", reasons)
+	}
 }
 
 func TestCrashDuringSuspendReportsLostWork(t *testing.T) {

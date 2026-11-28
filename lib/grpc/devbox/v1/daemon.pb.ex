@@ -21,6 +21,7 @@ defmodule Devbox.V1.HealthResponse do
   field :boot_id, 4, type: :string, json_name: "bootId"
   field :restored, 5, type: :bool
   field :workspace_hydrated, 6, type: :bool, json_name: "workspaceHydrated"
+  field :home_error, 7, type: :string, json_name: "homeError"
 end
 
 defmodule Devbox.V1.HarnessEndpoints do
@@ -283,6 +284,7 @@ defmodule Devbox.V1.DaemonHeartbeat do
 
   field :head_offset, 1, type: :uint64, json_name: "headOffset"
   field :idle, 2, type: Devbox.V1.IdleState
+  field :home_error, 3, type: :string, json_name: "homeError"
 end
 
 defmodule Devbox.V1.AckEventsRequest do

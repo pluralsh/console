@@ -1,11 +1,13 @@
 // Package browser runs the sandbox's visible Chromium (DBX-45): Xvfb, Chromium with a CDP port the agent's
-// Playwright MCP drives, x11vnc on localhost bridged to the /browser/vnc WebSocket, and the /preview/:port/*
-// reverse proxy. The browser starts on demand (StartBrowser, a VNC viewer, or the first CDP connection) and stops
-// when idle.
+// Playwright MCP drives, the display's streamer on localhost, and the /preview/:port/* reverse proxy. The
+// streamer is voxl (H.264, bridged to /browser/stream) when the image ships it, else x11vnc (RFB for noVNC,
+// bridged to /browser/vnc). The browser starts on demand (StartBrowser, a viewer, or the first CDP connection)
+// and stops when idle.
 package browser
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
@@ -34,9 +36,18 @@ const (
 	DefaultDisplay     = ":99"
 	DefaultCDPPort     = 9222
 	DefaultVNCPort     = 5900
+	DefaultVoxlPort    = 6901
 	DefaultIdleTimeout = 15 * time.Minute
 	VNCPath            = "/browser/vnc"
-	startTimeout       = 30 * time.Second
+	StreamPath         = devboxv1.BrowserStreamPath
+	// voxlMaxKbps caps voxl's adaptive bitrate (30 Mbps by default) for a stream that crosses KAS and the
+	// gateway.
+	voxlMaxKbps = 10000
+	// startTimeout bounds a whole start, within console's 30s deadline on the OpenStream that triggers it, so
+	// the caller sees why it failed.
+	startTimeout = 20 * time.Second
+	// outputTail is how much of a browser process's output a start failure reports.
+	outputTail = 2 << 10
 )
 
 // Options configure a Browser.
@@ -44,13 +55,17 @@ type Options struct {
 	Chromium string
 	Xvfb     string
 	X11VNC   string
+	Voxl     string
 	Display  string
 	// CDPPort is the localhost port agents connect to; the daemon proxies it to Chromium's own port (CDPPort+1)
 	// so the first connection can start the browser.
-	CDPPort     int
-	VNCPort     int
-	ProfileDir  string
-	ExtraFlags  []string
+	CDPPort    int
+	VNCPort    int
+	VoxlPort   int
+	ProfileDir string
+	ExtraFlags []string
+	// Prepare runs before each Chromium start, e.g. to trust the egress CA; a failure is logged, not fatal.
+	Prepare     func(ctx context.Context) error
 	IdleTimeout time.Duration
 	Env         func() []string
 	Supervisor  *proc.Supervisor
@@ -62,6 +77,9 @@ type Options struct {
 type Browser struct {
 	opts Options
 	log  *slog.Logger
+	// voxl streams the display when the image ships it; voxlPassword guards its localhost port.
+	voxl         bool
+	voxlPassword string
 
 	mu       sync.Mutex
 	running  bool
@@ -96,6 +114,12 @@ func New(opts Options) *Browser {
 	if opts.VNCPort == 0 {
 		opts.VNCPort = DefaultVNCPort
 	}
+	if opts.Voxl == "" {
+		opts.Voxl = "voxl"
+	}
+	if opts.VoxlPort == 0 {
+		opts.VoxlPort = DefaultVoxlPort
+	}
 	if opts.IdleTimeout == 0 {
 		opts.IdleTimeout = DefaultIdleTimeout
 	}
@@ -112,6 +136,9 @@ func New(opts Options) *Browser {
 		opts.Supervisor = proc.NewSupervisor(opts.Log)
 	}
 	b := &Browser{opts: opts, log: opts.Log.With("component", "browser")}
+	if _, err := exec.LookPath(opts.Voxl); err == nil {
+		b.voxl, b.voxlPassword = true, rand.Text()
+	}
 	b.touch()
 	return b
 }
@@ -128,9 +155,9 @@ func firstExisting(paths ...string) string {
 	return "chromium"
 }
 
-// Available reports whether Chromium, Xvfb and x11vnc are installed.
+// Available reports whether Chromium, Xvfb and a streamer (voxl or x11vnc) are installed.
 func (b *Browser) Available() bool {
-	for _, bin := range []string{b.opts.Chromium, b.opts.Xvfb, b.opts.X11VNC} {
+	for _, bin := range []string{b.opts.Chromium, b.opts.Xvfb, b.streamer()} {
 		if _, err := exec.LookPath(bin); err != nil {
 			return false
 		}
@@ -148,18 +175,40 @@ func (b *Browser) Streams() int { return int(b.streams.Load()) }
 
 func (b *Browser) internalCDPPort() int { return b.opts.CDPPort + 1 }
 
+func (b *Browser) streamer() string {
+	if b.voxl {
+		return b.opts.Voxl
+	}
+	return b.opts.X11VNC
+}
+
+func (b *Browser) streamerPort() int {
+	if b.voxl {
+		return b.opts.VoxlPort
+	}
+	return b.opts.VNCPort
+}
+
+// StreamPath is the daemon path viewers connect to: StreamPath with voxl, else VNCPath.
+func (b *Browser) StreamPath() string {
+	if b.voxl {
+		return StreamPath
+	}
+	return VNCPath
+}
+
 // Info returns the browser state.
 func (b *Browser) Info() *devboxv1.BrowserInfo {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	info := &devboxv1.BrowserInfo{Running: b.running, VncPath: VNCPath, CdpPort: int32(b.opts.CDPPort), Width: b.width, Height: b.height}
+	info := &devboxv1.BrowserInfo{Running: b.running, VncPath: b.StreamPath(), CdpPort: int32(b.opts.CDPPort), Width: b.width, Height: b.height}
 	if b.running {
 		info.StartedAt = timestamppb.New(b.started)
 	}
 	return info
 }
 
-// Start starts Xvfb, x11vnc and Chromium if they aren't running.
+// Start starts Xvfb, the streamer and Chromium if they aren't running.
 func (b *Browser) Start(ctx context.Context, width, height int32, url string) (*devboxv1.BrowserInfo, error) {
 	if width <= 0 {
 		width = 1280
@@ -207,74 +256,123 @@ func (b *Browser) Start(ctx context.Context, width, height int32, url string) (*
 	}
 }
 
-func (b *Browser) spawn(name string, args ...string) (*proc.Process, error) {
+// started is a browser process being started and the tail of its output.
+type started struct {
+	p   *proc.Process
+	out *tail
+}
+
+func (b *Browser) spawn(name string, args ...string) (started, error) {
+	return b.spawnEnv(name, nil, args...)
+}
+
+func (b *Browser) spawnEnv(name string, env []string, args ...string) (started, error) {
 	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Env = append(b.opts.Env(), "DISPLAY="+b.opts.Display)
+	cmd.Env = append(append(b.opts.Env(), "DISPLAY="+b.opts.Display), env...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	cmd.Stdout, cmd.Stderr = io.Discard, io.Discard
+	out := &tail{max: outputTail}
+	cmd.Stdout, cmd.Stderr = out, out
 	// Browser processes don't count as user activity on their own; stream bytes do.
-	return b.opts.Supervisor.Spawn(name, cmd, cmd.Start, true)
+	p, err := b.opts.Supervisor.Spawn(name, cmd, cmd.Start, true)
+	if err == nil {
+		_ = proc.Deprioritize(p.Pid())
+	}
+	return started{p: p, out: out}, err
 }
 
 func (b *Browser) start(width, height int32, url string) error {
-	var procs []*proc.Process
+	var procs []started
 	fail := func(err error) error {
 		for i := len(procs) - 1; i >= 0; i-- {
-			_ = b.opts.Supervisor.Stop(procs[i], 2*time.Second)
+			_ = b.opts.Supervisor.Stop(procs[i].p, 2*time.Second)
 		}
+		b.log.Warn("browser didn't start", "err", err)
 		return err
 	}
+	if b.voxl {
+		// voxl shrinks the screen to each viewer's window and Chromium follows (ServeStream)
+		width, height = maxScreenWidth, maxScreenHeight
+	}
+	deadline := time.Now().Add(startTimeout)
 	display := strings.TrimPrefix(b.opts.Display, ":")
 	sock := filepath.Join("/tmp/.X11-unix", "X"+display)
 	if _, err := os.Stat(sock); err != nil {
-		p, err := b.spawn("xvfb", b.opts.Xvfb, b.opts.Display, "-screen", "0", fmt.Sprintf("%dx%dx24", width, height), "-nolisten", "tcp", "-ac")
+		s, err := b.spawn("xvfb", b.opts.Xvfb, b.opts.Display, "-screen", "0", fmt.Sprintf("%dx%dx24", width, height), "-nolisten", "tcp", "-ac")
 		if err != nil {
 			return fail(fmt.Errorf("start Xvfb: %w", err))
 		}
-		procs = append(procs, p)
-		if err := waitFor(func() bool { _, err := os.Stat(sock); return err == nil }, startTimeout); err != nil {
-			return fail(errors.New("xvfb didn't start"))
+		procs = append(procs, s)
+		if err := waitFor(func() bool { _, err := os.Stat(sock); return err == nil }, deadline, procs); err != nil {
+			return fail(fmt.Errorf("xvfb didn't start: %w", err))
 		}
 	}
-	p, err := b.spawn("x11vnc", b.opts.X11VNC, "-display", b.opts.Display, "-rfbport", strconv.Itoa(b.opts.VNCPort), "-localhost",
-		"-forever", "-shared", "-nopw", "-quiet", "-noxdamage")
+	s, err := b.spawnStreamer()
 	if err != nil {
-		return fail(fmt.Errorf("start x11vnc: %w", err))
+		return fail(fmt.Errorf("start %s: %w", b.streamer(), err))
 	}
-	procs = append(procs, p)
+	procs = append(procs, s)
 	profile := b.opts.ProfileDir
 	if profile == "" {
 		profile = filepath.Join(os.TempDir(), "devbox-chromium")
 	}
 	_ = os.MkdirAll(profile, 0o700)
 	_ = os.Remove(filepath.Join(profile, "SingletonLock"))
-	args := make([]string, 0, 13+len(b.opts.ExtraFlags))
-	args = append(args, b.opts.Chromium,
+	if b.opts.Prepare != nil {
+		pctx, cancel := context.WithDeadline(context.Background(), deadline)
+		err := b.opts.Prepare(pctx)
+		cancel()
+		if err != nil {
+			b.log.Warn("preparing the browser", "err", err)
+		}
+	}
+	args := make([]string, 0, 14+len(b.opts.ExtraFlags))
+	// The box's sandbox (gVisor) is the isolation boundary, and Chromium's own sandbox can't start inside it.
+	// The window is a pixel past the screen, which Chromium would otherwise fall a pixel short of (fitWindows).
+	args = append(args, b.opts.Chromium, "--no-sandbox",
 		"--no-first-run", "--no-default-browser-check", "--disable-dev-shm-usage", "--disable-background-networking",
 		"--remote-debugging-address=127.0.0.1", "--remote-debugging-port="+strconv.Itoa(b.internalCDPPort()),
-		"--user-data-dir="+profile, fmt.Sprintf("--window-size=%d,%d", width, height), "--window-position=0,0", "--start-maximized",
+		"--user-data-dir="+profile, fmt.Sprintf("--window-size=%d,%d", width+1, height+1), "--window-position=0,0", "--start-maximized",
 	)
 	args = append(args, b.opts.ExtraFlags...)
 	if url == "" {
 		url = "about:blank"
 	}
 	args = append(args, url)
-	p, err = b.spawn("chromium", args...)
+	s, err = b.spawn("chromium", args...)
 	if err != nil {
 		return fail(fmt.Errorf("start chromium: %w", err))
 	}
-	procs = append(procs, p)
-	if err := waitFor(func() bool { return dialable(b.internalCDPPort()) && dialable(b.opts.VNCPort) }, startTimeout); err != nil {
-		return fail(errors.New("chromium or x11vnc didn't come up"))
+	procs = append(procs, s)
+	if err := waitFor(func() bool { return dialable(b.internalCDPPort()) && dialable(b.streamerPort()) }, deadline, procs); err != nil {
+		return fail(fmt.Errorf("chromium or %s didn't come up: %w", b.streamer(), err))
+	}
+	running := make([]*proc.Process, len(procs))
+	for i, s := range procs {
+		running[i] = s.p
 	}
 	b.mu.Lock()
-	b.running, b.procs, b.started, b.width, b.height = true, procs, b.opts.Clock.Now(), width, height
+	b.running, b.procs, b.started, b.width, b.height = true, running, b.opts.Clock.Now(), width, height
 	b.mu.Unlock()
-	for _, p := range procs {
+	for _, p := range running {
 		go b.watch(p)
 	}
-	b.log.Info("browser started", "display", b.opts.Display, "cdp", b.opts.CDPPort, "vnc", b.opts.VNCPort)
+	b.log.Info("browser started", "display", b.opts.Display, "cdp", b.opts.CDPPort, "streamer", b.streamer(), "port", b.streamerPort())
 	return nil
+}
+
+// spawnStreamer starts voxl or x11vnc on localhost. voxl's password stays out of its arguments, where any process
+// could read it.
+func (b *Browser) spawnStreamer() (started, error) {
+	if !b.voxl {
+		return b.spawn("x11vnc", b.opts.X11VNC, "-display", b.opts.Display, "-rfbport", strconv.Itoa(b.opts.VNCPort), "-localhost",
+			"-forever", "-shared", "-nopw", "-quiet", "-noxdamage")
+	}
+	return b.spawnEnv("voxl", []string{"VOXL_PASSWORD=" + b.voxlPassword}, b.opts.Voxl,
+		"--addr=127.0.0.1", "--port="+strconv.Itoa(b.opts.VoxlPort), "--max-kbps="+strconv.Itoa(voxlMaxKbps),
+		"--audio-enabled=false", "--microphone-enabled=false", "--file-transfers=none",
+		// one screen pixel per CSS pixel of the viewer: pages lay out at the viewer's size without
+		// doubling the stream on HiDPI displays
+		"--enable-resize", "--resize-scale=1")
 }
 
 // watch tears the stack down when one of its processes dies.
@@ -406,15 +504,45 @@ func dialable(port int) bool {
 	return true
 }
 
-func waitFor(cond func() bool, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
+// waitFor polls cond until deadline, failing early with its output once one of procs exits.
+func waitFor(cond func() bool, deadline time.Time, procs []started) error {
 	for time.Now().Before(deadline) {
 		if cond() {
 			return nil
 		}
+		for _, s := range procs {
+			select {
+			case <-s.p.Done():
+				return fmt.Errorf("%s exited (%w): %s", s.p.Name, s.p.Err(), s.out)
+			default:
+			}
+		}
 		time.Sleep(100 * time.Millisecond)
 	}
 	return errors.New("timed out")
+}
+
+// tail keeps the last max bytes written to it.
+type tail struct {
+	mu  sync.Mutex
+	max int
+	buf []byte
+}
+
+func (t *tail) Write(p []byte) (int, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.buf = append(t.buf, p...)
+	if over := len(t.buf) - t.max; over > 0 {
+		t.buf = append(t.buf[:0], t.buf[over:]...)
+	}
+	return len(p), nil
+}
+
+func (t *tail) String() string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return strings.TrimSpace(string(t.buf))
 }
 
 // PlaywrightMCP is the stdio MCP server entry that drives this browser, added to every session when the image

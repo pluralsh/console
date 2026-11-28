@@ -151,15 +151,7 @@ export function WorkbenchJobPromptInput({
           setValue={setNewMessage}
           onSubmit={submitJob}
           allowSubmit={!!newMessage}
-          wrapperStyles={{
-            minHeight: 90,
-            ...(hasQueue
-              ? {
-                  borderTopLeftRadius: 0,
-                  borderTopRightRadius: 0,
-                }
-              : {}),
-          }}
+          wrapperStyles={{ minHeight: 90 }}
           enableAutoComplete
           workbenchId={job?.workbench?.id}
           workbenchRepositorySource={job?.workbench}

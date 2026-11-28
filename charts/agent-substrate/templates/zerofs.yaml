@@ -137,13 +137,18 @@ spec:
   selector:
     matchLabels:
       app: devbox-zerofs-node
-  # A restart ends every home the plugin serves on the node, so roll by hand.
+  # A restart ends every home the plugin serves on the node, so the
+  # deployment-operator rolls it a node at a time once that node's devboxes are drained.
   updateStrategy:
     type: OnDelete
   template:
     metadata:
       labels:
         app: devbox-zerofs-node
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9821"
+        prometheus.io/path: /metrics
     spec:
       serviceAccountName: devbox-zerofs
       priorityClassName: {{ $z.node.priorityClassName }}
@@ -174,9 +179,14 @@ spec:
             - --state-root={{ $z.node.stateDir }}
             - --socket-dir=/run/zerofs
             - --cache-disk-gb={{ $z.node.cacheDiskGB }}
+            - --cache-disk-percent={{ $z.node.cacheDiskPercent }}
+            - --cache-disk-max-gb={{ $z.node.cacheDiskMaxGB }}
             - --cache-memory-gb={{ $z.node.cacheMemoryGB }}
+            - --parked-cache-gb={{ $z.node.parkedCacheGB }}
             - --nbds-max={{ $z.node.nbdsMax }}
-            - --mount-options={{ $z.node.mountOptions }}
+            {{- with $z.node.mountOptions }}
+            - --mount-options={{ . }}
+            {{- end }}
             {{- range $z.node.nbdClientFlags }}
             - --nbd-client-flag={{ . }}
             {{- end }}

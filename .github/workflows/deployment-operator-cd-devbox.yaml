@@ -359,6 +359,62 @@ jobs:
           digest: ${{ steps.build.outputs.digest }}
           images: ghcr.io/pluralsh/devbox-juicefs
 
+  publish-block:
+    name: Build, test and publish devbox-block
+    needs: [version]
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/pluralsh/devbox-block
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hardened Images
+        uses: docker/login-action@v4
+        with:
+          registry: dhi.io
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      # The Go build cross-compiles, so no QEMU is needed.
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: "./go"
+          file: "./go/deployment-operator/dockerfiles/devbox/block.Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=${{ env.CACHE }}:devbox-block
+          cache-to: type=registry,ref=${{ env.CACHE }}:devbox-block,mode=max,ignore-error=true
+          build-args: |
+            VERSION=${{ needs.version.outputs.version }}
+      - name: Test
+        run: docker run --rm --platform linux/amd64 "${BLOCK_IMAGE}" -version
+        env:
+          BLOCK_IMAGE: ghcr.io/pluralsh/devbox-block@${{ steps.build.outputs.digest }}
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.build.outputs.digest }}
+          images: ghcr.io/pluralsh/devbox-block
+
   publish-zerofs:
     name: Build, test and publish devbox-zerofs
     needs: [version]
@@ -427,7 +483,7 @@ jobs:
   # run it, since a manual run doesn't build the deployment-operator image assetStaging uses.
   bump-agent-substrate:
     name: Bump agent-substrate chart
-    needs: [version, publish-juicefs, publish-zerofs]
+    needs: [version, publish-juicefs, publish-zerofs, publish-block]
     if: startsWith(github.ref, 'refs/tags/go/deployment-operator/v')
     permissions:
       contents: write
@@ -446,7 +502,7 @@ jobs:
         with:
           title: "agent-substrate: images at deployment-operator ${{ needs.version.outputs.version }}"
           body: |
-            Automated PR pinning `devbox-zerofs`, `devbox-juicefs` and the asset-staging `deployment-operator` image in `charts/agent-substrate` to ${{ needs.version.outputs.version }}, and bumping the chart's patch version.
+            Automated PR pinning `devbox-zerofs`, `devbox-juicefs`, `devbox-block` and the asset-staging `deployment-operator` image in `charts/agent-substrate` to ${{ needs.version.outputs.version }}, and bumping the chart's patch version.
           commit-message: "agent-substrate: images at deployment-operator ${{ needs.version.outputs.version }}"
           branch: agent-substrate-${{ needs.version.outputs.version }}
           labels: release
@@ -456,7 +512,7 @@ jobs:
   # requests stay on GHCR.
   mirror:
     name: Mirror ${{ matrix.image }} to ${{ matrix.registry }}
-    needs: [version, publish, publish-gateway, publish-juicefs, publish-zerofs]
+    needs: [version, publish, publish-gateway, publish-juicefs, publish-zerofs, publish-block]
     if: github.event_name != 'pull_request'
     permissions:
       contents: read
@@ -465,7 +521,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [devbox-minimal, devbox-fat, devbox-gateway, devbox-juicefs, devbox-zerofs]
+        image: [devbox-minimal, devbox-fat, devbox-gateway, devbox-juicefs, devbox-zerofs, devbox-block]
         registry: [gcr.io, docker.io]
     runs-on: ubuntu-latest
     steps:

@@ -80,11 +80,19 @@ func devboxInstanceCapacity(runner *v1alpha1.DevboxRunner, class v1alpha1.Devbox
 	res := lo.FromPtr(runner.Spec.Resources)
 	cpuQ, memoryQ, diskQ := lo.FromPtrOr(res.CPU, resource.MustParse("2")), lo.FromPtrOr(res.Memory, resource.MustParse("4Gi")), lo.FromPtrOr(res.Disk, resource.MustParse("20Gi"))
 	minCPU, minMemory, disk := cpuQ.MilliValue(), memoryQ.Value(), diskQ.Value()
-	if runner.Spec.HomeStorage() == v1alpha1.DevboxHomeJuiceFS {
+	switch runner.Spec.HomeStorage() {
+	case v1alpha1.DevboxHomeJuiceFS:
 		// The home lives in object storage. Its node cache is bounded by JuiceFS, which stops caching before the
-		// disk fills, so it takes no budget. A ZeroFS home's writer caches on the node's disk per home, up to the
-		// home's own data, so it keeps the home's budget.
+		// disk fills, so it takes no budget.
 		disk = 0
+	case v1alpha1.DevboxHomeBlock:
+		// The home is its own cloud disk, attached to the node, so it takes none of the node's.
+		disk = 0
+	case v1alpha1.DevboxHomeZeroFS:
+		// A ZeroFS home's writer caches on the node's disk a share of the home's size (the node plugin's
+		// --cache-disk-percent), so budgeting the whole home covers it.
+		home := runner.Spec.HomeSize()
+		disk = home.Value()
 	}
 	out := devboxCapacity{CPU: minCPU, Memory: minMemory}
 

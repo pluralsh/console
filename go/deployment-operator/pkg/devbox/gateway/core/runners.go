@@ -46,6 +46,13 @@ type Runner struct {
 	Autonomy           *devboxv1.AutonomyPolicy
 	// Env is the runner's resolved secret env vars, sent with every Initialize.
 	Env map[string]string
+
+	// Zones are the zones new instances may go to, the runner's Zones(). ZonePools maps each zonal
+	// WorkerPool's namespace/name to its zone, retired zones included. InstanceCPU is each instance's CPU limit in
+	// millicores, which sizes a worker's free slots.
+	Zones       []string
+	ZonePools   map[string]string
+	InstanceCPU int64
 }
 
 type RunnerRevision struct {
@@ -197,6 +204,19 @@ func (k *KubeRunners) ByAtespace(ctx context.Context, atespace string) (*Runner,
 	return r, nil
 }
 
+// List returns every DevboxRunner, without its secret env.
+func (k *KubeRunners) List(ctx context.Context) ([]*Runner, error) {
+	list := &v1alpha1.DevboxRunnerList{}
+	if err := k.Client.List(ctx, list); err != nil {
+		return nil, fmt.Errorf("listing devbox runners: %w", err)
+	}
+	out := make([]*Runner, 0, len(list.Items))
+	for i := range list.Items {
+		out = append(out, RunnerFromCRD(&list.Items[i]))
+	}
+	return out, nil
+}
+
 // Invalidate drops a cached runner.
 func (k *KubeRunners) Invalidate(name string) {
 	k.mu.Lock()
@@ -236,6 +256,14 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 	for _, repo := range obj.Spec.Repositories {
 		r.Repositories = append(r.Repositories, repo.URL)
 	}
+	r.Zones = obj.Zones()
+	r.ZonePools = map[string]string{}
+	for _, p := range st.WorkerPoolZones {
+		r.ZonePools[p.WorkerPool] = p.Zone
+	}
+	if c := st.Capacity; c != nil && c.InstanceCPU != nil {
+		r.InstanceCPU = c.InstanceCPU.MilliValue()
+	}
 	for _, e := range obj.Spec.HTTPAllowlist {
 		entry := egress.AllowEntry{Host: e.Host}
 		if e.Port != nil {
@@ -248,6 +276,11 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 	}
 	for _, h := range obj.Spec.EgressPresetHosts() {
 		r.HTTPAllowlist = append(r.HTTPAllowlist, egress.AllowEntry{Host: h, Port: 443})
+	}
+	if obj.Spec.PublicEgress() {
+		r.HTTPAllowlist = append(r.HTTPAllowlist,
+			egress.AllowEntry{Host: v1alpha1.PublicEgressHost, Port: 443, Passthrough: true},
+			egress.AllowEntry{Host: v1alpha1.PublicEgressHost, Port: 80, Cleartext: true})
 	}
 	for _, ci := range obj.Spec.CloudIdentities {
 		id := &devboxv1.CloudIdentity{Name: ci.Name, IsDefault: ci.Default != nil && *ci.Default}

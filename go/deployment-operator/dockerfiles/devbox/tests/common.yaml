@@ -27,6 +27,8 @@ metadataTest:
       value: /bin/bash
     - key: DEVBOX_TRUST_DIR
       value: /var/lib/devbox/trust
+    - key: DEVBOX_SYSTEM_CA_BUNDLE
+      value: /var/lib/devbox/trust/system-ca.pem
     - key: DEVBOX_IDENTITY_DIR
       value: /run/plural/identity
     - key: DEVBOX_CHROMIUM
@@ -35,21 +37,25 @@ metadataTest:
       value: ":99"
     - key: SSL_CERT_FILE
       value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: AWS_CA_BUNDLE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE
+      value: /var/lib/devbox/trust/ca-bundle.pem
     - key: NODE_EXTRA_CA_CERTS
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: DENO_CERT
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: REQUESTS_CA_BUNDLE
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: CURL_CA_BUNDLE
-      value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: GIT_SSL_CAINFO
-      value: /var/lib/devbox/trust/ca-bundle.pem
     - key: PIP_CERT
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: AWS_CA_BUNDLE
+    - key: TWINE_CERT
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: CARGO_HTTP_CAINFO
+    - key: CONDA_SSL_VERIFY
       value: /var/lib/devbox/trust/ca-bundle.pem
-    - key: CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE
+    - key: HEX_CACERTS_PATH
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: NIX_SSL_CERT_FILE
       value: /var/lib/devbox/trust/ca-bundle.pem
     - key: PATH
       value: "^/home/dev/.local/share/mise/shims:/home/dev/.local/bin:"
@@ -62,6 +68,10 @@ fileExistenceTests:
     permissions: "-rwxr-xr-x"
   - name: skel .bashrc
     path: /etc/devbox/skel/.bashrc
+    shouldExist: true
+  # Chromium runs with --no-sandbox (gVisor is the boundary); this hides the infobar warning about it.
+  - name: chromium policy
+    path: /etc/chromium/policies/managed/devbox.json
     shouldExist: true
   - name: skel .zshrc
     path: /etc/devbox/skel/.zshrc
@@ -125,6 +135,14 @@ fileExistenceTests:
 # before the command runs, so these scripts avoid shell variables. Go regexps
 # need (?m) for ^ and $ to match around the trailing newline.
 commandTests:
+  - name: system CA bundle is the devbox trust bundle
+    command: readlink
+    args: ["/etc/ssl/certs/ca-certificates.crt"]
+    expectedOutput: ["(?m)^/var/lib/devbox/trust/ca-bundle.pem$"]
+  - name: trust bundle and system roots are dev-writable files
+    command: stat
+    args: ["-c", "%F %u", "/var/lib/devbox/trust/ca-bundle.pem", "/var/lib/devbox/trust/system-ca.pem"]
+    expectedOutput: ["(?m)^regular file 1000\\nregular file 1000$"]
   - name: dev is UID 1000 with home /home/dev
     command: getent
     args: ["passwd", "dev"]
@@ -147,10 +165,10 @@ commandTests:
     expectedOutput:
       - "(?m)^SSL_CERT_FILE=/var/lib/devbox/trust/ca-bundle.pem$"
       - "(?m)^NODE_EXTRA_CA_CERTS=/var/lib/devbox/trust/ca-bundle.pem$"
-  - name: trust bundle is writable and resolves to system CAs by default
+  - name: trust bundle is writable and holds the system CAs by default
     command: sh
-    args: ["-c", "test -w /var/lib/devbox/trust && test -s /var/lib/devbox/trust/ca-bundle.pem && readlink /var/lib/devbox/trust/ca-bundle.pem"]
-    expectedOutput: ["(?m)^/etc/ssl/certs/ca-certificates.crt$"]
+    args: ["-c", "test -w /var/lib/devbox/trust && test -s /var/lib/devbox/trust/ca-bundle.pem && cmp -s /var/lib/devbox/trust/ca-bundle.pem /var/lib/devbox/trust/system-ca.pem && echo same"]
+    expectedOutput: ["(?m)^same$"]
   - name: run dirs writable by dev
     command: sh
     args: ["-c", "touch /run/plural/identity/.t /run/plural/agent-auth/.t && echo ok"]
@@ -250,10 +268,18 @@ commandTests:
     command: sh
     args: ["-c", "chromium --headless --no-sandbox --disable-gpu --dump-dom 'data:text/html,<p>devbox-ok</p>' 2>/dev/null"]
     expectedOutput: ["devbox-ok"]
-  - name: Xvfb and x11vnc
+  - name: certutil, which trusts the egress CA in chromium's NSS database
     command: which
-    args: ["Xvfb", "x11vnc"]
+    args: ["certutil"]
     exitCode: 0
+  - name: Xvfb and voxl
+    command: which
+    args: ["Xvfb", "voxl"]
+    exitCode: 0
+  - name: voxl runs
+    command: voxl
+    args: ["--version"]
+    expectedOutput: ["voxl \\d+\\.\\d+\\.\\d+"]
 
   # Interactive shell environment.
   - name: shells, editors and CLI tools

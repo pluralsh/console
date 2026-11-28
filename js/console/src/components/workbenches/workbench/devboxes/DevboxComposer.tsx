@@ -17,6 +17,7 @@ import {
   DevboxCommandFragment,
   DevboxConfigOptionFragment,
 } from 'generated/graphql'
+import { insertChipAtRange } from 'components/utils/contentEditableChips'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
@@ -38,6 +39,7 @@ import {
 import {
   caretOffset,
   directoryToken,
+  elementMentionChip,
   fileMentionChip,
   getMentionQuery,
   matchFiles,
@@ -81,6 +83,7 @@ export function composerOptions(
 }
 import { DevboxSuggestion, DevboxSuggestionMenu } from './DevboxSuggestionMenu'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
+import { usePromptInserts } from './devboxPromptInserts'
 
 const MAX_SUGGESTIONS = 50
 
@@ -98,6 +101,17 @@ export function attachmentError(files: File[]): Nullable<string> {
 }
 
 const NO_FILES: File[] = []
+
+type ComposerDraft = { text: string; files: File[] }
+
+// the main view replaces the conversation (browser, file, diff), which unmounts
+// the composer; the draft has to outlive that or Back to session starts empty
+const composerDrafts = new Map<string, ComposerDraft>()
+
+function persistComposerDraft(key: string, draft: ComposerDraft) {
+  if (!draft.text && draft.files.length === 0) composerDrafts.delete(key)
+  else composerDrafts.set(key, draft)
+}
 
 type ConfigValue = NonNullable<
   NonNullable<DevboxConfigOptionFragment['options']>[number]
@@ -152,6 +166,9 @@ export function DevboxComposer({
   placeholder = 'Message the agent, / for commands or @ for files',
   allowEmpty = false,
   autoFocus = false,
+  // keeps the unsent prompt when this composer unmounts and mounts again
+  draftKey,
+  insertsFor,
   toolbar,
   onSubmit,
   onCancel,
@@ -169,9 +186,7 @@ export function DevboxComposer({
   // instead of onSetConfigOption
   switchModels?: Nullable<string[]>
   // completes `@path` mentions against the instance's files
-  listFiles?: Nullable<
-    (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
-  >
+  listFiles?: Nullable<(path: string) => Promise<DevboxFileEntry[]>>
   // searches beneath the directory being completed once a name is typed;
   // without it, names are matched against the directory's listing
   searchFiles?: Nullable<
@@ -182,6 +197,9 @@ export function DevboxComposer({
   placeholder?: string
   allowEmpty?: boolean
   autoFocus?: boolean
+  draftKey?: string
+  // takes the elements picked in this instance's browser into the prompt
+  insertsFor?: Nullable<string>
   // extra controls beside the attach button
   toolbar?: ReactNode
   // resolving to false (a failed send) keeps the draft
@@ -193,11 +211,12 @@ export function DevboxComposer({
   onSetConfigOption?: (configId: string, value: string) => void
   onSwitchModel?: (configId: string, value: string) => void
 }) {
-  const [text, setText] = useState('')
+  const saved = draftKey ? composerDrafts.get(draftKey) : undefined
+  const [text, setText] = useState(saved?.text ?? '')
   const [caret, setCaret] = useState(0)
   const [active, setActive] = useState(0)
   const [dismissed, setDismissed] = useState<Nullable<string>>(null)
-  const [files, setFiles] = useState<File[]>(NO_FILES)
+  const [files, setFiles] = useState<File[]>(saved?.files ?? NO_FILES)
   const [sending, setSending] = useState(false)
   // directories browsed into (typed token → absolute path)
   const [mentions, setMentions] = useState<Record<string, string>>({})
@@ -206,10 +225,39 @@ export function DevboxComposer({
   useEffect(() => {
     draft.current = { text, files }
   }, [text, files])
+  useEffect(() => {
+    if (!draftKey) return
+    return () => persistComposerDraft(draftKey, draft.current)
+  }, [draftKey])
 
   useEffect(() => {
     if (autoFocus) ref.current?.focus()
   }, [autoFocus])
+
+  // a picked element goes at the caret, or the end when the prompt isn't being edited
+  usePromptInserts(insertsFor, (element) => {
+    const node = ref.current
+    if (!node || disabled) return
+    const sel = document.getSelection()
+    const editing = sel?.rangeCount && node.contains(sel.anchorNode)
+    const range = editing
+      ? sel.getRangeAt(0).cloneRange()
+      : document.createRange()
+    if (!editing) {
+      range.selectNodeContents(node)
+      range.collapse(false)
+    }
+    const before = document.createRange()
+    before.setStart(node, 0)
+    before.setEnd(range.startContainer, range.startOffset)
+    if (/[^\s\u200b]$/.test(before.toString())) {
+      range.insertNode(document.createTextNode(' '))
+      range.collapse(false)
+    }
+    node.focus()
+    insertChipAtRange(node, elementMentionChip(element), range)
+    node.dispatchEvent(new InputEvent('input', { bubbles: true }))
+  })
 
   useEffect(() => {
     const onSelectionChange = () => {
@@ -308,6 +356,7 @@ export function DevboxComposer({
   const hint = slashCommandHint(text, commands)
 
   const update = (value: string) => {
+    draft.current = { text: value, files: draft.current.files }
     setText(value)
     setCaret(ref.current ? caretOffset(ref.current) : value.length)
     setActive(0)
@@ -366,7 +415,10 @@ export function DevboxComposer({
         update('')
         setMentions({})
       }
-      if (draft.current.files === sent.files) setFiles(NO_FILES)
+      if (draft.current.files === sent.files) {
+        draft.current = { ...draft.current, files: NO_FILES }
+        setFiles(NO_FILES)
+      }
     }
     const result = onSubmit(text.trim(), files)
     if (!(result instanceof Promise)) return clear(result)
@@ -438,6 +490,8 @@ export function DevboxComposer({
         aria-multiline
         disabled={disabled}
         placeholder={placeholder}
+        initialValue={text}
+        deserializePlrlInitialValue
         setValue={update}
         onKeyDown={onKeyDown}
         onPasteFiles={addFiles}

@@ -92,6 +92,20 @@ defmodule Console.Devboxes.IngestTest do
       assert_receive {:event, %PubSub.DevboxInstanceUpdated{}}
     end
 
+    test "a suspend explains its reason, including ones console has no atom for" do
+      inst = insert(:devbox_instance, status: :running)
+
+      {:ok, updated} = Ingest.report_instance_status(%{
+        instance_id: inst.id,
+        status: :INSTANCE_STATUS_SUSPENDED,
+        suspend_reason: :SUSPEND_REASON_HOME_UNAVAILABLE,
+        generation: 1
+      }, inst.devbox.cluster)
+
+      assert updated.status == :suspended
+      assert updated.status_reason == "suspended: home unavailable"
+    end
+
     test "resuming clears the idle state from before the suspend" do
       past = Timex.now() |> Timex.shift(minutes: -5)
       inst = insert(:devbox_instance, status: :suspended, idle_state: %{idle: true, idle_since: past, suspends_at: past})
@@ -283,6 +297,20 @@ defmodule Console.Devboxes.IngestTest do
 
       assert_receive {:event, %PubSub.DevboxInstanceIndexUpdated{item: %DevboxInstance.IndexDelta{revision: 3, sessions: [_, _], interactions: [_]}}}
       assert_receive {:event, %PubSub.DevboxThreadUpdated{}}
+      assert_receive {:event, %PubSub.DevboxInstanceUpdated{item: %DevboxInstance{running_threads: 1}}}
+    end
+
+    test "it broadcasts the instance when its turns finish, but not for an unchanged aggregate" do
+      inst = insert(:devbox_instance, running_threads: 2, index_revision: 1)
+      cluster = inst.devbox.cluster
+
+      {:ok, _} = Ingest.upsert_instance_index(%{instance_id: inst.id, aggregate: %{revision: 2, running_threads: 2}}, cluster)
+      refute_receive {:event, %PubSub.DevboxInstanceUpdated{}}
+
+      {:ok, _} = Ingest.upsert_instance_index(%{instance_id: inst.id, aggregate: %{revision: 3, running_threads: 0}}, cluster)
+      assert_receive {:event, %PubSub.DevboxInstanceUpdated{item: %DevboxInstance{id: id, running_threads: 0}}}
+      assert id == inst.id
+      assert refetch(inst).running_threads == 0
     end
 
     test "it files a subagent's interaction under the subagent, not its top-level thread" do
@@ -307,6 +335,52 @@ defmodule Console.Devboxes.IngestTest do
 
       child = Console.Repo.get_by!(DevboxInstanceSession, acp_session_id: "child")
       assert Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-sub").session_id == child.id
+    end
+
+    test "it truncates overlong session and interaction titles instead of rejecting the batch" do
+      inst = insert(:devbox_instance)
+      thread = insert(:devbox_instance_session, instance: inst, acp_session_id: "parent")
+      long = String.duplicate("echo x; ", 100)
+
+      {:ok, %{sessions_applied: 1, interactions_applied: 1}} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [%{thread_id: thread.id, session_id: "parent", title: long, revision: 1}],
+        interactions: [%{
+          interaction_id: "int-long",
+          session_id: "parent",
+          kind: :INTERACTION_KIND_PERMISSION,
+          state: :INTERACTION_STATE_PENDING,
+          title: long,
+          revision: 1
+        }]
+      }, inst.devbox.cluster)
+
+      assert refetch(thread).title == String.slice(long, 0, 255)
+      assert Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-long").title == String.slice(long, 0, 255)
+    end
+
+    test "it truncates titles by codepoint, which multi-codepoint graphemes outnumber" do
+      inst = insert(:devbox_instance)
+      thread = insert(:devbox_instance_session, instance: inst, acp_session_id: "parent")
+      # 200 graphemes, 400 codepoints
+      long = String.duplicate("e\u0301", 200)
+
+      {:ok, %{sessions_applied: 1, interactions_applied: 1}} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [%{thread_id: thread.id, session_id: "parent", title: long, revision: 1}],
+        interactions: [%{
+          interaction_id: "int-accents",
+          session_id: "parent",
+          kind: :INTERACTION_KIND_PERMISSION,
+          state: :INTERACTION_STATE_PENDING,
+          title: long,
+          revision: 1
+        }]
+      }, inst.devbox.cluster)
+
+      assert length(String.codepoints(refetch(thread).title)) == 255
+      interaction = Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-accents")
+      assert length(String.codepoints(interaction.title)) == 255
     end
 
     test "it links a subagent indexed before its parent, in the same batch or a later one" do
@@ -348,6 +422,7 @@ defmodule Console.Devboxes.IngestTest do
       assert refetch(thread).title == "current"
       assert refetch(inst).running_threads == 0
       refute_receive {:event, %PubSub.DevboxInstanceIndexUpdated{}}
+      refute_receive {:event, %PubSub.DevboxInstanceUpdated{}}
     end
 
     test "a failed row rolls back the whole batch" do

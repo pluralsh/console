@@ -12,7 +12,9 @@ import (
 	"strings"
 )
 
-// WriteFileAtomic writes data to a temporary file next to path and renames it into place.
+// WriteFileAtomic writes data to a temporary file next to path and renames it into place. It doesn't fsync: on
+// the home's ext4, auto_da_alloc commits the data with the rename, and every fsync there is a ZeroFS flush that
+// freezes a new L0 SST, so per-write syncs from frequently saved state outpace compaction.
 func WriteFileAtomic(path string, data []byte, perm os.FileMode) error {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -25,10 +27,6 @@ func WriteFileAtomic(path string, data []byte, perm os.FileMode) error {
 	name := tmp.Name()
 	defer func() { _ = os.Remove(name) }()
 	if _, err := tmp.Write(data); err != nil {
-		_ = tmp.Close()
-		return err
-	}
-	if err := tmp.Sync(); err != nil {
 		_ = tmp.Close()
 		return err
 	}

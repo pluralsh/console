@@ -6,6 +6,7 @@
  * is serialized to canonical `<plrl-*>` XML.
  */
 
+import { DEVBOX_CHIP_TAGS, devboxChip } from 'components/ai/chatbot/devboxChips'
 import {
   chipDisplayText,
   MentionKind,
@@ -19,9 +20,13 @@ export const CHIP_ATTR_PREFIX = 'data-attr-'
 
 // longest first, since some tags (plrl-sentinel-run) prefix others (plrl-sentinel-run-job)
 const PLRL_CHIP_REGEX = new RegExp(
-  `<(${[...Object.values(MentionKind)].sort((a, b) => b.length - a.length).join('|')})\\b([^>]*)></\\1>`,
+  `<(${[...Object.values(MentionKind), ...DEVBOX_CHIP_TAGS].sort((a, b) => b.length - a.length).join('|')})\\b([^>]*)></\\1>`,
   'gi'
 )
+
+// a devbox chip's label, else the mention's
+const chipLabel = (tag: string, attrs: Record<string, Nullable<string>>) =>
+  devboxChip(tag, attrs)?.label ?? chipDisplayText(tag as MentionKind, attrs)
 const CHIP_ATTR_REGEX = /([a-z-]+)\s*=\s*"([^"]*)"/g
 
 const ZWSP = '​'
@@ -153,7 +158,7 @@ export function insertChipAtRange(
 
 /** Build a chip span from a flat attribute map. */
 export function buildChipFromAttrs(
-  tag: MentionKind,
+  tag: MentionKind | string,
   attrs: Record<string, Nullable<string>>
 ): HTMLElement {
   const span = document.createElement('span')
@@ -164,7 +169,9 @@ export function buildChipFromAttrs(
     if (v == null || v === '') continue
     span.setAttribute(`${CHIP_ATTR_PREFIX}${k}`, v)
   }
-  const label = chipDisplayText(tag, attrs)
+  const devbox = devboxChip(tag, attrs)
+  if (devbox) span.title = devbox.title
+  const label = chipLabel(tag, attrs)
   // wrap text in an inner span for highlight styling
   const inner = document.createElement('span')
   inner.textContent = tag === MentionKind.Skill ? `/${label}` : label
@@ -192,8 +199,7 @@ export function prettifyPrompt(text: string): string {
   return walkPlrlText(text)
     .map((n) =>
       n.type === 'chip'
-        ? (n.tag === MentionKind.Skill ? '/' : '@') +
-          chipDisplayText(n.tag, n.attrs)
+        ? (n.tag === MentionKind.Skill ? '/' : '@') + chipLabel(n.tag, n.attrs)
         : n.text
     )
     .join('')
@@ -213,7 +219,7 @@ export function truncateKeepingChips(text: string, length: number): string {
   for (const node of walkPlrlText(text)) {
     const [content, visibleLen] =
       node.type === 'chip'
-        ? [node.raw, 1 + chipDisplayText(node.tag, node.attrs).length]
+        ? [node.raw, 1 + chipLabel(node.tag, node.attrs).length]
         : [node.text, node.text.length]
     if (visibleLen > remaining) {
       if (node.type === 'text' && remaining > 0)
@@ -314,7 +320,7 @@ function walkPlrlText(text: string): WalkedPlrlNode[] {
     const attrs: Record<string, string> = {}
     for (const attrMatch of match[2].matchAll(CHIP_ATTR_REGEX))
       attrs[attrMatch[1]] = decodeChipAttrValue(attrMatch[2])
-    if (attrs['item-id'] && attrs['item-name'])
+    if ((attrs['item-id'] && attrs['item-name']) || devboxChip(tag, attrs))
       out.push({ type: 'chip', tag, attrs, raw: match[0] })
     else out.push({ type: 'text', text: match[0] })
     lastIdx = matchIdx + match[0].length

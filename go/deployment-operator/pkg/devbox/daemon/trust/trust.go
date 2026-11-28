@@ -1,5 +1,6 @@
 // Package trust builds the sandbox's CA bundle: the system roots plus the egress gateway's interception CA, written
-// to the writable trust store that SSL_CERT_FILE, NODE_EXTRA_CA_CERTS, REQUESTS_CA_BUNDLE and GIT_SSL_CAINFO point at.
+// to the writable trust store that the system bundle links to and SSL_CERT_FILE, NODE_EXTRA_CA_CERTS and
+// REQUESTS_CA_BUNDLE point at.
 package trust
 
 import (
@@ -19,8 +20,26 @@ const DefaultSystemBundle = "/etc/ssl/certs/ca-certificates.crt"
 // DefaultEgressCAGlobs are where Substrate projects the egress trust bundle.
 var DefaultEgressCAGlobs = []string{"/run/ate/egress-trust-bundle/*.pem", "/var/run/ate/egress-trust-bundle/*.pem"}
 
-// EnvVars are the variables that must point at the bundle.
-var EnvVars = []string{"SSL_CERT_FILE", "NODE_EXTRA_CA_CERTS", "REQUESTS_CA_BUNDLE", "GIT_SSL_CAINFO", "CURL_CA_BUNDLE", "AWS_CA_BUNDLE"}
+// EnvVars are the variables that must point at the bundle, for tools that ship their own roots instead of reading
+// the system bundle. Everything else (curl, git, OpenSSL, Go, Ruby, Cargo) reads the system bundle, which the image
+// links to ours, so it needs no variable; each extra one is a setting some tool may misread. The image's ENV, its
+// sudoers env_keep and its structure tests list the same variables.
+var EnvVars = []string{
+	// rustls tools with built-in roots (uv and others) and standalone Python builds.
+	"SSL_CERT_FILE",
+	"AWS_CA_BUNDLE",
+	"CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE",
+	// Node and everything on it (npm, Yarn, pnpm, corepack); Bun too.
+	"NODE_EXTRA_CA_CERTS",
+	"DENO_CERT",
+	// Python's certifi users: requests (pip, poetry), pip, twine, conda.
+	"REQUESTS_CA_BUNDLE",
+	"PIP_CERT",
+	"TWINE_CERT",
+	"CONDA_SSL_VERIFY",
+	"HEX_CACERTS_PATH",
+	"NIX_SSL_CERT_FILE",
+}
 
 // Build writes system + extra certificates to out (replacing a symlink with a file) and returns the number of
 // extra certificates added. Duplicate certificates are written once.

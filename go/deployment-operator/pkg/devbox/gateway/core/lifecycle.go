@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strings"
 	"time"
 
@@ -159,6 +160,13 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 		// Substrate refuses an explicit tag for templates with external volumes; the default is the golden tag.
 		spec.SourceTag, spec.Preview = "", true
 	}
+	if runner.HomeStorage.Zonal() && len(runner.Zones) > 0 {
+		zone, err := g.instanceZone(ctx, inst, runner)
+		if err != nil {
+			return err
+		}
+		spec.Zone = zone
+	}
 	if _, err := g.deps.Actors.CreateActor(ctx, spec); err != nil {
 		return fmt.Errorf("creating actor %s: %w", ref, err)
 	}
@@ -188,13 +196,47 @@ func (g *Gateway) applyEgress(ctx context.Context, inst *Instance) error {
 	if err != nil {
 		return err
 	}
+	inst.mu.Lock()
+	runner := inst.runner
+	inst.mu.Unlock()
 	if err := g.deps.Actors.ApplyEgressPolicy(ctx, inst.ref(), actors.EgressRules(egress.BuildPolicy(*info))); err != nil {
 		return fmt.Errorf("applying egress policy: %w", err)
+	}
+	if runner != nil {
+		inst.mu.Lock()
+		inst.egressApplied = egressInputs(runner)
+		inst.mu.Unlock()
 	}
 	if g.deps.Egress != nil {
 		g.deps.Egress.Invalidate(inst.ID)
 	}
 	return nil
+}
+
+// refreshEgress re-reads inst's runner and re-applies its egress policy when the runner's allowlist, presets,
+// cloud identities or repositories differ from what the actor's policy was built from, so live and suspended
+// boxes pick up runner edits. It compares against the applied policy rather than inst.runner, which adoption and
+// wakes refresh without re-applying; after a gateway restart that means one re-apply per box. Callers hold
+// inst.op.
+func (g *Gateway) refreshEgress(ctx context.Context, inst *Instance) error {
+	runner, err := g.deps.Runners.Get(ctx, inst.record().Runner)
+	if err != nil {
+		return err
+	}
+	inst.mu.Lock()
+	applied := inst.egressApplied
+	inst.runner = runner
+	inst.mu.Unlock()
+	if applied != nil && reflect.DeepEqual(applied, egressInputs(runner)) {
+		return nil
+	}
+	g.log.Info("re-applying egress policy", "instance", inst.ID, "runner", runner.Name, "firstSinceStart", applied == nil)
+	return g.applyEgress(ctx, inst)
+}
+
+// egressInputs are the runner fields instanceInfo builds an egress policy from.
+func egressInputs(r *Runner) any {
+	return []any{r.HTTPAllowlist, r.CloudIdentityHosts, r.AllowedRepositories, r.Repositories}
 }
 
 // wake resumes the actor, waits for its daemon and (re)initializes it. Initialize is idempotent: a restored
@@ -503,6 +545,13 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.In
 	default:
 		return st, status.Errorf(codes.FailedPrecondition, "instance %s is %s and can't be resumed", inst.ID, st)
 	}
+	if err := g.refreshEgress(ctx, inst); err != nil {
+		g.log.Error(err, "refreshing egress policy before resume", "instance", inst.ID)
+	}
+	g.refreshRunner(ctx, inst)
+	if err := g.repin(ctx, inst); err != nil {
+		g.log.Error(err, "moving instance out of a dropped zone; resuming in its old zone", "instance", inst.ID)
+	}
 	if err := g.wake(ctx, inst); err != nil {
 		if errors.Is(err, actors.ErrCrashed) {
 			_ = g.deps.Actors.Revert(ctx, inst.ref())
@@ -630,7 +679,7 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 }
 
 // saveHomeSeed copies a JuiceFS home, which isn't in the tag, into the snapshot's seed while the actor is still
-// suspended, so the copy matches the tag. Seeds are JuiceFS seeds, so a ZeroFS home isn't saved.
+// suspended, so the copy matches the tag. Seeds are JuiceFS seeds, so a ZeroFS or Block home isn't saved.
 func (g *Gateway) saveHomeSeed(ctx context.Context, inst *Instance, ref, tag actors.Ref) error {
 	if g.deps.Seeds == nil {
 		return nil
@@ -639,7 +688,7 @@ func (g *Gateway) saveHomeSeed(ctx context.Context, inst *Instance, ref, tag act
 	if err != nil {
 		return fmt.Errorf("finding the home storage of %s: %w", ref, err)
 	}
-	if storage == v1alpha1.DevboxHomeZeroFS {
+	if storage == v1alpha1.DevboxHomeZeroFS || storage == v1alpha1.DevboxHomeBlock {
 		return nil
 	}
 	a, err := g.deps.Actors.GetActor(ctx, ref)

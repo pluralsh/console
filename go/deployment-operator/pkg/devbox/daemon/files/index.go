@@ -268,7 +268,7 @@ func (h *hits) Pop() any {
 }
 
 // search returns the best limit entries under root matching q (lowercase), unordered, skipping dot-named paths
-// below root unless hidden, and whether more matched.
+// below root outside a checkout unless hidden, and whether more matched.
 func (idx *FileIndex) search(root, q string, hidden bool, limit int) ([]match, bool) {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
@@ -279,10 +279,10 @@ func (idx *FileIndex) search(root, q string, hidden bool, limit int) ([]match, b
 	qm := maskOf(q)
 	top, more := &hits{}, false
 	var rel []byte
-	var walk func(n *indexNode, pm uint64)
-	walk = func(n *indexNode, pm uint64) {
+	var walk func(n *indexNode, pm uint64, inRepo bool)
+	walk = func(n *indexNode, pm uint64, inRepo bool) {
 		for _, c := range n.children {
-			if !hidden && strings.HasPrefix(c.name, ".") {
+			if !hidden && !inRepo && strings.HasPrefix(c.name, ".") {
 				continue
 			}
 			cm := pm | c.own
@@ -310,12 +310,12 @@ func (idx *FileIndex) search(root, q string, hidden bool, limit int) ([]match, b
 				}
 			}
 			if len(c.children) > 0 {
-				walk(c, cm)
+				walk(c, cm, inRepo || c.repo)
 			}
 			rel = rel[:mark]
 		}
 	}
-	walk(start, 0)
+	walk(start, 0, start.inRepo())
 
 	out := make([]match, top.Len())
 	for i, h := range *top {
@@ -324,7 +324,8 @@ func (idx *FileIndex) search(root, q string, hidden bool, limit int) ([]match, b
 	return out, more
 }
 
-// children lists the indexed entries directly in dir, by name, skipping dot-named ones unless hidden.
+// children lists the indexed entries directly in dir, by name, skipping dot-named ones outside a checkout unless
+// hidden.
 func (idx *FileIndex) children(dir string, hidden bool, limit int) (entries []*devboxv1.FileEntry, truncated bool) {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
@@ -332,9 +333,10 @@ func (idx *FileIndex) children(dir string, hidden bool, limit int) (entries []*d
 	if n == nil {
 		return nil, false
 	}
+	hidden = hidden || n.inRepo()
 	prefix := n.path()
 	for _, c := range n.children {
-		if !c.entry || (!hidden && strings.HasPrefix(c.name, ".")) {
+		if !c.entry || c.name == gitDir || (!hidden && strings.HasPrefix(c.name, ".")) {
 			continue
 		}
 		if len(entries) >= limit {
@@ -343,6 +345,16 @@ func (idx *FileIndex) children(dir string, hidden bool, limit int) (entries []*d
 		entries = append(entries, indexEntry(c, prefix+string(filepath.Separator)+c.name))
 	}
 	return entries, false
+}
+
+// inRepo reports whether n is a checkout or inside one.
+func (n *indexNode) inRepo() bool {
+	for a := n; a != nil; a = a.parent {
+		if a.repo {
+			return true
+		}
+	}
+	return false
 }
 
 func indexEntry(n *indexNode, p string) *devboxv1.FileEntry {

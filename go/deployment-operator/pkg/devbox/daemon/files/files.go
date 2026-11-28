@@ -38,6 +38,8 @@ const (
 	MaxListEntries = 5000
 	// MaxWriteBytes caps WriteFile.
 	MaxWriteBytes = 32 << 20
+
+	gitDir = ".git"
 )
 
 // Checkouts lists the checkouts under the home directory and, for a thread, its worktrees.
@@ -146,6 +148,10 @@ func (si *statusIndex) annotate(s *Service, e *devboxv1.FileEntry) {
 		return
 	}
 	e.Repository = filepath.Base(repo)
+	// a checkout has no status of its own, and listing the home would otherwise run git status in every one
+	if repo == e.GetPath() {
+		return
+	}
 	st, ok := si.cache[repo]
 	if !ok {
 		st = map[string]string{}
@@ -209,11 +215,12 @@ func (s *Service) listDisk(ctx context.Context, req *devboxv1.ListFilesRequest, 
 			return err
 		}
 		names := make([]string, 0, len(des))
+		hidden := req.GetIncludeHidden() || s.repoOf(dir) != ""
 		for _, de := range des {
-			if !req.GetIncludeHidden() && strings.HasPrefix(de.Name(), ".") {
+			if !hidden && strings.HasPrefix(de.Name(), ".") {
 				continue
 			}
-			if de.Name() == ".git" {
+			if de.Name() == gitDir {
 				continue
 			}
 			names = append(names, de.Name())

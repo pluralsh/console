@@ -4,6 +4,7 @@ import {
   DevboxToolCallFragment,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
+import { mcpCall } from './devboxIntegrations'
 import { DevboxTimelineStore, selectOrderedEntities } from './devboxTimeline'
 
 export type ApprovalDiff = { path: string; oldText: string; newText: string }
@@ -19,9 +20,6 @@ type Input = Record<string, unknown>
 const str = (v: unknown) => (typeof v === 'string' ? v : undefined)
 const isEmpty = (v: unknown) =>
   v == null || (typeof v === 'object' && !Object.keys(v as object).length)
-
-// Claude names MCP tools mcp__<server>__<tool>; Codex titles them <server>.<tool>
-const CLAUDE_MCP_TOOL = /^mcp__(.+?)__(.+)$/
 
 // what a permission request would do, from the tool call it was raised for
 export function approvalPreview(
@@ -46,23 +44,8 @@ export function approvalPreview(
       description: str(input.description),
     }
 
-  const mcp =
-    CLAUDE_MCP_TOOL.exec(toolCall.title ?? '') ??
-    CLAUDE_MCP_TOOL.exec(str(input.tool_name) ?? '')
-  if (mcp)
-    return {
-      kind: 'mcp',
-      server: mcp[1],
-      tool: mcp[2],
-      args: input.tool_input ?? input,
-    }
-  if (str(input.server) && str(input.tool))
-    return {
-      kind: 'mcp',
-      server: str(input.server)!,
-      tool: str(input.tool)!,
-      args: input.arguments ?? {},
-    }
+  const mcp = mcpCall(toolCall)
+  if (mcp) return { kind: 'mcp', ...mcp }
 
   return isEmpty(raw) ? null : { kind: 'generic', input: raw }
 }

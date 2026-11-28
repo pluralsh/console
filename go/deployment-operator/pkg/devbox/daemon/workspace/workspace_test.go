@@ -183,6 +183,13 @@ func TestWorktrees(t *testing.T) {
 	if err != nil || single != filepath.Join(home, ".threads", "t2", "api") {
 		t.Fatalf("single-repo worktree cwd %s %v", single, err)
 	}
+	repeated, err := m.Worktrees("t3", []string{"api", "web", "api", "web", "api"})
+	if err != nil || repeated != filepath.Join(home, ".threads", "t3") {
+		t.Fatalf("repeated repos: cwd %s %v", repeated, err)
+	}
+	if got := m.ThreadWorktrees("t3"); len(got) != 2 {
+		t.Fatalf("repeated repos made worktrees %v", got)
+	}
 }
 
 // The golden boot's clones are refetched when an instance first boots: a clean checkout fast-forwards or switches

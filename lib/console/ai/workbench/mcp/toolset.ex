@@ -97,6 +97,21 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   def mcp_name(tool), do: mcp_name(Tool.name(tool))
 
   @doc """
+  The MCP names of every tool derived from a `WorkbenchTool`, paired with that tool, so a client can attribute an
+  MCP call to the integration behind it.  Mutating tools are included, since a session that isn't readonly
+  advertises them; builtins aren't, having no integration.
+  """
+  @spec integrations(Workbench.t, User.t) :: [{binary, WorkbenchTool.t}]
+  def integrations(%Workbench{} = bench, %User{} = user) do
+    tools(bench, user, readonly: false)
+    |> filter(:all)
+    |> Enum.flat_map(fn
+      %{tool: %WorkbenchTool{} = wt} = tool -> [{mcp_name(tool), wt}]
+      _ -> []
+    end)
+  end
+
+  @doc """
   Indexes tools by `mcp_name/1`.  Distinct workbench names that sanitize to the
   same identifier are an error rather than a silent overwrite.
   """

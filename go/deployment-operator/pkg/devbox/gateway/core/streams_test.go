@@ -1,10 +1,12 @@
 package core
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net"
 	"net/http"
+	"strings"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -47,6 +49,36 @@ func sandboxHTTP(t *testing.T) http.Handler {
 			n, err := rw.Read(buf)
 			if n > 0 {
 				_, _ = rw.Write(append([]byte("echo:"), buf[:n]...))
+				_ = rw.Flush()
+			}
+			if err != nil {
+				return
+			}
+		}
+	})
+	// VNC is a binary WebSocket. Echo the negotiated subprotocol and the raw frames.
+	mux.HandleFunc("/browser/vnc", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Upgrade") == "" {
+			http.Error(w, "upgrade required", http.StatusBadRequest)
+			return
+		}
+		conn, rw, err := http.NewResponseController(w).Hijack()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		defer conn.Close()
+		_, _ = rw.WriteString("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n")
+		if proto := r.Header.Get("Sec-WebSocket-Protocol"); proto != "" {
+			_, _ = rw.WriteString("Sec-WebSocket-Protocol: " + proto + "\r\n")
+		}
+		_, _ = rw.WriteString("\r\n")
+		_ = rw.Flush()
+		buf := make([]byte, 1024)
+		for {
+			n, err := rw.Read(buf)
+			if n > 0 {
+				_, _ = rw.Write(buf[:n])
 				_ = rw.Flush()
 			}
 			if err != nil {
@@ -187,4 +219,95 @@ func TestProxyStreamTerminalUpgrade(t *testing.T) {
 			break
 		}
 	}
+}
+
+func TestOpenStreamMarksVoxlStreams(t *testing.T) {
+	h := newHarness(t, sandboxHTTP(t))
+	h.running("inst-1")
+	gc := gatewayClient(t, h.g)
+	open := func() *devboxv1.OpenStreamResponse {
+		t.Helper()
+		resp, err := gc.OpenStream(context.Background(), &devboxv1.OpenStreamRequest{InstanceId: "inst-1", Kind: devboxv1.StreamKind_STREAM_KIND_VNC})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp
+	}
+	if vnc := open(); len(vnc.GetSubprotocols()) != 0 {
+		t.Fatalf("a VNC stream carries subprotocols %v", vnc.GetSubprotocols())
+	}
+	h.daemon.browserPath = devboxv1.BrowserStreamPath
+	voxl := open()
+	if voxl.GetDaemonPath() != devboxv1.BrowserStreamPath || len(voxl.GetSubprotocols()) != 1 || voxl.GetSubprotocols()[0] != "voxl" {
+		t.Fatalf("OpenStream = %v", voxl)
+	}
+}
+
+func TestProxyStreamVNC(t *testing.T) {
+	h := newHarness(t, sandboxHTTP(t))
+	h.running("inst-1")
+	gc := gatewayClient(t, h.g)
+
+	open, err := gc.OpenStream(context.Background(), &devboxv1.OpenStreamRequest{
+		InstanceId:   "inst-1",
+		Kind:         devboxv1.StreamKind_STREAM_KIND_VNC,
+		StartBrowser: &devboxv1.StartBrowserRequest{Url: "http://localhost:3000"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if open.GetDaemonPath() != "/browser/vnc" || open.GetStreamId() == "" || !open.GetBrowser().GetRunning() {
+		t.Fatalf("OpenStream = %v", open)
+	}
+
+	ctx, cancel := context.WithCancel(streamCtx("inst-1", open.GetStreamId()))
+	defer cancel()
+	stream, err := gc.ProxyStream(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	zero := int64(0)
+	_ = stream.Send(&devboxv1.HttpRequest{Message: &devboxv1.HttpRequest_Header_{Header: &devboxv1.HttpRequest_Header{
+		Request: &devboxv1.HttpRequestLine{Method: "GET", Header: map[string]*devboxv1.MetadataValues{
+			"Connection":             {Value: []string{"Upgrade"}},
+			"Upgrade":                {Value: []string{"websocket"}},
+			"Sec-WebSocket-Protocol": {Value: []string{"binary"}},
+		}},
+		ContentLength: &zero,
+	}}})
+	_ = stream.Send(&devboxv1.HttpRequest{Message: &devboxv1.HttpRequest_Trailer_{Trailer: &devboxv1.HttpRequest_Trailer{}}})
+
+	msg, err := stream.Recv()
+	if err != nil || msg.GetHeader().GetResponse().GetStatusCode() != http.StatusSwitchingProtocols {
+		t.Fatalf("header = %v, %v", msg, err)
+	}
+	if got := metadataValue(msg.GetHeader().GetResponse().GetHeader(), "Sec-WebSocket-Protocol"); got != "binary" {
+		t.Fatalf("Sec-WebSocket-Protocol = %q", got)
+	}
+	if msg, err = stream.Recv(); err != nil || msg.GetTrailer() == nil {
+		t.Fatalf("trailer = %v, %v", msg, err)
+	}
+	frame := []byte{0x00, 0xff, 0x01, 0x10}
+	_ = stream.Send(&devboxv1.HttpRequest{Message: &devboxv1.HttpRequest_UpgradeData_{UpgradeData: &devboxv1.HttpRequest_UpgradeData{Data: frame}}})
+	var got []byte
+	for len(got) < len(frame) {
+		msg, err := stream.Recv()
+		if err != nil {
+			t.Fatalf("after %v: %v", got, err)
+		}
+		got = append(got, msg.GetUpgradeData().GetData()...)
+	}
+	if !bytes.Equal(got, frame) {
+		t.Fatalf("frame = %v, want %v", got, frame)
+	}
+	_ = stream.CloseSend()
+}
+
+func metadataValue(h map[string]*devboxv1.MetadataValues, name string) string {
+	for k, v := range h {
+		if strings.EqualFold(k, name) && len(v.GetValue()) > 0 {
+			return v.GetValue()[0]
+		}
+	}
+	return ""
 }

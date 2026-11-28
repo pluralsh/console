@@ -1,7 +1,9 @@
 import {
+  Button,
   CliIcon,
-  MonitorIcon,
   CloseIcon,
+  EmptyState,
+  MonitorIcon,
   GitCompareIcon,
   FolderIcon,
   IconFrame,
@@ -40,9 +42,10 @@ import {
   WORKBENCH_DEVBOX_INSTANCE_PARAM_ID,
   WORKBENCH_DEVBOX_PR_QUERY_PARAM,
   WORKBENCH_DEVBOX_TAB_QUERY_PARAM,
+  WORKBENCH_DEVBOX_VIEW_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { DevboxBrowserTab } from './DevboxBrowserTab'
+import { DevboxBrowserView } from './DevboxBrowserTab'
 import { useDevboxChangeStat } from './devboxChanges'
 import {
   DevboxDiffBlock,
@@ -56,6 +59,7 @@ import { pullRequestsStatus, useDevboxPullRequests } from './devboxPullRequests'
 import { DevboxPullRequestsTab } from './DevboxPullRequestsTab'
 import { DevboxTerminalTab } from './DevboxTerminalTab'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
+import { addToPrompt } from './devboxPromptInserts'
 
 const SIDE_PANEL_TYPE: SidePanel = 'devbox'
 const OPEN_KEY = 'plural-devbox-panel-open'
@@ -82,7 +86,7 @@ const PANEL_TABS: {
 export const isPanelTab = (tab: Nullable<string>): tab is DevboxPanelTab =>
   PANEL_TABS.some((t) => t.key === tab)
 
-// the browser tab stays behind its feature flag until it works
+// the browser tab is only for boxes that run one
 function usePanelTabs(instance: Nullable<DevboxInstanceFragment>) {
   const { featureFlags } = use(FeatureFlagContext)
   return PANEL_TABS.filter(
@@ -149,16 +153,18 @@ export function useDevboxPanel() {
     })
     setOpen(true)
   }
-  // the main view shows at most one of an open file or a change's diff
+  // the main view shows at most one of the browser, an open file, or a change's diff
   const selectFile = (path: Nullable<string>) =>
     update({
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path,
       [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
     })
   const selectChange = (change: Nullable<string>) =>
     update({
       [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: change,
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
     })
   // a trailing `/` only reveals a directory in the tree, a file also replaces
   // the instance's main view with the file
@@ -167,12 +173,32 @@ export function useDevboxPanel() {
       [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: null,
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path,
       [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
+    })
+    setOpen(true)
+  }
+  // the browser shows in one place at a time, so moving it to the main view
+  // takes it out of the panel
+  const browserToMain = () =>
+    update({
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: 'browser',
+      [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: null,
+    })
+  const browserToPanel = () => {
+    update({
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: 'browser',
+      [WORKBENCH_DEVBOX_PR_QUERY_PARAM]: null,
     })
     setOpen(true)
   }
 
   const file = params.get(WORKBENCH_DEVBOX_FILE_QUERY_PARAM)
   const change = params.get(WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM)
+  const browserInMain =
+    params.get(WORKBENCH_DEVBOX_VIEW_QUERY_PARAM) === 'browser'
 
   return {
     isOpen: sidePanel === SIDE_PANEL_TYPE,
@@ -187,6 +213,9 @@ export function useDevboxPanel() {
     openFile,
     change,
     selectChange,
+    browserInMain,
+    browserToMain,
+    browserToPanel,
   }
 }
 
@@ -261,6 +290,9 @@ export function DevboxPanelContent() {
     selectFile,
     change,
     selectChange,
+    browserInMain,
+    browserToMain,
+    browserToPanel,
   } = useDevboxPanel()
 
   const [headerActions, setHeaderActions] =
@@ -319,7 +351,8 @@ export function DevboxPanelContent() {
           $flush={
             active.key === 'changes' ||
             active.key === 'files' ||
-            active.key === 'terminal'
+            active.key === 'terminal' ||
+            active.key === 'browser'
           }
         >
           {active.key === 'files' && (
@@ -354,13 +387,31 @@ export function DevboxPanelContent() {
               headerActions={headerActions}
             />
           )}
-          {active.key === 'browser' && (
-            <DevboxBrowserTab
-              api={api}
-              live={live}
-              browserEnabled={!!instance.devbox?.browser}
-            />
-          )}
+          {active.key === 'browser' &&
+            (browserInMain ? (
+              <EmptyState
+                message="The browser is in the main view"
+                description="Move it back here to keep it beside the session."
+              >
+                <Button
+                  small
+                  secondary
+                  onClick={browserToPanel}
+                >
+                  Move to sidebar
+                </Button>
+              </EmptyState>
+            ) : (
+              <DevboxBrowserView
+                api={api}
+                live={live}
+                placement="panel"
+                onMove={browserToMain}
+                onPick={(element) =>
+                  instanceId && addToPrompt(instanceId, element)
+                }
+              />
+            ))}
         </PanelBodySC>
       )}
     </SidePanelContent>

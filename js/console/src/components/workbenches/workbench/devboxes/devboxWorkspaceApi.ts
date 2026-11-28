@@ -79,12 +79,9 @@ export type DevboxChangeGroup = {
 // state for any operation left undefined
 export type DevboxWorkspaceApi = {
   openStream?: (opts: DevboxOpenStreamOptions) => Promise<DevboxStreamTicket>
-  // brief entries carry no size or git status, which lets the instance list
-  // from memory rather than disk
-  listFiles?: (
-    path: string,
-    opts?: { brief?: boolean }
-  ) => Promise<DevboxFileEntry[]>
+  // entries are brief, with no size or git status, which lets the instance
+  // list from memory rather than disk
+  listFiles?: (path: string) => Promise<DevboxFileEntry[]>
   // the best fuzzy matches for query anywhere under path
   searchFiles?: (path: string, query: string) => Promise<DevboxFileEntry[]>
   // the last listing of a directory, if any, to show while listFiles refreshes it
@@ -124,6 +121,7 @@ export function createWorkspaceApi(
   const filesVariables = (path: string) => ({
     instanceId,
     path: path === '~' ? null : path,
+    brief: true,
   })
   return {
     openStream: async ({ kind, port, terminalId, url }) => {
@@ -144,16 +142,14 @@ export function createWorkspaceApi(
       if (!stream) throw new Error('Console returned no stream')
       return stream
     },
-    listFiles: async (path, opts) => {
+    listFiles: async (path) => {
       const { data } = await client.query<
         DevboxFilesQuery,
         DevboxFilesQueryVariables
       >({
         query: DevboxFilesDocument,
-        variables: opts?.brief
-          ? { ...filesVariables(path), brief: true }
-          : filesVariables(path),
-        fetchPolicy: opts?.brief ? 'no-cache' : 'network-only',
+        variables: filesVariables(path),
+        fetchPolicy: 'network-only',
       })
       return toFileEntries(data)
     },
@@ -265,18 +261,3 @@ export function devboxStreamSocketUrl(
 
 export const ticketSubprotocols = (ticket: DevboxStreamTicket) =>
   (ticket.subprotocols ?? []).filter((p): p is string => !!p)
-
-// The page loads in the instance's own browser, so the app sees localhost and its absolute URLs resolve.
-export function devboxBrowserUrl(target: string) {
-  const t = target.trim()
-  if (/^\d{2,5}$/.test(t))
-    return Number(t) <= 65535 ? `http://localhost:${t}` : null
-  try {
-    const url = new URL(/^[a-z]+:\/\//i.test(t) ? t : `http://${t}`)
-    return url.protocol === 'http:' || url.protocol === 'https:'
-      ? url.toString()
-      : null
-  } catch {
-    return null
-  }
-}
