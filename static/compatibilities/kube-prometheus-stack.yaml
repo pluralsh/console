@@ -5,6 +5,70 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 94.1.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Prometheus node-exporter image tag updated to **v6** (chart release
+        94.1.0)., Grafana image tag updated to **v14.6.1** (from 93.11.1 notes).,
+      'Security hardening and Pod Security Standards alignment across subcharts:',
+      '- **prometheus**: hardened server and configmap-reload security contexts.',
+      '- **prometheus-blackbox-exporter**: defaults adjusted to meet Restricted Pod
+        Security Standard; common labels moved to DaemonSet pod template; values.yaml
+        keys alphabetized.', '- **prometheus-elasticsearch-exporter**: default service
+        account token mount disabled; root group dropped by default; preStop hook
+        changed from exec to native sleep; new values added for collectors and intervals.']
+    features: ['prometheus-elasticsearch-exporter gained new configurable collectors
+        (health-report, tasks) and settings (es.node, es.clusterinfo.interval).']
+    breaking_changes: ['Potential compatibility change: **prometheus-node-exporter
+        image major version bump to v6** may include metric/flag changes; validate
+        dashboards, rules, and any custom scrape/metric relabeling that depends on
+        node-exporter metrics.', 'Stricter default security posture (Restricted PSS
+        alignment, token mounts disabled, root group dropped, hardened securityContexts)
+        can break clusters with custom PSP/PSS exemptions, non-root-incompatible volumes,
+        or workloads relying on auto-mounted service account tokens.']
+  chart_version: 94.1.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.2-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.1',
+    'quay.io/prometheus/node-exporter:v1.13.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 93.11.1
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['kube-prometheus-stack: bump kube-state-metrics image tag to v9.1.0
+        (from chart 93.9.0).', 'kube-prometheus-stack: bump Grafana image tag to v14.6.1
+        (from chart 93.11.1).', 'prometheus-blackbox-exporter subchart: add common
+        labels to DaemonSet pod template; sort values.yaml keys; tighten defaults
+        to meet Kubernetes Restricted Pod Security Standard by default.', "prometheus-elasticsearch-exporter\
+        \ subchart: harden defaults (don\u2019t mount SA token; drop root group);\
+        \ change preStop from exec to native sleep; add new collector/interval values\
+        \ (health-report, tasks, es.node, es.clusterinfo.interval).", 'prometheus
+        subchart: harden Prometheus server and configmap-reload securityContexts.']
+    features: ['Security hardening across multiple subcharts (Prometheus, blackbox-exporter,
+        elasticsearch-exporter) to better align with restricted Pod Security defaults.',
+      'New configurable collectors/interval options for prometheus-elasticsearch-exporter
+        (health-report, tasks, es.node, clusterinfo interval).', 'Component image
+        updates: kube-state-metrics to v9.1.0 and Grafana to v14.6.1.']
+    breaking_changes: ['Stricter default PodSecurity/securityContext settings (restricted
+        PSS, no SA token mount, dropped root group) may break environments relying
+        on previous permissive defaults or requiring root/privileged behavior.', 'Changes
+        in blackbox-exporter DaemonSet pod template labels could affect label-based
+        selectors, network policies, or monitoring/alert routing if you depended on
+        the previous label set.']
+  chart_version: 93.11.1
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.2-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.1',
+    'quay.io/prometheus/node-exporter:v1.13.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 93.9.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']

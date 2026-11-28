@@ -3,19 +3,81 @@ git_url: https://github.com/ray-project/kuberay
 release_url: https://github.com/ray-project/kuberay/releases/tag/v{vsn}
 helm_repository_url: https://ray-project.github.io/kuberay-helm
 versions:
-- version: 1.7.3
+- version: 1.8.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Security/dependency update: bumped `golang.org/x/net` to v0.62.0 and
-        `go-openapi/swag` to v0.27.1 to address CVEs (included in v1.7.3).']
-    breaking_changes: []
-  chart_version: 1.7.3
-  images: ['quay.io/kuberay/operator:v1.7.3']
+    helm_changes: "### kuberay-operator chart values to review / update\n\n- **Feature\
+      \ gates (new features are gated and off by default):**\n  - To enable **Node\
+      \ Label Delivery (alpha)**:\n    - Ensure operator **webhooks are enabled**:\
+      \ `webhooks.enabled: true` (requires cert-manager; **not compatible with** `singleNamespaceInstall:\
+      \ true`).\n    - Set feature gate: `--feature-gates=NodeLabelDelivery=true`\
+      \ (via chart\u2019s `featureGates` value).\n    - Allowlist node label keys:\
+      \ `configuration.allowedNodeLabels` (or `--allowed-node-labels`).\n  - To enable\
+      \ **Kubernetes Node Event Forwarding (alpha)**:\n    - Set `nodeEventForwarder.enabled:\
+      \ true`.\n    - Set feature gate: `--feature-gates=RayNodeEventForwarder=true`\
+      \ (via chart `featureGates`).\n    - Optionally filter with: `nodeEventForwarder.sources`,\
+      \ `nodeEventForwarder.reasons`, `nodeEventForwarder.types` (defaults to `Warning`).\n\
+      \    - **Not supported with** `singleNamespaceInstall: true`.\n\n- **History\
+      \ Server collector image configuration:**\n  - New operator Helm value `collectorImage`\
+      \ (and `--collector-image` flag) controls the History Server collector sidecar\
+      \ image; defaults to the collector image matching the operator version.\n  -\
+      \ `spec.historyServerOptions.collectorOptions.image` is now **optional**.\n\n\
+      - **RayCluster Helm chart changes (if you also manage Ray clusters via Helm):**\n\
+      \  - New: `common.envFrom` applied to Ray container for head + all worker groups.\n\
+      \  - New: chart now exposes `authOptions` and `upgradeStrategy`.\n  - Fix: `maxReplicas:\
+      \ 0` is preserved (no longer rendered as `2147483647`).\n\n- **Operator config\
+      \ cleanup:**\n  - Remove `deleteRayJobAfterJobFinishes` from the operator `--config`\
+      \ file (field removed).\n\n- **Workload-Aware Scheduling API bump:**\n  - KubernetesWAS\
+      \ now uses `scheduling.k8s.io/v1alpha3` (was `v1alpha2`). Ensure your cluster\
+      \ serves the required API versions (release note indicates Kubernetes 1.37 and\
+      \ serving `v1alpha3` + `v1beta1`).\n"
+    chart_updates: ['History Server: Running clusters are now displayed without proxying
+        to live clusters when `--enable-live-clusters` is disabled (default); collector
+        uploads logs periodically during runtime and History Server serves from object
+        store.', 'History Server: Added reload/refresh behavior for cached sessions;
+        added OCI object storage backend (`--storage-backend=oci`).', 'RayCluster
+        API: `workerGroupSpecs` becomes a map list keyed by `groupName` to improve
+        Server-Side Apply merge behavior.', 'RayCluster feature: `idleTerminationOptions`
+        added to allow autoscaler v2 to suspend/delete idle clusters (requires in-tree
+        autoscaling + Ray >= 2.60.0).', 'RayCluster behavior: default `RAY_AUTH_MODE=disabled`
+        is set when `spec.authOptions.mode` is unset to stay compatible with Ray 2.61
+        token-auth default.', 'RayService: Added `clusterUpgradeOptions.gatewayRef`
+        to reuse an existing Gateway for incremental upgrades (mutually exclusive
+        with `gatewayClassName`).', 'RayCronJob: `jobTemplate` now supports `metadata`
+        propagation to generated RayJobs.', 'Operator: Kubernetes Workload-Aware Scheduling
+        supports in-place gang resize and autoscaling RayClusters; Volcano integration
+        updates subgroup policy behavior.', 'Helm/RayCluster chart: added `common.envFrom`,
+        exposed `authOptions` and `upgradeStrategy`, and fixed rendering of `maxReplicas:
+        0`.', 'History Server collector: sidecar image now configurable via operator
+        value `collectorImage`; `collectorOptions.securityContext` added.']
+    features: ['History Server (beta): can list and serve running RayClusters from
+        object storage without proxying to the live cluster; adds reload UI and OCI
+        storage backend.', 'Node Label Delivery (alpha): propagate Kubernetes node
+        labels to Ray node labels for more realistic scheduling; requires webhooks,
+        allowlist, and feature gate.', 'Kubernetes Node Event Forwarding (alpha):
+        forward Node-level events (e.g., GPU XID) to Ray CRs so they appear in Ray
+        Dashboard; requires feature gate and is disabled by default.', 'Idle RayCluster
+        termination: autoscaler v2 can suspend or delete a RayCluster after no drivers
+        are connected for a configured timeout.', 'RayCluster scheduling improvements:
+        `scaleStrategy.scaleGate` for faster fallback between worker groups when scaling
+        is blocked (e.g., quota).']
+    breaking_changes: ['RayCronJob: `spec.jobTemplate` changes from a bare `RayJobSpec`
+        to a `RayJobTemplateSpec` (`metadata` + `spec`); you must move fields under
+        `jobTemplate.spec`.', 'RayJob (HTTPMode): if the job disappears from the head
+        (e.g., head recreated), it is now marked `Failed` instead of being silently
+        resubmitted; set `backoffLimit>0` to retry.', 'Kubernetes Workload-Aware Scheduling:
+        switches API from `scheduling.k8s.io/v1alpha2` to `v1alpha3`; cluster/API
+        compatibility must be verified before upgrade.', 'History Server: collector
+        uploads running logs as chunked `.chunks/` objects; upgrade History Server
+        and collector together to ensure chunked logs can be read.', 'Python client:
+        renamed from `python-client`/`python_client` to `kuberay-client`/`kuberay_client`;
+        update installs and imports.', 'Operator config: removed unused `deleteRayJobAfterJobFinishes`;
+        remove it from your operator config to avoid startup/config errors.']
+  chart_version: 1.8.0
+  images: ['quay.io/kuberay/operator:v1.8.0']
 - version: 1.7.1
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23']

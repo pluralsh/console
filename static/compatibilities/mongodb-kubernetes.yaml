@@ -3,6 +3,31 @@ git_url: https://github.com/mongodb/mongodb-kubernetes
 release_url: https://github.com/mongodb/mongodb-kubernetes/releases/tag/{vsn}
 helm_repository_url: https://mongodb.github.io/helm-charts
 versions:
+- version: 1.16.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Ops Manager license management via new `MongoDBOpsManager.spec.license`\
+        \ (secretRef, release receipts for air\u2011gapped, annotations to recompute/rotate,\
+        \ new status conditions).", MongoDBSearch OIDC sync-source adds optional `audience`
+        and `resource` token request parameters for providers like Auth0/Okta/Entra
+        v1., Ops Manager S3 stores add `portableBackupEnabled` to opt into portable
+        backups on Ops Manager >= 8.0.28 or >= 9.0.2.]
+    breaking_changes: ['Default MongoDBSearch `mongot` image repository changes to
+        `quay.io/mongodb/mongodb-enterprise-search`, causing existing mongot pods
+        to restart on operator upgrade; private registries must mirror the new image
+        (can revert by setting `search.name`/`MDB_SEARCH_NAME` to `mongodb-search`).',
+      Validation now rejects `ubi8` as a container image type for `MongoDB`/`MongoDBMultiCluster`
+        when using static container architecture; existing configurations using `ubi8`
+        must switch to `ubi9` or `ubi9-slim`., 'Ops Manager portable backups deprecate
+        `objectLockEnabled`, `objectRetentionDays`, and `objectRetentionMode` for
+        supported Ops Manager versions; leaving them set triggers warnings and those
+        settings are no longer sent.']
+  chart_version: 1.16.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.16.0']
 - version: 1.15.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

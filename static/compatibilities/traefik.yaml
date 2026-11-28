@@ -4,17 +4,49 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.19
+- version: 3.8.0
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: []
-    breaking_changes: []
-  chart_version: 42.4.2
-  images: ['docker.io/traefik:v3.7.19']
+    features: ['Security: v3.8.0 includes fixes for three GitHub Security Advisories
+        (GHSA-3rh5-223h-cpwr, GHSA-42x2-976f-ph52, GHSA-9657-c2gv-wjpj); prioritize
+        this upgrade in environments exposed to untrusted traffic.', 'ACME: new `reusePrivateKey`
+        option lets you keep/reuse an existing ACME account/private key material behavior
+        across renewals, which can simplify cert rotation workflows.', 'Timeouts:
+        per-router responding timeouts were added across multiple providers (Docker,
+        Kubernetes Ingress/CRD/GatewayAPI, middleware), allowing finer-grained control
+        of request/response timing per route.', 'Kubernetes CRD: `ServersTransport`
+        gains new forwarding timeout options, enabling more precise upstream transport
+        tuning (connect/read/idle style knobs depending on config surface).', "Gateway\
+        \ API: major expansion\u2014ListenerSet support, listener isolation, listener\
+        \ filters, GatewayClass option, client certificate validation, backend client\
+        \ cert support, retries, request mirroring, CORS filter, and HTTPRoute backendRequest\
+        \ timeout.", 'Gateway API + TLS: broader BackendTLSPolicy support (TLSRoute,
+        gRPC backends) plus SAN validation support for TLS/BackendTLSPolicy.', 'Middleware:
+        new Tap middleware for traffic inspection/recording use cases; circuit breaker
+        can require a minimum number of requests before tripping; buffering middleware
+        exposes `disableRequestBuffer`/`disableResponseBuffer`.', 'Rules: Host and
+        HostSNI matchers now support a double wildcard, enabling more flexible domain
+        matching patterns.', 'Server/EntryPoints: configurable max request header
+        size and additional header-handling controls (underscore removal, aliasing/aliasHeadersStrategy,
+        limit number of header values).', 'Plugins: experimental Yaegi v2 runtime
+        plus new `fileMapping` and `mounts` settings for plugin execution environments.']
+    breaking_changes: ["Migration required: v3.8.0 explicitly calls out a migration\
+        \ guide\u2014treat this as a potentially breaking minor upgrade and review/plan\
+        \ config changes before rollout.", 'Gateway API support change: Traefik now
+        consumes TCPRoute via its v1 version and drops Gateway API v1.5.x support;
+        clusters/controllers pinned to older gateway-api CRDs will need an update.',
+      'Operational/security behavior shifts: ACME DNS-01 default behavior changed
+        to not require recursive nameserver propagation by default; if you relied
+        on the prior stricter propagation checks, validation timing/behavior may differ.',
+      'CONNECT handling tightened: several server changes reject/alter CONNECT handling
+        earlier in the pipeline; if you proxy CONNECT (e.g., websockets-over-CONNECT
+        or tunneling use cases), validate behavior in staging.']
+  chart_version: 43.0.0
+  images: ['docker.io/traefik:v3.8.0']
 - version: 3.7.4
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
@@ -37,6 +69,7 @@ versions:
         if you are coming from <3.7.0 (not the case for 3.7.0 -> 3.7.4).']
   chart_version: 40.3.0
   images: ['docker.io/traefik:v3.7.4']
+  eolAt: '2026-11-23'
 - version: 3.7.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
@@ -72,6 +105,7 @@ versions:
         changed/fixed and should be validated against your current annotations/config.']
   chart_version: 40.0.1
   images: ['docker.io/traefik:v3.7.0']
+  eolAt: '2026-11-23'
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
