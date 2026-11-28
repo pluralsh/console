@@ -665,8 +665,54 @@ versions:
     breaking_changes: []
   chart_version: 1.16.5
   images: []
-- version: 1.16.0
+- version: 1.16.2
   kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / config changes to review\n- **Continuous scanning**:\
+      \ New/updated values likely exist to enable continuous scanning behavior. Review\
+      \ your `values.yaml` for new keys introduced in PR #323 and decide whether to\
+      \ enable/disable.\n- **NetworkPolicies**: Chart now supports Kubernetes NetworkPolicies\
+      \ (PR #326). If your cluster enforces default-deny, plan to **enable and validate**\
+      \ these policies; if you already manage policies centrally, ensure chart-generated\
+      \ policies don\u2019t conflict.\n- **Node-agent security context**: `privileged:\
+      \ true` was removed from the node-agent Pod (PR #306). If you previously relied\
+      \ on privileged mode for host access, validate required capabilities/permissions\
+      \ still work in your environment.\n- **VEX support**: New helm-chart options\
+      \ for VEX handling were added (PR #309). Decide whether you want to configure\
+      \ VEX inputs/behavior.\n- **AKS user-assigned identity**: Added support for\
+      \ AKS clusters using user-assigned identities (PR #317). If on AKS with UAI,\
+      \ review new identity-related values and wire them to your existing setup.\n\
+      - **serviceMonitor interval/timings**: ServiceMonitor now supports customizing\
+      \ `interval` and scrape timing-related settings (PR #319). If you use Prometheus\
+      \ Operator, consider setting these explicitly.\n- **Image overrides**: Busybox\
+      \ image is now sourced from values (PR #321). If you pin/allowlist images, set/verify\
+      \ the busybox image value.\n- **Resources/limits**: Limits/resources were fixed/added\
+      \ for some components (PRs #328, #313). If you have strict quotas/limit ranges,\
+      \ review defaults and override as needed.\n"
+    chart_updates: ['Added support for Continuous Scanning capability (PR #323).',
+      'Introduced optional NetworkPolicies for chart-managed components (PR #326).',
+      'Hardened node-agent by removing privileged mode (PR #306).', 'Added VEX (Vulnerability
+        Exploitability eXchange) support in the chart (PR #309).', 'Added AKS user-assigned
+        cluster support (PR #317).', 'Fixed/adjusted resource limits and added resources
+        to the discovery job (PRs #328, #313).', 'NOTES.txt updated (PR #330).', 'Busybox
+        image is now configurable via values (PR #321).', 'Normalized image references
+        by adding explicit `docker.io` where missing (PR #311).', 'ServiceMonitor
+        gained configurable interval/scrape timing options (PR #319).']
+    features: [Continuous Scanning support can be enabled via the chart to continuously
+        assess cluster posture., Optional NetworkPolicies can be created by the chart
+        to restrict component traffic., VEX support was added so you can incorporate
+        VEX data into vulnerability handling., AKS user-assigned identity support
+        improves compatibility with AKS clusters using UAI., ServiceMonitor scrape
+        interval/timing is now configurable for Prometheus Operator users.]
+    breaking_changes: [Node-agent no longer runs as a privileged pod; environments
+        that depended on privileged host access may need additional configuration
+        or may observe reduced functionality until adjusted.]
+  chart_version: 1.16.2
+  images: []
+- version: 1.16.0
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:

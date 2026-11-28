@@ -3,6 +3,43 @@ git_url: https://github.com/mongodb/mongodb-kubernetes
 release_url: https://github.com/mongodb/mongodb-kubernetes/releases/tag/{vsn}
 helm_repository_url: https://mongodb.github.io/helm-charts
 versions:
+- version: 1.16.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm/values changes to consider\n\n- **If you mirror images\
+      \ / use a private registry**: update your mirrored image set for **MongoDBSearch**.\n\
+      \  - Default `mongot` image repo changed to `quay.io/mongodb/mongodb-enterprise-search`\
+      \ (from `quay.io/mongodb/mongodb-search`). Existing `mongot` pods will restart\
+      \ after the operator upgrade.\n  - To keep the old repo (still updated until\
+      \ mongot 2.0), set Helm value **`search.name: mongodb-search`** (env `MDB_SEARCH_NAME`).\n\
+      \n- **MongoDBSearch metrics forwarder**: default image bumped **`otel/opentelemetry-collector-contrib:0.163.2`\
+      \ \u2192 `0.165.0`**.\n\n- **Container image type validation**: `ubi8` is now\
+      \ **rejected** for `MongoDB`/`MongoDBMultiCluster` using **static container\
+      \ architecture** (it can prevent MongoDB from starting). If you had set `operator.mdbDefaultImageType=ubi8`\
+      \ or used the per-resource `mongodb.com/v1.containerImageType: ubi8` annotation\
+      \ for static resources, change to `ubi9` or `ubi9-slim` before/with the upgrade.\n\
+      \n- **MongoDBOpsManager license management**: new CRD fields under `MongoDBOpsManager.spec.license`\
+      \ (not a Helm value change, but you may add these fields post-upgrade if you\
+      \ want the operator to manage the EA license)."
+    chart_updates: []
+    features: ['Ops Manager: operator can now manage the Enterprise Advanced license
+        via `MongoDBOpsManager.spec.license.secretRef`, including release handling
+        and conditions (`LicenseActive`, `OperatorManagedLicense`).', 'MongoDBSearch:
+        OIDC sync-source now supports optional `audience` and `resource` token-request
+        parameters for providers like Auth0/Okta (audience) and Entra ID v1-style
+        (resource).', 'Ops Manager backups: new `portableBackupEnabled` on `spec.backup.s3Stores[]`
+        / `spec.backup.s3OpLogStores[]` to enable portable backups on supported Ops
+        Manager versions.']
+    breaking_changes: [Static-architecture `MongoDB`/`MongoDBMultiCluster` resources
+        can no longer use `ubi8` image type; the operator will reject it (switch to
+        `ubi9` or `ubi9-slim`)., "Enabling Ops Manager portable backups is effectively\
+        \ one-way: it cannot be disabled once enabled, and some S3 Object Lock fields\
+        \ are deprecated/ignored on newer Ops Manager versions (you\u2019ll see a\
+        \ warning if they remain set)."]
+  chart_version: 1.16.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.16.0']
 - version: 1.15.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

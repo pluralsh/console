@@ -4,17 +4,41 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.19
+- version: 3.8.0
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: []
-    breaking_changes: []
-  chart_version: 42.4.2
-  images: ['docker.io/traefik:v3.7.19']
+    features: ['Security: v3.8.0 fixes three CVEs (GHSA-3rh5-223h-cpwr, GHSA-42x2-976f-ph52,
+        GHSA-9657-c2gv-wjpj); upgrading closes known vulnerabilities.', 'ACME: new
+        `reusePrivateKey` option to keep/reuse an existing private key when renewing/rotating
+        certs.', 'Timeouts: per-router responding timeouts added across Docker/Kubernetes
+        (Ingress, CRD, Gateway API) and middleware; plus new forwarding timeouts in
+        Kubernetes `ServersTransport` CRD.', "Kubernetes Gateway API: major expansion\u2014\
+        ListenerSet (GEP-1713), listener filters, listener isolation, GatewayClass\
+        \ option, client cert validation, backend client certs, BackendTLSPolicy support\
+        \ for TLSRoute and gRPC backends, HTTPRoute request timeout/retry/request-mirror/CORS\
+        \ support, and ClusterTrustBundle CA references.", 'Routing rules: Host/HostSNI
+        matchers now support a double wildcard.', 'Middleware: new Tap middleware;
+        circuit breaker can require a minimum request count; buffering middleware
+        exposes disableRequestBuffer/disableResponseBuffer; forwarded-headers middleware
+        can add X-Forwarded-Scheme and X-Scheme.', 'Plugins: experimental Yaegi v2
+        runtime with new settings (fileMapping, mounts).', 'Server/entrypoints: configurable
+        max request header size; options to remove/alias/limit request header values
+        (aliasHeadersStrategy and related entrypoint options).']
+    breaking_changes: ['Gateway API: Traefik now consumes TCPRoute via the v1 API
+        and drops support for Gateway API v1.5.x; migration guide explicitly required
+        and minimum Gateway API version is bumped (docs note v1.7.0).', "Gateway API\
+        \ behavior changes: listener isolation and generated service-name/collision-avoidance\
+        \ changes can alter resource/service names and status behavior\u2014verify\
+        \ any tooling that relies on previous naming/status patterns.", Security/behavioral
+        hardening around CONNECT and request parsing/normalization (multiple server
+        changes and an explicit migration note for CONNECT requests); test any proxies/tunnels
+        that rely on CONNECT handling.]
+  chart_version: 43.0.0
+  images: ['docker.io/traefik:v3.8.0']
 - version: 3.7.4
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
@@ -37,6 +61,7 @@ versions:
         if you are coming from <3.7.0 (not the case for 3.7.0 -> 3.7.4).']
   chart_version: 40.3.0
   images: ['docker.io/traefik:v3.7.4']
+  eolAt: '2026-11-23'
 - version: 3.7.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
@@ -72,6 +97,7 @@ versions:
         changed/fixed and should be validated against your current annotations/config.']
   chart_version: 40.0.1
   images: ['docker.io/traefik:v3.7.0']
+  eolAt: '2026-11-23'
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
