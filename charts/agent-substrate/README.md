@@ -263,7 +263,7 @@ End to end on a cluster (e.g. `hack/kind-up.sh`), in this order:
 ### JuiceFS homes
 
 `juicefs.enabled: true` (opt-in; `juicefs.image.tag` is pinned to the chart's deployment-operator release) adds a JuiceFS filesystem a
-DevboxRunner can keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`,
+DevboxRunner could keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`, which DevboxRunners no longer accept: homes are [Block](#block-homes) or Snapshot;
 capped at `spec.home.size`, default `spec.resources.disk`). It reuses the chart's Postgres and
 bucket:
 
@@ -320,7 +320,7 @@ Without one, the pods fall back to the node's credentials, and CreateVolume fail
   waits for their devboxes to suspend (at most its drain timeout, 30 minutes by default), deletes the
   plugin pod, and replaces the drained workers once the new plugin is ready.
 
-A DevboxRunner uses it with `spec.home.storage: ZeroFS`. Each template revision gets a seeded
+A DevboxRunner used it with `spec.home.storage: ZeroFS`, which DevboxRunners no longer accept (homes are Block or Snapshot). Each template revision gets a seeded
 StorageClass as with [JuiceFS](#juicefs-homes). The first home from it is the golden boot's. When
 Substrate deletes it, the controller copies its objects to `<zerofs.prefix>/seeds/<seed>/`, and every
 later home of the revision starts from a server-side copy of that prefix. Snapshots don't save the
@@ -366,7 +366,7 @@ capabilities or host namespaces, their own token-less ServiceAccount). `block.an
 merges any other part of the pod; the controller reads them from the `devbox-block-anchor-template`
 ConfigMap and restarts when they change. The controller and node pods take `podLabels`,
 `podAnnotations` and `resources` too, and have probes and CPU and memory limits; the node plugin is
-privileged, so admission policies need an exception for it as for ZeroFS's and JuiceFS's. A DevboxRunner uses block homes with `spec.home.storage: Block`,
+privileged, so admission policies need an exception for it as for ZeroFS's and JuiceFS's. DevboxRunners keep their homes on block disks by default (`spec.home.storage: Block`; `Snapshot` keeps them on the node instead), so turn on `block.enabled` with `devboxes.enabled`,
 and the operator runs one WorkerPool per zone, in the zones of the nodes its workers select (or
 `spec.workerPool.zones`, to choose them); the gateway keeps each box in its home's zone, moving a box whose
 zone was dropped. Each template revision

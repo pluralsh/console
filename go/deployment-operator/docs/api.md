@@ -957,10 +957,14 @@ _Appears in:_
 
 DevboxHome selects how instances store /home/dev.
 
-With JuiceFS, ZeroFS or Block, an instance's home is seeded from the golden boot's, so what the bootstrap script
-and mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
-ZeroFS and Block snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for any
-of them: Substrate can't restore a tag of a template with external volumes.
+With Block, each instance's home is its own cloud disk from the agent-substrate chart's block driver
+(block.enabled), which needs the cloud's disk CSI driver and VolumeSnapshots. A home is seeded from the golden
+boot's, so what the bootstrap script and mise installed is there from the start. Snapshots don't save the home
+yet, and starting an instance from a snapshot isn't supported: Substrate can't restore a tag of a template with
+external volumes.
+
+With Snapshot, the home stays on the instance's node and rides in every snapshot, which needs no storage beyond
+the node's, e.g. on machines without cloud disks.
 
 
 
@@ -969,19 +973,20 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS ZeroFS Block] <br />Optional: \{\} <br /> |
-| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS, ZeroFS or Block home may hold: a JuiceFS quota, the size of the ZeroFS block<br />device, or the size of the cloud disk. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
-| `storageClassName` _string_ | StorageClassName is the JuiceFS, ZeroFS or Block StorageClass. Defaults to the agent-substrate chart's<br />devbox-juicefs, devbox-zerofs or devbox-block. |  | Optional: \{\} <br /> |
+| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Block. Changing it rolls a new revision, and instances moved to it start with a fresh home. | Block | Enum: [Block Snapshot] <br />Optional: \{\} <br /> |
+| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the size of each Block home's cloud disk. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
+| `storageClassName` _string_ | StorageClassName is the block driver's StorageClass for Block homes. Defaults to the agent-substrate chart's<br />devbox-block. |  | Optional: \{\} <br /> |
 
 
 #### DevboxHomeStorage
 
 _Underlying type:_ _string_
 
-DevboxHomeStorage is where an instance's /home/dev lives.
+DevboxHomeStorage is where an instance's /home/dev lives. The API accepts Block and Snapshot; the operator keeps
+serving JuiceFS and ZeroFS homes so they can come back.
 
 _Validation:_
-- Enum: [Snapshot JuiceFS ZeroFS Block]
+- Enum: [Block Snapshot]
 
 _Appears in:_
 - [DevboxHome](#devboxhome)
@@ -1175,7 +1180,7 @@ _Appears in:_
 | `image` _string_ |  |  |  |
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
-| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS ZeroFS Block] <br />Optional: \{\} <br /> |
+| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Block Snapshot] <br />Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
 | `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
 

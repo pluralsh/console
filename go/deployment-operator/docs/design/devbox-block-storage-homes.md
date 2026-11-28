@@ -1,7 +1,9 @@
 # Devbox homes on cloud block storage
 
 Status: implemented for any CSI disk provider the cluster runs (driver, chart, operator, gateway); not yet run on a
-cluster. Nov 27, 2026.
+cluster. Nov 27, 2026. `Block` is now the default `spec.home.storage`, and `Snapshot` the only other value it
+accepts (for machines without cloud disks); the operator keeps its JuiceFS and ZeroFS code paths, which the API no
+longer reaches, so they can come back.
 
 ## Summary
 

@@ -352,26 +352,22 @@ spec:
                     anyOf:
                     - type: integer
                     - type: string
-                    description: |-
-                      Size is the most a JuiceFS, ZeroFS or Block home may hold: a JuiceFS quota, the size of the ZeroFS block
-                      device, or the size of the cloud disk. Defaults to spec.resources.disk.
+                    description: Size is the size of each Block home's cloud disk.
+                      Defaults to spec.resources.disk.
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   storage:
-                    default: Snapshot
-                    description: |-
-                      Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
-                      home.
+                    default: Block
+                    description: Storage defaults to Block. Changing it rolls a new
+                      revision, and instances moved to it start with a fresh home.
                     enum:
-                    - Snapshot
-                    - JuiceFS
-                    - ZeroFS
                     - Block
+                    - Snapshot
                     type: string
                   storageClassName:
                     description: |-
-                      StorageClassName is the JuiceFS, ZeroFS or Block StorageClass. Defaults to the agent-substrate chart's
-                      devbox-juicefs, devbox-zerofs or devbox-block.
+                      StorageClassName is the block driver's StorageClass for Block homes. Defaults to the agent-substrate chart's
+                      devbox-block.
                     type: string
                 type: object
               httpAllowlist:
@@ -1405,10 +1401,8 @@ spec:
                       description: HomeStorage is where this revision's template keeps
                         /home/dev; unset means Snapshot.
                       enum:
-                      - Snapshot
-                      - JuiceFS
-                      - ZeroFS
                       - Block
+                      - Snapshot
                       type: string
                     image:
                       type: string

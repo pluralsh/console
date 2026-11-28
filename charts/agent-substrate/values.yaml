@@ -280,7 +280,8 @@ devboxes:
 # Opt-in JuiceFS devbox homes: a CSI driver (the deployment-operator's devbox-juicefs) that serves each actor's
 # home as a directory of one shared JuiceFS filesystem, its metadata in the chart's Postgres and its data in the
 # snapshot bucket, so a home follows its box from node to node without riding in the checkpoint. DevboxRunners
-# opt in with spec.home.storage: JuiceFS. Enabling it adds the ExternalVolumes preview gate.
+# no longer accept spec.home.storage: JuiceFS (only Block or Snapshot); the driver stays for a return. Enabling it adds the
+# ExternalVolumes preview gate.
 juicefs:
   enabled: false
   image:
@@ -352,7 +353,8 @@ juicefs:
 
 # ZeroFS devbox homes: each home is its own ZeroFS filesystem in the bucket, served on the node its box runs on as
 # an ext4 block device. No metadata database. Each revision's homes start from its golden boot's home; snapshots
-# don't save homes yet.
+# don't save homes yet. DevboxRunners no longer accept spec.home.storage: ZeroFS (only Block or Snapshot); the driver
+# stays for a return.
 zerofs:
   enabled: false
   image:
@@ -432,12 +434,13 @@ zerofs:
     affinity: {}
     priorityClassName: system-node-critical
 
-# Opt-in block storage devbox homes: one disk per home, formatted ext4 and mounted by the node's kernel. The disks
-# come from the CSI driver for disks the cluster already runs (the provider: the AWS EBS or GCP PD CSI driver, or any
-# other that attaches disks and snapshots them), which the deployment-operator's devbox-block drives through
+# Block storage devbox homes: one disk per home, formatted ext4 and mounted by the node's kernel. The disks come
+# from the CSI driver for disks the cluster already runs (the provider: the AWS EBS, GCP PD or Azure Disk CSI driver,
+# or any other that attaches disks and snapshots them), which the deployment-operator's devbox-block drives through
 # Kubernetes: a claim per disk and a pod that keeps it attached to its node. A disk is created on its home's first
-# attach, in that node's zone, and the gateway keeps each box in its home's zone. DevboxRunners select it with
-# spec.home.storage: Block.
+# attach, in that node's zone, and the gateway keeps each box in its home's zone. DevboxRunners' homes are Block
+# unless spec.home.storage is Snapshot, so turn it on with devboxes.enabled; the cluster also needs the
+# VolumeSnapshot CRDs, the snapshot controller and a VolumeSnapshotClass for the provider.
 block:
   enabled: false
   image:

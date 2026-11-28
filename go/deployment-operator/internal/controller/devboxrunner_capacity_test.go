@@ -16,8 +16,10 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
+// capacityRunner keeps its home on the node (Snapshot), so homes count against the worker's disk.
 func capacityRunner(cpu, memory string, disk *string) *v1alpha1.DevboxRunner {
-	runner := &v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{WorkerPool: &v1alpha1.DevboxWorkerPool{}}}
+	runner := snapshotHomeRunner()
+	runner.Spec.WorkerPool = &v1alpha1.DevboxWorkerPool{}
 	if cpu != "" || memory != "" {
 		limits := corev1.ResourceList{}
 		if cpu != "" {

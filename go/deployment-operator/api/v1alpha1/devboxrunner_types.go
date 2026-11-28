@@ -384,8 +384,9 @@ func (s *DevboxRunnerSpec) HasGoldenBootWork() bool {
 		(s.Mise != nil && s.Mise.Config != nil && *s.Mise.Config != "")
 }
 
-// DevboxHomeStorage is where an instance's /home/dev lives.
-// +kubebuilder:validation:Enum=Snapshot;JuiceFS;ZeroFS;Block
+// DevboxHomeStorage is where an instance's /home/dev lives. The API accepts Block and Snapshot; the operator keeps
+// serving JuiceFS and ZeroFS homes so they can come back.
+// +kubebuilder:validation:Enum=Block;Snapshot
 type DevboxHomeStorage string
 
 const (
@@ -414,24 +415,26 @@ const (
 
 // DevboxHome selects how instances store /home/dev.
 //
-// With JuiceFS, ZeroFS or Block, an instance's home is seeded from the golden boot's, so what the bootstrap script
-// and mise installed is there from the start. With JuiceFS, every snapshot also saves the home as a JuiceFS clone;
-// ZeroFS and Block snapshots don't save the home yet. Starting an instance from a snapshot isn't supported for any
-// of them: Substrate can't restore a tag of a template with external volumes.
+// With Block, each instance's home is its own cloud disk from the agent-substrate chart's block driver
+// (block.enabled), which needs the cloud's disk CSI driver and VolumeSnapshots. A home is seeded from the golden
+// boot's, so what the bootstrap script and mise installed is there from the start. Snapshots don't save the home
+// yet, and starting an instance from a snapshot isn't supported: Substrate can't restore a tag of a template with
+// external volumes.
+//
+// With Snapshot, the home stays on the instance's node and rides in every snapshot, which needs no storage beyond
+// the node's, e.g. on machines without cloud disks.
 type DevboxHome struct {
-	// Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
-	// home.
+	// Storage defaults to Block. Changing it rolls a new revision, and instances moved to it start with a fresh home.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=Snapshot
+	// +kubebuilder:default=Block
 	Storage *DevboxHomeStorage `json:"storage,omitempty"`
 
-	// Size is the most a JuiceFS, ZeroFS or Block home may hold: a JuiceFS quota, the size of the ZeroFS block
-	// device, or the size of the cloud disk. Defaults to spec.resources.disk.
+	// Size is the size of each Block home's cloud disk. Defaults to spec.resources.disk.
 	// +kubebuilder:validation:Optional
 	Size *resource.Quantity `json:"size,omitempty"`
 
-	// StorageClassName is the JuiceFS, ZeroFS or Block StorageClass. Defaults to the agent-substrate chart's
-	// devbox-juicefs, devbox-zerofs or devbox-block.
+	// StorageClassName is the block driver's StorageClass for Block homes. Defaults to the agent-substrate chart's
+	// devbox-block.
 	// +kubebuilder:validation:Optional
 	StorageClassName *string `json:"storageClassName,omitempty"`
 }
@@ -439,7 +442,7 @@ type DevboxHome struct {
 // HomeStorage is where instances keep /home/dev.
 func (s *DevboxRunnerSpec) HomeStorage() DevboxHomeStorage {
 	if s.Home == nil || s.Home.Storage == nil {
-		return DevboxHomeSnapshot
+		return DevboxHomeBlock
 	}
 	return *s.Home.Storage
 }

@@ -16,10 +16,18 @@ import (
 )
 
 func TestDevboxHomeVolumeSource(t *testing.T) {
-	t.Run("the home is a durable dir by default", func(t *testing.T) {
+	t.Run("the home is a Block disk by default", func(t *testing.T) {
 		g := NewWithT(t)
 		vol := devboxHomeVolumeSource(&v1alpha1.DevboxRunner{})
 		g.Expect(vol.Name).To(Equal(devboxHomeVolume))
+		g.Expect(vol.DurableDir).To(BeNil())
+		g.Expect(vol.External.GetTemplate().GetStorageClassName()).To(Equal(v1alpha1.DevboxDefaultBlockStorageClass))
+		g.Expect(devboxTemplateNeedsPreview(&ateapi.ActorTemplate{Volumes: []*ateapi.Volume{vol}})).To(BeTrue())
+	})
+
+	t.Run("a Snapshot home is a durable dir", func(t *testing.T) {
+		g := NewWithT(t)
+		vol := devboxHomeVolumeSource(snapshotHomeRunner())
 		g.Expect(vol.DurableDir).NotTo(BeNil())
 		g.Expect(vol.External).To(BeNil())
 	})
@@ -63,7 +71,7 @@ func TestDevboxHomeVolumeSource(t *testing.T) {
 
 	t.Run("a durable dir home needs no preview", func(t *testing.T) {
 		g := NewWithT(t)
-		g.Expect(devboxTemplateNeedsPreview(&ateapi.ActorTemplate{Volumes: []*ateapi.Volume{devboxHomeVolumeSource(&v1alpha1.DevboxRunner{})}})).To(BeFalse())
+		g.Expect(devboxTemplateNeedsPreview(&ateapi.ActorTemplate{Volumes: []*ateapi.Volume{devboxHomeVolumeSource(snapshotHomeRunner())}})).To(BeFalse())
 	})
 }
 
@@ -132,4 +140,9 @@ func TestBlockPreflight(t *testing.T) {
 	g.Expect(blockPreflight(sc(nil))).To(MatchError(ContainSubstring("hasn't checked its provider yet")))
 	g.Expect(blockPreflight(sc(map[string]string{block.AnnotationProvider: "nfs.csi.k8s.io", block.AnnotationPreflight: "CSIDriver nfs.csi.k8s.io doesn't attach its volumes to nodes"}))).
 		To(MatchError("block storage provider nfs.csi.k8s.io can't serve homes: CSIDriver nfs.csi.k8s.io doesn't attach its volumes to nodes"))
+}
+
+// snapshotHomeRunner keeps its home on the node, in its snapshots.
+func snapshotHomeRunner() *v1alpha1.DevboxRunner {
+	return &v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{Home: &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeSnapshot)}}}
 }
