@@ -78,6 +78,19 @@ func undurableSnapshotNodes(actors []*ateapi.Actor) map[string]bool {
 	return nodes
 }
 
+// suspendedActorNodes counts the suspended actors Substrate resumes on each node: those whose snapshot stays local
+// there (Status.AssignedNode, for about 30 minutes after the suspend). The resume falls back to any worker when the
+// node has none with room, and then also moves the actor's block-storage home off that node.
+func suspendedActorNodes(actors []*ateapi.Actor) map[string]int {
+	nodes := map[string]int{}
+	for _, actor := range actors {
+		if node := actor.GetStatus().GetAssignedNode(); node != "" && actor.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_SUSPENDED {
+			nodes[node]++
+		}
+	}
+	return nodes
+}
+
 // warmActorsByWorker counts the gateway's warm actors on each worker. One lives for a single boot, so counting it
 // would scale the pool up for an instance that never comes, and that new worker would be warmed in turn.
 func warmActorsByWorker(actors []*ateapi.Actor) map[string]int64 {
@@ -189,6 +202,7 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPools(ctx context.Context, api s
 		}
 	}
 	pinned := undurableSnapshotNodes(actors)
+	suspended := suspendedActorNodes(actors)
 	warm := warmActorsByWorker(actors)
 	for _, t := range pools.targets {
 		if !t.observable() {
@@ -231,7 +245,7 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPools(ctx context.Context, api s
 	var totals devboxPoolView
 	var zoneStatus []v1alpha1.DevboxZoneCapacity
 	for i, t := range pools.targets {
-		next, err := r.scalePool(ctx, api, t, desired[i], active[i], cooledDown, pinned)
+		next, err := r.scalePool(ctx, api, t, desired[i], active[i], cooledDown, pinned, suspended)
 		if err != nil {
 			return err
 		}
@@ -268,7 +282,7 @@ func (t *devboxPoolTarget) observable() bool {
 
 // scalePool sets one pool's replicas from its desired workers and the workers to run when scaling up, and reports
 // whether it scaled.
-func (r *DevboxRunnerReconciler) scalePool(ctx context.Context, api substrate.API, t *devboxPoolTarget, desired, scaleUp int64, cooledDown bool, pinned map[string]bool) (bool, error) {
+func (r *DevboxRunnerReconciler) scalePool(ctx context.Context, api substrate.API, t *devboxPoolTarget, desired, scaleUp int64, cooledDown bool, pinned map[string]bool, suspended map[string]int) (bool, error) {
 	view := &t.view
 	scaled := false
 	active := int64(len(view.schedulable))
@@ -277,7 +291,7 @@ func (r *DevboxRunnerReconciler) scalePool(ctx context.Context, api substrate.AP
 		scaled = scaleUp > active
 		active = scaleUp
 	case desired < active && cooledDown:
-		drained, err := r.drainIdleWorkers(ctx, api, view, active-desired, pinned)
+		drained, err := r.drainIdleWorkers(ctx, api, view, active-desired, pinned, suspended)
 		if err != nil {
 			return false, err
 		}
@@ -300,9 +314,10 @@ func (r *DevboxRunnerReconciler) scalePool(ctx context.Context, api substrate.AP
 }
 
 // drainIdleWorkers drains up to n active or unavailable workers that host no instance and whose node holds no
-// undurable snapshot, unavailable ones first, moving them to view.drainedIdle, or to view.held if an instance landed on one before the drain took
+// undurable snapshot, unavailable ones first, then those on nodes with the fewest suspended actors to resume there
+// (see suspendedActorNodes), moving them to view.drainedIdle, or to view.held if an instance landed on one before the drain took
 // effect. It returns how many left schedulable.
-func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, api substrate.API, view *devboxPoolView, n int64, pinned map[string]bool) (int64, error) {
+func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, api substrate.API, view *devboxPoolView, n int64, pinned map[string]bool, suspended map[string]int) (int64, error) {
 	idle := lo.Filter(view.schedulable, func(p devboxWorkerPod, _ int) bool {
 		state := p.state()
 		return (state == ateapi.WorkerState_WORKER_STATE_ACTIVE || state == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE) &&
@@ -311,6 +326,9 @@ func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, api subst
 	sort.Slice(idle, func(i, j int) bool {
 		if a, b := idle[i].state() == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE, idle[j].state() == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE; a != b {
 			return a
+		}
+		if a, b := suspended[idle[i].pod.Spec.NodeName], suspended[idle[j].pod.Spec.NodeName]; a != b {
+			return a < b
 		}
 		return idle[i].pod.Name > idle[j].pod.Name
 	})

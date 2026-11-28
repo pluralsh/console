@@ -204,15 +204,19 @@ commandTests:
     command: sh
     args: ["-c", "command -v podman; command -v docker; readlink /usr/local/bin/docker"]
     expectedOutput: ["(?m)^/usr/local/bin/podman\n/usr/local/bin/docker\npodman$"]
-  - name: newuidmap and newgidmap run shadow's unprivileged copies as dev
+  - name: podman runs as root in the box's container user namespace
     command: sh
-    args: ["-c", "readlink /usr/bin/newuidmap /usr/bin/newgidmap; stat -c '%a %n' /usr/local/libexec/devbox/newuidmap /usr/local/libexec/devbox/newgidmap; dpkg-divert --list /usr/bin/newuidmap"]
-    expectedOutput: ["(?m)^/usr/local/libexec/devbox/idmap\n/usr/local/libexec/devbox/idmap$", "755 /usr/local/libexec/devbox/newuidmap", "755 /usr/local/libexec/devbox/newgidmap", "diversion of /usr/bin/newuidmap to /usr/local/libexec/devbox/newuidmap"]
+    args: ["-c", "grep -c 'sudo -n -E /usr/local/libexec/devbox/userns' /usr/local/bin/podman; stat -c '%a %n' /usr/local/libexec/devbox/userns; grep -o \"printf '0 0 [0-9]*\" /usr/local/libexec/devbox/userns | sort -u"]
+    expectedOutput: ["(?m)^1\n755 /usr/local/libexec/devbox/userns\nprintf '0 0 4294967294$"]
+  - name: build steps use chroot isolation
+    command: grep
+    args: ["BUILDAH_ISOLATION", "/usr/local/libexec/devbox/userns"]
+    expectedOutput: ['BUILDAH_ISOLATION:-chroot']
   - name: podman-compose
     command: podman-compose
     args: ["--version"]
     expectedOutput: ["podman-compose version"]
-  - name: rootless container networks (pasta, netavark, aardvark-dns, nft)
+  - name: container networks (pasta, netavark, aardvark-dns, nft)
     command: sh
     args: ["-c", "command -v pasta && command -v nft && ls /usr/lib/podman/netavark /usr/lib/podman/aardvark-dns"]
     expectedOutput: ["pasta", "nft", "netavark", "aardvark-dns"]
@@ -224,30 +228,29 @@ commandTests:
     command: cat
     args: ["/etc/containers/containers.conf.d/devbox.conf"]
     expectedOutput: ["compose_warning_logs = false", 'compose_providers = \["/usr/local/bin/podman-compose"\]']
-  - name: containers share the box's network and PID namespace
+  - name: containers share the box's network and bind its /proc without cgroups
     command: cat
     args: ["/etc/containers/containers.conf.d/devbox.conf"]
-    expectedOutput: ['netns = "host"', 'pidns = "host"', 'cgroups = "enabled"']
+    expectedOutput: ['netns = "host"', 'cgroups = "disabled"', 'mounts = \["type=bind,source=/proc,destination=/proc"\]']
+    excludedOutput: ['pidns']
   - name: podman-compose and docker-compose resolve to the host-network wrapper
     command: sh
     args: ["-c", "command -v podman-compose; readlink /usr/local/bin/docker-compose; head -1 /usr/local/bin/podman-compose"]
     expectedOutput: ["(?m)^/usr/local/bin/podman-compose\n/usr/local/bin/podman-compose\n#!/usr/bin/python3$"]
-  - name: rootless podman stores images with vfs off the home directory
+  - name: podman stores images with vfs off the home directory
     command: cat
     args: ["/etc/containers/storage.conf"]
-    expectedOutput: ['driver = "vfs"', 'rootless_storage_path = "/var/lib/devbox-containers/storage"']
-  - name: Block homes keep rootless podman storage on the home with vfs
+    expectedOutput: ['driver = "vfs"', 'graphroot = "/var/lib/containers/storage"']
+    excludedOutput: ['rootless_storage_path']
+  - name: Block homes keep podman storage on the home with vfs
     command: cat
     args: ["/etc/containers/storage.home.conf"]
-    expectedOutput: ['driver = "vfs"', 'runroot = "/run/containers/storage"', 'rootless_storage_path = "/home/dev/\.local/share/containers/storage"']
-  - name: dev owns the container storage directory
-    command: stat
-    args: ["-c", "%u:%g %a", "/var/lib/devbox-containers"]
-    expectedOutput: ["(?m)^1000:1000 700$"]
-  - name: dev has subordinate ids for rootless containers
-    command: grep
-    args: ["^dev:", "/etc/subuid", "/etc/subgid"]
-    expectedOutput: ["/etc/subuid:dev:100000:65536", "/etc/subgid:dev:100000:65536"]
+    expectedOutput: ['driver = "vfs"', 'runroot = "/run/containers/storage"', 'graphroot = "/home/dev/\.local/share/containers/rootful"']
+  - name: no rootless id mapping helpers
+    command: sh
+    args: ["-c", "ls /usr/local/libexec/devbox/idmap 2>&1; dpkg-divert --list /usr/bin/newuidmap"]
+    expectedOutput: ["No such file or directory"]
+    excludedOutput: ["diversion of"]
   - name: bkt (Bitbucket CLI)
     command: bkt
     args: ["--version"]

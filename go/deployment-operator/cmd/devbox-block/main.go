@@ -55,6 +55,7 @@ type options struct {
 	anchorImage       string
 	anchorTemplate    string
 	diskWait          time.Duration
+	detachDelay       time.Duration
 
 	// node
 	endpoint    string
@@ -81,6 +82,7 @@ func main() {
 	flag.StringVar(&o.anchorImage, "anchor-image", "", "controller: the image of anchor pods, this one")
 	flag.StringVar(&o.anchorTemplate, "anchor-template", "", "controller: a file holding a partial Pod, merged over anchor pods' defaults: labels, annotations, priority class, resources...")
 	flag.DurationVar(&o.diskWait, "disk-wait", 2*time.Minute, "how long a call waits on the provider (controller) or the kubelet's mount (node) before asking Substrate to retry")
+	flag.DurationVar(&o.detachDelay, "detach-delay", 10*time.Minute, "controller: how long a disk stays attached to its node after Substrate detaches it, so a box resumed there skips the detach and attach; 0 detaches at once")
 
 	flag.StringVar(&o.endpoint, "endpoint", "/csi/csi.sock", "node: the CSI socket path")
 	flag.StringVar(&o.nodeID, "node-id", os.Getenv("NODE_NAME"), "node: this node's name (NODE_NAME)")
@@ -175,6 +177,7 @@ func runController(ctx context.Context, o *options, log logr.Logger) error {
 		Store:           &block.KubeStore{Client: kube, Namespace: o.namespace},
 		GroupSize:       block.KubeGroupSize(kube),
 		DefaultCapacity: o.defaultCapacity,
+		DetachDelay:     o.detachDelay,
 		Log:             log,
 	}
 	identity := &block.Identity{Version: version, Controller: true, Preflight: controller.Ready}
@@ -214,10 +217,15 @@ func runController(ctx context.Context, o *options, log logr.Logger) error {
 	if o.seedGCInterval > 0 {
 		g.Go(func() error { return controller.RunCollection(ctx, block.KubeLiveSeeds(kube), o.seedGCInterval) })
 	}
+	// Runs even with no delay, to detach what a previous run with one released.
+	g.Go(func() error { return controller.RunDetaches(ctx, detachInterval) })
 	return g.Wait()
 }
 
-const preflightRetry = 5 * time.Second
+const (
+	preflightRetry = 5 * time.Second
+	detachInterval = 30 * time.Second
+)
 
 func runNode(ctx context.Context, o *options, log logr.Logger) error {
 	if o.nodeID == "" {

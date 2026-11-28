@@ -23,6 +23,14 @@ type bind struct {
 type fakeMounter struct {
 	mu     sync.Mutex
 	mounts map[string]bind
+	synced []string
+}
+
+func (m *fakeMounter) Sync(path string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.synced = append(m.synced, path)
+	return nil
 }
 
 func (m *fakeMounter) Bind(source, target string, readonly bool) error {
@@ -133,6 +141,15 @@ func TestNodeBindMountsTheAnchorsMountAndPreparesTheHome(t *testing.T) {
 	}
 	if _, ok := m.mounts[staging]; ok || len(m.mounts) != 1 {
 		t.Fatalf("unstage should unmount only the staging path, got %v", m.mounts)
+	}
+	if len(m.synced) != 1 || m.synced[0] != staging {
+		t.Fatalf("unstage should sync the home before unmounting it, since its disk may stay attached, got %v", m.synced)
+	}
+	if _, err := n.NodeUnstageVolume(ctx, &csi.NodeUnstageVolumeRequest{VolumeId: "substrate-a1-home", StagingTargetPath: staging}); err != nil {
+		t.Fatalf("unstaging again should be a no-op: %v", err)
+	}
+	if len(m.synced) != 1 {
+		t.Fatalf("unstaging what isn't staged shouldn't sync anything, got %v", m.synced)
 	}
 }
 

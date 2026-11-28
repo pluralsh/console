@@ -40,7 +40,10 @@ type Controller struct {
 	PollInterval time.Duration
 	// MoveWait is how long an attach waits for a moving disk's snapshot. Defaults to DefaultMoveWait.
 	MoveWait time.Duration
-	Log      logr.Logger
+	// DetachDelay is how long a disk Substrate detaches stays attached to its node, so a box resumed there within
+	// it skips the detach and the attach, each of which takes the provider 10-20s. 0 detaches at once.
+	DetachDelay time.Duration
+	Log         logr.Logger
 
 	provider atomic.Pointer[Provider]
 	volumes  keyedLock
@@ -174,7 +177,8 @@ func (c *Controller) seedVolume(ctx context.Context, rec *VolumeRecord) error {
 
 // DeleteVolume deletes the volume's disk and record, first capturing a golden volume's disk as its seed: Substrate
 // deletes the golden actor, suspended, right after the golden tag, so the disk is the state the tag's memory
-// snapshot saw. Substrate detaches a volume before deleting it.
+// snapshot saw. Substrate detaches a volume before deleting it, though its disk may still be attached through
+// DetachDelay; deleting the disk's anchor and claim detaches it.
 func (c *Controller) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
 	name := req.GetVolumeId()
 	if !validID(name) {
@@ -197,6 +201,16 @@ func (c *Controller) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequ
 		return &csi.DeleteVolumeResponse{}, nil
 	}
 	if rec.Golden {
+		if rec.DiskID != "" && rec.Node != "" {
+			// Released but still attached; the seed is captured from the disk unmounted.
+			if err := c.Disks.Detach(ctx, rec.DiskID, rec.Node); err != nil {
+				return nil, err
+			}
+			rec.Node, rec.DetachAt = "", time.Time{}
+			if err := c.Store.PutVolume(ctx, rec); err != nil {
+				return nil, status.Errorf(codes.Internal, "recording the detach of volume %s: %v", name, err)
+			}
+		}
 		if err := c.captureSeed(ctx, rec); err != nil {
 			return nil, err
 		}

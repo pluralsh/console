@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"sync"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,6 +29,9 @@ type VolumeRecord struct {
 	DiskID     string `json:"diskID,omitempty"`
 	// Node is the node the disk was last attached to, for detaching when Substrate doesn't name it.
 	Node string `json:"node,omitempty"`
+	// DetachAt is set while Substrate has released the disk but it stays attached to Node, so a resume there
+	// skips the attach; the disk detaches then.
+	DetachAt time.Time `json:"detachAt,omitzero"`
 	// Generation counts the disk's moves. Each move's disk is named for its generation, so a retried move finds
 	// the disk it created.
 	Generation int `json:"generation,omitempty"`
@@ -299,6 +303,26 @@ func (k *keyedLock) lock(key string) func() {
 	e.refs++
 	k.mu.Unlock()
 	e.mu.Lock()
+	return k.unlocker(key, e)
+}
+
+// tryLock locks key unless someone holds or waits for it.
+func (k *keyedLock) tryLock(key string) (func(), bool) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.locks == nil {
+		k.locks = map[string]*keyedEntry{}
+	}
+	if _, held := k.locks[key]; held {
+		return nil, false
+	}
+	e := &keyedEntry{refs: 1}
+	e.mu.Lock()
+	k.locks[key] = e
+	return k.unlocker(key, e), true
+}
+
+func (k *keyedLock) unlocker(key string, e *keyedEntry) func() {
 	return func() {
 		e.mu.Unlock()
 		k.mu.Lock()

@@ -213,3 +213,26 @@ func TestKubeDisksDriveTheProviderThroughKubernetes(t *testing.T) {
 		t.Fatal("delete should remove the claim")
 	}
 }
+
+func TestKubeDisksCountTheNodesFreeAttachSlots(t *testing.T) {
+	ctx := context.Background()
+	limited := csiNode("node-a", "disk.example.com")
+	limited.Spec.Drivers[0].Allocatable = &storagev1.VolumeNodeResources{Count: ptr.To[int32](3)}
+	va := func(name, node, attacher string) *storagev1.VolumeAttachment {
+		return &storagev1.VolumeAttachment{ObjectMeta: metav1.ObjectMeta{Name: name}, Spec: storagev1.VolumeAttachmentSpec{Attacher: attacher, NodeName: node}}
+	}
+	c := fake.NewClientBuilder().WithObjects(
+		limited, csiNode("node-b", "disk.example.com"),
+		va("a1", "node-a", "disk.example.com"), va("a2", "node-a", "disk.example.com"),
+		va("a3", "node-a", "other.example.com"), va("b1", "node-b", "disk.example.com"),
+	).Build()
+	k := &KubeDisks{Client: c, Namespace: "ate-system", Log: logr.Discard()}
+	k.provider, k.snapshotClass = "disk.example.com", "snaps"
+
+	if free, err := k.Free(ctx, "node-a"); err != nil || free != 1 {
+		t.Fatalf("node-a should have one slot left for the provider's disks, got %d, %v", free, err)
+	}
+	if free, err := k.Free(ctx, "node-b"); err != nil || free != -1 {
+		t.Fatalf("a node whose driver reports no limit should say so, got %d, %v", free, err)
+	}
+}

@@ -138,7 +138,7 @@ export function DevboxInstanceView({
     browserToPanel,
   } = useDevboxPanel()
   const api = useDevboxWorkspaceApi(instanceId)
-  useDevboxPresence(instanceId, live)
+  useDevboxPresence(instanceId, instance?.status)
 
   const [resume, resumeState] = useResumeDevboxInstanceMutation({
     onError: (e) => popToast({ content: e.message, severity: 'danger' }),

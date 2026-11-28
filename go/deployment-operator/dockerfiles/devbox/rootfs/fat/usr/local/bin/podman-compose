@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-# podman-compose for the devbox sandbox. The microVM guest has no /dev/net/tun, so rootless podman can't give the
-# networks or pods a compose project asks for their own network namespace. Every service joins the box's own network
+# podman-compose for the devbox sandbox. The microVM guest has no /dev/net/tun and the box has no NET_ADMIN, so podman
+# can't give the networks or pods a compose project asks for their own network namespace. Every service joins the box's own network
 # instead, and each service
 # name, container name, hostname and network alias resolves to 127.0.0.1, so `db:5432` still reaches the db service.
 # Services share one port space: each listens on its own container port, and published port remaps don't apply.

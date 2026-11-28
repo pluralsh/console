@@ -22,6 +22,8 @@ type Mounter interface {
 	// Unmount unmounts target; a target that isn't mounted is no error.
 	Unmount(target string) error
 	IsMounted(path string) (bool, error)
+	// Sync writes the dirty data of the filesystem path is on to its disk.
+	Sync(path string) error
 }
 
 // Node is the CSI node service. The kubelet mounts the volume's disk for its anchor pod once it's attached, around
@@ -100,10 +102,23 @@ func (n *Node) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequ
 	return &csi.NodeStageVolumeResponse{}, nil
 }
 
+// NodeUnstageVolume syncs the home's filesystem, which unmounting the bind mount doesn't, and unmounts it. The disk
+// may stay attached and mounted for the anchor a while after (the controller's DetachDelay), so this is what makes
+// the box's writes durable at suspend.
 func (n *Node) NodeUnstageVolume(_ context.Context, req *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
 	staging, err := n.path("staging", req.GetStagingTargetPath())
 	if err != nil {
 		return nil, err
+	}
+	mounted, err := n.Mounter.IsMounted(staging)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "checking staging path %s: %v", staging, err)
+	}
+	if !mounted {
+		return &csi.NodeUnstageVolumeResponse{}, nil
+	}
+	if err := n.Mounter.Sync(staging); err != nil {
+		return nil, status.Errorf(codes.Internal, "syncing %s: %v", staging, err)
 	}
 	if err := n.Mounter.Unmount(staging); err != nil {
 		return nil, status.Errorf(codes.Internal, "unmounting %s: %v", staging, err)

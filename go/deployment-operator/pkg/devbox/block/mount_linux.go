@@ -40,6 +40,18 @@ func (m BindMounter) Unmount(target string) error {
 	return nil
 }
 
+func (BindMounter) Sync(path string) error {
+	fd, err := unix.Open(path, unix.O_RDONLY|unix.O_DIRECTORY|unix.O_CLOEXEC, 0)
+	if err != nil {
+		return fmt.Errorf("opening %s: %w", path, err)
+	}
+	defer unix.Close(fd)
+	if err := unix.Syncfs(fd); err != nil {
+		return fmt.Errorf("syncing the filesystem of %s: %w", path, err)
+	}
+	return nil
+}
+
 // IsMounted reports whether path is a mount point, by /proc/self/mountinfo.
 func (BindMounter) IsMounted(path string) (bool, error) {
 	path = filepath.Clean(path)

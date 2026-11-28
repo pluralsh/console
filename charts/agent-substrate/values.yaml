@@ -460,6 +460,9 @@ block:
   parameters: {}
   # -- The size of a home created without one.
   defaultCapacityGiB: 20
+  # -- How long a suspended box's disk stays attached to its node, so resuming there skips the detach and attach
+  # (10-20s each on EBS). Its anchor stays on the node meanwhile. "0s" detaches at suspend.
+  detachDelay: 10m
   # Owner and mode of a new, empty home: the devbox images' dev user.
   home:
     uid: 1000
@@ -480,7 +483,8 @@ block:
       limits:
         cpu: 500m
         memory: 256Mi
-  # The pod that keeps each attached home's disk attached to and mounted on its node, one per running box. It does
+  # The pod that keeps each attached home's disk attached to and mounted on its node, one per running box and per box
+  # suspended within detachDelay. It does
   # nothing, but counts against the node's pod limit. Its defaults pass the restricted Pod Security Standard and
   # common admission policies: non-root, read-only root filesystem, no capabilities, no host namespaces, CPU and
   # memory requests and limits (5m/16Mi, 50m/32Mi), probes, its own ServiceAccount without a token.

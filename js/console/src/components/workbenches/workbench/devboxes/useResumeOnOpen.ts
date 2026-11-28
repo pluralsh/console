@@ -2,8 +2,8 @@ import { DevboxInstanceStatus } from 'generated/graphql'
 import { useEffect, useRef } from 'react'
 
 // opening a suspended instance resumes it, judged once by its status when
-// opened (undefined until it's known), so one suspended while open stays
-// suspended
+// opened (undefined until it's known), so one the user suspends while open
+// stays suspended (presence pings wake an idle suspend)
 export function useResumeOnOpen({
   instanceId,
   status,

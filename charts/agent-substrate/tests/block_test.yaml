@@ -44,6 +44,7 @@ tests:
             - --allowed-clients=spiffe://cluster.local/ns/ate-system/sa/ate-api-server
             - --anchor-image=ghcr.io/pluralsh/devbox-block:1.2.3
             - --anchor-template=/etc/devbox-block/anchor.yaml
+            - --detach-delay=10m
 
   - it: gives the driver's pods probes, requests and limits, and their own labels and annotations
     template: templates/block.yaml

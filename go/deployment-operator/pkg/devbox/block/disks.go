@@ -39,6 +39,8 @@ type Disks interface {
 	Attach(ctx context.Context, disk, node string) (string, error)
 	// Detach unmounts the disk and detaches it from node, or from wherever it is when node is empty.
 	Detach(ctx context.Context, disk, node string) error
+	// Free reports how many more of the provider's disks node can attach, or -1 when it doesn't say.
+	Free(ctx context.Context, node string) (int, error)
 	Delete(ctx context.Context, disk string) error
 	// Snapshot snapshots the disk under name and reports whether the snapshot can seed new disks yet.
 	Snapshot(ctx context.Context, name, disk string) (bool, error)
@@ -331,6 +333,36 @@ func (k *KubeDisks) nodeHasProvider(ctx context.Context, node, provider string) 
 		}
 	}
 	return status.Errorf(codes.FailedPrecondition, "node %s doesn't run the node plugin of %s", node, provider)
+}
+
+func (k *KubeDisks) Free(ctx context.Context, node string) (int, error) {
+	provider, _, err := k.checked()
+	if err != nil {
+		return 0, err
+	}
+	csiNode := &storagev1.CSINode{}
+	if err := k.Client.Get(ctx, client.ObjectKey{Name: node}, csiNode); err != nil {
+		return 0, status.Errorf(codes.Internal, "reading CSINode %s: %v", node, err)
+	}
+	limit := -1
+	for _, d := range csiNode.Spec.Drivers {
+		if d.Name == provider && d.Allocatable != nil && d.Allocatable.Count != nil {
+			limit = int(*d.Allocatable.Count)
+		}
+	}
+	if limit < 0 {
+		return -1, nil
+	}
+	var list storagev1.VolumeAttachmentList
+	if err := k.Client.List(ctx, &list); err != nil {
+		return 0, status.Errorf(codes.Internal, "listing VolumeAttachments: %v", err)
+	}
+	for _, va := range list.Items {
+		if va.Spec.NodeName == node && va.Spec.Attacher == provider {
+			limit--
+		}
+	}
+	return max(limit, 0), nil
 }
 
 func (k *KubeDisks) deleteAnchor(ctx context.Context, disk string) error {

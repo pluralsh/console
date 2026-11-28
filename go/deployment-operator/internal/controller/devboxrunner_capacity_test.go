@@ -233,7 +233,7 @@ func TestDrainIdleWorkersSkipsPinnedNodes(t *testing.T) {
 		})
 	}
 
-	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 2, map[string]bool{"node-b": true})
+	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 2, map[string]bool{"node-b": true}, nil)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(drained).To(Equal(int64(1)))
 	g.Expect(fake.workers["w-a"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_DRAINING))
@@ -254,11 +254,39 @@ func TestDrainIdleWorkersPrefersUnavailable(t *testing.T) {
 		})
 	}
 
-	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 1, nil)
+	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 1, nil, nil)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(drained).To(Equal(int64(1)))
 	g.Expect(fake.workers["w-b"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_DRAINING))
 	g.Expect(fake.workers["w-a"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_ACTIVE))
+}
+
+func TestDrainIdleWorkersKeepsTheNodeASuspendedActorResumesOn(t *testing.T) {
+	g := NewWithT(t)
+	fake := newFakeSubstrate()
+	r := &DevboxRunnerReconciler{}
+	var view devboxPoolView
+	for _, name := range []string{"a", "b"} {
+		w := testWorker("pool", name, ateapi.WorkerState_WORKER_STATE_ACTIVE, 0)
+		fake.workers[w.GetMetadata().GetName()] = w
+		view.schedulable = append(view.schedulable, devboxWorkerPod{
+			pod:    corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: name, UID: types.UID(name)}, Spec: corev1.PodSpec{NodeName: "node-" + name}},
+			worker: w,
+		})
+	}
+	actors := []*ateapi.Actor{
+		{Status: &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDED, AssignedNode: "node-b"}},
+		{Status: &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDED}},
+		{Status: &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_RUNNING, AssignedNode: "node-a"}},
+	}
+	suspended := suspendedActorNodes(actors)
+	g.Expect(suspended).To(Equal(map[string]int{"node-b": 1}))
+
+	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 1, nil, suspended)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(drained).To(Equal(int64(1)))
+	g.Expect(fake.workers["w-a"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_DRAINING))
+	g.Expect(fake.workers["w-b"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_ACTIVE), "the suspended actor's resume needs a worker on node-b")
 }
 
 func TestScaleUpWorkers(t *testing.T) {

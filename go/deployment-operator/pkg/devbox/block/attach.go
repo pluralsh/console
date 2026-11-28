@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
+	"time"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"google.golang.org/grpc/codes"
@@ -37,6 +39,18 @@ func (c *Controller) ControllerPublishVolume(ctx context.Context, req *csi.Contr
 		return nil, status.Errorf(codes.NotFound, "volume %s doesn't exist", name)
 	}
 
+	if rec.DiskID != "" && rec.Node != "" && rec.Node != node {
+		// Still on the last node: released there, or Substrate lost that node without detaching. It detaches first,
+		// so a move snapshots it unmounted.
+		if err := c.Disks.Detach(ctx, rec.DiskID, rec.Node); err != nil {
+			return nil, err
+		}
+		rec.Node, rec.DetachAt = "", time.Time{}
+		if err := c.Store.PutVolume(ctx, rec); err != nil {
+			return nil, status.Errorf(codes.Internal, "recording the detach of volume %s: %v", name, err)
+		}
+	}
+
 	if rec.DiskID == "" {
 		if err := c.createDisk(ctx, rec, node); err != nil {
 			return nil, err
@@ -54,18 +68,15 @@ func (c *Controller) ControllerPublishVolume(ctx context.Context, req *csi.Contr
 		c.grow(ctx, rec)
 	}
 
-	if rec.Node != "" && rec.Node != node {
-		// Substrate lost the last node without detaching; the anchor left there goes first.
-		if err := c.Disks.Detach(ctx, rec.DiskID, rec.Node); err != nil {
-			return nil, err
-		}
+	if rec.Node != node {
+		c.makeRoom(ctx, name, node)
 	}
 	source, err := c.Disks.Attach(ctx, rec.DiskID, node)
 	if err != nil {
 		return nil, err
 	}
-	if rec.Node != node {
-		rec.Node = node
+	if rec.Node != node || !rec.DetachAt.IsZero() {
+		rec.Node, rec.DetachAt = node, time.Time{}
 		if err := c.Store.PutVolume(ctx, rec); err != nil {
 			return nil, status.Errorf(codes.Internal, "recording the attachment of volume %s: %v", name, err)
 		}
@@ -74,8 +85,10 @@ func (c *Controller) ControllerPublishVolume(ctx context.Context, req *csi.Contr
 	return &csi.ControllerPublishVolumeResponse{PublishContext: map[string]string{PublishContextSource: source}}, nil
 }
 
-// ControllerUnpublishVolume unmounts the volume's disk and detaches it, from the node Substrate names or else the
-// one it was last attached to.
+// ControllerUnpublishVolume releases the volume's disk from the node Substrate names or else the one it was last
+// attached to. With a DetachDelay the disk stays attached there until DetachReleased detaches it, or a publish
+// takes it back or moves it; otherwise it's unmounted and detached now. The node plugin synced the filesystem when
+// it unstaged the volume, so a disk left attached holds everything the box wrote.
 func (c *Controller) ControllerUnpublishVolume(ctx context.Context, req *csi.ControllerUnpublishVolumeRequest) (*csi.ControllerUnpublishVolumeResponse, error) {
 	name, node := req.GetVolumeId(), req.GetNodeId()
 	if !validID(name) {
@@ -92,17 +105,124 @@ func (c *Controller) ControllerUnpublishVolume(ctx context.Context, req *csi.Con
 	if node == "" {
 		node = rec.Node
 	}
+	if c.DetachDelay > 0 && node != "" && node == rec.Node {
+		if rec.DetachAt.IsZero() {
+			rec.DetachAt = time.Now().Add(c.DetachDelay)
+			if err := c.Store.PutVolume(ctx, rec); err != nil {
+				return nil, status.Errorf(codes.Internal, "recording the release of volume %s: %v", name, err)
+			}
+		}
+		c.Log.Info("released volume", "volume", name, "disk", rec.DiskID, "node", node, "detachAt", rec.DetachAt)
+		return &csi.ControllerUnpublishVolumeResponse{}, nil
+	}
 	if err := c.Disks.Detach(ctx, rec.DiskID, node); err != nil {
 		return nil, err
 	}
 	if rec.Node == node || node == "" {
-		rec.Node = ""
+		rec.Node, rec.DetachAt = "", time.Time{}
 		if err := c.Store.PutVolume(ctx, rec); err != nil {
 			return nil, status.Errorf(codes.Internal, "recording volume %s: %v", name, err)
 		}
 	}
 	c.Log.Info("detached volume", "volume", name, "disk", rec.DiskID, "node", node)
 	return &csi.ControllerUnpublishVolumeResponse{}, nil
+}
+
+// DetachReleased detaches the disks released longer ago than DetachDelay.
+func (c *Controller) DetachReleased(ctx context.Context, now time.Time) error {
+	volumes, err := c.Store.ListVolumes(ctx)
+	if err != nil {
+		return fmt.Errorf("listing volumes: %w", err)
+	}
+	var errs []error
+	for _, v := range volumes {
+		if !v.DetachAt.IsZero() && !now.Before(v.DetachAt) {
+			errs = append(errs, c.detachReleased(ctx, v.Name, now))
+		}
+	}
+	return errors.Join(errs...)
+}
+
+func (c *Controller) detachReleased(ctx context.Context, name string, now time.Time) error {
+	defer c.volumes.lock(name)()
+	return c.detachReleasedLocked(ctx, name, now)
+}
+
+// makeRoom detaches disks released on node, longest released first, while it has no attach slot left for
+// another: Substrate places boxes without counting disks, and released ones add to a node's running boxes'. It
+// skips volumes another call holds, so two attaches never wait on each other, and only logs failures, since the
+// attach reports whether there was room. Holds the attaching volume's lock.
+func (c *Controller) makeRoom(ctx context.Context, attaching, node string) {
+	free, err := c.Disks.Free(ctx, node)
+	if err != nil {
+		c.Log.Error(err, "counting the node's free attach slots", "node", node)
+		return
+	}
+	if free != 0 {
+		return
+	}
+	volumes, err := c.Store.ListVolumes(ctx)
+	if err != nil {
+		c.Log.Error(err, "listing volumes released on the node", "node", node)
+		return
+	}
+	var released []*VolumeRecord
+	for _, v := range volumes {
+		if v.Name != attaching && v.Node == node && !v.DetachAt.IsZero() {
+			released = append(released, v)
+		}
+	}
+	slices.SortFunc(released, func(a, b *VolumeRecord) int { return a.DetachAt.Compare(b.DetachAt) })
+	for _, v := range released {
+		unlock, ok := c.volumes.tryLock(v.Name)
+		if !ok {
+			continue
+		}
+		err := c.detachReleasedLocked(ctx, v.Name, time.Time{})
+		unlock()
+		if err != nil {
+			c.Log.Error(err, "detaching a released disk to make room", "volume", v.Name, "node", node)
+			continue
+		}
+		return
+	}
+}
+
+// detachReleasedLocked detaches the volume's released disk if it was due by now; a zero now detaches it regardless.
+// Holds the volume's lock.
+func (c *Controller) detachReleasedLocked(ctx context.Context, name string, now time.Time) error {
+	rec, err := c.Store.GetVolume(ctx, name)
+	if err != nil || rec == nil || rec.DetachAt.IsZero() || (!now.IsZero() && now.Before(rec.DetachAt)) {
+		return err
+	}
+	if rec.DiskID != "" && rec.Node != "" {
+		if err := c.Disks.Detach(ctx, rec.DiskID, rec.Node); err != nil {
+			return fmt.Errorf("detaching volume %s from node %s: %w", name, rec.Node, err)
+		}
+	}
+	node := rec.Node
+	rec.Node, rec.DetachAt = "", time.Time{}
+	if err := c.Store.PutVolume(ctx, rec); err != nil {
+		return fmt.Errorf("recording the detach of volume %s: %w", name, err)
+	}
+	c.Log.Info("detached volume", "volume", name, "disk", rec.DiskID, "node", node, "released", true)
+	return nil
+}
+
+// RunDetaches detaches released disks every interval until ctx ends.
+func (c *Controller) RunDetaches(ctx context.Context, interval time.Duration) error {
+	t := time.NewTicker(interval)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-t.C:
+			if err := c.DetachReleased(ctx, time.Now()); err != nil {
+				c.Log.Error(err, "detaching released disks")
+			}
+		}
+	}
 }
 
 // diskName is the name of a volume's disk of a generation.

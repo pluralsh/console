@@ -35,6 +35,22 @@ type fakeDisks struct {
 	snapshots map[string]int  // snapshot -> polls until ready
 	stuck     map[string]bool // snapshot -> never ready
 	snapDel   []string
+	// snapAttached are the disks snapshotted while still attached to a node.
+	snapAttached []string
+	limits       map[string]int // node -> attach limit; none: unlimited
+}
+
+func (f *fakeDisks) Free(_ context.Context, node string) (int, error) {
+	limit, ok := f.limits[node]
+	if !ok {
+		return -1, nil
+	}
+	for _, n := range f.attached {
+		if n == node {
+			limit--
+		}
+	}
+	return max(limit, 0), nil
 }
 
 func newFakeDisks() *fakeDisks {
@@ -107,6 +123,9 @@ func (f *fakeDisks) Delete(_ context.Context, disk string) error {
 func (f *fakeDisks) Snapshot(_ context.Context, name, disk string) (bool, error) {
 	if _, ok := f.disks[disk]; !ok {
 		return false, status.Errorf(codes.NotFound, "no disk %s", disk)
+	}
+	if _, ok := f.attached[disk]; ok {
+		f.snapAttached = append(f.snapAttached, disk)
 	}
 	left := f.snapshots[name]
 	if left > 0 {
@@ -431,6 +450,145 @@ func TestAttachElsewhereDetachesFromTheLostNodeFirst(t *testing.T) {
 	}
 }
 
+func TestAReleasedDiskStaysAttachedForTheSameNode(t *testing.T) {
+	ctx := context.Background()
+	d := newFakeDisks()
+	c := newController(d)
+	c.DetachDelay = 10 * time.Minute
+	name, disk := "substrate-r-home", diskName("substrate-r-home", 0)
+	if _, err := create(t, c, name, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := publish(c, name, "node-a"); err != nil {
+		t.Fatal(err)
+	}
+
+	unpublish(t, c, name, "node-a")
+	if d.attached[disk] != "node-a" {
+		t.Fatalf("a released disk should stay attached through the delay, got %v", d.attached)
+	}
+	rec, _ := c.Store.GetVolume(ctx, name)
+	if rec.Node != "node-a" || rec.DetachAt.IsZero() {
+		t.Fatalf("the release should be recorded against its node, got %+v", rec)
+	}
+	first := rec.DetachAt
+	unpublish(t, c, name, "node-a")
+	if rec, _ = c.Store.GetVolume(ctx, name); !rec.DetachAt.Equal(first) {
+		t.Fatal("releasing again shouldn't push the detach back")
+	}
+
+	if err := c.DetachReleased(ctx, first.Add(-time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if d.attached[disk] != "node-a" {
+		t.Fatal("nothing detaches before the delay is up")
+	}
+
+	if _, err := publish(c, name, "node-a"); err != nil {
+		t.Fatal(err)
+	}
+	if rec, _ = c.Store.GetVolume(ctx, name); rec.Node != "node-a" || !rec.DetachAt.IsZero() {
+		t.Fatalf("attaching on the same node should take the disk back, got %+v", rec)
+	}
+	if err := c.DetachReleased(ctx, first.Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if d.attached[disk] != "node-a" {
+		t.Fatal("a disk taken back isn't detached by the sweep")
+	}
+
+	unpublish(t, c, name, "node-a")
+	rec, _ = c.Store.GetVolume(ctx, name)
+	if err := c.DetachReleased(ctx, rec.DetachAt); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := d.attached[disk]; ok {
+		t.Fatal("the sweep should detach a disk once its delay is up")
+	}
+	if rec, _ = c.Store.GetVolume(ctx, name); rec.Node != "" || !rec.DetachAt.IsZero() {
+		t.Fatalf("the sweep should record the detach, got %+v", rec)
+	}
+}
+
+func TestAFullNodeDetachesTheLongestReleasedDiskToMakeRoom(t *testing.T) {
+	d := newFakeDisks()
+	d.limits = map[string]int{"node-a": 2}
+	c := newController(d)
+	c.DetachDelay = 10 * time.Minute
+	for _, n := range []string{"substrate-1-home", "substrate-2-home", "substrate-3-home"} {
+		if _, err := create(t, c, n, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, n := range []string{"substrate-1-home", "substrate-2-home"} {
+		if _, err := publish(c, n, "node-a"); err != nil {
+			t.Fatal(err)
+		}
+		unpublish(t, c, n, "node-a")
+	}
+
+	if _, err := publish(c, "substrate-3-home", "node-a"); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := d.attached[diskName("substrate-1-home", 0)]; ok {
+		t.Fatalf("the longest released disk should be detached to make room, got %v", d.attached)
+	}
+	if d.attached[diskName("substrate-2-home", 0)] != "node-a" {
+		t.Fatalf("only as many released disks as needed should be detached, got %v", d.attached)
+	}
+	if rec, _ := c.Store.GetVolume(context.Background(), "substrate-1-home"); rec.Node != "" || !rec.DetachAt.IsZero() {
+		t.Fatalf("the detach should be recorded, got %+v", rec)
+	}
+}
+
+func TestAReleasedDiskDetachesBeforeAttachingElsewhere(t *testing.T) {
+	d := newFakeDisks()
+	c := newController(d)
+	c.DetachDelay = 10 * time.Minute
+	name, disk := "substrate-e-home", diskName("substrate-e-home", 0)
+	if _, err := create(t, c, name, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := publish(c, name, "node-a"); err != nil {
+		t.Fatal(err)
+	}
+	unpublish(t, c, name, "node-a")
+
+	if _, err := publish(c, name, "node-a2"); err != nil {
+		t.Fatalf("a released disk should attach to another node in its zone: %v", err)
+	}
+	if d.attached[disk] != "node-a2" {
+		t.Fatalf("disk should move to the new node, got %v", d.attached)
+	}
+	if rec, _ := c.Store.GetVolume(context.Background(), name); rec.Node != "node-a2" || !rec.DetachAt.IsZero() {
+		t.Fatalf("the new attachment should be recorded, got %+v", rec)
+	}
+}
+
+func TestAReleasedDiskIsDetachedBeforeItsMoveIsSnapshotted(t *testing.T) {
+	d := newFakeDisks()
+	c := newController(d)
+	c.DetachDelay = 10 * time.Minute
+	name := "substrate-m-home"
+	if _, err := create(t, c, name, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := publish(c, name, "node-a"); err != nil {
+		t.Fatal(err)
+	}
+	unpublish(t, c, name, "node-a")
+
+	if _, err := publish(c, name, "node-b"); err != nil {
+		t.Fatalf("a released disk should move to another zone: %v", err)
+	}
+	if len(d.snapAttached) != 0 {
+		t.Fatalf("a move should snapshot the disk detached, got %v snapshotted attached", d.snapAttached)
+	}
+	if d.attached[diskName(name, 1)] != "node-b" {
+		t.Fatalf("the moved disk should be attached to the new node, got %v", d.attached)
+	}
+}
+
 func TestSeedIsCapturedFromTheGoldenVolumeAndSeedsLaterDisks(t *testing.T) {
 	d := newFakeDisks()
 	c := newController(d)
@@ -468,6 +626,28 @@ func TestSeedIsCapturedFromTheGoldenVolumeAndSeedsLaterDisks(t *testing.T) {
 	}
 	if src := d.creates[1].spec.Snapshot; src != snapshotName("ns.tmpl-1") {
 		t.Fatalf("a later disk should start from the seed's snapshot, got %q", src)
+	}
+}
+
+func TestAReleasedGoldenDiskIsDetachedBeforeTheSeedIsCaptured(t *testing.T) {
+	d := newFakeDisks()
+	c := newController(d)
+	c.DetachDelay = 10 * time.Minute
+	seed := map[string]string{ParamSeed: "ns.tmpl-3"}
+	if _, err := create(t, c, "substrate-golden-home", seed); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := publish(c, "substrate-golden-home", "node-a"); err != nil {
+		t.Fatal(err)
+	}
+	unpublish(t, c, "substrate-golden-home", "node-a")
+
+	deleteVolume(t, c, "substrate-golden-home")
+	if s, _ := c.Store.GetSeed(context.Background(), "ns.tmpl-3"); !s.captured() {
+		t.Fatalf("the seed should be captured, got %+v", s)
+	}
+	if len(d.snapAttached) != 0 {
+		t.Fatalf("the seed should be snapshotted from the disk detached, got %v snapshotted attached", d.snapAttached)
 	}
 }
 

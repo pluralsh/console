@@ -109,8 +109,17 @@ Substrate creates volumes before it chooses a worker (see Zones), so:
   before it creates the pod's sandbox and starts its container, so the node plugin waits for that mount at
   `NodeStageVolume` instead of the controller waiting for the anchor to run. A later attach to a node the
   volume's node affinity doesn't admit moves the disk (see Zones).
-- `ControllerUnpublishVolume` deletes the anchor and waits until the disk's VolumeAttachment for that node is gone,
-  using the last recorded node if Substrate doesn't name one.
+- `ControllerUnpublishVolume` releases the disk but leaves its anchor, and so the attachment, on the node for
+  `--detach-delay` (10 minutes), recording when it's due to detach. A full detach measured 17-20s on EBS: about 8-10s
+  for the kubelet to report the disk unmounted and the attach/detach controller to act, then 9-16s for EBS. Since
+  Substrate waits for it inside suspend, it was most of the suspend. A resume on the same node within the delay
+  finds the disk attached and mounted and skips both the detach and the attach. A publish to another node, or
+  deleting a golden volume, detaches the disk from the old node first, so moves and seeds snapshot it unmounted.
+  Released disks count against the node's attach limit, which Substrate doesn't consider when it places boxes, so
+  an attach to a node with no slot left (its CSINode's allocatable count, less its VolumeAttachments) first
+  detaches the disk released there longest. Otherwise a sweep every 30 seconds deletes the anchor once the delay is up and waits until the disk's
+  VolumeAttachment for that node is gone. `NodeUnstageVolume` syncs the home's filesystem before unmounting the
+  staging path, so a disk left attached already holds everything the box wrote.
 - `DeleteVolume` captures the seed when the volume is its seed's golden volume (see Seeds), then deletes the anchor
   and the claim; the provider deletes the disk once it's detached.
 
@@ -207,7 +216,12 @@ together:
 4. **Maximum.** `maxReplicas` caps the total across zones. At the cap, waiting resumes come before spare slots.
 
 Scaling down stays per pool and works as it does today: only idle workers are drained, after `ScaleDownDelay`. A
-zone with no running boxes and no share of the minimum scales to zero.
+zone with no running boxes and no share of the minimum scales to zero. Among idle workers, those on nodes where no
+suspended box will resume go first. For about 30 minutes after a suspend, Substrate keeps the snapshot local and
+pins the resume to that node (the actor's `assignedNode`). With the detach delay, the box's disk is still attached
+there too. If the node has no worker, Substrate resumes the box elsewhere and the disk has to detach and reattach
+(about 17s). That happened on devbox-dev: 15s after a box suspended, its worker was drained in favour of an
+identical spare on another node.
 
 So with `minReplicas: 1`, one worker runs, in the zone with the most homes. With `minReplicas: 3` and homes in two
 zones, those two zones get two workers and one.
@@ -287,7 +301,7 @@ layer), and the devbox images keep Podman's images,
 containers and volumes there by default, with the `vfs` driver, which stores every layer as a full copy. A few
 compose stacks can make every suspend and resume carry gigabytes. With a Block home, the operator sets
 `CONTAINERS_STORAGE_CONF=/etc/containers/storage.home.conf`, which keeps that storage at
-`/home/dev/.local/share/containers/storage` instead. Snapshots shrink to the box's own changes, images survive new
+`/home/dev/.local/share/containers/rootful` instead. Snapshots shrink to the box's own changes, images survive new
 images of the box, and images the golden boot pulls ship in the seed. The costs:
 
 - Images count against `spec.home.size`, and `vfs` duplicates layers, so homes need more room than before.
@@ -322,9 +336,11 @@ home.
 
 ## Risks
 
-- **Attach and detach on every resume and suspend.** These are usually seconds on AWS and GCP, but detaches
-  occasionally hang for minutes. Substrate runs them synchronously inside suspend and resume. The spike below
-  measures this before we build anything.
+- **Attach and detach on every resume and suspend.** Substrate runs them synchronously inside suspend and resume,
+  and a detach took 17-20s on EBS (occasionally minutes). The detach delay takes it out of suspend, and out of a
+  resume on the same node. A resume on another node within the delay pays it instead.
+- **Anchors kept after suspend.** Through the detach delay a suspended box's anchor stays on its node, counts
+  against its pod and volume attach limits, and may hold off scale-down of an otherwise empty node.
 - **Zone capacity.** Pinning trades flexibility for simplicity. A zone shortage strands its boxes until they're
   moved.
 - **Cold zones.** Because the minimum isn't repeated in every zone, a box in a zone with no worker resumes in

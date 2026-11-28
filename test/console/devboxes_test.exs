@@ -539,11 +539,19 @@ defmodule Console.DevboxesTest do
       end)
     end
 
-    test "pinging a suspended instance resumes it" do
-      inst = owned_instance(status: :suspended)
+    test "pinging an idle-suspended instance resumes it" do
+      inst = owned_instance(status: :suspended, status_reason: "suspended: idle")
       expect(Control.Test, :resume_instance, fn _ -> :ok end)
 
       {:ok, _} = Devboxes.ping_instance(inst.id, inst.user)
+    end
+
+    test "pinging leaves a user's suspend alone" do
+      inst = owned_instance(status: :suspended, status_reason: "suspended: user")
+      reject(Control.Test, :resume_instance, 1)
+
+      {:ok, _} = Devboxes.ping_instance(inst.id, inst.user)
+      refute refetch(inst).suspended_at
     end
 
     test "keep awake is clamped to the box's max deferral and narrowed by the workbench" do

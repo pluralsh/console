@@ -222,6 +222,7 @@ spec:
             - --allowed-clients={{ include "substrate.block.allowedClients" . }}
             - --anchor-image={{ include "substrate.block.image" . }}
             - --anchor-template=/etc/devbox-block/anchor.yaml
+            - --detach-delay={{ $b.detachDelay }}
           env:
             - name: POD_NAMESPACE
               valueFrom:

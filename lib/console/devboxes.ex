@@ -672,7 +672,7 @@ defmodule Console.Devboxes do
 
   @doc """
   Records that a user is viewing an instance (a visible workbench tab).  Clients call this about every 30s.  The
-  aggregate viewer lease is pushed to the gateway when it toggles or moves enough, and a suspended instance resumes.
+  aggregate viewer lease is pushed to the gateway when it toggles or moves enough, and an idle-suspended instance resumes.
   """
   @spec ping_instance(binary, User.t) :: instance_resp
   def ping_instance(id, %User{id: user_id} = user) do
@@ -737,7 +737,9 @@ defmodule Console.Devboxes do
 
   defp lease_window(ts), do: div(DateTime.to_unix(ts), @lease_resync)
 
-  defp maybe_resume(%DevboxInstance{status: :suspended} = inst) do
+  # only an idle suspend: a visible tab's viewer lease should have vetoed it, so it lost a race with the lease (e.g.
+  # the tab opened mid-suspend); a user's suspend or the awake ceiling must stick while the tab stays open
+  defp maybe_resume(%DevboxInstance{status: :suspended, status_reason: "suspended: idle"} = inst) do
     with {:ok, claimed} <- claim_resume(inst.id),
       do: Control.resume_instance(claimed)
     {:ok, inst}

@@ -265,18 +265,20 @@ RUN set -eux; \
     cd /; rm -rf "${tmp}" /root/.config /root/.cache; \
     aws --version; gcloud --version > /dev/null; az version --output none
 
-# Containers: rootless Podman as dev, with `docker`, `docker compose` and
-# `docker-compose` mapped onto it, on microVM boxes only (/usr/local/bin/podman
-# refuses on gVisor). The microVM guest's filesystems are virtio-fs, which
-# overlayfs can't use as an upper layer, and it has no /dev/fuse, so images use
-# the vfs driver. It has no /dev/net/tun for pasta either, so containers share
-# the box's network: /usr/local/bin/podman-compose runs every compose service on
-# it with service names resolving to 127.0.0.1, and traffic leaves through the
-# box's egress policy. The guest masks parts of /proc, so a container can't
-# mount a fresh procfs; containers share the box's PID namespace, where crun
-# bind-mounts the box's /proc instead, and Podman requires cgroups for that
-# (it finds no cgroup mount and runs without limits).
-# newuidmap and newgidmap are diverted to /usr/local/libexec/devbox/idmap.
+# Containers: rootful Podman, with `docker`, `docker compose` and `docker-compose`
+# mapped onto it, on microVM boxes only (/usr/local/bin/podman refuses on
+# gVisor). /usr/local/bin/podman runs it as root through sudo in a user
+# namespace that maps every id onto itself (/usr/local/libexec/devbox/userns),
+# since Substrate never grants a box CAP_SYS_ADMIN. The microVM guest's
+# filesystems are virtio-fs, which overlayfs can't use as an upper layer, and it
+# has no /dev/fuse, so images use the vfs driver. It has no /dev/net/tun or
+# NET_ADMIN either, so containers share the box's network:
+# /usr/local/bin/podman-compose runs every compose service on it with service
+# names resolving to 127.0.0.1, and traffic leaves through the box's egress
+# policy. The guest masks parts of /proc and has no cgroup mount, so a container
+# can't mount a fresh procfs or get cgroups: containers bind-mount the box's
+# /proc in their own PID namespace and run without limits, and build steps use
+# buildah's chroot isolation.
 # Images, containers and volumes live on the box's root filesystem by default, not the home: a ZeroFS home turns
 # every fsync into an object-storage flush, which databases in compose stacks issue per commit. Every snapshot
 # carries the root filesystem, so they also grow each suspend and resume, and a new image starts them empty.
@@ -287,16 +289,9 @@ COPY --chmod=0755 deployment-operator/dockerfiles/devbox/rootfs/fat/usr/local/li
 RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      podman podman-docker podman-compose uidmap crun catatonit \
+      podman podman-docker podman-compose crun catatonit \
       netavark aardvark-dns passt nftables; \
     rm -rf /var/lib/apt/lists/*; \
-    for tool in newuidmap newgidmap; do \
-      dpkg-divert --local --rename --divert "/usr/local/libexec/devbox/${tool}" --add "/usr/bin/${tool}"; \
-      chmod 0755 "/usr/local/libexec/devbox/${tool}"; \
-      ln -s /usr/local/libexec/devbox/idmap "/usr/bin/${tool}"; \
-    done; \
-    echo "dev:100000:65536" > /etc/subuid; \
-    echo "dev:100000:65536" > /etc/subgid; \
     touch /etc/containers/nodocker; \
     ln -s podman /usr/local/bin/docker; \
     ln -s /usr/local/bin/podman-compose /usr/local/bin/docker-compose; \
@@ -305,17 +300,15 @@ RUN set -eux; \
       'driver = "vfs"' \
       'runroot = "/run/containers/storage"' \
       'graphroot = "/var/lib/containers/storage"' \
-      'rootless_storage_path = "/var/lib/devbox-containers/storage"' \
       > /etc/containers/storage.conf; \
-    sed 's|^rootless_storage_path = .*|rootless_storage_path = "/home/dev/.local/share/containers/storage"|' \
+    sed 's|^graphroot = .*|graphroot = "/home/dev/.local/share/containers/rootful"|' \
       /etc/containers/storage.conf > /etc/containers/storage.home.conf; \
-    install -d -o 1000 -g 1000 -m 0700 /var/lib/devbox-containers; \
     mkdir -p /etc/containers/containers.conf.d; \
     printf '%s\n' \
       '[containers]' \
       'netns = "host"' \
-      'pidns = "host"' \
-      'cgroups = "enabled"' \
+      'cgroups = "disabled"' \
+      'mounts = ["type=bind,source=/proc,destination=/proc"]' \
       'log_driver = "k8s-file"' \
       '' \
       '[engine]' \

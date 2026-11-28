@@ -37,10 +37,10 @@ import (
 var workerPoolGVK = schema.GroupVersionKind{Group: "ate.dev", Version: "v1", Kind: "WorkerPool"}
 
 // devboxCapabilities are added to the devbox container's capability set. The box runs as dev (non-root), so its
-// processes hold none of them; they only bound what setuid-root helpers (sudo) gain. newuidmap/newgidmap need SETUID,
-// SETGID and (to map uid 0) SETFCAP to give rootless containers their subuid/subgid ranges; without them `docker`
-// fails to start any container. Substrate doesn't let a box add SYS_ADMIN, so the devbox images run them as dev.
-// DAC_OVERRIDE lets root under sudo open files dev owns.
+// processes hold none of them; they only bound what setuid-root helpers (sudo) gain. Substrate doesn't let a box add
+// SYS_ADMIN, so the devbox images run Podman as root in a user namespace mapping every id onto itself: writing its
+// uid_map and gid_map takes SETUID, SETGID and (to map uid 0) SETFCAP; without them `docker` fails to start any
+// container. DAC_OVERRIDE lets root under sudo open files dev owns.
 var devboxCapabilities = []string{"SETUID", "SETGID", "SETFCAP", "DAC_OVERRIDE"}
 
 // workerPodAnnotations keep node autoscalers from evicting workers: a worker's boxes run outside any pod, so a
