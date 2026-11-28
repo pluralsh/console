@@ -3,104 +3,122 @@ icon: https://artifacthub.io/image/0ca7dd5c-47ec-4d6a-87b7-2f2b74a3cca5
 git_url: https://repo1.dso.mil/big-bang/bigbang
 release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
 versions:
-- version: 4.1.1
+- version: 4.2.0
   kube: ['1.36']
   requirements:
   - name: Alloy
     version: 4.6.0-bb.1
   - name: Anchore Enterprise
-    version: 4.4.1-bb.1
+    version: 4.5.3-bb.0
   - name: Argocd
-    version: 10.17.1-bb.0
+    version: 10.18.2-bb.0
   - name: Authservice
-    version: 1.1.8-bb.7
+    version: 1.1.8-bb.11
   - name: Cert Manager
     version: v1.21.3-bb.3
   - name: Eck Operator
-    version: 3.5.0-bb.3
+    version: 3.5.0-bb.4
   - name: Elasticsearch Kibana
-    version: 1.45.0-bb.0
+    version: 1.46.0-bb.2
   - name: External Secrets Operator
-    version: 2.14.0-bb.1
+    version: 2.15.0-bb.3
   - name: Fluentbit
-    version: 0.58.3-bb.3
+    version: 0.58.3-bb.5
   - name: Fortify
     version: 26.2.0-bb.8
   - name: Gatekeeper
-    version: 3.23.1-bb.5
+    version: 3.23.1-bb.6
   - name: Gateway Api
-    version: 1.6.3-bb.0
+    version: 1.7.0-bb.0
   - name: Gitlab
-    version: 10.5.4-bb.0
+    version: 10.6.1-bb.0
   - name: Gitlab Runner
-    version: 0.94.2-bb.1
+    version: 0.95.0-bb.0
   - name: Grafana
-    version: 14.4.0-bb.0
+    version: 14.5.0-bb.1
   - name: Harbor
-    version: 1.19.4-bb.3
+    version: 1.19.4-bb.7
   - name: Headlamp
-    version: 0.46.0-bb.0
+    version: 0.46.0-bb.2
   - name: Istio Cni
-    version: 1.31.3-bb.0
+    version: 1.32.0-bb.0
   - name: Istio Crds
-    version: 1.31.3-bb.0
+    version: 1.32.0-bb.0
   - name: Istio Egress Gateway
     version: 0.1.5-bb.0
   - name: Istio Gateway
-    version: 1.31.3-bb.1
+    version: 1.32.0-bb.2
   - name: Istiod
-    version: 1.31.3-bb.0
+    version: 1.32.0-bb.1
   - name: Keycloak
-    version: 7.4.0-bb.3
+    version: 7.4.0-bb.6
   - name: Kiali
-    version: 2.34.1-bb.0
+    version: 2.35.0-bb.1
   - name: Kyverno
-    version: 3.9.2-bb.1
+    version: 3.10.0-bb.3
   - name: Kyverno Policies
-    version: 3.3.4-bb.93
+    version: 3.3.4-bb.94
   - name: Kyverno Reporter
-    version: 3.11.2-bb.1
+    version: 3.11.2-bb.3
   - name: Loki
-    version: 6.55.0-bb.13
+    version: 6.55.0-bb.17
   - name: Mattermost
-    version: 12.0.2-bb.0
+    version: 12.1.0-bb.1
   - name: Mattermost Operator
-    version: 1.25.9-bb.4
+    version: 1.25.9-bb.5
   - name: Metrics Server
     version: 3.14.0-bb.3
   - name: Mimir
-    version: 6.2.2-bb.2
+    version: 6.2.2-bb.6
   - name: Minio
-    version: 7.1.1-bb.27
+    version: 7.1.1-bb.28
   - name: Minio Operator
-    version: 7.1.1-bb.14
+    version: 7.1.1-bb.15
   - name: Monitoring
-    version: 93.1.1-bb.0
+    version: 93.9.0-bb.0
   - name: Neuvector
-    version: 2.11.4-bb.1
+    version: 2.11.4-bb.2
   - name: Prometheus Operator Crds
-    version: 33.0.1-bb.0
+    version: 33.0.2-bb.1
   - name: Renovate
-    version: 46.405.2-bb.0
+    version: 46.450.1-bb.0
   - name: Sonarqube
-    version: 2026.5.1004-bb.0
+    version: 2026.5.1007-bb.0
   - name: Tempo
-    version: 3.2.1-bb.2
+    version: 3.2.1-bb.3
   - name: Thanos
-    version: 17.6.0-bb.8
+    version: 17.6.0-bb.10
   - name: Twistlock
-    version: 0.32.0-bb.2
+    version: 0.32.0-bb.3
   - name: Vault
-    version: 0.34.1-bb.8
+    version: 0.34.1-bb.10
   - name: Velero
-    version: 12.2.3-bb.0
+    version: 12.2.5-bb.1
   - name: Wrapper
     version: 0.4.15
   - name: Ztunnel
-    version: 1.31.3-bb.0
+    version: 1.32.0-bb.0
   incompatibilities: []
-  summary: null
-  chart_version: 4.1.1
+  summary:
+    helm_changes: ''
+    chart_updates: ['Big Bang umbrella chart updated from 4.1.0 to 4.2.0, primarily
+        by bumping bundled component charts/versions (see component list in release
+        notes).', "Notable platform-layer bumps include Istio 1.31.3 \u2192 1.32.0,\
+        \ Kyverno 3.9.2 \u2192 3.10.0, Monitoring stack 93.1.1 \u2192 93.9.0, and\
+        \ Gateway API 1.6.3 \u2192 1.7.0."]
+    features: ['New functionality is largely delivered via component bumps (e.g.,
+        Istio 1.32, Kyverno 3.10, Monitoring 93.9) which typically include security
+        fixes, performance improvements, and new CRD/feature support in their respective
+        projects.', 'Operational enhancements may appear in GitLab 10.6.1, External
+        Secrets Operator 2.15, and Velero 12.2.5 through upstream fixes and minor
+        features.']
+    breaking_changes: ["Potential breaking changes are most likely from control-plane\
+        \ components that change CRDs/APIs/behavior: Istio 1.32 (sidecar/gateway behavior\
+        \ and CRDs), Kyverno 3.10 (policy/reporting behavior), Monitoring 93.9 (Prometheus\
+        \ Operator rule/CRD expectations), and Gateway API 1.7 (resource schema/validation).\
+        \ Review each component\u2019s upstream release notes if you rely on advanced\
+        \ features or custom CRs."]
+  chart_version: 4.2.0
   images: []
 - version: 4.1.0
   kube: ['1.36']

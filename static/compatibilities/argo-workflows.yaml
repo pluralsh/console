@@ -4,23 +4,23 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.1.6
+- version: 4.1.7
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ["No specific feature details were provided in the notes you shared;\
-        \ both entries primarily include installation/asset info and point to external\
-        \ changelog/blog for \u201CWhat\u2019s New\u201D.", The main visible change
-        is the target release artifact versions (CLI binaries and install.yaml) moving
-        from v4.1.0 to v4.1.6.]
-    breaking_changes: [No breaking changes were listed in the provided excerpts; they
-        refer to an external upgrading guide/known issues instead.]
-  chart_version: 2.0.18
-  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.6', 'quay.io/argoproj/argocli:v4.1.6',
-    'quay.io/argoproj/workflow-controller:v4.1.6']
+    features: [No feature details were provided in the supplied release notes beyond
+        generic links to blog/changelog and installation instructions. Treat this
+        as a patch upgrade within 4.1.x with presumed fixes and minor improvements.]
+    breaking_changes: ['No breaking changes were listed in the provided notes; however,
+        the notes explicitly direct readers to the upgrading guide for breaking changes/known
+        issues, so you should still review upstream upgrade docs and open issues before
+        rollout.']
+  chart_version: 2.0.19
+  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.7', 'quay.io/argoproj/argocli:v4.1.7',
+    'quay.io/argoproj/workflow-controller:v4.1.7']
 - version: 4.1.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -171,20 +171,17 @@ versions:
         for any late-breaking notes.]
   chart_version: 0.40.5
   images: ['quay.io/argoproj/argocli:v3.5.3', 'quay.io/argoproj/workflow-controller:v3.5.3']
-- version: 3.5.1
+- version: 3.5.2
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [Release notes provided are for v3.5.0 only and mainly include installation/asset
-        information; no functional changes are described in the excerpt.]
-    breaking_changes: ["No breaking changes are listed in the provided notes; to assess\
-        \ 3.5.0\u21923.5.1 impact we still need v3.5.1 application and Helm chart\
-        \ changelog entries."]
-  chart_version: 0.39.4
-  images: ['quay.io/argoproj/argocli:v3.5.1', 'quay.io/argoproj/workflow-controller:v3.5.1']
+    features: []
+    breaking_changes: []
+  chart_version: 0.40.4
+  images: ['quay.io/argoproj/argocli:v3.5.2', 'quay.io/argoproj/workflow-controller:v3.5.2']
 - version: 3.5.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []

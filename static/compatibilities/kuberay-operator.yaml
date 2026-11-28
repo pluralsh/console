@@ -3,19 +3,71 @@ git_url: https://github.com/ray-project/kuberay
 release_url: https://github.com/ray-project/kuberay/releases/tag/v{vsn}
 helm_repository_url: https://ray-project.github.io/kuberay-helm
 versions:
-- version: 1.7.3
+- version: 1.8.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Security/dependency update: bumped `golang.org/x/net` to v0.62.0 and
-        `go-openapi/swag` to v0.27.1 to address CVEs (included in v1.7.3).']
-    breaking_changes: []
-  chart_version: 1.7.3
-  images: ['quay.io/kuberay/operator:v1.7.3']
+    helm_changes: "## Helm / values changes to consider\n\n### kuberay-operator chart\n\
+      - **Node Label Delivery (alpha, off by default):**\n  - Requires **webhooks\
+      \ enabled**: `webhooks.enabled: true` (depends on cert-manager; **not compatible\
+      \ with** `singleNamespaceInstall`).\n  - Allowlist node labels the operator\
+      \ may read/deliver: `configuration.allowedNodeLabels` (equivalent to `--allowed-node-labels`).\n\
+      \  - Enable the feature gate on the operator: set `--feature-gates=NodeLabelDelivery=true`\
+      \ (via chart `featureGates`).\n\n- **Kubernetes Node Event Forwarding (alpha,\
+      \ off by default):**\n  - Enable with `nodeEventForwarder.enabled: true` **and**\
+      \ the feature gate `--feature-gates=RayNodeEventForwarder=true`.\n  - Optional\
+      \ filters: `nodeEventForwarder.sources`, `nodeEventForwarder.reasons`, `nodeEventForwarder.types`\
+      \ (defaults to `Warning` only).\n  - **Not supported with** `singleNamespaceInstall:\
+      \ true`.\n\n- **History Server collector image configuration:**\n  - Operator\
+      \ now supports configuring collector sidecar image via `collectorImage` Helm\
+      \ value (or `--collector-image`). Defaults to the collector image matching the\
+      \ operator version.\n  - Cluster-level `spec.historyServerOptions.collectorOptions.image`\
+      \ is now optional.\n\n### ray-cluster chart (if you also manage Ray clusters\
+      \ via Helm)\n- New: `common.envFrom` applied to Ray containers for head and\
+      \ all workers.\n- Newly exposed values: `spec.authOptions` and `spec.upgradeStrategy`.\n\
+      - Bug fix: `maxReplicas: 0` is now preserved (no longer rendered as `2147483647`).\n"
+    chart_updates: ['Added alpha features controlled by operator feature gates: NodeLabelDelivery
+        and RayNodeEventForwarder, including optional Helm values for enablement and
+        filtering.', Operator now supports configuring the History Server collector
+        image via Helm (`collectorImage`) and associated flag; collector options image
+        field becomes optional in RayCluster spec., 'RayCluster Helm chart enhancements:
+        support `common.envFrom`, expose `authOptions` and `upgradeStrategy`, preserve
+        `maxReplicas: 0` correctly.', Grafana dashboards in-chart updated to target
+        Ray 2.58 metrics/dashboards (if you deploy them from this stack).]
+    features: ['History Server (beta): can list/serve running clusters from object
+        storage without proxying live clusters by default; adds refresh/reload and
+        OCI object storage backend support.', 'Node Label Delivery (alpha): operator
+        can inject Kubernetes node labels as Ray node labels for scheduling based
+        on real node attributes; requires webhooks + allowlist + feature gate.', 'Kubernetes
+        Node Event Forwarding (alpha): forwards K8s Node events (e.g., GPU XID) to
+        Ray CRs for visibility in Ray Dashboard; configurable filters and feature
+        gate.', 'Idle RayCluster termination: clusters can self-suspend or self-delete
+        after idle timeout when using in-tree autoscaling with autoscaler v2 and sufficiently
+        new Ray versions.', 'RayCluster API/behavior updates: scaleGate for fast fallback
+        across worker groups; default `RAY_AUTH_MODE=disabled` when `authOptions.mode`
+        unset to keep compatibility with Ray 2.61 token auth default; workerGroupSpecs
+        becomes a map-list keyed by `groupName` for better SSA merges.', RayService
+        incremental upgrade can attach to an existing Gateway via `gatewayRef`., RayCronJob
+        jobTemplate can now include metadata (labels/annotations) to propagate to
+        generated RayJobs.]
+    breaking_changes: ['RayCronJob spec change: `spec.jobTemplate` is now a `RayJobTemplateSpec`
+        (`metadata` + `spec`) instead of a bare `RayJobSpec`; existing manifests must
+        move fields under `jobTemplate.spec`.', 'RayJob HTTPMode behavior change:
+        if the job disappears from the head (e.g., head pod recreated) it is now marked
+        Failed instead of being silently resubmitted; set `backoffLimit > 0` if you
+        want retries.', Kubernetes Workload-Aware Scheduling integration switches
+        from `scheduling.k8s.io/v1alpha2` to `v1alpha3`; requires Kubernetes 1.37
+        and serving `v1alpha3` and `v1beta1`., History Server collector uploads running
+        logs as chunked `.chunks/` objects; upgrade collector and History Server together
+        so chunked logs can be read; expect increased object count/PUTs., 'Python
+        client renamed: PyPI distribution `python-client` -> `kuberay-client`, import
+        package `python_client` -> `kuberay_client`.', 'Operator config cleanup: removed
+        unused `deleteRayJobAfterJobFinishes` from operator Configuration; remove
+        it from any `--config` file.']
+  chart_version: 1.8.0
+  images: ['quay.io/kuberay/operator:v1.8.0']
 - version: 1.7.1
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23']
